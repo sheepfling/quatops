@@ -1,0 +1,43 @@
+"""Direct aliases to the explicit hamilton scalar operations."""
+
+from ..hamilton.scalar import (
+    AxisAngle,
+    Quaternion,
+    RotVec,
+    Vector,
+    conjugate,
+    from_axis_angle,
+    from_rotvec,
+    from_wxyz,
+    from_xyzw,
+    inverse,
+    multiply,
+    norm,
+    normalize,
+    rotate,
+    to_axis_angle,
+    to_rotvec,
+    to_wxyz,
+    to_xyzw,
+)
+
+__all__ = [
+    "AxisAngle",
+    "Quaternion",
+    "RotVec",
+    "Vector",
+    "conjugate",
+    "from_axis_angle",
+    "from_rotvec",
+    "from_wxyz",
+    "from_xyzw",
+    "inverse",
+    "multiply",
+    "norm",
+    "normalize",
+    "rotate",
+    "to_axis_angle",
+    "to_rotvec",
+    "to_wxyz",
+    "to_xyzw",
+]
