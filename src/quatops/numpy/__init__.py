@@ -1,0 +1,304 @@
+"""NumPy quaternion operations using scalar-first ``(..., 4)`` arrays.
+
+All functions return float64 arrays (or a float64 scalar for a single norm).
+Leading axes broadcast for binary operations. Inputs must have boolean, signed
+or unsigned integer, or real floating dtype. They are cast to float64, which
+can round or underflow; non-finite values after casting raise ValueError.
+Complex, object, string, and other dtypes are rejected. Arithmetic uses local
+floating-point error handling, independent of numpy.seterr.
+"""
+
+from typing import Any
+
+import numpy as np
+
+
+def _components(value: Any, width: int, name: str) -> np.ndarray:
+    """Validate a trailing component axis and convert to float64."""
+    try:
+        original = np.asarray(value)
+    except (TypeError, ValueError) as exc:
+        raise ValueError(f"{name} must be a real numeric array") from exc
+    if original.dtype.kind not in "biuf":
+        raise ValueError(f"{name} must be a real numeric array")
+    if original.ndim == 0 or original.shape[-1] != width:
+        raise ValueError(f"{name} must have shape (..., {width})")
+    with np.errstate(all="ignore"):
+        array = original.astype(np.float64, copy=False)
+    if not np.all(np.isfinite(array)):
+        raise ValueError(f"{name} must contain finite float64 values")
+    return array
+
+
+def _result(value: Any) -> Any:
+    if not np.all(np.isfinite(value)):
+        raise OverflowError("quaternion arithmetic produced a non-finite result")
+    return value
+
+
+def _scaled(q: np.ndarray) -> tuple:
+    scale = np.max(np.abs(q), axis=-1, keepdims=True)
+    if np.any(scale == 0):
+        raise ValueError("zero quaternion has no normalization or inverse")
+    with np.errstate(all="ignore"):
+        unit_scale = q / scale
+        sum_squares = np.sum(unit_scale * unit_scale, axis=-1, keepdims=True)
+    return scale, unit_scale, sum_squares
+
+
+def from_xyzw(q: Any) -> np.ndarray:
+    """Convert scalar-last ``(..., 4)`` values to scalar-first layout."""
+    a = _components(q, 4, "quaternion")
+    return a[..., [3, 0, 1, 2]]
+
+
+def to_xyzw(q: Any) -> np.ndarray:
+    """Convert scalar-first ``(..., 4)`` values to scalar-last layout."""
+    a = _components(q, 4, "quaternion")
+    return a[..., [1, 2, 3, 0]]
+
+
+def from_wxyz(q: Any) -> np.ndarray:
+    """Validate and copy scalar-first values; no convention conversion."""
+    return _components(q, 4, "quaternion").copy()
+
+
+def to_wxyz(q: Any) -> np.ndarray:
+    """Validate and copy scalar-first values; no convention conversion."""
+    return _components(q, 4, "quaternion").copy()
+
+
+def conjugate(q: Any) -> np.ndarray:
+    """Return the quaternion conjugate; preserve its magnitude."""
+    a = _components(q, 4, "quaternion")
+    out = a.copy()
+    out[..., 1:] *= -1
+    return out
+
+
+def _multiply(a: np.ndarray, b: np.ndarray) -> np.ndarray:
+    a, b = np.broadcast_arrays(a, b)
+    aw, ax, ay, az = np.moveaxis(a, -1, 0)
+    bw, bx, by, bz = np.moveaxis(b, -1, 0)
+    with np.errstate(all="ignore"):
+        return np.stack((aw*bw - ax*bx - ay*by - az*bz,
+                         aw*bx + ax*bw + ay*bz - az*by,
+                         aw*by - ax*bz + ay*bw + az*bx,
+                         aw*bz + ax*by - ay*bx + az*bw), axis=-1)
+
+
+def multiply(q: Any, r: Any) -> np.ndarray:
+    """Return Hamilton product ``q * r``; in rotations, r acts first."""
+    a = _components(q, 4, "q")
+    b = _components(r, 4, "r")
+    return _result(_multiply(a, b))
+
+
+def norm(q: Any) -> Any:
+    """Return the norm as a float64 scalar or array of leading shape."""
+    a = _components(q, 4, "quaternion")
+    with np.errstate(all="ignore"):
+        scale = np.max(np.abs(a), axis=-1, keepdims=True)
+        scaled = np.divide(a, scale, out=np.zeros_like(a), where=scale != 0)
+        result = (scale * np.sqrt(np.sum(scaled * scaled, axis=-1, keepdims=True)))[..., 0]
+    # Ellipsis indexing can leave a zero-dimensional ndarray; the public
+    # contract returns a NumPy scalar for a single (4,) quaternion.
+    return _result(result[()] if result.ndim == 0 else result)
+
+
+def normalize(q: Any) -> np.ndarray:
+    """Return unit quaternions; raise ValueError if any norm is zero."""
+    a = _components(q, 4, "quaternion")
+    _, scaled, sums = _scaled(a)
+    with np.errstate(all="ignore"):
+        out = scaled / np.sqrt(sums)
+    return _result(out)
+
+
+def inverse(q: Any) -> np.ndarray:
+    """Return multiplicative inverses; raise ValueError for any zero norm."""
+    a = _components(q, 4, "quaternion")
+    scale, scaled, sums = _scaled(a)
+    scaled = scaled.copy()
+    scaled[..., 1:] *= -1
+    with np.errstate(all="ignore"):
+        out = (scaled / sums) / scale
+    return _result(out)
+
+
+def _sum_three(a: np.ndarray, b: np.ndarray, c: np.ndarray) -> np.ndarray:
+    """Sum three finite products, cancelling large opposing terms first.
+
+    Error-free transforms retain low-order terms that would otherwise vanish
+    before a later cancellation. The caller controls floating-point warnings.
+    """
+    def opposing(x: np.ndarray, y: np.ndarray) -> np.ndarray:
+        return ((x < 0) & (y > 0)) | ((x > 0) & (y < 0))
+
+    ab = np.where(opposing(a, b), np.minimum(np.abs(a), np.abs(b)), 0.0)
+    ac = np.where(opposing(a, c), np.minimum(np.abs(a), np.abs(c)), 0.0)
+    bc = np.where(opposing(b, c), np.minimum(np.abs(b), np.abs(c)), 0.0)
+    use_ab = (ab >= ac) & (ab >= bc)
+    use_ac = ~use_ab & (ac >= bc)
+    first = np.where(use_ab | use_ac, a, b)
+    second = np.where(use_ab, b, c)
+    third = np.where(use_ab, c, np.where(use_ac, b, a))
+
+    # TwoSum recovers the rounding residual of each addition. If the true
+    # result exceeds float64 range, the final finite-result check rejects it.
+    s = first + second
+    s_part = s - first
+    s_error = (first - (s - s_part)) + (second - s_part)
+    t = s + third
+    t_part = t - s
+    t_error = (s - (t - t_part)) + (third - t_part)
+    return t + (s_error + t_error)
+
+
+def rotate(q: Any, v: Any) -> np.ndarray:
+    """Actively rotate vectors by nonzero quaternions using ``q v q⁻¹``.
+
+    Quaternion and vector leading axes broadcast. The input is never
+    normalized; equivalent quaternion rescaling is used to limit overflow.
+    Each output component is a compensated sum of separately formed products.
+    """
+    a = _components(q, 4, "quaternion")
+    v = _components(v, 3, "vector")
+    _, scaled, sums = _scaled(a)
+    shape = np.broadcast_shapes(scaled.shape[:-1], v.shape[:-1])
+    scaled = np.broadcast_to(scaled, shape + (4,))
+    v = np.broadcast_to(v, shape + (3,))
+    sums = np.broadcast_to(sums[..., 0], shape)
+    w, x, y, z = np.moveaxis(scaled, -1, 0)
+    vx, vy, vz = np.moveaxis(v, -1, 0)
+    with np.errstate(all="ignore"):
+        # Matrix coefficients remain bounded by one mathematically; clipping
+        # last-bit roundoff prevents an artificial overflow at max float.
+        ww, xx, yy, zz = w*w, x*x, y*y, z*z
+        # Match scalar evaluation order: cancel ww and xx before adding a
+        # smaller square in m11 and m22. Other cancellation error remains.
+        m00 = np.clip(((ww + xx) - yy - zz) / sums, -1.0, 1.0)
+        m01 = np.clip((2 * (x*y - w*z)) / sums, -1.0, 1.0)
+        m02 = np.clip((2 * (x*z + w*y)) / sums, -1.0, 1.0)
+        m10 = np.clip((2 * (x*y + w*z)) / sums, -1.0, 1.0)
+        m11 = np.clip(((ww - xx) + yy - zz) / sums, -1.0, 1.0)
+        m12 = np.clip((2 * (y*z - w*x)) / sums, -1.0, 1.0)
+        m20 = np.clip((2 * (x*z - w*y)) / sums, -1.0, 1.0)
+        m21 = np.clip((2 * (y*z + w*x)) / sums, -1.0, 1.0)
+        m22 = np.clip(((ww - xx) - yy + zz) / sums, -1.0, 1.0)
+        result = np.stack((
+            _sum_three(m00*vx, m01*vy, m02*vz),
+            _sum_three(m10*vx, m11*vy, m12*vz),
+            _sum_three(m20*vx, m21*vy, m22*vz),
+        ), axis=-1)
+    return _result(result)
+
+
+
+def _direction(v: np.ndarray, allow_zero: bool = False) -> tuple:
+    """Return unit directions, max magnitude, and scaled vector norms."""
+    with np.errstate(all="ignore"):
+        scale = np.max(np.abs(v), axis=-1, keepdims=True)
+        if not allow_zero and np.any(scale == 0):
+            raise ValueError("axis must be nonzero")
+        parts = np.divide(v, scale, out=np.zeros_like(v), where=scale != 0)
+        length = np.sqrt(np.sum(parts * parts, axis=-1, keepdims=True))
+        unit = np.divide(parts, length, out=np.zeros_like(parts), where=length != 0)
+    return unit, scale, length
+
+
+def _canonical_rotation_quaternion(q: np.ndarray) -> np.ndarray:
+    """Canonicalize sign before scaling; do not modify the input."""
+    w, x, y, z = np.moveaxis(q, -1, 0)
+    first = np.where(x != 0, x, np.where(y != 0, y, z))
+    flip = (w < 0) | ((w == 0) & (first < 0))
+    with np.errstate(all="ignore"):
+        out = np.where(flip[..., None], -q, q)
+    return np.where(out == 0, 0.0, out)
+
+
+def _from_unit_axis_angle(axis: np.ndarray, angle: np.ndarray) -> np.ndarray:
+    with np.errstate(all="ignore"):
+        half = angle * 0.5
+        w = np.cos(half)
+        # Treat the float values +pi and -pi as exact half turns; no tolerance.
+        w = np.where(np.abs(angle) == np.pi, 0.0, w)
+        vector = axis * np.sin(half)[..., None]
+        q = np.concatenate((w[..., None], vector), axis=-1)
+    return _canonical_rotation_quaternion(_result(q))
+
+
+def from_axis_angle(a: Any) -> np.ndarray:
+    """Convert (..., 4) (axis x/y/z, radians) to canonical unit quaternions.
+
+    The finite nonzero axis is explicitly normalized during conversion, even
+    for zero angles. Finite angles are accepted; huge-angle accuracy is subject
+    to the platform trigonometric implementation.
+    """
+    a = _components(a, 4, "axis-angle")
+    axis, _, _ = _direction(a[..., :3])
+    return _from_unit_axis_angle(axis, a[..., 3])
+
+
+def from_rotvec(r: Any) -> np.ndarray:
+    """Convert (..., 3) axis-times-radians vectors to unit quaternions."""
+    r = _components(r, 3, "rotation vector")
+    axis, scale, length = _direction(r, allow_zero=True)
+    with np.errstate(all="ignore"):
+        angle = (scale * length)[..., 0]
+    return _from_unit_axis_angle(axis, _result(angle))
+
+
+def _axis_angle(q: Any) -> tuple:
+    a = _components(q, 4, "quaternion")
+    if np.any(np.all(a == 0, axis=-1)):
+        raise ValueError("zero quaternion has no rotation")
+    a = _canonical_rotation_quaternion(a)
+    axis, vector_scale, length = _direction(a[..., 1:], allow_zero=True)
+    vscale = vector_scale[..., 0]
+    magnitude = length[..., 0]
+    w = a[..., 0]
+    with np.errstate(all="ignore"):
+        scale = np.maximum(w, vscale)
+        angle = 2.0 * np.arctan2((vscale / scale) * magnitude, w / scale)
+        # For tiny ratios, preserve 2*v/w even when v/w rounds to zero.
+        # This is the linear limit of 2*atan(v/w); at this threshold the
+        # omitted cubic correction is below binary64 precision.
+        tiny = (w > 0) & (vscale <= w * 1e-8)
+        v_mantissa, v_exponent = np.frexp(vscale)
+        w_mantissa, w_exponent = np.frexp(w)
+        small_angle = np.ldexp(
+            (2.0 * v_mantissa / w_mantissa) * magnitude,
+            v_exponent - w_exponent,
+        )
+        angle = np.where(tiny, small_angle, angle)
+        axis = np.where((angle == 0)[..., None], np.array([1.0, 0.0, 0.0]), axis)
+        axis = np.where(axis == 0, 0.0, axis)
+        angle = np.where(angle == 0, 0.0, angle)
+    return _result(axis), _result(angle)
+
+
+def to_axis_angle(q: Any) -> np.ndarray:
+    """Return (..., 4) canonical unit-axis / principal-radians rotations.
+
+    Quaternion magnitude and sign are not retained. Identity uses +X as axis.
+    Exact w=0 half-turns choose the first nonzero axis component positive.
+    """
+    axis, angle = _axis_angle(q)
+    return np.concatenate((axis, angle[..., None]), axis=-1)
+
+
+def to_rotvec(q: Any) -> np.ndarray:
+    """Return (..., 3) canonical axis-times-principal-radians vectors."""
+    axis, angle = _axis_angle(q)
+    original = _canonical_rotation_quaternion(_components(q, 4, "quaternion"))
+    w = original[..., 0]
+    vector = original[..., 1:]
+    with np.errstate(all="ignore"):
+        vector_scale = np.max(np.abs(vector), axis=-1)
+        tiny = (w > 0) & (vector_scale <= w * 1e-8)
+        # Compute each tiny component independently; multiplying the rounded
+        # angle by a unit axis can introduce a second subnormal rounding.
+        small_vector = (2.0 * vector) / w[..., None]
+        result = np.where(tiny[..., None], small_vector, axis * angle[..., None])
+    return np.where(result == 0, 0.0, _result(result))

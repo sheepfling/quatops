@@ -1,0 +1,6 @@
+include API.md
+include PROPOSED_ROTATION_REPRESENTATIONS.md
+include experiments/HOMOGENEOUS_INVESTIGATION.md
+include experiments/ROTATION_NUMERICS.md
+recursive-include experiments *.py
+recursive-include tests *.py
