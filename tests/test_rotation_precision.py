@@ -9,7 +9,7 @@ from quatops import dataclass, namedtuple, scalar
 try:
     import numpy as np
 
-    from quatops import numpy as array
+    from quatops.numpy.hamilton import wxyz as array
 except ImportError:
     np = None
     array = None

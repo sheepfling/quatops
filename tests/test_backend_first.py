@@ -38,7 +38,6 @@ class BackendFirstTests(unittest.TestCase):
                 self.assertIs(getattr(alias, name), getattr(target, name))
 
     def test_python_aliases_are_the_native_scalar_functions(self):
-        self.assertDirectExports("quatops.python", "quatops.hamilton.scalar", COMMON)
         self.assertDirectExports(
             "quatops.python.hamilton", "quatops.hamilton.scalar", COMMON
         )
@@ -76,8 +75,10 @@ class BackendFirstTests(unittest.TestCase):
 import sys
 from quatops import python, types
 from quatops.python import hamilton, jpl
+import quatops.numpy as numpy_namespace
 from quatops.types import hamilton_namedtuple, hamilton_dataclass, jpl_namedtuple, jpl_dataclass
-assert python.multiply is hamilton.multiply
+assert not hasattr(python, 'multiply')
+assert not hasattr(numpy_namespace, 'multiply')
 assert jpl.rotate((0, 0, 0, 1), (1, 2, 3)) == (1, 2, 3)
 assert 'numpy' not in sys.modules
 assert not any(name == 'plainquat' or name.startswith('plainquat.') for name in sys.modules)
@@ -89,12 +90,13 @@ assert not any(name == 'plainquat' or name.startswith('plainquat.') for name in 
 
     @unittest.skipIf(np is None, "NumPy is not installed")
     def test_numpy_aliases_are_the_four_native_kernels(self):
-        self.assertDirectExports("quatops.numpy", "quatops.hamilton.numpy_wxyz", COMMON)
+        numpy_namespace = importlib.import_module("quatops.numpy")
+        self.assertFalse(hasattr(numpy_namespace, "multiply"))
         for convention in ("hamilton", "jpl"):
             for order in ("wxyz", "xyzw"):
                 operations = COMMON + (JPL_EXTRA if convention == "jpl" else ())
                 self.assertDirectExports(
-                    f"quatops.numpy.{convention}_{order}",
+                    f"quatops.numpy.{convention}.{order}",
                     f"quatops.{convention}.numpy_{order}",
                     operations,
                 )

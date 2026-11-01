@@ -68,7 +68,7 @@ implementations. Run the checker (its exit status is deliberately nonzero while
 known failures remain) and timing script from this directory's parent:
 
 ```sh
-PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src:experiments python experiments/check_homogeneous.py homogeneous_scalar homogeneous_numpy plainquat.scalar plainquat.numpy
+PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src:experiments python experiments/check_homogeneous.py homogeneous_scalar homogeneous_numpy quatops.python.hamilton quatops.numpy.hamilton.wxyz
 PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src:. python experiments/bench_homogeneous.py
 ```
 

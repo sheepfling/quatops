@@ -10,7 +10,7 @@ from typing import Any
 
 import numpy as np
 
-from ..numpy import _components, _direction, _result, _scaled, _sum_three
+from .._numpy import _components, _direction, _result, _scaled, _sum_three
 
 
 def from_xyzw(q: Any) -> np.ndarray:
@@ -89,20 +89,20 @@ def norm(q: Any) -> Any:
 def normalize(q: Any) -> np.ndarray:
     """Return unit quaternions; reject a zero quaternion anywhere in a batch."""
     a = _components(q, 4, "quaternion")
-    _, scaled, sums = _scaled(a)
+    scaled = _scaled(a)
     with np.errstate(all="ignore"):
-        out = scaled / np.sqrt(sums)
+        out = scaled.unit_scale / np.sqrt(scaled.sum_squares)
     return _result(out)
 
 
 def inverse(q: Any) -> np.ndarray:
     """Return multiplicative inverses; reject a zero quaternion in a batch."""
     a = _components(q, 4, "quaternion")
-    scale, scaled, sums = _scaled(a)
-    scaled = scaled.copy()
+    scaled_state = _scaled(a)
+    scaled = scaled_state.unit_scale.copy()
     scaled[..., 1:] *= -1
     with np.errstate(all="ignore"):
-        out = (scaled / sums) / scale
+        out = (scaled / scaled_state.sum_squares) / scaled_state.scale
     return _result(out)
 
 
@@ -114,7 +114,9 @@ def rotate(q: Any, v: Any) -> np.ndarray:
     """
     a = _components(q, 4, "quaternion")
     v = _components(v, 3, "vector")
-    _, scaled, sums = _scaled(a)
+    scaled_state = _scaled(a)
+    scaled = scaled_state.unit_scale
+    sums = scaled_state.sum_squares
     shape = np.broadcast_shapes(scaled.shape[:-1], v.shape[:-1])
     scaled = np.broadcast_to(scaled, shape + (4,))
     v = np.broadcast_to(v, shape + (3,))

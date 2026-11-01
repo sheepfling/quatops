@@ -94,7 +94,8 @@ def inverse(q: Iterable[float]) -> Quaternion:
     scale, parts = _scalar._scaled(_scalar._quaternion(q))
     w, x, y, z = parts
     denominator = sum(value * value for value in parts)
-    values = tuple((value / denominator) / scale for value in (w, -x, -y, -z))
+    inv_denominator = 1.0 / denominator
+    values = tuple((value * inv_denominator) / scale for value in (w, -x, -y, -z))
     return Quaternion(*_scalar._checked(values))
 
 

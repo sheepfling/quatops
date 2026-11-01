@@ -15,10 +15,10 @@ assert_type(hx.to_axis_angle((0.0, 0.0, 0.0, 1.0)), NDArray[Any])
 assert_type(jw.from_hamilton(q), NDArray[Any])
 assert_type(jx.to_hamilton((0.0, 0.0, 0.0, 1.0)), NDArray[Any])
 
-from quatops.numpy import hamilton_wxyz as backend_hw
-from quatops.numpy import hamilton_xyzw as backend_hx
-from quatops.numpy import jpl_wxyz as backend_jw
-from quatops.numpy import jpl_xyzw as backend_jx
+from quatops.numpy.hamilton import wxyz as backend_hw
+from quatops.numpy.hamilton import xyzw as backend_hx
+from quatops.numpy.jpl import wxyz as backend_jw
+from quatops.numpy.jpl import xyzw as backend_jx
 
 assert_type(backend_hw.rotate(q, (1.0, 0.0, 0.0)), NDArray[Any])
 assert_type(backend_hx.to_axis_angle((0.0, 0.0, 0.0, 1.0)), NDArray[Any])

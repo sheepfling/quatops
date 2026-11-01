@@ -13,8 +13,8 @@ from functools import partial
 import numpy as np
 
 from experiments import homogeneous_numpy, homogeneous_scalar
-from quatops import numpy as current_numpy
 from quatops import scalar as current_scalar
+from quatops.numpy.hamilton import wxyz as current_numpy
 
 CASES = {
     "ordinary": ((1.0, 2.0, 3.0, 4.0), (1.0, 2.0, 3.0)),

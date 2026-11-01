@@ -6,7 +6,7 @@ import unittest
 try:
     import numpy as np
 
-    from quatops import numpy as qnp
+    from quatops.numpy.hamilton import wxyz as qnp
 except ImportError:
     np = None
     qnp = None

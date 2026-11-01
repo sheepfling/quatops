@@ -11,7 +11,7 @@ from quatops import dataclass, namedtuple, scalar
 try:
     import numpy as np
 
-    from quatops import numpy as qnumpy
+    from quatops.numpy.hamilton import wxyz as qnumpy
 except ImportError:
     np = None
     qnumpy = None

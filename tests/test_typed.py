@@ -134,6 +134,17 @@ class DataclassTests(BackendTests, unittest.TestCase):
         q = self.backend.Quaternion(1, 2, 3, 4)
         self.assertNotIsInstance(q, tuple)
 
+    def test_inverse_reuses_one_reciprocal_and_matches_scalar_extremes(self):
+        for q in (
+            (2.1, -3.4, 0.7, 1.2),
+            (1e308, -4e307, 2e307, 1e307),
+            (1e-308, 2e-308, -1e-308, 0.0),
+        ):
+            with self.subTest(q=q):
+                self.assertComponentsClose(
+                    dataclass.inverse(q), scalar.inverse(q), rel_tol=1e-15, abs_tol=0.0
+                )
+
 
 if __name__ == '__main__':
     unittest.main()

@@ -1,3 +1,43 @@
 [build-system]
-requires = ["setuptools>=58", "wheel"]
+requires = ["setuptools>=77", "setuptools-scm>=8"]
 build-backend = "setuptools.build_meta"
+
+[project]
+name = "quatops"
+dynamic = ["version"]
+description = "Small, explicit scalar and NumPy quaternion operations"
+readme = "README.md"
+requires-python = ">=3.9"
+license = "MIT"
+classifiers = [
+    "Development Status :: 2 - Pre-Alpha",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3 :: 3.9",
+    "Programming Language :: Python :: 3 :: 3.10",
+    "Programming Language :: Python :: 3 :: 3.11",
+    "Programming Language :: Python :: 3 :: 3.12",
+    "Programming Language :: Python :: 3 :: 3.13",
+    "Programming Language :: Python :: 3 :: 3.14",
+    "Topic :: Scientific/Engineering :: Mathematics",
+    "Typing :: Typed",
+]
+
+[project.optional-dependencies]
+numpy = ["numpy>=1.20"]
+dev = ["numpy>=1.20", "scipy>=1.7"]
+
+[tool.setuptools]
+package-dir = { "" = "src" }
+include-package-data = true
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+quatops = ["py.typed"]
+
+[tool.setuptools_scm]
+fallback_version = "0.1.0"
+version_scheme = "no-guess-dev"
+local_scheme = "no-local-version"

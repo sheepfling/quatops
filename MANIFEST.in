@@ -1,6 +1,8 @@
-include API.md
-include PROPOSED_ROTATION_REPRESENTATIONS.md
-include experiments/HOMOGENEOUS_INVESTIGATION.md
-include experiments/ROTATION_NUMERICS.md
-recursive-include experiments *.py
-recursive-include tests *.py
+include README.md
+include LICENSE
+graft src
+graft tests
+prune docs
+prune experiments
+exclude .gitignore
+global-exclude *.py[cod]

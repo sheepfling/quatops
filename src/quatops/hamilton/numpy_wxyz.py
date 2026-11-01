@@ -1,6 +1,6 @@
 """Hamilton NumPy operations in wxyz order; direct aliases to the native backend."""
 
-from ..numpy import (
+from ..numpy.hamilton.wxyz import (
     conjugate,
     from_axis_angle,
     from_rotvec,

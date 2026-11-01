@@ -14,8 +14,8 @@ from quatops.jpl import scalar as j_scalar
 try:
     import numpy as np
 
-    from quatops import numpy as h_numpy
-    from quatops.jpl import numpy as j_numpy
+    from quatops.numpy.hamilton import wxyz as h_numpy
+    from quatops.numpy.jpl import xyzw as j_numpy
 except ImportError:
     np = None
     h_numpy = None

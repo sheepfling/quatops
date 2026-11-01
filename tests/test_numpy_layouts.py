@@ -58,8 +58,8 @@ class NumPyLayoutsTests(unittest.TestCase):
             with self.subTest(convention=convention, order=order):
                 self.assertEqual(tuple(inspect.signature(backend.multiply).parameters), ("q", "r"))
                 self.assertEqual(tuple(inspect.signature(backend.rotate).parameters), ("q", "v"))
-        h_legacy = importlib.import_module("quatops.hamilton.numpy")
-        j_legacy = importlib.import_module("quatops.jpl.numpy")
+        h_legacy = importlib.import_module("quatops.numpy.hamilton.wxyz")
+        j_legacy = importlib.import_module("quatops.numpy.jpl.xyzw")
         h_default, j_default = self.backends[0][2], self.backends[3][2]
         for name in ("multiply", "rotate", "from_axis_angle", "to_rotvec"):
             self.assertIs(getattr(h_default, name), getattr(h_legacy, name))
@@ -200,7 +200,10 @@ class NumPyLayoutsTests(unittest.TestCase):
                 with ExitStack() as stack:
                     others = [entry[2] for entry in self.backends]
                     others.extend(importlib.import_module(name) for name in (
-                        "quatops.numpy", "quatops.hamilton.numpy", "quatops.jpl.numpy"
+                        "quatops.numpy.hamilton.wxyz",
+                        "quatops.numpy.hamilton.xyzw",
+                        "quatops.numpy.jpl.wxyz",
+                        "quatops.numpy.jpl.xyzw",
                     ))
                     for other in dict.fromkeys(others):
                         for name in ("from_wxyz", "from_xyzw", "to_wxyz", "to_xyzw",

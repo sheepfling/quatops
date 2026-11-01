@@ -32,12 +32,11 @@ assert_type(j_scalar.from_hamilton(q), tuple[float, float, float, float])
 assert_type(j_namedtuple.from_hamilton(q), j_namedtuple.Quaternion)
 assert_type(j_dataclass.to_rotvec((0, 0, 0, 1)), j_dataclass.RotVec)
 
-from quatops import python as python_backend
 from quatops import types as quat_types
 from quatops.python import hamilton as python_hamilton
 from quatops.python import jpl as python_jpl
 
-assert_type(python_backend.multiply(q, q), tuple[float, float, float, float])
+assert_type(python_hamilton.multiply(q, q), tuple[float, float, float, float])
 assert_type(python_hamilton.to_rotvec(q), tuple[float, float, float])
 assert_type(python_jpl.from_hamilton(q), tuple[float, float, float, float])
 assert_type(quat_types.HamiltonQuaternion(*q), h_dataclass.Quaternion)

@@ -6,8 +6,8 @@ from fractions import Fraction as F
 import numpy as np
 import scipy
 
-from quatops import numpy as nq
 from quatops import scalar
+from quatops.numpy.hamilton import wxyz as nq
 
 
 def frac_rot(q, v):

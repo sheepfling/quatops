@@ -4,9 +4,8 @@ This is the **implemented, provisional** contract for explicit Hamilton and JPL
 modules. Choose a convention and representation at import time; there is no
 common runtime quaternion wrapper, convention flag, or automatic dispatch. The
 distribution/import root is `quatops`; this unpublished candidate was previously
-named `plainquat`, and no `plainquat` import shim is provided. Prior source and
-distribution artifacts are preserved in `experiments/plainquat-pre-rename/`.
-For an introduction, see the [README](README.md).
+named `plainquat`, and no `plainquat` import shim is provided. For an
+introduction, see the [README](../README.md).
 
 ## Convention, storage, and rotation
 
@@ -20,7 +19,7 @@ For an introduction, see the [README](README.md).
 | Product vector part | `aw*bv + bw*av + av × bv` | `aw*bv + bw*av - av × bv` |
 | Product scalar part | `aw*bw - av · bv` | `aw*bw - av · bv` |
 | Active action | Vector part of `q * (0, v) * inverse(q)` | Vector part of `q ⊙ (v, 0) ⊙ inverse(q)` |
-| Composition order | `multiply(q, r)` applies `r` then `q` | `multiply(q, r)` applies `r` then `q` |
+| Composition order | `multiply(q, r)` means `q * r`; its active rotation applies `r` first, then `q` | `multiply(q, r)` means JPL `q ⊙ r`; its active rotation applies `r` first, then `q` |
 
 Here `av` and `bv` are the three vector components and `aw` and `bw` their
 scalar components. In the action table, `(0, v)` and `(v, 0)` denote a pure
@@ -28,9 +27,10 @@ vector quaternion in scalar-first and scalar-last notation respectively. For
 a given NumPy module its stored form is `(0, vx, vy, vz)` in `wxyz` or
 `(vx, vy, vz, 0)` in `xyzw`. Both actions are active and right-handed. A passive
 coordinate transform is the inverse action, obtained using `inverse(q)`;
-`-q` and `q` instead represent the same rotation. The existing top-level
-`quatops.scalar`, `quatops.namedtuple`, `quatops.dataclass`, and
-`quatops.numpy` modules remain Hamilton-compatible imports.
+`-q` and `q` represent the same rotation. The top-level `quatops.scalar`,
+`quatops.namedtuple`, and `quatops.dataclass` modules remain Hamilton-compatible
+imports. `quatops.numpy` is only a namespace; choose convention and order
+submodules before using NumPy operations.
 
 The same physical rotation is represented by Hamilton `h=(w, x, y, z)` in
 `wxyz` order and JPL `j=(w, -x, -y, -z)` in `wxyz` order or
@@ -63,20 +63,20 @@ remain available.
 | Python tuples | `quatops.python.hamilton` | `quatops.python.jpl` |
 | NamedTuple | `quatops.types.hamilton_namedtuple` | `quatops.types.jpl_namedtuple` |
 | Frozen slotted dataclass | `quatops.types.hamilton_dataclass` | `quatops.types.jpl_dataclass` |
-| NumPy `wxyz` | `quatops.numpy.hamilton_wxyz` | `quatops.numpy.jpl_wxyz` |
-| NumPy `xyzw` | `quatops.numpy.hamilton_xyzw` | `quatops.numpy.jpl_xyzw` |
+| NumPy `wxyz` | `quatops.numpy.hamilton.wxyz` | `quatops.numpy.jpl.wxyz` |
+| NumPy `xyzw` | `quatops.numpy.hamilton.xyzw` | `quatops.numpy.jpl.xyzw` |
 
-`quatops.python` and `quatops.numpy` themselves expose Hamilton `wxyz` operations.
-`quatops.types.HamiltonQuaternion` and `quatops.types.JPLQuaternion` alias the
-respective frozen dataclass classes; `quatops.types` has no bare default `Quaternion`.
+`quatops.python` and `quatops.numpy` are namespaces without default operations.
+Import `quatops.python.hamilton` or `quatops.python.jpl` to choose a scalar
+convention. `quatops.types.HamiltonQuaternion` and
+`quatops.types.JPLQuaternion` alias the respective frozen dataclass classes;
+`quatops.types` has no bare default `Quaternion`.
 
-The older convention-first NumPy paths `quatops.hamilton.numpy_wxyz`,
+The convention-first NumPy paths `quatops.hamilton.numpy_wxyz`,
 `quatops.hamilton.numpy_xyzw`, `quatops.jpl.numpy_wxyz`, and
-`quatops.jpl.numpy_xyzw` name the same functions. `quatops.hamilton.numpy` and
-`quatops.jpl.numpy` are Hamilton `wxyz` and JPL `xyzw` respectively; the
-existing top-level `quatops.scalar`, `quatops.namedtuple`, and
-`quatops.dataclass` are Hamilton. NumPy `multiply` and `rotate` do not select a
-convention or layout at runtime and do not convert inputs on each call.
+`quatops.jpl.numpy_xyzw` re-export the corresponding fully specified native
+functions. NumPy `multiply` and `rotate` do not select a convention or layout at
+runtime and do not convert inputs on each call.
 
 Tuple, NamedTuple, and dataclass modules have one native layout per convention:
 Hamilton `wxyz` and JPL `xyzw`. Their layout helpers perform one-time reorders
@@ -209,7 +209,7 @@ a documented double-rounding limit, not a correctly-rounded conversion guarantee
   relative accuracy. In particular, Hamilton rotation of vector
   `(1e308, 1, 1)` by `(5, 12, 13, 0)` currently returns a first component
   near `1.11e292` instead of `17/13`; the corresponding JPL quaternion is
-  `(-12, -13, 0, 5)` in `xyzw` or `(5, -12, -13, 0)` in `wxyz`. See [the precision investigation](experiments/ROTATION_NUMERICS.md)
+  `(-12, -13, 0, 5)` in `xyzw` or `(5, -12, -13, 0)` in `wxyz`. See [the precision investigation](ROTATION_NUMERICS.md)
   for a second example and measured alternatives. Other operations can overflow
   in intermediate calculations even when their exact result is representable.
   NumPy suppresses floating-point warnings locally, checks results, and preserves

@@ -1,8 +1,15 @@
-"""Quaternion operations with explicit conventions and representations.
+"""Quaternion operations with explicitly selected conventions and layouts.
 
-Choose backend-first ``quatops.python``, ``quatops.numpy``, or ``quatops.types``,
-or use the convention-first ``quatops.hamilton`` and ``quatops.jpl`` modules.
-Importing this root package does not import NumPy.
+Choose a fully specified backend module such as ``quatops.python.hamilton`` or
+``quatops.numpy.hamilton.xyzw``. Importing this root package does not import
+NumPy.
 """
 
-__version__ = "0.1.0"
+from importlib.metadata import PackageNotFoundError
+from importlib.metadata import version as _distribution_version
+
+try:
+    __version__ = _distribution_version("quatops")
+except PackageNotFoundError:
+    # A source checkout may not have installed distribution metadata yet.
+    __version__ = "0+unknown"

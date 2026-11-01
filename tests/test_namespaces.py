@@ -19,19 +19,17 @@ from quatops.jpl import scalar as j_scalar
 try:
     import numpy as np
 
-    from quatops import numpy as legacy_numpy
-    from quatops.hamilton import numpy as h_numpy
-    from quatops.jpl import numpy as j_numpy
+    from quatops.numpy.hamilton import wxyz as h_numpy
+    from quatops.numpy.jpl import xyzw as j_numpy
 except ImportError:
     np = None
-    legacy_numpy = None
     h_numpy = None
     j_numpy = None
 
 
 SCALAR_PAIRS = ((legacy_scalar, h_scalar), (legacy_namedtuple, h_namedtuple),
                 (legacy_dataclass, h_dataclass))
-ALL_PAIRS = SCALAR_PAIRS + (((legacy_numpy, h_numpy),) if np is not None else ())
+ALL_PAIRS = SCALAR_PAIRS
 JPL_MODULES = (j_scalar, j_namedtuple, j_dataclass) + ((j_numpy,) if np is not None else ())
 OPERATIONS = (
     'from_xyzw', 'to_xyzw', 'from_wxyz', 'to_wxyz', 'conjugate', 'multiply',
@@ -120,6 +118,18 @@ class HamiltonNamespaceTests(unittest.TestCase):
         self.assertEqual(h_numpy.from_wxyz(empty).shape, (0, 2, 4))
         self.assertEqual(h_numpy.to_wxyz(empty).shape, (0, 2, 4))
         np.testing.assert_array_equal(q, old)
+
+    @unittest.skipIf(np is None, 'NumPy is not installed')
+    def test_numpy_namespace_requires_convention_and_layout_modules(self):
+        import quatops.numpy as namespace
+        import quatops.numpy.hamilton as hamilton_namespace
+        import quatops.numpy.jpl as jpl_namespace
+
+        for module in (namespace, hamilton_namespace, jpl_namespace):
+            self.assertFalse(hasattr(module, 'multiply'))
+        self.assertIs(h_numpy.multiply, __import__(
+            'quatops.hamilton.numpy_wxyz', fromlist=['multiply']
+        ).multiply)
 
 
 if __name__ == '__main__':

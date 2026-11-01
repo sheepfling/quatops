@@ -2,12 +2,12 @@
 
 Power-of-two scaling and compensated coefficient products reduce some rounding
 errors.  This prototype deliberately exposes known underflow limitations; it is
-not a correctly rounded implementation and does not replace quatops.numpy.
+not a correctly rounded implementation and does not replace quatops.numpy.hamilton.wxyz.
 """
 
 import numpy as np
 
-from quatops.numpy import _components, _result, _sum_three
+from quatops._numpy import _components, _result, _sum_three
 
 _SPLIT = 134217729.0  # 2**27 + 1 for Dekker splitting of binary64 values.
 
