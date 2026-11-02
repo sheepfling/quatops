@@ -65,11 +65,12 @@ preconstructed inputs, best / median:
 These results cover selected inputs only. The experimental prototypes have not
 met the full library contract, so the timings are not equivalent production
 implementations. Run the checker (its exit status is deliberately nonzero while
-known failures remain) and timing script from this directory's parent:
+known failures remain) and timing script from the repository root with the
+local environment:
 
 ```sh
-PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src:experiments python experiments/check_homogeneous.py homogeneous_scalar homogeneous_numpy quatops.python.hamilton quatops.numpy.hamilton.wxyz
-PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src:. python experiments/bench_homogeneous.py
+.venv/bin/python experiments/run.py check-homogeneous homogeneous_scalar homogeneous_numpy quatops.python.hamilton quatops.numpy.hamilton.wxyz
+.venv/bin/python experiments/run.py homogeneous-benchmark
 ```
 
 ## Decision

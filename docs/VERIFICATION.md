@@ -17,14 +17,21 @@ python3 -m venv .venv
 .venv/bin/python -m pytest -q
 .venv/bin/mypy tests/typing_tests/foundational_consumer.py \
     tests/typing_tests/consumer.py tests/typing_tests/float32_consumer.py
+.venv/bin/ruff check --select F,E9 src tests experiments
 ```
 
-The `dev` extra installs NumPy, numpy-quaternion, SciPy, pytest, SciPy stubs,
-and Mypy. Pytest's `pythonpath` setting loads the checkout's `src` package
-directly. The repository `.venv` is ignored by Git and is the expected
-environment for Python checks.
+The `dev` extra installs NumPy, numpy-quaternion, SciPy, pytest,
+pytest-benchmark, SciPy stubs, Mypy, and Ruff. Pytest's `pythonpath` setting
+loads the checkout's `src` package directly. The repository `.venv` is ignored
+by Git and is the expected environment for Python checks. Normal pytest runs
+exclude the opt-in performance tests; run them separately with
+`.venv/bin/python -m pytest -m benchmark --benchmark-only`.
 
-## Latest source-suite run
+## Recorded source-suite run
+
+The result below records one local run in the environment listed. It is not an
+automatic claim about later source changes; rerun the setup commands above to
+verify the checkout you are using.
 
 The full suite passed in the repository environment on CPython 3.15.2 with
 NumPy 2.5.4, numpy-quaternion 2024.0.3, SciPy 1.18.1, and pytest 9.2.0:

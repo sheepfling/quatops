@@ -1,11 +1,13 @@
-# Proposed axis-angle and rotation-vector contract
+# Historical axis-angle and rotation-vector proposal
 
-**Historical proposal:** a provisional conversion milestone has since been
-implemented. See [API.md](API.md) for current behavior. This document preserves
-the earlier options and open decisions; it does not override the implementation.
+> **Archive, not current API guidance.** This proposal predates the implemented
+> conversion APIs. Its examples use the old `plainquat` package name, and its
+> open questions were unresolved only at the time it was written. See
+> [API.md](API.md) for the current package paths and behavior.
 
-**Original proposal for review.** The original [quaternion API](API.md) and
-its open numerical limitations motivated this design. The goal is a shared operation contract with
+**Original review draft, retained for historical context.** The earlier
+[quaternion API](API.md) and its open numerical limitations motivated this
+design. The goal was a shared operation contract with
 representation-specific, independently selected modules and kernels: no common
 runtime object, automatic dispatch, or mandatory cross-backend wrapper.
 
@@ -38,8 +40,9 @@ proposed. NumPy quaternion layout remains scalar-first `(..., 4)`.
 
 An alternative is separate `axis` and `angle` arguments for construction
 while keeping flat returned values. That would add a multi-argument broadcast
-contract; it is not included in the minimal proposal below. **Rick's choice of
-layout remains open.**
+contract; it is not included in the minimal proposal below. **At the time this
+proposal was written, the layout choice remained open.** The implemented choice
+is documented in [API.md](API.md).
 
 ## Proposed shared functions
 
@@ -175,7 +178,7 @@ zero-axis decision, and need testing before being promised.
   choice. SciPy documents [rotation vectors and radians](https://docs.scipy.org/doc/scipy/reference/generated/scipy.spatial.transform.Rotation.as_rotvec.html)
   and [quaternion layout and canonical signs](https://docs.scipy.org/doc/scipy/reference/generated/scipy.spatial.transform.Rotation.as_quat.html).
 
-## Decisions for Rick
+## Questions left open in the original proposal
 
 1. Flat AxisAngle versus nested axis/angle, and whether independent array
    broadcasting is worth a separate two-argument function.

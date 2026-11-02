@@ -1,6 +1,13 @@
-# Independent oracle coverage backlog
+# Independent oracle coverage
 
-## Goal
+## Status
+
+The coverage plan below is complete for the public operations and layouts
+listed here. The checked items record completed coverage; use the coverage map
+to find the tests. Add a new item when the public API or its edge contracts
+expand.
+
+## Coverage goals
 
 Check every public quaternion and attitude operation against an independent
 reference or a separately derived mathematical invariant across the 15 scalar
@@ -103,6 +110,6 @@ physical JPL-to-Hamilton mapping of numpy-quaternion selects the opposite vector
 sign; the branch test therefore uses the independent complex-slice formula and
 records the coefficient-policy exception explicitly.
 
-Latest full-suite evidence is recorded in
+Recorded full-suite evidence is summarized in
 [`VERIFICATION.md`](VERIFICATION.md). The completed suite used the repository
 `.venv` and exercised the full scalar and NumPy representation matrix.

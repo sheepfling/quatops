@@ -35,10 +35,11 @@ establishes agreement for the examples, not a general exactness guarantee.
 | Near-zero-coefficient scalar, µs/call | 4.042 / 4.070 | 24.720 / 24.867 | 22.156 / 22.221 |
 | 10,000 ordinary pairs, ms/batch | NumPy 0.692 / 0.699 | Python loop 175.344 / 175.794 | not measured |
 
-Run from the project directory with NumPy and SciPy installed:
+Run the current experiment from the repository root with the local development
+environment:
 
 ```sh
-PYTHONPATH=src python experiments/rotation_benchmark.py
+.venv/bin/python experiments/run.py rotation-benchmark
 ```
 
 ## Options for a decision
