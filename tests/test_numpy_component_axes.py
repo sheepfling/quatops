@@ -234,9 +234,15 @@ def test_component_first_empty_batches_validation_and_signatures(convention, ord
     assert "(..., 4)" not in leading.from_axis_angle.__doc__
     for name in leading.__all__:
         assert hasattr(trailing, name)
-        assert inspect.signature(getattr(leading, name)) == inspect.signature(
-            getattr(trailing, name)
-        )
+        expected_signature = inspect.signature(getattr(trailing, name))
+        if name in ("from_euler", "to_euler", "to_euler_with_status"):
+            expected_signature = expected_signature.replace(parameters=[
+                parameter.replace(default=0)
+                if parameter.name in ("angle_axis", "component_axis")
+                else parameter
+                for parameter in expected_signature.parameters.values()
+            ])
+        assert inspect.signature(getattr(leading, name)) == expected_signature
         assert getattr(leading, name).__annotations__ == getattr(
             trailing, name
         ).__annotations__

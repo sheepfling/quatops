@@ -13,6 +13,7 @@ from tests.oracle_support import (
     matrices_to_trailing,
     orient_matrices,
     orient_vectors,
+    random_rotations,
     reference_coefficients,
     reference_quaternions,
     to_wxyz,
@@ -204,7 +205,7 @@ def test_homogeneous_transforms_and_adjoint_match_scipy(
 ):
     rng = np.random.default_rng(0xAD10 + len(backend_name))
     count = 40
-    rotations = Rotation.random(count, rng=rng)
+    rotations = random_rotations(count, rng)
     public = as_hamilton_coefficients(rotations.as_quat()[..., (3, 0, 1, 2)], is_jpl)
     magnitudes = rng.uniform(0.1, 9.0, size=(count, 1))
     coefficients = public * magnitudes

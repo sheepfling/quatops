@@ -5,6 +5,8 @@ The product uses the negative cross term. Rotations are active and right-handed;
 Hamilton quaternion for the same rotation is ``(w, -x, -y, -z)``.
 """
 
+from __future__ import annotations
+
 import cmath
 import math
 import random
@@ -19,6 +21,7 @@ Quaternion = tuple[float, float, float, float]
 Vector = tuple[float, float, float]
 AxisAngle = tuple[float, float, float, float]
 RotVec = Vector
+EulerResult = _advanced.EulerResult
 
 # Shape checks and scalar floating-point helpers do not select a convention.
 _components = _h._components
@@ -800,22 +803,56 @@ def squad(q0: Iterable[FloatT], q1: Iterable[FloatT], a: Iterable[FloatT],
     return slerp(first, second, 2.0 * amount * (1.0 - amount))
 
 
-def from_euler(angles: Iterable[FloatT], sequence: str = "xyz") -> Quaternion:
-    """Construct a JPL rotation from extrinsic or intrinsic Tait-Bryan angles."""
-    values, axes = _euler_angles(angles, sequence)
-    result: Quaternion = (0.0, 0.0, 0.0, 1.0)
-    for axis, angle in zip(axes, values):
-        vector = {"x": (1.0, 0.0, 0.0), "y": (0.0, 1.0, 0.0),
-                  "z": (0.0, 0.0, 1.0)}[axis]
-        increment = from_axis_angle((*vector, angle))
-        result = multiply(increment, result)
-    return canonicalize(normalize(result))
+def from_euler(
+    angles: Iterable[FloatT], sequence: str = "xyz", *, degrees: bool = False
+) -> Quaternion:
+    """Construct a JPL rotation from extrinsic or intrinsic Euler angles."""
+    values = _vector(angles)
+    intrinsic, i, j, k, ell, epsilon, proper = _advanced._euler_sequence_metadata(sequence)
+    if not isinstance(degrees, bool):
+        raise ValueError("degrees must be a bool")  # noqa: TRY004
+    if degrees:
+        values = tuple(math.radians(value) for value in values)  # type: ignore[assignment]
+    if not intrinsic:
+        values = tuple(reversed(values))  # type: ignore[assignment]
+    return _advanced._euler_from_validated_angles(
+        *values, i, j, k, ell, epsilon, proper, algebra_epsilon=-1,
+        scalar_last=True,
+    )
 
 
-def to_euler(q: Iterable[FloatT], sequence: str = "xyz") -> RotVec:
-    """Extract principal Tait-Bryan angles from an active JPL rotation."""
-    _sequence(sequence)
-    return _euler_from_matrix(to_rotation_matrix(q), sequence)
+def to_euler(
+    q: Iterable[FloatT], sequence: str = "xyz",
+    gimbal_tolerance: FloatLike = 1e-12, *, degrees: bool = False,
+) -> RotVec:
+    """Extract principal Euler angles from an active JPL rotation."""
+    if not isinstance(degrees, bool):
+        raise ValueError("degrees must be a bool")  # noqa: TRY004
+    x, y, z, w = _quaternion(q)
+    angles = _advanced._euler_from_components(w, -x, -y, -z, sequence,
+                                               gimbal_tolerance)
+    if degrees:
+        return tuple(math.degrees(value) for value in angles)  # type: ignore[arg-type,return-value]
+    return angles  # type: ignore[return-value]
+
+
+def to_euler_with_status(
+    q: Iterable[FloatT], sequence: str = "xyz", *, degrees: bool = False,
+    gimbal_tolerance: FloatLike = 1e-12,
+) -> _advanced.EulerResult:
+    """Extract Euler angles and the gimbal-lock flag from an active JPL rotation."""
+    if not isinstance(degrees, bool):
+        raise ValueError("degrees must be a bool")  # noqa: TRY004
+    x, y, z, w = _quaternion(q)
+    result = _advanced._euler_from_components(w, -x, -y, -z, sequence,
+                                               gimbal_tolerance,
+                                               with_status=True)
+    assert isinstance(result, _advanced.EulerResult)
+    if not degrees:
+        return result
+    return _advanced.EulerResult(
+        tuple(math.degrees(value) for value in result.angles), result.gimbal_lock
+    )
 
 
 def from_mrp(sigma: Iterable[FloatT]) -> Quaternion:
@@ -1009,6 +1046,7 @@ so3_adjoint = to_rotation_matrix
 
 __all__ = [
     'AxisAngle',
+    'EulerResult',
     'Quaternion',
     'RotVec',
     'Vector',
@@ -1100,6 +1138,7 @@ __all__ += [
     'squad',
     'swing_twist',
     'to_euler',
+    'to_euler_with_status',
     'to_homogeneous_matrix',
     'to_mrp',
     'vector_part',

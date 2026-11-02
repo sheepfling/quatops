@@ -20,6 +20,8 @@ package users can stay with the README and API contract.
 
 - [API contract](API.md): conventions, storage, public operations, validation,
   numerical behavior, and known limits. This is the current contract.
+- [Game-engine references](engines/README.md): separate notes for Unreal,
+  Unity, and Godot Euler APIs and coordinate-basis conversions.
 - [Verification](VERIFICATION.md): setup commands, recorded test evidence, and
   oracle coverage. Rerun its commands to verify a newer checkout.
 - [Oracle coverage](ORACLE_COVERAGE.md): completed coverage groups and their

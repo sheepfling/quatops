@@ -807,6 +807,7 @@ from ._advanced import (
     asinh,
     atan,
     atanh,
+    EulerResult,
     boxminus,
     boxplus,
     commutator,
@@ -831,6 +832,7 @@ from ._advanced import (
     squad,
     swing_twist,
     to_euler,
+    to_euler_with_status,
     to_homogeneous_matrix,
     to_mrp,
     vector_part,
@@ -838,6 +840,7 @@ from ._advanced import (
 
 __all__ = [
     "AxisAngle",
+    "EulerResult",
     "Quaternion",
     "RotVec",
     "Vector",
@@ -917,6 +920,7 @@ __all__ = [
     "tanh",
     "to_axis_angle",
     "to_euler",
+    "to_euler_with_status",
     "to_homogeneous_matrix",
     "to_left_matrix",
     "to_mrp",

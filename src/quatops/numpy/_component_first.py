@@ -22,7 +22,8 @@ _OPERATIONS = (
     "sinh", "slerp", "so3_adjoint", "squad", "skew_matrix", "sqrt", "swing_twist",
     "so3_left_jacobian",
     "so3_left_jacobian_inverse", "so3_right_jacobian", "so3_right_jacobian_inverse",
-    "subtract", "tan", "tanh", "to_axis_angle", "to_euler", "to_hamilton", "to_left_matrix",
+    "subtract", "tan", "tanh", "to_axis_angle", "to_euler", "to_euler_with_status",
+    "to_hamilton", "to_left_matrix",
     "to_mrp", "to_right_matrix", "to_rotation_matrix", "to_rotation_vector", "to_rotvec",
     "to_homogeneous_matrix", "to_wxyz", "to_xyzw", "vector_part",
 )
@@ -104,6 +105,7 @@ _COMPONENT_ARGUMENTS = {
     "tanh": {"q"},
     "to_axis_angle": {"q"},
     "to_euler": {"q"},
+    "to_euler_with_status": {"q"},
     "to_homogeneous_matrix": {"q", "translation"},
     "canonicalize": {"q"},
     "to_hamilton": {"q"},
@@ -197,22 +199,80 @@ def bind_component_first(backend: ModuleType, module_name: str) -> dict[str, Any
             ):
                 operation_doc = operation_doc.replace(trailing_shape, leading_shape)
 
-            @wraps(fn)
-            def adapted(*args: Any, **kwargs: Any) -> Any:
-                bound = fn_signature.bind(*args, **kwargs)
-                for parameter in inputs:
-                    if parameter in bound.arguments:
-                        mover = (
-                            _move_matrix_to_last
-                            if operation in ("from_rotation_matrix", "from_homogeneous_matrix")
-                            else _move_input_to_last
-                        )
-                        if bound.arguments[parameter] is not None:
-                            bound.arguments[parameter] = mover(bound.arguments[parameter], parameter)
-                result = fn(*bound.args, **bound.kwargs)
-                return _move_output_to_first(operation, result)
+            adapter_signature = fn_signature
+            if operation in ("from_euler", "to_euler", "to_euler_with_status"):
+                adapter_signature = fn_signature.replace(parameters=[
+                    parameter.replace(default=0)
+                    if parameter.name in ("angle_axis", "component_axis")
+                    else parameter
+                    for parameter in fn_signature.parameters.values()
+                ])
+
+            if operation == "from_euler":
+                @wraps(fn)
+                def adapted(
+                    angles: Any,
+                    sequence: str = "xyz",
+                    *,
+                    degrees: bool = False,
+                    angle_axis: int = 0,
+                    component_axis: int = 0,
+                ) -> Any:
+                    return fn(
+                        angles, sequence, degrees=degrees, angle_axis=angle_axis,
+                        component_axis=component_axis,
+                    )
+            elif operation == "to_euler":
+                @wraps(fn)
+                def adapted(
+                    q: Any,
+                    sequence: str = "xyz",
+                    gimbal_tolerance: float = 1e-12,
+                    *,
+                    degrees: bool = False,
+                    component_axis: int = 0,
+                    angle_axis: int = 0,
+                ) -> Any:
+                    return fn(
+                        q, sequence, gimbal_tolerance, degrees=degrees,
+                        component_axis=component_axis, angle_axis=angle_axis,
+                    )
+            elif operation == "to_euler_with_status":
+                @wraps(fn)
+                def adapted(
+                    q: Any,
+                    sequence: str = "xyz",
+                    *,
+                    degrees: bool = False,
+                    gimbal_tolerance: float = 1e-12,
+                    component_axis: int = 0,
+                    angle_axis: int = 0,
+                ) -> Any:
+                    return fn(
+                        q, sequence, degrees=degrees,
+                        gimbal_tolerance=gimbal_tolerance,
+                        component_axis=component_axis, angle_axis=angle_axis,
+                    )
+            else:
+                @wraps(fn)
+                def adapted(*args: Any, **kwargs: Any) -> Any:
+                    bound = fn_signature.bind(*args, **kwargs)
+                    for parameter in inputs:
+                        if parameter in bound.arguments:
+                            mover = (
+                                _move_matrix_to_last
+                                if operation in ("from_rotation_matrix", "from_homogeneous_matrix")
+                                else _move_input_to_last
+                            )
+                            if bound.arguments[parameter] is not None:
+                                bound.arguments[parameter] = mover(
+                                    bound.arguments[parameter], parameter
+                                )
+                    result = fn(*bound.args, **bound.kwargs)
+                    return _move_output_to_first(operation, result)
 
             adapted.__module__ = module_name
+            adapted.__signature__ = adapter_signature
             adapted.__doc__ = (
                 f"Run `{operation}` with the component axis first. Quaternion arrays "
                 "have shape `(4, ...)`, vector arrays have shape `(3, ...)`, and "

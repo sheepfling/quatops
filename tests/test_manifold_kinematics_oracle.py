@@ -10,6 +10,7 @@ from tests.oracle_support import (
     as_hamilton_coefficients,
     from_wxyz,
     orient_vectors,
+    random_rotations,
     reference_coefficients,
     reference_quaternions,
     to_wxyz,
@@ -118,7 +119,7 @@ def test_long_arc_interpolation_flags_and_extrapolation_match_coefficient_formul
     """Check sign-preserving interpolation and extrapolation away from singular pairs."""
     rng = np.random.default_rng(0x10A6 + len(backend_name))
     count = 36
-    bases = Rotation.random(count, rng=rng)
+    bases = random_rotations(count, rng)
     axes = rng.normal(size=(count, 3))
     axes /= np.linalg.norm(axes, axis=-1, keepdims=True)
     angles = rng.uniform(0.45, 2.35, size=count)
@@ -190,7 +191,7 @@ def test_boxplus_and_boxminus_match_scipy_rotation_composition(
 ):
     rng = np.random.default_rng(0xB0A + len(backend_name))
     count = 40
-    bases = Rotation.random(count, rng=rng)
+    bases = random_rotations(count, rng)
     increments = rng.normal(scale=0.3, size=(count, 3))
     public = as_hamilton_coefficients(
         bases.as_quat()[..., (3, 0, 1, 2)], is_jpl
@@ -278,7 +279,7 @@ def test_constant_and_sampled_angular_rate_integrators_match_scipy_products(
 ):
     rng = np.random.default_rng(0x1A73 + len(backend_name))
     count, sample_count = 20, 6
-    initial = Rotation.random(count, rng=rng)
+    initial = random_rotations(count, rng)
     public = as_hamilton_coefficients(initial.as_quat()[..., (3, 0, 1, 2)], is_jpl)
     rates = rng.normal(scale=0.5, size=(count, sample_count, 3))
     times = np.linspace(0.0, 0.7, sample_count)

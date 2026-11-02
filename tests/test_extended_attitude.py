@@ -31,9 +31,12 @@ NUMPY_APIS = tuple(
     for order in ("wxyz", "xyzw")
     for component_first in (False, True)
 )
-EULER_SEQUENCES = tuple(
-    "".join(axes) for axes in itertools.permutations("xyz")
-) + tuple("".join(axes).upper() for axes in itertools.permutations("xyz"))
+EULER_SEQUENCES = (
+    tuple("".join(axes) for axes in itertools.permutations("xyz"))
+    + tuple("".join(axes).upper() for axes in itertools.permutations("xyz"))
+    + ("xyx", "xzx", "yxy", "yzy", "zxz", "zyz")
+    + ("XYX", "XZX", "YXY", "YZY", "ZXZ", "ZYZ")
+)
 
 
 def _tuple(value):
@@ -125,7 +128,8 @@ def test_euler_conversions_match_scipy(path, sequence):
     np.testing.assert_allclose(recovered.as_matrix(), expected.as_matrix(),
                                rtol=3e-14, atol=3e-14)
 
-    gimbal_angles = (0.3, math.pi / 2, -0.2)
+    middle = 0.0 if sequence[0].lower() == sequence[2].lower() else math.pi / 2
+    gimbal_angles = (0.3, middle, -0.2)
     gimbal = Rotation.from_euler(sequence, gimbal_angles)
     gimbal_q = api.from_euler(gimbal_angles, sequence)
     extracted = _tuple(api.to_euler(gimbal_q, sequence))

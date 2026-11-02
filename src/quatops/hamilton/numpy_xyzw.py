@@ -17,6 +17,8 @@ from .._numpy import (
     _components,
     _direction,
     _dot_quaternions,
+    _euler_from_angles,
+    _euler_to_angles,
     _factor,
     _from_rotation_matrix,
     _from_two_vectors,
@@ -679,20 +681,37 @@ NumPy inputs preserve batch axes; compatible leading axes broadcast."""
     return _make_sign_continuous(_advanced_scalar.make_sign_continuous, quaternions)
 
 
-def from_euler(angles: Any, sequence: str = "xyz") -> np.ndarray:
-    """Construct a JPL rotation from extrinsic or intrinsic Tait-Bryan angles.
+def from_euler(angles: Any, sequence: str = "xyz", *, degrees: bool = False,
+               angle_axis: int = -1, component_axis: int = -1) -> np.ndarray:
+    """Construct a Hamilton rotation from extrinsic or intrinsic Euler angles.
 
 NumPy inputs preserve batch axes; compatible leading axes broadcast."""
-    return _map_scalar(_advanced_scalar.from_euler, angles, sequence,
-                       component_arguments={0: (3, "angles")}, result_shape=(4,))
+    return _euler_from_angles(angles, sequence, degrees=degrees,
+                              angle_axis=angle_axis, component_axis=component_axis,
+                              algebra_epsilon=1, scalar_last=_SCALAR_LAST)
 
 
-def to_euler(q: Any, sequence: str = "xyz") -> np.ndarray:
-    """Extract principal Tait-Bryan angles from an active JPL rotation.
+def to_euler(q: Any, sequence: str = "xyz", gimbal_tolerance: float = 1e-12, *,
+             degrees: bool = False, component_axis: int = -1,
+             angle_axis: int = -1) -> np.ndarray:
+    """Extract principal Euler angles from an active Hamilton rotation.
 
 NumPy inputs preserve batch axes; compatible leading axes broadcast."""
-    return _map_scalar(_advanced_scalar.to_euler, q, sequence,
-                       component_arguments={0: (4, "quaternion")}, result_shape=(3,))
+    return _euler_to_angles(q, sequence, degrees=degrees,
+                            gimbal_tolerance=gimbal_tolerance,
+                            component_axis=component_axis, angle_axis=angle_axis,
+                            algebra_epsilon=1, scalar_last=_SCALAR_LAST,
+                            with_status=False)
+
+
+def to_euler_with_status(q: Any, sequence: str = "xyz", *, degrees: bool = False,
+                         gimbal_tolerance: float = 1e-12,
+                         component_axis: int = -1, angle_axis: int = -1) -> Any:
+    return _euler_to_angles(q, sequence, degrees=degrees,
+                            gimbal_tolerance=gimbal_tolerance,
+                            component_axis=component_axis, angle_axis=angle_axis,
+                            algebra_epsilon=1, scalar_last=_SCALAR_LAST,
+                            with_status=True)
 
 
 def from_mrp(sigma: Any) -> np.ndarray:

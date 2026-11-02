@@ -28,11 +28,22 @@ Mypy, and Ruff. Pytest's `pythonpath` setting
 loads the checkout's `src` package directly. The repository `.venv` is ignored
 by Git and is the expected environment for Python checks.
 
-## Recorded source-suite run
+## Current source-suite run
 
-The result below records one local run in the environment listed. It is not an
-automatic claim about later source changes; rerun the setup commands above to
-verify the checkout you are using.
+The current checkout passed its full suite on CPython 3.9.6 with NumPy 1.26.4,
+numpy-quaternion 2023.0.4, SciPy 1.13.1, and pytest 8.4.2:
+
+**2,155 passed, 1 skipped** in 7.77 seconds on 2026-11-02. The skip is the
+expected `longdouble` range check on a platform where `longdouble` has no wider range
+than `float64`. The engine-coordinate SciPy oracle is included in this run.
+The full `.[dev]` extra did not resolve on Python 3.9 because its
+`numpy-quaternion>=2024.0.3` requirement has no compatible release; the run
+used the environment's preinstalled numpy-quaternion 2023.0.4. The checkout was
+installed editable without changing its dependencies.
+
+An earlier local run on another checkout passed in the environment listed
+below. It is historical evidence, not an automatic claim about later source
+changes; rerun the setup commands above to verify the checkout you are using.
 
 The full suite passed in the repository environment on CPython 3.15.2 with
 NumPy 2.5.4, numpy-quaternion 2024.0.3, SciPy 1.18.1, and pytest 9.2.0:
@@ -91,10 +102,23 @@ complex-slice formula there.
 
 `tests/test_rotation_conversion_oracle.py` checks coefficient order and
 Hamilton/JPL conversion, canonicalization and sign policies, rotation distance,
-axis-angle and two-vector conversions, all twelve extrinsic/intrinsic Euler
-sequences, MRP, and the rotation-vector aliases against SciPy or direct
-coefficient rules. Its samples include non-unit inputs, angles beyond a full
-turn, antipodal vector pairs, and MRP's principal range.
+axis-angle and two-vector conversions, all twelve Euler axis patterns in both
+extrinsic and intrinsic forms (24 sequence strings), MRP, and the rotation-vector
+aliases against SciPy or direct coefficient rules. Its samples include non-unit
+inputs, angles beyond a full turn, antipodal vector pairs, and MRP's principal
+range.
+
+`tests/test_engine_basis_oracle.py` checks engine-boundary signed-axis maps for
+Hamilton and JPL inputs in both coefficient orders against SciPy rotation
+matrices, across all 48 signed permutations. It also checks the SLERP/map
+commutation property and NumPy component-axis preservation. The focused run in
+this checkout passed 107 cases; it does not test an engine runtime.
+
+`tests/test_engine_euler_golden.py` checks seven frozen, source-attributed
+Unity.Mathematics and Godot Euler fixtures across 23 scalar and NumPy
+representations (161 case/backend combinations). Expected quaternion and
+matrix values are stored in `tests/golden/engine_euler_fixtures.json`; these
+are upstream static fixtures, not local engine captures.
 
 `tests/test_manifold_kinematics_oracle.py` compares SLERP and SQUAD with SciPy
 `Slerp`, NLERP with a direct normalized coefficient blend, local updates with
