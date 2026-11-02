@@ -31,6 +31,7 @@ dev = [
     "numpy-quaternion>=2024.0.3",
     "mypy>=1.10",
     "pytest>=7",
+    "ruff>=0.8",
     "scipy>=1.7",
     "scipy-stubs",
 ]
