@@ -1,4 +1,7 @@
-"""Alias to the Hamilton NumPy component-first ``wxyz`` API."""
+"""Hamilton NumPy API with a leading component axis, shaped ``(4, ...)``.
+
+Each quaternion stores its scalar coefficient first, in ``wxyz`` order.
+"""
 
 from ..numpy.hamilton.components_first import wxyz as _backend
 from ..numpy.hamilton.components_first.wxyz import *  # noqa: F403

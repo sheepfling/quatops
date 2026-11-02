@@ -1,9 +1,9 @@
-"""Native NumPy Hamilton quaternions: scalar-last ``(..., 4)`` in xyzw order.
+"""Hamilton NumPy API with its quaternion component axis last: ``(..., 4)``.
 
-The product uses a positive vector cross term. Rotations are active and
-right-handed; ``multiply(lhs, rhs)`` applies ``rhs`` first. Scalar-last ordering
-does not change the Hamilton algebra. Arrays use float64 with the same
-validation and NumPy floating-point policy as the scalar-first NumPy backend.
+Each quaternion stores its scalar coefficient last, in ``xyzw`` order. The
+product uses a positive vector cross term. Rotations are active and
+right-handed; ``multiply(lhs, rhs)`` applies ``rhs`` first. Arrays use float64
+with the same validation and NumPy floating-point policy as the ``wxyz`` API.
 """
 
 from typing import Any

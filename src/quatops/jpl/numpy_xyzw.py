@@ -1,9 +1,11 @@
-"""Native NumPy JPL quaternions: scalar-last ``(..., 4)`` in xyzw order.
+"""JPL NumPy API with its quaternion component axis last: ``(..., 4)``.
+
+Each quaternion stores its scalar coefficient last, in ``xyzw`` order.
 
 The product uses a negative vector cross term. Rotations are active and
 right-handed; ``multiply(lhs, rhs)`` applies ``rhs`` first. The physically equivalent
 Hamilton quaternion is ``(w, -x, -y, -z)``. Arrays use float64 with the same
-validation and NumPy floating-point policy as the scalar-first NumPy backend.
+validation and NumPy floating-point policy as the ``wxyz`` API.
 """
 
 from typing import Any

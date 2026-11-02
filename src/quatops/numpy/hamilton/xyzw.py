@@ -1,4 +1,7 @@
-"""Hamilton NumPy operations with trailing scalar-last ``xyzw`` storage."""
+"""Hamilton NumPy operations with quaternion component axis last: ``(..., 4)``.
+
+Each quaternion stores its scalar coefficient last, in ``xyzw`` order.
+"""
 
 from ...hamilton.numpy_xyzw import (
     add,

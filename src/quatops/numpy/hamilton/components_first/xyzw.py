@@ -1,4 +1,7 @@
-"""Hamilton NumPy API with leading-axis ``xyzw`` coefficient arrays."""
+"""Hamilton NumPy API with leading component axis ``(4, ...)``.
+
+Each quaternion stores its scalar coefficient last, in ``xyzw`` order.
+"""
 
 from ..._component_first import bind_component_first
 from .. import xyzw as _backend

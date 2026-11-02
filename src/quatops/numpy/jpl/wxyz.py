@@ -1,4 +1,7 @@
-"""JPL NumPy operations with trailing scalar-first ``wxyz`` storage."""
+"""JPL NumPy operations with quaternion component axis last: ``(..., 4)``.
+
+Each quaternion stores its scalar coefficient first, in ``wxyz`` order.
+"""
 
 from ...jpl.numpy_wxyz import (
     add,

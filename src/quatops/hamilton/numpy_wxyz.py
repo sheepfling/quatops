@@ -1,4 +1,8 @@
-"""Hamilton NumPy operations in wxyz order; direct aliases to the native backend."""
+"""Hamilton NumPy API with its quaternion component axis last: ``(..., 4)``.
+
+Each quaternion stores its scalar coefficient first, in ``wxyz`` order. This
+module directly aliases the native backend.
+"""
 
 from ..numpy.hamilton.wxyz import (
     add,

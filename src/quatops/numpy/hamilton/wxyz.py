@@ -1,4 +1,6 @@
-"""NumPy quaternion operations using scalar-first ``(..., 4)`` arrays.
+"""Hamilton NumPy operations with quaternion component axis last: ``(..., 4)``.
+
+Each quaternion stores its scalar coefficient first, in ``wxyz`` order.
 
 All functions return float64 arrays (or a float64 scalar for a single norm).
 Leading axes broadcast for binary operations. Inputs must have boolean, signed
