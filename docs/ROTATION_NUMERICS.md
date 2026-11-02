@@ -2,8 +2,8 @@
 
 **Historical snapshot:** These measurements predate the later narrow NumPy
 coefficient-order parity fix. The near-diagonal NumPy example below is now fixed;
-the general cancellation case remains open. The table preserves the original
-measured evidence.
+the general cancellation case is still a known limitation. The table preserves
+the original measured evidence.
 
 This is a local experiment, not an implemented accuracy mode or a guarantee.
 The current `rotate` implementation is unchanged by this investigation. Its
@@ -42,7 +42,11 @@ environment:
 .venv/bin/python experiments/run.py rotation-benchmark
 ```
 
-## Options for a decision
+## Research directions, not selected API changes
+
+The accuracy options below are ideas for future work, not pending API
+decisions. The current `rotate` behavior and its known limitations are defined
+in the [API contract](API.md).
 
 1. Improve the ordinary float64 kernel, e.g. exact power-of-two scaling and
    compensated coefficient sums. A local prototype fixes the two reported

@@ -140,9 +140,8 @@ For workload-specific timings, use the
 measurements, not general performance guarantees.
 
 See the [documentation map](docs/README.md) for the API reference, verification
-record, experiment guide, and historical research notes. The old
-[axis-angle and rotation-vector proposal](docs/PROPOSED_ROTATION_REPRESENTATIONS.md)
-is a historical design record; the implemented behavior is in the API contract.
+record, experiment guide, and research notes. The API contract describes the
+implemented axis-angle and rotation-vector behavior.
 
 To run a local experiment without setting `PYTHONPATH`, see the
 [experiment guide](experiments/README.md) and use

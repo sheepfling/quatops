@@ -10,12 +10,12 @@ Python API that accepts and returns ordinary tuples. The top-level
 order; it is not a NumPy scalar API. NamedTuple, dataclass, and NumPy are
 distinct value representations.
 
-This is the **implemented, provisional** contract for explicit Hamilton and JPL
+This document defines the current behavior of the explicit Hamilton and JPL
 modules. Choose a convention and representation at import time; there is no
-common runtime quaternion wrapper, convention flag, or automatic dispatch. The
-distribution/import root is `quatops`; this unpublished candidate was previously
-named `plainquat`, and no `plainquat` import shim is provided. For an
-introduction, see the [README](../README.md).
+common runtime quaternion wrapper, convention flag, or automatic dispatch.
+The import name is `quatops`. `plainquat` appeared in early design drafts and
+is not a supported import. For an introduction, see the
+[README](../README.md).
 
 ## Convention, storage, and rotation
 
@@ -526,9 +526,9 @@ points; its matrix convention and extraction behavior are documented in
 
 ## Axis-angle and rotation-vector conversions
 
-These are provisional candidate policies. AxisAngle is flat `(ax, ay, az,
-angle)` in radians; RotVec is `(x, y, z)` with direction equal to the axis and
-length equal to the angle in radians. The scalar backend returns plain tuples;
+AxisAngle is flat `(ax, ay, az, angle)` in radians. RotVec is `(x, y, z)` with
+direction equal to the axis and length equal to the angle in radians. The
+scalar backend returns plain tuples;
 `namedtuple` and `dataclass` expose their own `AxisAngle` and `RotVec` classes;
 NumPy returns float64 arrays of shape `(..., 4)` and `(..., 3)`. Constructors
 store their arguments as supplied; operations validate them. Each conversion is

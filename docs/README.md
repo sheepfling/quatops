@@ -25,7 +25,4 @@ truth for current behavior and public signatures.
   limits and measurements from a historical investigation.
 - [Homogeneous rotation experiment](HOMOGENEOUS_INVESTIGATION.md): rejected
   research prototypes and why they were not promoted into the library.
-- [Axis-angle and rotation-vector proposal](PROPOSED_ROTATION_REPRESENTATIONS.md):
-  historical pre-implementation proposal. Do not use its old package names,
-  examples, or open questions as current API guidance.
 - [Changelog](../CHANGELOG.md): alpha release contents and compatibility note.
