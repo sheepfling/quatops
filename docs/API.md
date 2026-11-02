@@ -1,5 +1,15 @@
 # Shared API contract
 
+## Terminology
+
+The *scalar coefficient* is the real quaternion component, conventionally
+written `w`. `wxyz` puts it first; `xyzw` puts it last. These names describe
+coefficient order, not the container type. Here, *tuple backend* means the
+Python API that accepts and returns ordinary tuples. The top-level
+`quatops.scalar` module is the Hamilton tuple backend, with `wxyz` coefficient
+order; it is not a NumPy scalar API. NamedTuple, dataclass, and NumPy are
+distinct value representations.
+
 This is the **implemented, provisional** contract for explicit Hamilton and JPL
 modules. Choose a convention and representation at import time; there is no
 common runtime quaternion wrapper, convention flag, or automatic dispatch. The
@@ -101,29 +111,31 @@ The convention-first NumPy paths `quatops.hamilton.numpy_wxyz`,
 functions. NumPy operations do not select a convention or layout at runtime and
 do not convert inputs on each call.
 
-The standard NumPy modules store components on the last axis: quaternions have
-shape `(..., 4)` and vectors have shape `(..., 3)`. Component-first adapters
-are provided at `quatops.numpy.hamilton.components_first.wxyz`,
+The standard NumPy modules store the four quaternion coefficients on the last
+axis: quaternions have shape `(..., 4)` and vectors have shape `(..., 3)`. The
+`components_first` adapters put that coefficient axis at axis 0, for example at
+`quatops.numpy.hamilton.components_first.wxyz`,
 `quatops.numpy.hamilton.components_first.xyzw`,
 `quatops.numpy.jpl.components_first.wxyz`, and
 `quatops.numpy.jpl.components_first.xyzw`. They accept quaternions shaped
-`(4, ...)` and vectors shaped `(3, ...)`; the `wxyz` or `xyzw` suffix still
-selects coefficient order. Matching convention-first aliases end in
+`(4, ...)` and vectors shaped `(3, ...)`; the `wxyz` or `xyzw` suffix
+independently selects whether `w` comes first or last within the four values.
+Matching convention-first aliases end in
 `numpy_wxyz_components_first` or `numpy_xyzw_components_first` under
 `quatops.hamilton` and `quatops.jpl`.
 
-Component-first operations follow the same validation and batch-broadcasting
+Operations with the coefficient axis at axis 0 follow the same validation and batch-broadcasting
 rules as their trailing-axis counterparts. Quaternion, axis-angle, and
 three-vector outputs put the component axis first. Matrix outputs put both
 matrix axes first, producing
 `(3, 3, ...)` for rotation/Jacobian matrices and `(4, 4, ...)` for quaternion
 multiplication matrices. Scalar reductions such as `norm` return only the
 broadcast batch shape. Thus a `(4, 4)` array is interpreted according to the
-selected module: four component-first quaternions in a batch, or four
+selected module: four quaternions with components on axis 0 in a batch, or four
 component-last quaternions in a batch. The adapter moves axes around the
 existing NumPy kernels and does not duplicate the mathematical operations.
 `from_rotation_matrix` accepts `(..., 3, 3)` input on trailing-axis modules and
-`(3, 3, ...)` input on component-first modules.
+`(3, 3, ...)` input on modules with the coefficient axis at axis 0.
 
 Tuple, NamedTuple, and dataclass modules have one native layout per convention:
 Hamilton `wxyz` and JPL `xyzw`. Their layout helpers perform one-time reorders
@@ -383,10 +395,10 @@ rotation errors as a 3×3 matrix. By default it centers on the Markley mean;
 
 NumPy mean and covariance inputs use the sample axis immediately before the
 four quaternion components: `(..., samples, 4)` in trailing layout and
-`(4, ..., samples)` in component-first layout. Weights have shape
+`(4, ..., samples)` in layout with the coefficient axis at axis 0. Weights have shape
 `(..., samples)` and broadcast over the batch axes. Covariance matrices place
-their two matrix axes last in trailing layout and first in component-first
-layout.
+their two matrix axes last when the coefficient axis is last and first when
+the coefficient axis is at axis 0.
 
 `random_quaternion(size=None, rng=None)` draws uniform unit quaternions on
 the 3-sphere using Shoemake's construction; `random_rotation` is an alias for
@@ -457,8 +469,8 @@ For trailing-axis NumPy modules, binary quaternion operations broadcast leading
 dimensions according to NumPy rules. Thus `(2, 1, 4)` added to `(1, 3, 4)`
 returns `(2, 3, 4)`; rotating `(2, 1, 4)` quaternions by `(1, 3, 3)` vectors
 returns `(2, 3, 3)`. `norm` removes the final axis and yields a NumPy scalar
-for shape `(4,)`. Component-first modules apply the same rules to the batch
-axes after the leading component axis, and `norm` removes the first axis. No
+for shape `(4,)`. Modules with the coefficient axis at axis 0 apply the same
+rules to remaining batch axes, and `norm` removes the coefficient axis. No
 output memory layout is guaranteed. Array-like inputs must infer a boolean, signed or
 unsigned integer, or real floating dtype. Complex, object (including
 `Fraction` or `Decimal`), string, and other dtypes are rejected even when their
@@ -476,7 +488,7 @@ These are functions on the selected module, not methods on the quaternion
 value. Scalar and typed results are nested tuples; NumPy results are float64
 arrays. For a trailing-axis NumPy input shaped `(..., 4)`, rotation matrices
 have shape `(..., 3, 3)` and multiplication matrices have shape `(..., 4, 4)`.
-For component-first inputs `(4, ...)`, these outputs have shapes `(3, 3, ...)`
+For inputs with the coefficient axis at axis 0 `(4, ...)`, these outputs have shapes `(3, 3, ...)`
 and `(4, 4, ...)`. Batch dimensions are preserved, including empty batches.
 Matrix input uses the module's native coefficient ordering.
 
@@ -539,7 +551,8 @@ All finite input angles are accepted. Outside the exact `pi` rule, sine and
 cosine are evaluated on the half-angle without explicit modulo reduction; for
 very large arguments the precision of platform/NumPy trigonometric functions
 and their argument reduction is not guaranteed across platforms. If a RotVec
-norm cannot be represented as a float, `from_rotvec` raises `OverflowError`.
+norm cannot be represented as a float, the caller is responsible for checking
+that the input is within the representable angular range before conversion.
 No arbitrary small-angle threshold snaps a representable rotation to identity.
 Nevertheless, finite precision has limits: the half-angle of a smallest
 subnormal RotVec cannot be represented in a quaternion and may round to zero;

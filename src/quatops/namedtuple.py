@@ -333,42 +333,58 @@ def to_rotation_vector(q: Iterable[FloatT]) -> RotVec:
 
 
 def tan(q: Iterable[FloatT]) -> Quaternion:
+    """Return the algebraic quaternion tangent ``sin(q) / cos(q)``."""
     return Quaternion(*scalar.tan(q))
 
 
 def dot(lhs: Iterable[FloatT], rhs: Iterable[FloatT]) -> float:
+    """Return the Euclidean coefficient dot product."""
     return scalar.dot(lhs, rhs)
 
 
 def norm_squared(q: Iterable[FloatT]) -> float:
+    """Return the squared Euclidean coefficient norm."""
     return scalar.norm_squared(q)
 
 
 def right_divide(lhs: Iterable[FloatT], rhs: Iterable[FloatT]) -> Quaternion:
+    """Return the right quotient ``lhs * inverse(rhs)``."""
     return Quaternion(*scalar.right_divide(lhs, rhs))
 
 
 def left_divide(lhs: Iterable[FloatT], rhs: Iterable[FloatT]) -> Quaternion:
+    """Return the left quotient ``inverse(lhs) * rhs``."""
     return Quaternion(*scalar.left_divide(lhs, rhs))
 
 
 def rotation_distance(q0: Iterable[FloatT], q1: Iterable[FloatT]) -> float:
+    """Return the shortest geodesic angle between two rotations in radians."""
     return scalar.rotation_distance(q0, q1)
 
 
 def rotations_equivalent(q0: Iterable[FloatT], q1: Iterable[FloatT], atol: FloatLike = 1e-12) -> bool:
+    """Return whether two rotations differ by at most ``atol`` radians."""
     return scalar.rotations_equivalent(q0, q1, atol)
 
 
 def canonicalize(q: Iterable[FloatT]) -> Quaternion:
+    """Choose a deterministic sign while preserving the quaternion magnitude."""
     return Quaternion(*scalar.canonicalize(q))
 
 
 def from_rotation_matrix(matrix: Iterable[Iterable[FloatT]], atol: FloatLike = 1e-8) -> Quaternion:
+    """Convert a proper active 3x3 rotation matrix to a canonical unit q.
+
+Orthogonality and determinant +1 are checked within the absolute tolerance."""
     return Quaternion(*scalar.from_rotation_matrix(matrix, atol))
 
 
 def from_two_vectors(source: Iterable[FloatT], target: Iterable[FloatT]) -> Quaternion:
+    """Return the shortest active rotation mapping ``source`` onto ``target``.
+
+Inputs must be nonzero. For antiparallel vectors, the half-turn axis is
+chosen deterministically by crossing the source with its least-aligned
+coordinate axis."""
     return Quaternion(*scalar.from_two_vectors(source, target))
 
 

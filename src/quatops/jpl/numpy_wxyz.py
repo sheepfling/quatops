@@ -408,38 +408,71 @@ def tan(q: Any) -> np.ndarray:
 
 
 def dot(lhs: Any, rhs: Any) -> np.ndarray:
+    """Return the Euclidean coefficient dot product.
+
+NumPy inputs preserve batch axes; compatible leading axes broadcast."""
     return _dot_quaternions(lhs, rhs)
 
 
 def norm_squared(q: Any) -> np.ndarray:
+    """Return the squared Euclidean coefficient norm.
+
+NumPy inputs preserve batch axes; compatible leading axes broadcast."""
     return _norm_squared(q)
 
 
 def right_divide(lhs: Any, rhs: Any) -> np.ndarray:
+    """Return the right quotient ``lhs * inverse(rhs)``.
+
+NumPy inputs preserve batch axes; compatible leading axes broadcast."""
     return _right_divide(lhs, rhs, -1, _SCALAR_LAST)
 
 
 def left_divide(lhs: Any, rhs: Any) -> np.ndarray:
+    """Return the left quotient ``inverse(lhs) * rhs``.
+
+NumPy inputs preserve batch axes; compatible leading axes broadcast."""
     return _left_divide(lhs, rhs, -1, _SCALAR_LAST)
 
 
 def rotation_distance(q0: Any, q1: Any) -> np.ndarray:
+    """Return the shortest geodesic angle between two rotations in radians.
+
+NumPy inputs preserve batch axes; compatible leading axes broadcast."""
     return _rotation_distance(q0, q1, -1, _SCALAR_LAST)
 
 
 def rotations_equivalent(q0: Any, q1: Any, atol: Any = 1e-12) -> np.ndarray:
+    """Return whether two rotations differ by at most ``atol`` radians.
+
+NumPy inputs preserve batch axes; compatible leading axes broadcast."""
     return _rotations_equivalent(q0, q1, atol, -1, _SCALAR_LAST)
 
 
 def canonicalize(q: Any) -> np.ndarray:
+    """Choose a deterministic sign while preserving the quaternion magnitude.
+
+NumPy inputs preserve batch axes; compatible leading axes broadcast."""
     return _canonicalize(q, _SCALAR_LAST, -1)
 
 
 def from_rotation_matrix(matrix: Any, atol: Any = 1e-8) -> np.ndarray:
+    """Convert a proper active 3x3 rotation matrix to a canonical unit q.
+
+Orthogonality and determinant +1 are checked within the absolute tolerance.
+
+NumPy inputs preserve batch axes; compatible leading axes broadcast."""
     return _from_rotation_matrix(matrix, -1, _SCALAR_LAST, atol)
 
 
 def from_two_vectors(source: Any, target: Any) -> np.ndarray:
+    """Return the shortest active rotation mapping ``source`` onto ``target``.
+
+Inputs must be nonzero. For antiparallel vectors, the half-turn axis is
+chosen deterministically by crossing the source with its least-aligned
+coordinate axis.
+
+NumPy inputs preserve batch axes; compatible leading axes broadcast."""
     return _from_two_vectors(source, target, -1, _SCALAR_LAST)
 
 
@@ -472,78 +505,123 @@ def _map_scalar(
 
 # Extended quaternion mathematics and attitude APIs.
 def asin(q: Any) -> np.ndarray:
+    """Return the principal JPL coefficient arcsine.
+
+NumPy inputs preserve batch axes; compatible leading axes broadcast."""
     return _map_scalar(_advanced_scalar.asin, q,
                        component_arguments={0: (4, "quaternion")}, result_shape=(4,))
 
 
 def acos(q: Any) -> np.ndarray:
+    """Return the principal JPL coefficient arccosine.
+
+NumPy inputs preserve batch axes; compatible leading axes broadcast."""
     return _map_scalar(_advanced_scalar.acos, q,
                        component_arguments={0: (4, "quaternion")}, result_shape=(4,))
 
 
 def atan(q: Any) -> np.ndarray:
+    """Return the principal JPL coefficient arctangent.
+
+NumPy inputs preserve batch axes; compatible leading axes broadcast."""
     return _map_scalar(_advanced_scalar.atan, q,
                        component_arguments={0: (4, "quaternion")}, result_shape=(4,))
 
 
 def asinh(q: Any) -> np.ndarray:
+    """Return the principal JPL coefficient inverse hyperbolic sine.
+
+NumPy inputs preserve batch axes; compatible leading axes broadcast."""
     return _map_scalar(_advanced_scalar.asinh, q,
                        component_arguments={0: (4, "quaternion")}, result_shape=(4,))
 
 
 def acosh(q: Any) -> np.ndarray:
+    """Return the principal JPL coefficient inverse hyperbolic cosine.
+
+NumPy inputs preserve batch axes; compatible leading axes broadcast."""
     return _map_scalar(_advanced_scalar.acosh, q,
                        component_arguments={0: (4, "quaternion")}, result_shape=(4,))
 
 
 def atanh(q: Any) -> np.ndarray:
+    """Return the principal JPL coefficient inverse hyperbolic tangent.
+
+NumPy inputs preserve batch axes; compatible leading axes broadcast."""
     return _map_scalar(_advanced_scalar.atanh, q,
                        component_arguments={0: (4, "quaternion")}, result_shape=(4,))
 
 
 def expm1(q: Any) -> np.ndarray:
+    """Return ``exp(q)-1``, using a convergent series near zero.
+
+NumPy inputs preserve batch axes; compatible leading axes broadcast."""
     return _map_scalar(_advanced_scalar.expm1, q,
                        component_arguments={0: (4, "quaternion")}, result_shape=(4,))
 
 
 def log1p(q: Any) -> np.ndarray:
+    """Return ``log(1+q)``, using a convergent series near zero.
+
+NumPy inputs preserve batch axes; compatible leading axes broadcast."""
     return _map_scalar(_advanced_scalar.log1p, q,
                        component_arguments={0: (4, "quaternion")}, result_shape=(4,))
 
 
 def log2(q: Any) -> np.ndarray:
+    """Return the principal JPL quaternion logarithm to base two.
+
+NumPy inputs preserve batch axes; compatible leading axes broadcast."""
     return _map_scalar(_advanced_scalar.log2, q,
                        component_arguments={0: (4, "quaternion")}, result_shape=(4,))
 
 
 def log10(q: Any) -> np.ndarray:
+    """Return the principal JPL quaternion logarithm to base ten.
+
+NumPy inputs preserve batch axes; compatible leading axes broadcast."""
     return _map_scalar(_advanced_scalar.log10, q,
                        component_arguments={0: (4, "quaternion")}, result_shape=(4,))
 
 
 def power_quaternion(q: Any, exponent: Any) -> np.ndarray:
+    """Raise ``q`` to a quaternion exponent as ``exp(exponent ⊙ log(q))``.
+
+NumPy inputs preserve batch axes; compatible leading axes broadcast."""
     return _map_scalar(_advanced_scalar.power_quaternion, q, exponent,
                        component_arguments={0: (4, "quaternion"), 1: (4, "exponent")},
                        result_shape=(4,))
 
 
 def commutator(lhs: Any, rhs: Any) -> np.ndarray:
+    """Return the JPL algebra commutator ``lhs⊙rhs - rhs⊙lhs``.
+
+NumPy inputs preserve batch axes; compatible leading axes broadcast."""
     return _map_scalar(_advanced_scalar.commutator, lhs, rhs,
                        component_arguments={0: (4, "lhs"), 1: (4, "rhs")},
                        result_shape=(4,))
 
 
 def scalar_part(q: Any) -> np.ndarray:
+    """Return the real/scalar coefficient of a Hamilton ``wxyz`` value.
+
+NumPy inputs preserve batch axes; compatible leading axes broadcast."""
     return _map_scalar(_advanced_scalar.scalar_part, q,
                        component_arguments={0: (4, "quaternion")}, result_shape=())
 
 
 def vector_part(q: Any) -> np.ndarray:
+    """Return the three imaginary coefficients of a Hamilton ``wxyz`` value.
+
+NumPy inputs preserve batch axes; compatible leading axes broadcast."""
     return _map_scalar(_advanced_scalar.vector_part, q,
                        component_arguments={0: (4, "quaternion")}, result_shape=(3,))
 
 
 def quaternion_derivative(q: Any, omega: Any, frame: str = "body") -> np.ndarray:
+    """Return ``dq/dt`` for a right-handed physical angular rate.
+
+NumPy inputs preserve batch axes; compatible leading axes broadcast."""
     return _map_scalar(_advanced_scalar.quaternion_derivative, q, omega, frame,
                        component_arguments={0: (4, "quaternion"), 1: (3, "omega")},
                        result_shape=(4,))
@@ -552,6 +630,9 @@ def quaternion_derivative(q: Any, omega: Any, frame: str = "body") -> np.ndarray
 def integrate_angular_velocity_samples(
     q: Any, omegas: Any, times: Any, frame: str = "body", method: str = "midpoint"
 ) -> np.ndarray:
+    """Integrate sampled rates with exact constant-rate increments.
+
+NumPy inputs preserve batch axes; compatible leading axes broadcast."""
     return _integrate_angular_velocity_samples(
         _advanced_scalar.integrate_angular_velocity_samples, q, omegas, times, frame, method,
         array_scalar_last=False, function_scalar_last=True,
@@ -559,24 +640,36 @@ def integrate_angular_velocity_samples(
 
 
 def boxplus(q: Any, delta: Any, frame: str = "body") -> np.ndarray:
+    """Apply a local physical rotation-vector increment to an attitude.
+
+NumPy inputs preserve batch axes; compatible leading axes broadcast."""
     return _map_scalar(_advanced_scalar.boxplus, q, delta, frame,
                        component_arguments={0: (4, "quaternion"), 1: (3, "delta")},
                        result_shape=(4,))
 
 
 def boxminus(q: Any, reference: Any, frame: str = "body") -> np.ndarray:
+    """Return the physical local rotation vector from ``reference`` to ``q``.
+
+NumPy inputs preserve batch axes; compatible leading axes broadcast."""
     return _map_scalar(_advanced_scalar.boxminus, q, reference, frame,
                        component_arguments={0: (4, "q"), 1: (4, "reference")},
                        result_shape=(3,))
 
 
 def nlerp(q0: Any, q1: Any, t: Any, shortest: bool = True) -> np.ndarray:
+    """Normalized linear interpolation of JPL rotations.
+
+NumPy inputs preserve batch axes; compatible leading axes broadcast."""
     return _map_scalar(_advanced_scalar.nlerp, q0, q1, t, shortest,
                        component_arguments={0: (4, "q0"), 1: (4, "q1")},
                        result_shape=(4,))
 
 
 def squad(q0: Any, q1: Any, a: Any, b: Any, t: Any) -> np.ndarray:
+    """Evaluate JPL SQUAD from endpoints and their control quaternions.
+
+NumPy inputs preserve batch axes; compatible leading axes broadcast."""
     return _map_scalar(_advanced_scalar.squad, q0, q1, a, b, t,
                        component_arguments={0: (4, "q0"), 1: (4, "q1"),
                                             2: (4, "a"), 3: (4, "b")},
@@ -584,36 +677,59 @@ def squad(q0: Any, q1: Any, a: Any, b: Any, t: Any) -> np.ndarray:
 
 
 def align_sign(q: Any, reference: Any) -> np.ndarray:
+    """Choose the sign of ``q`` closest to ``reference`` without normalization.
+
+NumPy inputs preserve batch axes; compatible leading axes broadcast."""
     return _map_scalar(_advanced_scalar.align_sign, q, reference,
                        component_arguments={0: (4, "q"), 1: (4, "reference")},
                        result_shape=(4,))
 
 
 def make_sign_continuous(quaternions: Any) -> np.ndarray:
+    """Flip signs along a sequence so consecutive coefficient dots are nonnegative.
+
+The first input sign and all quaternion magnitudes are preserved.
+
+NumPy inputs preserve batch axes; compatible leading axes broadcast."""
     return _make_sign_continuous(_advanced_scalar.make_sign_continuous, quaternions)
 
 
 def from_euler(angles: Any, sequence: str = "xyz") -> np.ndarray:
+    """Construct a JPL rotation from extrinsic or intrinsic Tait-Bryan angles.
+
+NumPy inputs preserve batch axes; compatible leading axes broadcast."""
     return _map_scalar(_advanced_scalar.from_euler, angles, sequence,
                        component_arguments={0: (3, "angles")}, result_shape=(4,))
 
 
 def to_euler(q: Any, sequence: str = "xyz") -> np.ndarray:
+    """Extract principal Tait-Bryan angles from an active JPL rotation.
+
+NumPy inputs preserve batch axes; compatible leading axes broadcast."""
     return _map_scalar(_advanced_scalar.to_euler, q, sequence,
                        component_arguments={0: (4, "quaternion")}, result_shape=(3,))
 
 
 def from_mrp(sigma: Any) -> np.ndarray:
+    """Convert modified Rodrigues parameters to a unit JPL quaternion.
+
+NumPy inputs preserve batch axes; compatible leading axes broadcast."""
     return _map_scalar(_advanced_scalar.from_mrp, sigma,
                        component_arguments={0: (3, "sigma")}, result_shape=(4,))
 
 
 def to_mrp(q: Any) -> np.ndarray:
+    """Convert a JPL attitude to principal modified Rodrigues parameters.
+
+NumPy inputs preserve batch axes; compatible leading axes broadcast."""
     return _map_scalar(_advanced_scalar.to_mrp, q,
                        component_arguments={0: (4, "quaternion")}, result_shape=(3,))
 
 
 def swing_twist(q: Any, axis: Any) -> tuple[np.ndarray, np.ndarray]:
+    """Decompose a JPL attitude as ``swing ⊙ twist`` about an axis.
+
+NumPy inputs preserve batch axes; compatible leading axes broadcast."""
     values = _map_scalar(_advanced_scalar.swing_twist, q, axis,
                          component_arguments={0: (4, "quaternion"), 1: (3, "axis")},
                          result_shape=(2, 4))
@@ -622,6 +738,9 @@ def swing_twist(q: Any, axis: Any) -> tuple[np.ndarray, np.ndarray]:
 
 def rotation_mean(quaternions: Any, weights: Any = None, method: str = "markley",
                   tolerance: Any = 1e-12, max_iterations: int = 100) -> np.ndarray:
+    """Average JPL rotations by weighted Markley or intrinsic Karcher mean.
+
+NumPy inputs preserve batch axes; compatible leading axes broadcast."""
     return _rotation_mean(_advanced_scalar.rotation_mean, quaternions, weights,
                           method, tolerance, max_iterations,
                           array_scalar_last=False, function_scalar_last=True)
@@ -629,31 +748,49 @@ def rotation_mean(quaternions: Any, weights: Any = None, method: str = "markley"
 
 def rotation_covariance(quaternions: Any, mean: Any = None, weights: Any = None,
                         frame: str = "body") -> np.ndarray:
+    """Return weighted population covariance in a JPL local tangent frame.
+
+NumPy inputs preserve batch axes; compatible leading axes broadcast."""
     return _rotation_covariance(_advanced_scalar.rotation_covariance, quaternions,
                                 mean, weights, frame,
                                 array_scalar_last=False, function_scalar_last=True)
 
 
 def align_vectors(source: Any, target: Any, weights: Any = None) -> np.ndarray:
+    """Solve the weighted Wahba problem with a native JPL quaternion result.
+
+NumPy inputs preserve batch axes; compatible leading axes broadcast."""
     return _align_vectors(_advanced_scalar.align_vectors, source, target, weights,
                           array_scalar_last=False, function_scalar_last=True)
 
 
 def random_quaternion(size: Any = None, rng: Any = None) -> np.ndarray:
+    """Draw a uniform unit JPL quaternion on S3 using Shoemake's method.
+
+NumPy inputs preserve batch axes; compatible leading axes broadcast."""
     return _random_quaternion(size, rng, -1, _SCALAR_LAST)
 
 
 def random_rotation(size: Any = None, rng: Any = None) -> np.ndarray:
+    """Draw a uniform SO(3) attitude, represented by a unit quaternion.
+
+NumPy inputs preserve batch axes; compatible leading axes broadcast."""
     return random_quaternion(size, rng)
 
 
 def to_homogeneous_matrix(q: Any, translation: Any = (0.0, 0.0, 0.0)) -> np.ndarray:
+    """Return a 4x4 homogeneous matrix for a JPL attitude and translation.
+
+NumPy inputs preserve batch axes; compatible leading axes broadcast."""
     return _map_scalar(_advanced_scalar.to_homogeneous_matrix, q, translation,
                        component_arguments={0: (4, "quaternion"), 1: (3, "translation")},
                        result_shape=(4, 4))
 
 
 def from_homogeneous_matrix(matrix: Any, atol: Any = 1e-8) -> np.ndarray:
+    """Validate a rigid 4x4 transform and return its native JPL rotation.
+
+NumPy inputs preserve batch axes; compatible leading axes broadcast."""
     return _from_homogeneous_matrix(
         matrix, _advanced_scalar.from_homogeneous_matrix, atol,
         array_scalar_last=_SCALAR_LAST, function_scalar_last=True,
@@ -661,5 +798,8 @@ def from_homogeneous_matrix(matrix: Any, atol: Any = 1e-8) -> np.ndarray:
 
 
 def so3_adjoint(q: Any) -> np.ndarray:
+    """Return the SO(3) adjoint matrix, equal to the active rotation matrix.
+
+NumPy inputs preserve batch axes; compatible leading axes broadcast."""
     return _map_scalar(_advanced_scalar.so3_adjoint, q,
                        component_arguments={0: (4, "quaternion")}, result_shape=(3, 3))

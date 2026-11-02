@@ -17,7 +17,6 @@ from quatops.hamilton import numpy_xyzw as hx
 from quatops.jpl import numpy_wxyz as jw
 from quatops.jpl import numpy_xyzw as jx
 
-
 def main() -> None:
     """Run multiply and rotation timings for all four NumPy modules."""
     print("Python", sys.version.replace("\n", " "), "NumPy", np.__version__)
@@ -34,17 +33,16 @@ def main() -> None:
         ("J xyzw", jx, np.ascontiguousarray(jx.from_hamilton(q_h)),
          np.ascontiguousarray(jx.from_hamilton(r_h))),
     )
-    for name, module, q, r in backends:
-        for operation, args in (("multiply", (q, r)), ("rotate", (q, vectors))):
-            function: Callable[[], object] = lambda module=module, operation=operation, args=args: getattr(
+    for name, module_, q, r in backends:
+        for operation_, args_ in (("multiply", (q, r)), ("rotate", (q, vectors))):
+            function: Callable[[], object] = lambda module=module_, operation=operation_, args=args_: getattr(
                 module, operation
             )(*args)
             timings = sorted(timeit.repeat(function, number=10, repeat=5))
             print(
-                f"{name} {operation}: best={timings[0] * 100:.3f} "
+                f"{name} {operation_}: best={timings[0] * 100:.3f} "
                 f"median={timings[2] * 100:.3f} ms/10000 pairs"
             )
-
 
 if __name__ == "__main__":
     main()

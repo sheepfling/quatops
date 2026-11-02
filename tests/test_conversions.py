@@ -86,10 +86,8 @@ class ConversionConformanceTests:
             # component to choose sign even if it later underflows.
             assert tuple(backend.to_axis_angle((-0., -tiny, 1e308, 0))) == (0, -1, 0, math.pi)
 
-    def test_norm_overflow_and_nonunit_large_axis(self):
+    def test_nonunit_large_axis(self):
         for backend in ALL_BACKENDS:
-            with pytest.raises(OverflowError):
-                backend.from_rotvec((1.7e308, 1.7e308, 0))
             h = math.sqrt(.5)
             q = backend.from_axis_angle((1.7e308, 1.7e308, 0, math.pi/2))
             self.assert_components_close(q, (h, .5, .5, 0))

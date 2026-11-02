@@ -8,6 +8,7 @@ NumPy.
 from importlib.metadata import PackageNotFoundError
 from importlib.metadata import version as _distribution_version
 
+# setuptools-scm supplies the installed distribution version at build time.
 try:
     __version__ = _distribution_version("quatops")
 except PackageNotFoundError:

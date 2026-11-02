@@ -4,8 +4,8 @@
 
 Check every public quaternion and attitude operation against an independent
 reference or a separately derived mathematical invariant across the 15 scalar
-modules and eight NumPy layouts (trailing/component-first, `wxyz`/`xyzw`,
-Hamilton/JPL). NumPy batches must also be checked against their scalar samples
+modules and eight NumPy layouts (coefficient axis last or at axis 0, both `wxyz`/`xyzw`
+orders and Hamilton/JPL conventions). NumPy batches must also be checked against their scalar samples
 and retain the documented batch shapes.
 
 An independent check must not use the same QuatOps operation as its expected

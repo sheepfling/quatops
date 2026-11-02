@@ -13,10 +13,12 @@ import sys
 from collections.abc import Iterable, Sequence
 from fractions import Fraction
 from types import ModuleType
-from typing import Callable, Optional
+from typing import Callable, cast
 
+Vec3 = tuple[float, float, float]
+PlainQuat = tuple[float, float, float, float]
 
-def exact_rotate(q: Iterable[float], v: Iterable[float]) -> tuple[float, float, float]:
+def exact_rotate(q: Iterable[float], v: Iterable[float]) -> Vec3:
     w, x, y, z = (Fraction.from_float(float(t)) for t in q)
     vx, vy, vz = (Fraction.from_float(float(t)) for t in v)
     denominator = w * w + x * x + y * y + z * z
@@ -27,11 +29,10 @@ def exact_rotate(q: Iterable[float], v: Iterable[float]) -> tuple[float, float, 
         (2 * (x * y + w * z), w * w - x * x + y * y - z * z, 2 * (y * z - w * x)),
         (2 * (x * z - w * y), 2 * (y * z + w * x), w * w - x * x - y * y + z * z),
     )
-    return tuple(
+    return cast(Vec3, tuple(
         float(sum(a * b for a, b in zip(row, (vx, vy, vz))) / denominator)
         for row in rows
-    )
-
+    ))
 
 TINY = math.nextafter(0.0, 1.0)
 CASES = (
@@ -60,8 +61,7 @@ CASES = (
     ("unrepresentable-result", (-2, -1, 0, 1), (1.7e308, -1.7e308, -1.7e308)),
 )
 
-
-def compare_one(label: str, function: Callable[..., object], q: Iterable[float],
+def compare_one(label: str, function: Callable[..., Iterable[float]], q: Iterable[float],
                 v: Iterable[float]) -> bool:
     try:
         expected = exact_rotate(q, v)
@@ -103,15 +103,14 @@ def compare_one(label: str, function: Callable[..., object], q: Iterable[float],
     )
     return passed
 
-
 def extra_checks(module: ModuleType) -> bool:
     print("  API checks:")
     passed = 0
     for q, v in (
-        ((0, 0, 0, 0), (1, 0, 0)),
-        ((1, 0, 0), (1, 0, 0)),
-        ((1, 0, 0, 0), (1, 0)),
-        ((float("nan"), 0, 0, 0), (1, 0, 0)),
+            ((0, 0, 0, 0), (1, 0, 0)),
+            ((1, 0, 0), (1, 0, 0)),
+            ((1, 0, 0, 0), (1, 0)),
+            ((float("nan"), 0, 0, 0), (1, 0, 0)),
     ):
         try:
             module.rotate(q, v)
@@ -123,7 +122,6 @@ def extra_checks(module: ModuleType) -> bool:
         else:
             print("   FAIL accepts", q, v)
     return passed == 4
-
 
 def array_checks(module: ModuleType) -> bool:
     import numpy as np
@@ -177,8 +175,7 @@ def array_checks(module: ModuleType) -> bool:
         np.seterr(**old)
     return batch_ok and empty_ok
 
-
-def main(names: Optional[Sequence[str]] = None) -> int:  # noqa: UP045
+def main(names: Sequence[str] | None = None) -> int:  # noqa: UP045
     names = list(names if names is not None else sys.argv[1:])
     names = names or ["homogeneous_scalar", "homogeneous_numpy"]
     all_passed = True
@@ -198,7 +195,6 @@ def main(names: Optional[Sequence[str]] = None) -> int:  # noqa: UP045
             array_passed = array_checks(module)
             all_passed = all_passed and array_passed
     return 0 if all_passed else 1
-
 
 if __name__ == "__main__":
     sys.exit(main())

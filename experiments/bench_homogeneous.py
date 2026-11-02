@@ -16,8 +16,9 @@ import numpy as np
 from experiments import homogeneous_numpy, homogeneous_scalar
 from quatops import scalar as current_scalar
 from quatops.numpy.hamilton import wxyz as current_numpy
+from typing import Mapping
 
-CASES: dict[str, tuple[tuple[float, ...], tuple[float, ...]]] = {
+CASES: Mapping[str, tuple[tuple[float, ...], tuple[float, ...]]] = {
     "ordinary": ((1.0, 2.0, 3.0, 4.0), (1.0, 2.0, 3.0)),
     "zero coefficient": ((5.0, 12.0, 13.0, 0.0), (1e308, 1.0, 1.0)),
     "extreme scales": ((1e-300, 2e-300, 3e-300, 4e-300), (1e308, 1e-308, 0.0)),

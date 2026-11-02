@@ -47,7 +47,7 @@ conversion, vector alignment, and dot products with extreme magnitudes.
 The prioritized feature tests cover algebraic powers and roots, hyperbolic
 functions, interpolation, SO(3) Jacobians, skew matrices, and angular-velocity
 integration across scalar, NamedTuple, dataclass, all NumPy convention and
-coefficient-order modules, and the four component-first NumPy adapters. The
+coefficient-order modules, and the four NumPy adapters with components on axis 0. The
 component-axis tests compare adapter results with the corresponding trailing-
 axis kernels, including broadcast, empty, and ambiguous square shapes.
 
@@ -58,8 +58,8 @@ derivatives against finite differences; sampled integration; MRP and
 swing/twist factorization; weighted Markley and intrinsic means; body/world
 covariance; random-sample second moments; homogeneous transforms; and
 weighted Wahba alignment against SciPy. They exercise all 15 scalar-facing
-modules and all eight trailing/component-first NumPy convention and storage
-layouts. NumPy checks include operations with different component widths,
+modules and all eight NumPy layouts, with the coefficient axis last or at axis 0 across
+both conventions and coefficient orders. NumPy checks include operations with different component widths,
 broadcasted batches, and outputs whose component and matrix axes move.
 
 Seeded Monte Carlo checks compare 21 generic algebra operations across all 15
@@ -117,7 +117,7 @@ and all eight NumPy layouts.
 layout/component-axis and numeric-extreme tests, checks zero and singular
 inputs, half-turn and near-zero rotation limits, invalid shapes, non-finite
 inputs, broadcasting, empty batches, custom matrix-validation tolerances, and
-component-axis outputs. The component-first adapter fix also ensures inverse
+component-axis outputs. The adapter fix for arrays with components on axis 0 also ensures inverse
 analytic functions return their quaternion component axis first.
 Coefficient-order adapters for sampled-rate integration, rotation
 means/covariance, and vector alignment are checked against the same independent

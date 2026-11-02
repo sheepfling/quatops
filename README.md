@@ -1,6 +1,13 @@
 # QuatOps
 
-QuatOps is a small quaternion library with explicit convention and representation modules. Choose a fully specified module; there is no convention flag, automatic dispatch, or required quaternion wrapper. The scalar backends use only the Python standard library. NumPy is optional, and SciPy is used only for development checks.
+QuatOps is a small quaternion library with explicit convention and representation modules. Choose a fully specified module; there is no convention flag, automatic dispatch, or required quaternion wrapper. The tuple-based Python backends use only the standard library. NumPy is optional, and SciPy is used only for development checks.
+
+**Terminology:** a *tuple backend* stores quaternion values as Python tuples;
+NamedTuple, dataclass, and NumPy backends name other value representations.
+The *scalar coefficient* is the real component `w`. `wxyz` (`scalar-first`)
+and `xyzw` (`scalar-last`) describe where that coefficient appears, not the
+value representation. The top-level `quatops.scalar` module is the historical
+Hamilton tuple backend; its quaternion coefficients are stored as `wxyz`.
 
 ## Choose an API
 
@@ -9,21 +16,25 @@ QuatOps is a small quaternion library with explicit convention and representatio
 | Plain Python tuples | `quatops.python.hamilton` | `quatops.python.jpl` |
 | `NamedTuple` | `quatops.types.hamilton_namedtuple` | `quatops.types.jpl_namedtuple` |
 | Frozen dataclass | `quatops.types.hamilton_dataclass` | `quatops.types.jpl_dataclass` |
-| NumPy, scalar-first | `quatops.numpy.hamilton.wxyz` | `quatops.numpy.jpl.wxyz` |
-| NumPy, scalar-last | `quatops.numpy.hamilton.xyzw` | `quatops.numpy.jpl.xyzw` |
+| NumPy, `wxyz` (scalar coefficient first) | `quatops.numpy.hamilton.wxyz` | `quatops.numpy.jpl.wxyz` |
+| NumPy, `xyzw` (scalar coefficient last) | `quatops.numpy.hamilton.xyzw` | `quatops.numpy.jpl.xyzw` |
 
 The convention is part of the module: Hamilton multiplication uses the positive vector cross term; JPL uses the negative one. Both rotate actively and right-handedly. In either convention, `multiply(lhs, rhs)` applies `rhs` first and then `lhs`. The APIs also provide component-wise `add`, `subtract`, `negate`, real `scale`, `inverse`, and right-quotient `divide(lhs, rhs) = multiply(lhs, inverse(rhs))`. NumPy module paths include both convention and component order; importing `quatops.numpy` alone selects no operations.
 
-The NumPy modules above use a trailing component axis, such as `(..., 4)` for
-quaternions. For arrays with components on axis zero, use the matching
-`quatops.numpy.{hamilton,jpl}.components_first.{wxyz,xyzw}` module. The names
-`wxyz` and `xyzw` describe coefficient order; `components_first` describes
-array-axis placement. Equivalent convention-first aliases are available under
-`quatops.{hamilton,jpl}.numpy_{wxyz,xyzw}_components_first`.
+NumPy has two independent layout choices. The `wxyz` and `xyzw` suffixes give
+the order of the four coefficients: whether the real coefficient `w` is first
+or last. Array shape is separate: the usual modules put the four coefficients
+on the last axis, `(..., 4)`, while `components_first` puts that axis at axis 0,
+`(4, ...)`. For example, use
+`quatops.numpy.jpl.components_first.xyzw` for an array shaped `(4, N)` whose
+four entries are ordered `x, y, z, w`. Equivalent convention-first aliases are
+available under `quatops.{hamilton,jpl}.numpy_{wxyz,xyzw}_components_first`.
 
 Each operation module also provides convention-neutral algebraic functions `exp`, `log`, `sin`, `cos`, `tan`, `sinh`, `cosh`, `tanh`, inverse trig and hyperbolic functions, stable `expm1`/`log1p`, logarithms to other bases, real and quaternion-valued powers, plus coefficient `dot` and `norm_squared`. Rotation tools include left/right division, rotation distance and equivalence, sign handling, matrix and two-vector conversions, Euler angles, MRP, SLERP/NLERP/SQUAD, local `boxplus`/`boxminus`, angular-velocity derivatives and sampled integration, Wahba alignment, rotation means and covariance, random attitudes, swing/twist, homogeneous transforms, and SO(3) Jacobians. For physical SO(3) conversion, use `from_rotation_vector` and `to_rotation_vector` (also available as `from_rotvec` and `to_rotvec`).
 
-All scalar, named-field, and NumPy operation modules provide `to_rotation_matrix(q)`, `to_left_matrix(q)`, and `to_right_matrix(q)`. Rotation matrices are active 3×3 transforms; the multiplication matrices act on quaternion coefficients. The separate `to_homogeneous_matrix(q, translation)` creates a 4×4 rigid transform for points and `from_homogeneous_matrix` extracts its rotation. Trailing-axis NumPy modules return `(..., 3, 3)` or `(..., 4, 4)` matrices. Component-first modules accept `(4, ...)` quaternions and return `(3, 3, ...)` or `(4, 4, ...)` matrices.
+All scalar, named-field, and NumPy operation modules provide `to_rotation_matrix(q)`, `to_left_matrix(q)`, and `to_right_matrix(q)`. Rotation matrices are active 3×3 transforms; the multiplication matrices act on quaternion coefficients. The separate `to_homogeneous_matrix(q, translation)` creates a 4×4 rigid transform for points and `from_homogeneous_matrix` extracts its rotation. NumPy modules with the coefficient axis last return `(..., 3, 3)` or
+`(..., 4, 4)` matrices. Modules with coefficients on axis 0 accept `(4, ...)`
+quaternions and return `(3, 3, ...)` or `(4, 4, ...)` matrices.
 
 ## Example
 
@@ -44,7 +55,7 @@ q = xyzw.from_rotvec((0, 0, pi / 2))
 rotated = xyzw.rotate(q, (1, 0, 0))
 ```
 
-For component-first arrays, select the matching explicit module, such as
+For arrays with the coefficient axis at axis 0, select the matching explicit module, such as
 `quatops.numpy.jpl.components_first.xyzw`; it accepts quaternions shaped
 `(4, ...)` and vectors shaped `(3, ...)`.
 

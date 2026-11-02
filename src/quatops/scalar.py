@@ -1,4 +1,4 @@
-"""Quaternion operations on scalar-first ``(w, x, y, z)`` tuples.
+"""Hamilton quaternion operations on Python tuples in ``wxyz`` coefficient order.
 
 All operations return new tuples or floats. Inputs must contain finite real
 numbers. Underflow follows Python float arithmetic; a non-finite result raises
@@ -555,11 +555,11 @@ def rotate(q: Iterable[FloatT], v: Iterable[FloatT]) -> Vector:
     w, x, y, z = parts
     vx, vy, vz = _vector(v)
     w2, x2, y2, z2 = w*w, x*x, y*y, z*z
-    denominator = w2 + x2 + y2 + z2
+    inv_denominator = 1./ (w2 + x2 + y2 + z2)
     # Compute each component independently.  A shared vector scale can erase a
     # small component when another one is near the largest representable float.
     def coefficient(value: FloatLike) -> float:
-        return min(1.0, max(-1.0, value / denominator))
+        return min(1.0, max(-1.0, value * inv_denominator))
 
     m00 = coefficient(w2 + x2 - y2 - z2)
     m01 = coefficient(2*(x*y - w*z))
@@ -727,7 +727,7 @@ def from_axis_angle(a: Iterable[FloatT]) -> Quaternion:
 def to_axis_angle(q: Iterable[FloatT]) -> AxisAngle:
     """Convert a finite nonzero quaternion to canonical axis and radians."""
     axis, angle = _axis_angle_from_q(q)
-    return (*axis, angle)
+    return *axis, angle
 
 
 def from_rotvec(r: Iterable[FloatT]) -> Quaternion:

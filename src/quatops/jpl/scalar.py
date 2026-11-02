@@ -1,4 +1,4 @@
-"""JPL scalar-first-vector quaternions as ``(x, y, z, w)`` tuples.
+"""Tuple-based JPL quaternion operations using ``xyzw`` coefficient order.
 
 The product uses the negative cross term. Rotations are active and right-handed;
 ``multiply(lhs, rhs)`` composes rotations with ``rhs`` applied first. The equivalent
@@ -710,10 +710,12 @@ def commutator(lhs: Iterable[FloatT], rhs: Iterable[FloatT]) -> Quaternion:
 
 
 def scalar_part(q: Iterable[FloatT]) -> float:
+    """Return the real/scalar coefficient of a Hamilton ``wxyz`` value."""
     return _quaternion(q)[3]
 
 
 def vector_part(q: Iterable[FloatT]) -> Vector:
+    """Return the three imaginary coefficients of a Hamilton ``wxyz`` value."""
     return _quaternion(q)[:3]
 
 
