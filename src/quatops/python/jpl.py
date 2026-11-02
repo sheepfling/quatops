@@ -63,6 +63,7 @@ from ..jpl.scalar import (
 
 __all__ = [
     'AxisAngle',
+    'EulerResult',
     'Quaternion',
     'RotVec',
     'Vector',

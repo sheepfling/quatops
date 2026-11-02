@@ -52,6 +52,7 @@ from ..hamilton.namedtuple import (
 
 __all__ = [
     'AxisAngle',
+    'EulerResult',
     'Quaternion',
     'RotVec',
     'add',

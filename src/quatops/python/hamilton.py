@@ -61,6 +61,7 @@ from ..hamilton.scalar import (
 
 __all__ = [
     'AxisAngle',
+    'EulerResult',
     'Quaternion',
     'RotVec',
     'Vector',

@@ -54,6 +54,7 @@ from ..jpl.dataclass import (
 
 __all__ = [
     'AxisAngle',
+    'EulerResult',
     'Quaternion',
     'RotVec',
     'add',

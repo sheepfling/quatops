@@ -54,6 +54,7 @@ from ..jpl.namedtuple import (
 
 __all__ = [
     'AxisAngle',
+    'EulerResult',
     'Quaternion',
     'RotVec',
     'add',
