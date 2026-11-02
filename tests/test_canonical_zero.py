@@ -1,28 +1,24 @@
 """Canonical sign and explicitly bounded subnormal conversion regressions."""
 
+import pytest
 import math
-import unittest
 from dataclasses import FrozenInstanceError
 
 from quatops import dataclass, namedtuple, scalar
 
-try:
-    import numpy as np
+import numpy as np
 
-    from quatops.numpy.hamilton import wxyz as qnumpy
-except ImportError:
-    np = None
-    qnumpy = None
+from quatops.numpy.hamilton import wxyz as qnumpy
 
-BACKENDS = (scalar, namedtuple, dataclass) + ((qnumpy,) if qnumpy is not None else ())
+BACKENDS = (scalar, namedtuple, dataclass, qnumpy)
 
 
-class CanonicalZeroTests(unittest.TestCase):
-    def assertPositiveZeros(self, result):
+class CanonicalZeroTests:
+    def assert_positive_zeros(self, result):
         for value in result:
             number = float(value)
             if number == 0.0:
-                self.assertEqual(math.copysign(1.0, number), 1.0, tuple(result))
+                assert math.copysign(1.0, number) == 1.0, tuple(result)
 
     def test_zero_sign_after_final_conversion_arithmetic(self):
         tiny = math.nextafter(0.0, 1.0)
@@ -38,23 +34,21 @@ class CanonicalZeroTests(unittest.TestCase):
         )
         for backend in BACKENDS:
             for operation, values in cases:
-                with self.subTest(backend=backend.__name__, operation=operation, values=values):
-                    supplied = list(values)
-                    before = supplied.copy()
-                    output = getattr(backend, operation)(supplied)
-                    self.assertPositiveZeros(output)
-                    self.assertEqual(supplied, before)
-                    if backend is scalar:
-                        self.assertIs(type(output), tuple)
-                    elif backend in (namedtuple, dataclass):
-                        expected = (backend.AxisAngle if operation == "to_axis_angle"
-                                    else backend.RotVec if operation == "to_rotvec"
-                                    else backend.Quaternion)
-                        self.assertIs(type(output), expected)
-                        with self.assertRaises((AttributeError, FrozenInstanceError)):
-                            setattr(output, "x" if operation != "to_axis_angle" else "ax", 2)
+                supplied = list(values)
+                before = supplied.copy()
+                output = getattr(backend, operation)(supplied)
+                self.assert_positive_zeros(output)
+                assert supplied == before
+                if backend is scalar:
+                    assert type(output) is tuple
+                elif backend in (namedtuple, dataclass):
+                    expected = (backend.AxisAngle if operation == "to_axis_angle"
+                                else backend.RotVec if operation == "to_rotvec"
+                                else backend.Quaternion)
+                    assert type(output) is expected
+                    with pytest.raises((AttributeError, FrozenInstanceError)):
+                        setattr(output, "x" if operation != "to_axis_angle" else "ax", 2)
 
-    @unittest.skipIf(np is None, "NumPy is not installed")
     def test_numpy_read_only_batch_zero_sign_and_state(self):
         tiny = math.nextafter(0.0, 1.0)
         q = np.array([[1.0, -tiny, 1e308, -0.0], [1e308, -5e-17, 1e307, -0.0]])
@@ -64,9 +58,9 @@ class CanonicalZeroTests(unittest.TestCase):
         try:
             for operation in (qnumpy.to_axis_angle, qnumpy.to_rotvec):
                 result = operation(q)
-                self.assertFalse(np.signbit(result[result == 0.0]).any())
-                self.assertEqual(q.tobytes(), before)
-                self.assertEqual(np.geterr(), dict.fromkeys(("divide", "over", "under", "invalid"), "raise"))
+                assert not np.signbit(result[result == 0.0]).any()
+                assert q.tobytes() == before
+                assert np.geterr() == dict.fromkeys(("divide", "over", "under", "invalid"), "raise")
         finally:
             np.seterr(**old)
 
@@ -77,13 +71,8 @@ class CanonicalZeroTests(unittest.TestCase):
         # check records the known limit without preventing a future fix.
         u = math.nextafter(0.0, 1.0)
         for backend in BACKENDS:
-            with self.subTest(backend=backend.__name__):
-                q = tuple(backend.from_rotvec((5*u, 5*u, 0)))
-                self.assertEqual(q[0], 1.0)
-                self.assertIn(q[1], (2*u, 3*u))
-                self.assertIn(q[2], (2*u, 3*u))
-                self.assertPositiveZeros(q)
-
-
-if __name__ == "__main__":
-    unittest.main()
+            q = tuple(backend.from_rotvec((5*u, 5*u, 0)))
+            assert q[0] == 1.0
+            assert q[1] in (2*u, 3*u)
+            assert q[2] in (2*u, 3*u)
+            self.assert_positive_zeros(q)

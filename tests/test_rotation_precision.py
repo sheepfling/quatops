@@ -1,18 +1,14 @@
 """Mixed-scale rotations checked against exact rational arithmetic."""
 
+import pytest
 import math
-import unittest
 from fractions import Fraction
 
 from quatops import dataclass, namedtuple, scalar
 
-try:
-    import numpy as np
+import numpy as np
 
-    from quatops.numpy.hamilton import wxyz as array
-except ImportError:
-    np = None
-    array = None
+from quatops.numpy.hamilton import wxyz as array
 
 
 def exact_rotate(q, v):
@@ -38,11 +34,10 @@ def backends():
     return modules
 
 
-class RotationPrecisionTests(unittest.TestCase):
-    def assertClose(self, actual, expected, rel_tol=3e-15, abs_tol=0.0):
+class RotationPrecisionTests:
+    def assert_close(self, actual, expected, rel_tol=3e-15, abs_tol=0.0):
         for value, reference in zip(actual, expected):
-            self.assertTrue(math.isclose(value, reference, rel_tol=rel_tol, abs_tol=abs_tol),
-                            (tuple(actual), tuple(expected)))
+            np.testing.assert_allclose(value, reference, rtol=rel_tol, atol=abs_tol)
 
     def test_identity_sign_and_permutation_preserve_mixed_scales(self):
         tiny = math.nextafter(0.0, 1.0)
@@ -51,10 +46,9 @@ class RotationPrecisionTests(unittest.TestCase):
         quaternions = ((1, 0, 0, 0), (0, 1, 0, 0), (1, 0, 0, 1), (1, 1, 1, 1))
         for backend in backends():
             for q in quaternions:
-                with self.subTest(backend=backend.__name__, q=q):
-                    expected = exact_rotate(q, v)
-                    actual = tuple(backend.rotate(q, v))
-                    self.assertEqual(actual, expected)
+                expected = exact_rotate(q, v)
+                actual = tuple(backend.rotate(q, v))
+                assert actual == expected
 
     def test_generic_rotation_matches_exact_rational_reference(self):
         # Positive and negative finite outputs on unrelated magnitude scales.
@@ -65,8 +59,7 @@ class RotationPrecisionTests(unittest.TestCase):
         )
         for backend in backends():
             for q, v in cases:
-                with self.subTest(backend=backend.__name__, q=q):
-                    self.assertClose(backend.rotate(q, v), exact_rotate(q, v))
+                self.assert_close(backend.rotate(q, v), exact_rotate(q, v))
 
     def test_large_cancellation_preserves_small_residual(self):
         # Exact first coordinate is -1e-308 after cancellation of 1e308 terms.
@@ -75,19 +68,17 @@ class RotationPrecisionTests(unittest.TestCase):
         v = (1e308, -1e308, 3e-308)
         expected = exact_rotate(q, v)
         for backend in backends():
-            with self.subTest(backend=backend.__name__):
-                self.assertClose(backend.rotate(q, v), expected)
+            self.assert_close(backend.rotate(q, v), expected)
 
     def test_true_result_overflow_is_reported(self):
         q = (-2, -1, 0, 1)
         v = (1.7e308, -1.7e308, -1.7e308)
-        with self.assertRaises(OverflowError):
+        with pytest.raises(OverflowError):
             exact_rotate(q, v)
         for backend in backends():
-            with self.subTest(backend=backend.__name__), self.assertRaises(OverflowError):
+            with pytest.raises(OverflowError):
                 backend.rotate(q, v)
 
-    @unittest.skipIf(np is None, 'NumPy is not installed')
     def test_numpy_broadcast_readonly_inputs_and_error_setting(self):
         q = np.array([[[1., 0, 0, 0]], [[1, 0, 0, 1]]])
         v = np.array([[[1e308, 1e-308, 0], [-1e-308, 1e308, 1e-300]]])
@@ -98,8 +89,8 @@ class RotationPrecisionTests(unittest.TestCase):
         try:
             before = np.geterr().copy()
             result = array.rotate(q, v)
-            self.assertEqual(np.geterr(), before)
-            self.assertEqual(result.shape, (2, 2, 3))
+            assert np.geterr() == before
+            assert result.shape == (2, 2, 3)
             for i in range(2):
                 for j in range(2):
                     np.testing.assert_array_equal(result[i, j], exact_rotate(q[i, 0], v[0, j]))
@@ -107,7 +98,3 @@ class RotationPrecisionTests(unittest.TestCase):
             np.testing.assert_array_equal(v, v_saved)
         finally:
             np.seterr(**previous)
-
-
-if __name__ == '__main__':
-    unittest.main()

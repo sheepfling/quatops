@@ -4,11 +4,14 @@ Algebra uses a negative cross product and active right-handed rotations.
 Constructors retain input without validation; functions validate finite values.
 """
 
+from __future__ import annotations
+
 from collections.abc import Iterable, Iterator
 from dataclasses import dataclass
 from math import hypot, isfinite
 
 from . import scalar as _s
+from .._typing import FloatLike, FloatT
 
 
 @dataclass(frozen=True)
@@ -53,106 +56,128 @@ class RotVec:
 
 
 
-def _quaternion(q: Iterable[float]) -> Quaternion:
+def _quaternion(q: Iterable[FloatT]) -> Quaternion:
     return Quaternion(*_s._quaternion(q))
 
 
-def _scaled(q: Quaternion) -> tuple[float, Quaternion]:
-    scale = max(abs(value) for value in q)
-    if scale == 0.0:
-        raise ValueError("zero quaternion has no inverse or normalization")
-    return scale, Quaternion(q.x / scale, q.y / scale, q.z / scale, q.w / scale)
-
-
-def from_xyzw(q: Iterable[float]) -> Quaternion:
+def from_xyzw(q: Iterable[FloatT]) -> Quaternion:
     """Validate scalar-last layout without changing convention."""
     return _quaternion(q)
 
 
-def to_xyzw(q: Iterable[float]) -> tuple[float, float, float, float]:
+def to_xyzw(q: Iterable[FloatT]) -> tuple[float, float, float, float]:
     """Return scalar-last components in a plain tuple."""
-    p = _quaternion(q)
-    return p.x, p.y, p.z, p.w
+    return _s._quaternion(q)
 
 
-def from_wxyz(q: Iterable[float]) -> Quaternion:
+def from_wxyz(q: Iterable[FloatT]) -> Quaternion:
     """Reorder scalar-first components to JPL scalar-last layout."""
     w, x, y, z = _s._quaternion(q)
     return Quaternion(x, y, z, w)
 
 
-def to_wxyz(q: Iterable[float]) -> tuple[float, float, float, float]:
+def to_wxyz(q: Iterable[FloatT]) -> tuple[float, float, float, float]:
     """Reorder to scalar-first without changing convention."""
-    p = _quaternion(q)
-    return p.w, p.x, p.y, p.z
+    x, y, z, w = _s._quaternion(q)
+    return w, x, y, z
 
 
-def from_hamilton(q: Iterable[float]) -> Quaternion:
+def from_hamilton(q: Iterable[FloatT]) -> Quaternion:
     """Convert Hamilton wxyz to JPL xyzw without normalization."""
     w, x, y, z = _s._quaternion(q)
     return Quaternion(-x, -y, -z, w)
 
 
-def to_hamilton(q: Iterable[float]) -> tuple[float, float, float, float]:
+def to_hamilton(q: Iterable[FloatT]) -> tuple[float, float, float, float]:
     """Convert JPL xyzw to Hamilton wxyz without normalization."""
-    p = _quaternion(q)
-    return p.w, -p.x, -p.y, -p.z
+    x, y, z, w = _s._quaternion(q)
+    return w, -x, -y, -z
 
 
-def conjugate(q: Iterable[float]) -> Quaternion:
+def conjugate(q: Iterable[FloatT]) -> Quaternion:
     """Return the conjugate, preserving magnitude."""
-    p = _quaternion(q)
-    return Quaternion(-p.x, -p.y, -p.z, p.w)
+    x, y, z, w = _s._quaternion(q)
+    return Quaternion(-x, -y, -z, w)
 
 
-def multiply(q: Iterable[float], r: Iterable[float]) -> Quaternion:
-    """Return the negative-cross JPL product; r acts first."""
-    p, t = _quaternion(q), _quaternion(r)
-    result = Quaternion(
-        p.w*t.x + p.x*t.w - p.y*t.z + p.z*t.y,
-        p.w*t.y + p.y*t.w - p.z*t.x + p.x*t.z,
-        p.w*t.z + p.z*t.w - p.x*t.y + p.y*t.x,
-        p.w*t.w - p.x*t.x - p.y*t.y - p.z*t.z,
+def add(lhs: Iterable[FloatT], rhs: Iterable[FloatT]) -> Quaternion:
+    """Add JPL components and return a dataclass Quaternion."""
+    x, y, z, w = _s._quaternion(lhs)
+    a, b, c, d = _s._quaternion(rhs)
+    return Quaternion(*_s._checked((x + a, y + b, z + c, w + d)))
+
+
+def subtract(lhs: Iterable[FloatT], rhs: Iterable[FloatT]) -> Quaternion:
+    """Subtract JPL components and return a dataclass Quaternion."""
+    x, y, z, w = _s._quaternion(lhs)
+    a, b, c, d = _s._quaternion(rhs)
+    return Quaternion(*_s._checked((x - a, y - b, z - c, w - d)))
+
+
+def negate(q: Iterable[FloatT]) -> Quaternion:
+    """Negate every component and return a dataclass Quaternion."""
+    x, y, z, w = _s._quaternion(q)
+    return Quaternion(-x, -y, -z, -w)
+
+
+def scale(q: Iterable[FloatT], factor: FloatLike) -> Quaternion:
+    """Scale every JPL component by a finite real number."""
+    value = _s._real_scalar(factor, "factor")
+    x, y, z, w = _s._quaternion(q)
+    return Quaternion(*_s._checked((value*x, value*y, value*z, value*w)))
+
+
+def multiply(lhs: Iterable[FloatT], rhs: Iterable[FloatT]) -> Quaternion:
+    """Return the negative-cross JPL product; ``rhs`` acts first."""
+    x, y, z, w = _s._quaternion(lhs)
+    a, b, c, d = _s._quaternion(rhs)
+    values = (
+        w*a + x*d - y*c + z*b,
+        w*b + y*d - z*a + x*c,
+        w*c + z*d - x*b + y*a,
+        w*d - x*a - y*b - z*c,
     )
-    if not all(isfinite(value) for value in result):
-        raise OverflowError("quaternion operation produced a non-finite result")
-    return result
+    return Quaternion(*_s._checked(values))
 
 
-def norm(q: Iterable[float]) -> float:
+def norm(q: Iterable[FloatT]) -> float:
     """Return Euclidean norm."""
-    value = hypot(*_quaternion(q))
+    value = hypot(*_s._quaternion(q))
     if not isfinite(value):
         raise OverflowError("quaternion norm is too large for a float")
     return value
 
 
-def normalize(q: Iterable[float]) -> Quaternion:
+def normalize(q: Iterable[FloatT]) -> Quaternion:
     """Return a unit quaternion, rejecting zero."""
-    _, p = _scaled(_quaternion(q))
+    _, p = _s._scaled(_s._quaternion(q))
     length = hypot(*p)
-    return Quaternion(p.x / length, p.y / length, p.z / length, p.w / length)
+    return Quaternion(*(value / length for value in p))
 
 
-def inverse(q: Iterable[float]) -> Quaternion:
+def inverse(q: Iterable[FloatT]) -> Quaternion:
     """Return the multiplicative inverse, rejecting zero."""
-    scale, p = _scaled(_quaternion(q))
+    scale, p = _s._scaled(_s._quaternion(q))
     den = sum(value * value for value in p)
-    out = Quaternion((-p.x / den) / scale, (-p.y / den) / scale,
-                     (-p.z / den) / scale, (p.w / den) / scale)
-    if not all(isfinite(value) for value in out):
-        raise OverflowError("quaternion operation produced a non-finite result")
-    return out
+    x, y, z, w = p
+    out = ((-x / den) / scale, (-y / den) / scale,
+           (-z / den) / scale, (w / den) / scale)
+    return Quaternion(*_s._checked(out))
 
 
-def rotate(q: Iterable[float], v: Iterable[float]) -> _s.Vector:
+def divide(lhs: Iterable[FloatT], rhs: Iterable[FloatT]) -> Quaternion:
+    """Return the right quotient ``lhs * inverse(rhs)`` in JPL algebra."""
+    return Quaternion(*_s.divide(lhs, rhs))
+
+
+def rotate(q: Iterable[FloatT], v: Iterable[FloatT]) -> _s.Vector:
     """Actively rotate a vector with the JPL quaternion, without normalization."""
-    _, p = _scaled(_quaternion(q))
+    _, p = _s._scaled(_s._quaternion(q))
     vx, vy, vz = _s._vector(v)
-    x, y, z, w = p.x, p.y, p.z, p.w
+    x, y, z, w = p
     w2, x2, y2, z2 = w*w, x*x, y*y, z*z
     den = w2 + x2 + y2 + z2
-    def coefficient(value: float) -> float:
+    def coefficient(value: FloatLike) -> float:
         return min(1.0, max(-1.0, value / den))
     m00 = coefficient(w2 + x2 - y2 - z2)
     m01 = coefficient(2*(x*y + w*z))
@@ -170,19 +195,101 @@ def rotate(q: Iterable[float], v: Iterable[float]) -> _s.Vector:
     return out
 
 
-def from_axis_angle(a: Iterable[float]) -> Quaternion:
+def to_rotation_matrix(q: Iterable[FloatT]) -> tuple[tuple[float, ...], ...]:
+    """Return the active JPL rotation as a norm-aware 3x3 matrix."""
+    return _s.to_rotation_matrix(q)
+
+
+def to_left_matrix(q: Iterable[FloatT]) -> tuple[tuple[float, ...], ...]:
+    """Return the JPL left-product matrix in scalar-last order."""
+    return _s.to_left_matrix(q)
+
+
+def to_right_matrix(q: Iterable[FloatT]) -> tuple[tuple[float, ...], ...]:
+    """Return the JPL right-product matrix in scalar-last order."""
+    return _s.to_right_matrix(q)
+
+
+def sinh(q: Iterable[FloatT]) -> Quaternion:
+    """Return JPL quaternion hyperbolic sine."""
+    return Quaternion(*_s.sinh(q))
+
+
+def cosh(q: Iterable[FloatT]) -> Quaternion:
+    """Return JPL quaternion hyperbolic cosine."""
+    return Quaternion(*_s.cosh(q))
+
+
+def tanh(q: Iterable[FloatT]) -> Quaternion:
+    """Return JPL quaternion hyperbolic tangent."""
+    return Quaternion(*_s.tanh(q))
+
+
+def power(q: Iterable[FloatT], exponent: FloatLike) -> Quaternion:
+    """Raise a JPL quaternion to an integer or principal real power."""
+    return Quaternion(*_s.power(q, exponent))
+
+
+def pow_real(q: Iterable[FloatT], exponent: FloatLike) -> Quaternion:
+    """Raise a JPL quaternion to a principal real power."""
+    return Quaternion(*_s.pow_real(q, exponent))
+
+
+def sqrt(q: Iterable[FloatT]) -> Quaternion:
+    """Return the principal square root of a JPL quaternion."""
+    return Quaternion(*_s.sqrt(q))
+
+
+def slerp(q0: Iterable[FloatT], q1: Iterable[FloatT], t: FloatLike,
+          shortest: bool = True) -> Quaternion:
+    """Interpolate JPL attitudes by shortest-path spherical interpolation."""
+    return Quaternion(*_s.slerp(q0, q1, t, shortest=shortest))
+
+
+def skew_matrix(v: Iterable[FloatT]) -> tuple[tuple[float, ...], ...]:
+    """Return the 3x3 cross-product matrix for a physical vector."""
+    return _s.skew_matrix(v)
+
+
+def so3_left_jacobian(r: Iterable[FloatT]) -> tuple[tuple[float, ...], ...]:
+    """Return the SO(3) left Jacobian."""
+    return _s.so3_left_jacobian(r)
+
+
+def so3_right_jacobian(r: Iterable[FloatT]) -> tuple[tuple[float, ...], ...]:
+    """Return the SO(3) right Jacobian."""
+    return _s.so3_right_jacobian(r)
+
+
+def so3_left_jacobian_inverse(r: Iterable[FloatT]) -> tuple[tuple[float, ...], ...]:
+    """Return the inverse SO(3) left Jacobian."""
+    return _s.so3_left_jacobian_inverse(r)
+
+
+def so3_right_jacobian_inverse(r: Iterable[FloatT]) -> tuple[tuple[float, ...], ...]:
+    """Return the inverse SO(3) right Jacobian."""
+    return _s.so3_right_jacobian_inverse(r)
+
+
+def integrate_angular_velocity(q: Iterable[FloatT], omega: Iterable[FloatT], dt: FloatLike,
+                               frame: str = "body") -> Quaternion:
+    """Integrate JPL attitude using the specified angular-velocity frame."""
+    return Quaternion(*_s.integrate_angular_velocity(q, omega, dt, frame=frame))
+
+
+def from_axis_angle(a: Iterable[FloatT]) -> Quaternion:
     """Normalize a nonzero axis and convert physical radians to JPL."""
     x, y, z, angle = _s._components(a, 4, "axis-angle")
     return Quaternion(*_s._from_unit_axis(_s._axis((x, y, z)), angle))
 
 
-def to_axis_angle(q: Iterable[float]) -> AxisAngle:
+def to_axis_angle(q: Iterable[FloatT]) -> AxisAngle:
     """Return canonical physical axis and principal radians."""
     axis, angle = _s._axis_angle_from_q(q)
     return AxisAngle(*axis, angle)
 
 
-def from_rotvec(r: Iterable[float]) -> Quaternion:
+def from_rotvec(r: Iterable[FloatT]) -> Quaternion:
     """Convert a physical rotation vector in radians to JPL."""
     v = _s._vector(r)
     if max(abs(value) for value in v) == 0:
@@ -193,6 +300,270 @@ def from_rotvec(r: Iterable[float]) -> Quaternion:
     return Quaternion(*_s._from_unit_axis(_s._axis(v), length))
 
 
-def to_rotvec(q: Iterable[float]) -> RotVec:
+def to_rotvec(q: Iterable[FloatT]) -> RotVec:
     """Extract the canonical physical rotation vector in radians."""
     return RotVec(*_s._rotvec_from_q(q))
+
+
+def exp(q: Iterable[FloatT]) -> Quaternion:
+    """Return the algebraic quaternion exponential as a JPL value."""
+    return Quaternion(*_s.exp(q))
+
+
+def log(q: Iterable[FloatT]) -> Quaternion:
+    """Return the principal algebraic quaternion logarithm as a JPL value."""
+    return Quaternion(*_s.log(q))
+
+
+def sin(q: Iterable[FloatT]) -> Quaternion:
+    """Return the algebraic quaternion sine as a JPL value."""
+    return Quaternion(*_s.sin(q))
+
+
+def cos(q: Iterable[FloatT]) -> Quaternion:
+    """Return the algebraic quaternion cosine as a JPL value."""
+    return Quaternion(*_s.cos(q))
+
+
+def from_rotation_vector(r: Iterable[FloatT]) -> Quaternion:
+    """Convert a physical rotation vector in radians to canonical JPL."""
+    return from_rotvec(r)
+
+
+def to_rotation_vector(q: Iterable[FloatT]) -> RotVec:
+    """Extract the canonical physical rotation vector from a JPL value."""
+    return to_rotvec(q)
+
+
+def tan(q: Iterable[FloatT]) -> Quaternion:
+    return Quaternion(*_s.tan(q))
+
+
+def dot(lhs: Iterable[FloatT], rhs: Iterable[FloatT]) -> float:
+    return _s.dot(lhs, rhs)
+
+
+def norm_squared(q: Iterable[FloatT]) -> float:
+    return _s.norm_squared(q)
+
+
+def right_divide(lhs: Iterable[FloatT], rhs: Iterable[FloatT]) -> Quaternion:
+    return Quaternion(*_s.right_divide(lhs, rhs))
+
+
+def left_divide(lhs: Iterable[FloatT], rhs: Iterable[FloatT]) -> Quaternion:
+    return Quaternion(*_s.left_divide(lhs, rhs))
+
+
+def rotation_distance(q0: Iterable[FloatT], q1: Iterable[FloatT]) -> float:
+    return _s.rotation_distance(q0, q1)
+
+
+def rotations_equivalent(q0: Iterable[FloatT], q1: Iterable[FloatT], atol: FloatLike = 1e-12) -> bool:
+    return _s.rotations_equivalent(q0, q1, atol)
+
+
+def canonicalize(q: Iterable[FloatT]) -> Quaternion:
+    return Quaternion(*_s.canonicalize(q))
+
+
+def from_rotation_matrix(matrix: Iterable[Iterable[FloatT]], atol: FloatLike = 1e-8) -> Quaternion:
+    return Quaternion(*_s.from_rotation_matrix(matrix, atol))
+
+
+def from_two_vectors(source: Iterable[FloatT], target: Iterable[FloatT]) -> Quaternion:
+    return Quaternion(*_s.from_two_vectors(source, target))
+
+
+# Extended algebra, attitude, statistics, and conversion _ss.
+def asin(q: Iterable[FloatT]) -> Quaternion:
+    """Return the principal quaternion arcsine."""
+    return Quaternion(*_s.asin(q))
+
+
+def acos(q: Iterable[FloatT]) -> Quaternion:
+    """Return the principal quaternion arccosine."""
+    return Quaternion(*_s.acos(q))
+
+
+def atan(q: Iterable[FloatT]) -> Quaternion:
+    """Return the principal quaternion arctangent."""
+    return Quaternion(*_s.atan(q))
+
+
+def asinh(q: Iterable[FloatT]) -> Quaternion:
+    """Return the principal inverse hyperbolic sine."""
+    return Quaternion(*_s.asinh(q))
+
+
+def acosh(q: Iterable[FloatT]) -> Quaternion:
+    """Return the principal inverse hyperbolic cosine."""
+    return Quaternion(*_s.acosh(q))
+
+
+def atanh(q: Iterable[FloatT]) -> Quaternion:
+    """Return the principal inverse hyperbolic tangent."""
+    return Quaternion(*_s.atanh(q))
+
+
+def expm1(q: Iterable[FloatT]) -> Quaternion:
+    """Return exp(q) - 1 with a stable small-argument path."""
+    return Quaternion(*_s.expm1(q))
+
+
+def log1p(q: Iterable[FloatT]) -> Quaternion:
+    """Return log(1 + q) with a stable small-argument path."""
+    return Quaternion(*_s.log1p(q))
+
+
+def log2(q: Iterable[FloatT]) -> Quaternion:
+    """Return the principal logarithm to base two."""
+    return Quaternion(*_s.log2(q))
+
+
+def log10(q: Iterable[FloatT]) -> Quaternion:
+    """Return the principal logarithm to base ten."""
+    return Quaternion(*_s.log10(q))
+
+
+def power_quaternion(q: Iterable[FloatT], exponent: Iterable[FloatT]) -> Quaternion:
+    """Raise q to a quaternion exponent using exp(exponent * log(q))."""
+    return Quaternion(*_s.power_quaternion(q, exponent))
+
+
+def commutator(lhs: Iterable[FloatT], rhs: Iterable[FloatT]) -> Quaternion:
+    """Return lhs*rhs - rhs*lhs."""
+    return Quaternion(*_s.commutator(lhs, rhs))
+
+
+def scalar_part(q: Iterable[FloatT]) -> float:
+    """Return the scalar coefficient."""
+    return _s.scalar_part(q)
+
+
+def vector_part(q: Iterable[FloatT]) -> RotVec:
+    """Return the three vector coefficients."""
+    return RotVec(*_s.vector_part(q))
+
+
+def quaternion_derivative(q: Iterable[FloatT], omega: Iterable[FloatT],
+                          frame: str = "body") -> Quaternion:
+    """Return dq/dt for angular velocity in radians per second."""
+    return Quaternion(*_s.quaternion_derivative(q, omega, frame))
+
+
+def integrate_angular_velocity_samples(
+    q: Iterable[FloatT], omegas: Iterable[Iterable[FloatT]], times: Iterable[FloatT],
+    frame: str = "body", method: str = "midpoint",
+) -> Quaternion:
+    """Integrate timestamped angular-rate samples to a final attitude."""
+    return Quaternion(*_s.integrate_angular_velocity_samples(q, omegas, times, frame, method))
+
+
+def boxplus(q: Iterable[FloatT], delta: Iterable[FloatT], frame: str = "body") -> Quaternion:
+    """Apply a local radians increment in the body or world frame."""
+    return Quaternion(*_s.boxplus(q, delta, frame))
+
+
+def boxminus(q: Iterable[FloatT], reference: Iterable[FloatT],
+             frame: str = "body") -> RotVec:
+    """Return the local radians increment from reference to q."""
+    return RotVec(*_s.boxminus(q, reference, frame))
+
+
+def nlerp(q0: Iterable[FloatT], q1: Iterable[FloatT], t: FloatLike,
+          shortest: bool = True) -> Quaternion:
+    """Interpolate rotations by normalized linear blending."""
+    return Quaternion(*_s.nlerp(q0, q1, t, shortest))
+
+
+def squad(q0: Iterable[FloatT], q1: Iterable[FloatT], a: Iterable[FloatT],
+          b: Iterable[FloatT], t: FloatLike) -> Quaternion:
+    """Evaluate spherical quadrangle interpolation."""
+    return Quaternion(*_s.squad(q0, q1, a, b, t))
+
+
+def align_sign(q: Iterable[FloatT], reference: Iterable[FloatT]) -> Quaternion:
+    """Choose q's sign to be closest to reference."""
+    return Quaternion(*_s.align_sign(q, reference))
+
+
+def make_sign_continuous(quaternions: Iterable[Iterable[FloatT]]) -> tuple[Quaternion, ...]:
+    """Choose consecutive signs so adjacent coefficient dots are nonnegative."""
+    return tuple(Quaternion(*q) for q in _s.make_sign_continuous(quaternions))
+
+
+def from_euler(angles: Iterable[FloatT], sequence: str = "xyz") -> Quaternion:
+    """Construct a rotation from three radians and a Tait-Bryan sequence."""
+    return Quaternion(*_s.from_euler(angles, sequence))
+
+
+def to_euler(q: Iterable[FloatT], sequence: str = "xyz") -> RotVec:
+    """Extract three principal radians in the requested Tait-Bryan sequence."""
+    return RotVec(*_s.to_euler(q, sequence))
+
+
+def from_mrp(sigma: Iterable[FloatT]) -> Quaternion:
+    """Convert modified Rodrigues parameters to a unit rotation."""
+    return Quaternion(*_s.from_mrp(sigma))
+
+
+def to_mrp(q: Iterable[FloatT]) -> RotVec:
+    """Convert a rotation to principal modified Rodrigues parameters."""
+    return RotVec(*_s.to_mrp(q))
+
+
+def swing_twist(q: Iterable[FloatT], axis: Iterable[FloatT]) -> tuple[Quaternion, Quaternion]:
+    """Return the swing and twist factors with q = swing * twist."""
+    swing, twist = _s.swing_twist(q, axis)
+    return Quaternion(*swing), Quaternion(*twist)
+
+
+def rotation_mean(quaternions: Iterable[Iterable[FloatT]],
+                  weights: Iterable[FloatT] | None = None, method: str = "markley",
+                  tolerance: FloatLike = 1e-12, max_iterations: int = 100) -> Quaternion:
+    """Compute a weighted Markley or intrinsic rotation mean."""
+    return Quaternion(*_s.rotation_mean(quaternions, weights, method, tolerance, max_iterations))
+
+
+def rotation_covariance(quaternions: Iterable[Iterable[FloatT]],
+                        mean: Iterable[FloatT] | None = None,
+                        weights: Iterable[FloatT] | None = None,
+                        frame: str = "body") -> tuple[tuple[float, ...], ...]:
+    """Return weighted population covariance in a local rotation tangent."""
+    return _s.rotation_covariance(quaternions, mean, weights, frame)
+
+
+def align_vectors(source: Iterable[Iterable[FloatT]], target: Iterable[Iterable[FloatT]],
+                  weights: Iterable[FloatT] | None = None) -> Quaternion:
+    """Solve weighted attitude alignment from vector correspondences."""
+    return Quaternion(*_s.align_vectors(source, target, weights))
+
+
+def random_quaternion(rng: object | None = None) -> Quaternion:
+    """Draw a uniform unit quaternion from S3."""
+    return Quaternion(*_s.random_quaternion(rng))
+
+
+def random_rotation(rng: object | None = None) -> Quaternion:
+    """Draw a uniform random SO(3) attitude."""
+    return Quaternion(*_s.random_rotation(rng))
+
+
+def to_homogeneous_matrix(
+    q: Iterable[FloatT], translation: Iterable[FloatT] = (0.0, 0.0, 0.0)
+) -> tuple[tuple[float, ...], ...]:
+    """Return a 4x4 homogeneous rotation and translation matrix."""
+    return _s.to_homogeneous_matrix(q, translation)
+
+
+def from_homogeneous_matrix(
+    matrix: Iterable[Iterable[FloatT]], atol: FloatLike = 1e-8
+) -> Quaternion:
+    """Validate a rigid 4x4 matrix and return its rotation."""
+    return Quaternion(*_s.from_homogeneous_matrix(matrix, atol))
+
+
+def so3_adjoint(q: Iterable[FloatT]) -> tuple[tuple[float, ...], ...]:
+    """Return the SO(3) adjoint matrix."""
+    return _s.so3_adjoint(q)

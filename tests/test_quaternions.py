@@ -1,17 +1,13 @@
 """Behavioral tests shared by the pure-Python and optional array interfaces."""
 
+import pytest
 import math
-import unittest
 
 from quatops import scalar
 
-try:
-    import numpy as np
+import numpy as np
 
-    from quatops.numpy.hamilton import wxyz as qnp
-except ImportError:
-    np = None
-    qnp = None
+from quatops.numpy.hamilton import wxyz as qnp
 
 try:
     from scipy.spatial.transform import Rotation
@@ -19,78 +15,79 @@ except ImportError:
     Rotation = None
 
 
-class ScalarTests(unittest.TestCase):
-    def assertTupleClose(self, actual, expected, **kwargs):
-        self.assertEqual(len(actual), len(expected))
+class ScalarTests:
+    def assert_tuple_close(self, actual, expected, **kwargs):
+        assert len(actual) == len(expected)
         for a, b in zip(actual, expected):
-            self.assertTrue(math.isclose(a, b, **kwargs), (actual, expected))
+            np.testing.assert_allclose(
+                a, b, rtol=kwargs.get("rel_tol", 1e-9),
+                atol=kwargs.get("abs_tol", 0),
+            )
 
     def test_hamilton_basis_and_order(self):
         i, j, k = (0, 1, 0, 0), (0, 0, 1, 0), (0, 0, 0, 1)
         minus_one = (-1, 0, 0, 0)
         for q in (i, j, k):
-            self.assertEqual(scalar.multiply(q, q), minus_one)
-        self.assertEqual(scalar.multiply(i, j), k)
-        self.assertEqual(scalar.multiply(j, i), (0, 0, 0, -1))
-        self.assertEqual(scalar.multiply(scalar.multiply(i, j), k), minus_one)
+            assert scalar.multiply(q, q) == minus_one
+        assert scalar.multiply(i, j) == k
+        assert scalar.multiply(j, i) == (0, 0, 0, -1)
+        assert scalar.multiply(scalar.multiply(i, j), k) == minus_one
 
     def test_layout_and_magnitude_are_explicit(self):
         q = (2, 3, 4, 5)
-        self.assertEqual(scalar.from_xyzw((3, 4, 5, 2)), q)
-        self.assertEqual(scalar.to_xyzw(q), (3, 4, 5, 2))
-        self.assertEqual(scalar.conjugate(q), (2, -3, -4, -5))
-        self.assertEqual(scalar.multiply(q, (1, 0, 0, 0)), q)
-        self.assertAlmostEqual(scalar.norm(q), math.sqrt(54))
-        self.assertAlmostEqual(scalar.norm(scalar.normalize(q)), 1.0)
-        self.assertEqual(q, (2, 3, 4, 5))
+        assert scalar.from_xyzw((3, 4, 5, 2)) == q
+        assert scalar.to_xyzw(q) == (3, 4, 5, 2)
+        assert scalar.conjugate(q) == (2, -3, -4, -5)
+        assert scalar.multiply(q, (1, 0, 0, 0)) == q
+        np.testing.assert_allclose(scalar.norm(q), math.sqrt(54), rtol=0, atol=5e-8)
+        np.testing.assert_allclose(scalar.norm(scalar.normalize(q)), 1.0, rtol=0, atol=5e-8)
+        assert q == (2, 3, 4, 5)
 
     def test_inverse_conjugate_and_rotation(self):
         q = (1, 2, -3, 4)
         r = (2, -1, 3, 2)
-        self.assertTupleClose(scalar.multiply(q, scalar.inverse(q)), (1, 0, 0, 0), abs_tol=1e-15)
-        self.assertTupleClose(scalar.conjugate(scalar.multiply(q, r)),
+        self.assert_tuple_close(scalar.multiply(q, scalar.inverse(q)), (1, 0, 0, 0), abs_tol=1e-15)
+        self.assert_tuple_close(scalar.conjugate(scalar.multiply(q, r)),
                               scalar.multiply(scalar.conjugate(r), scalar.conjugate(q)), abs_tol=1e-15)
         # Non-unit q represents the same active rotation; no normalization of q is required.
         h = math.sqrt(0.5)
         z = (2*h, 0, 0, 2*h)
-        self.assertTupleClose(scalar.rotate(z, (1, 0, 0)), (0, 1, 0), abs_tol=1e-15)
-        self.assertTupleClose(scalar.rotate(tuple(-v for v in z), (1, 0, 0)), (0, 1, 0), abs_tol=1e-15)
+        self.assert_tuple_close(scalar.rotate(z, (1, 0, 0)), (0, 1, 0), abs_tol=1e-15)
+        self.assert_tuple_close(scalar.rotate(tuple(-v for v in z), (1, 0, 0)), (0, 1, 0), abs_tol=1e-15)
         x = (h, h, 0, 0)
-        self.assertTupleClose(scalar.rotate(scalar.multiply(z, x), (0, 1, 0)),
+        self.assert_tuple_close(scalar.rotate(scalar.multiply(z, x), (0, 1, 0)),
                               scalar.rotate(z, scalar.rotate(x, (0, 1, 0))), abs_tol=1e-15)
 
     def test_extreme_norm_and_normalization(self):
         for scale in (1e-300, 1e300):
             q = (scale, -scale, scale, -scale)
-            self.assertTrue(math.isclose(scalar.norm(q), 2*scale, rel_tol=1e-15))
-            self.assertTupleClose(scalar.normalize(q), (0.5, -0.5, 0.5, -0.5), abs_tol=1e-15)
-            self.assertTupleClose(scalar.multiply(q, scalar.inverse(q)), (1, 0, 0, 0), abs_tol=1e-15)
+            np.testing.assert_allclose(scalar.norm(q), 2*scale, rtol=1e-15, atol=0)
+            self.assert_tuple_close(scalar.normalize(q), (0.5, -0.5, 0.5, -0.5), abs_tol=1e-15)
+            self.assert_tuple_close(scalar.multiply(q, scalar.inverse(q)), (1, 0, 0, 0), abs_tol=1e-15)
 
     def test_invalid_input_and_zero_norm(self):
         for fn in (scalar.from_xyzw, scalar.to_xyzw, scalar.conjugate, scalar.norm,
                    scalar.normalize, scalar.inverse):
-            with self.subTest(fn=fn.__name__):
-                for bad in ((1, 2, 3), (1, 2, 3, 4, 5), (1, 2, float('nan'), 4),
-                            (1, 2, float('inf'), 4), (1, 2, '3', 4)):
-                    with self.assertRaises(ValueError):
-                        fn(bad)
+            for bad in ((1, 2, 3), (1, 2, 3, 4, 5), (1, 2, float('nan'), 4),
+                        (1, 2, float('inf'), 4), (1, 2, '3', 4)):
+                with pytest.raises(ValueError):
+                    fn(bad)
         for fn in (scalar.normalize, scalar.inverse):
-            with self.assertRaises(ValueError):
+            with pytest.raises(ValueError):
                 fn((0, 0, 0, 0))
-        with self.assertRaises(ValueError):
+        with pytest.raises(ValueError):
             scalar.rotate((0, 0, 0, 0), (1, 2, 3))
-        with self.assertRaises(ValueError):
+        with pytest.raises(ValueError):
             scalar.rotate((1, 0, 0, 0), (1, 2))
-        with self.assertRaises(ValueError):
+        with pytest.raises(ValueError):
             scalar.multiply((1, 0, 0, 0), (1, 0, 0))
 
     def test_overflow_raises(self):
-        with self.assertRaises(OverflowError):
+        with pytest.raises(OverflowError):
             scalar.multiply((1e308, 0, 0, 0), (1e308, 0, 0, 0))
 
 
-@unittest.skipIf(np is None, 'NumPy is not installed')
-class ArrayTests(unittest.TestCase):
+class ArrayTests:
     def test_broadcast_and_scalar_parity(self):
         qs = np.array([[[1, 2, 3, 4]], [[2, -1, 2, -3]]])
         rs = np.array([[[1, 0, 0, 0], [0, 1, 0, 0], [2, 3, -1, 1]]])
@@ -98,9 +95,9 @@ class ArrayTests(unittest.TestCase):
         saved = (qs.copy(), rs.copy(), vectors.copy())
         result = qnp.multiply(qs, rs)
         rotated = qnp.rotate(qs, vectors)
-        self.assertEqual(result.shape, (2, 3, 4))
-        self.assertEqual(rotated.shape, (2, 3, 3))
-        self.assertEqual(result.dtype, np.float64)
+        assert result.shape == (2, 3, 4)
+        assert rotated.shape == (2, 3, 3)
+        assert result.dtype == np.float64
         for i in range(2):
             for j in range(3):
                 np.testing.assert_allclose(result[i, j], scalar.multiply(qs[i, 0], rs[0, j]), atol=1e-14)
@@ -111,8 +108,7 @@ class ArrayTests(unittest.TestCase):
     def test_all_functions_match_scalar(self):
         q = (2, 3, -4, 5)
         for name in ('from_xyzw', 'to_xyzw', 'conjugate', 'norm', 'normalize', 'inverse'):
-            with self.subTest(name=name):
-                np.testing.assert_allclose(getattr(qnp, name)(q), getattr(scalar, name)(q), rtol=1e-14)
+            np.testing.assert_allclose(getattr(qnp, name)(q), getattr(scalar, name)(q), rtol=1e-14)
         np.testing.assert_allclose(qnp.multiply(q, q), scalar.multiply(q, q))
         np.testing.assert_allclose(qnp.rotate(q, (1, 2, 3)), scalar.rotate(q, (1, 2, 3)))
 
@@ -123,42 +119,41 @@ class ArrayTests(unittest.TestCase):
         np.testing.assert_allclose(qnp.normalize(q), [[.5, -.5, .5, -.5]]*2)
         np.testing.assert_allclose(qnp.multiply(q, qnp.inverse(q)), [[1, 0, 0, 0]]*2, atol=1e-15)
         empty = np.empty((0, 4))
-        self.assertEqual(qnp.normalize(empty).shape, (0, 4))
-        self.assertEqual(qnp.norm(empty).shape, (0,))
-        self.assertEqual(qnp.rotate(empty, np.empty((0, 3))).shape, (0, 3))
+        assert qnp.normalize(empty).shape == (0, 4)
+        assert qnp.norm(empty).shape == (0,)
+        assert qnp.rotate(empty, np.empty((0, 3))).shape == (0, 3)
 
     def test_invalid_shapes_nonfinite_and_zero_batch(self):
         for fn in (qnp.from_xyzw, qnp.to_xyzw, qnp.conjugate, qnp.norm, qnp.normalize, qnp.inverse):
-            with self.subTest(fn=fn.__name__):
-                for bad in ([1, 2, 3], [[1, 2, 3, 4, 5]], [1, 2, float('nan'), 4],
-                            [1, 2, float('inf'), 4], [1, 2, '3', 4]):
-                    with self.assertRaises(ValueError):
-                        fn(bad)
+            for bad in ([1, 2, 3], [[1, 2, 3, 4, 5]], [1, 2, float('nan'), 4],
+                        [1, 2, float('inf'), 4], [1, 2, '3', 4]):
+                with pytest.raises(ValueError):
+                    fn(bad)
         batch = [[1, 0, 0, 0], [0, 0, 0, 0]]
         for fn in (qnp.normalize, qnp.inverse):
-            with self.assertRaises(ValueError):
+            with pytest.raises(ValueError):
                 fn(batch)
-        with self.assertRaises(ValueError):
+        with pytest.raises(ValueError):
             qnp.rotate(batch, [1, 0, 0])
-        with self.assertRaises(ValueError):
+        with pytest.raises(ValueError):
             qnp.rotate([1, 0, 0, 0], [1, 2])
-        with self.assertRaises(ValueError):
+        with pytest.raises(ValueError):
             qnp.multiply(np.ones((2, 4)), np.ones((3, 4)))
-        with self.assertRaises(ValueError):
+        with pytest.raises(ValueError):
             qnp.rotate(np.ones((2, 4)), np.ones((3, 3)))
 
     def test_numpy_error_settings_do_not_change_policy(self):
         old = np.seterr(all='raise')
         try:
-            with self.assertRaises(OverflowError):
+            with pytest.raises(OverflowError):
                 qnp.multiply([1e308, 0, 0, 0], [1e308, 0, 0, 0])
-            with self.assertRaises(ValueError):
+            with pytest.raises(ValueError):
                 qnp.normalize([0, 0, 0, 0])
             np.testing.assert_allclose(qnp.normalize([1e-300]*4), [.5]*4)
         finally:
             np.seterr(**old)
 
-    @unittest.skipIf(Rotation is None, 'SciPy is not installed')
+    @pytest.mark.skipif(Rotation is None, reason='SciPy is not installed')
     def test_rotation_against_scipy(self):
         rng = np.random.default_rng(106)
         qs = rng.normal(size=(25, 4)) * rng.uniform(.1, 10, size=(25, 1))
@@ -191,7 +186,3 @@ class ArrayTests(unittest.TestCase):
             np.testing.assert_allclose(scalar.normalize(scalar.multiply(q, r)), product,
                                        rtol=1e-13, atol=1e-13)
             np.testing.assert_allclose(scalar.rotate(q, v), rotated, rtol=1e-13, atol=1e-13)
-
-
-if __name__ == '__main__':
-    unittest.main()

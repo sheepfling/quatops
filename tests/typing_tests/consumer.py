@@ -1,4 +1,4 @@
-"""Installed-wheel typing smoke test; checked by mypy, Pyright, and ty."""
+"""Installed-wheel typing_tests smoke test; checked by mypy, Pyright, and ty."""
 
 from typing import assert_type
 
@@ -6,9 +6,14 @@ from quatops import dataclass, namedtuple, scalar
 
 q = (1.0, 0.0, 0.0, 0.0)
 assert_type(scalar.norm(q), float)
+assert_type(scalar.add(q, q), tuple[float, float, float, float])
+assert_type(scalar.subtract(q, q), tuple[float, float, float, float])
+assert_type(scalar.negate(q), tuple[float, float, float, float])
+assert_type(scalar.scale(q, 2), tuple[float, float, float, float])
+assert_type(scalar.divide(lhs=q, rhs=q), tuple[float, float, float, float])
 assert_type(scalar.rotate(q, (1.0, 0.0, 0.0)), tuple[float, float, float])
-assert_type(namedtuple.inverse(namedtuple.Quaternion(*q)), namedtuple.Quaternion)
-assert_type(dataclass.conjugate(dataclass.Quaternion(*q)), dataclass.Quaternion)
+assert_type(namedtuple.inverse(namedtuple.from_wxyz(q)), namedtuple.Quaternion)
+assert_type(dataclass.conjugate(dataclass.from_wxyz(q)), dataclass.Quaternion)
 assert_type(scalar.to_axis_angle(q), tuple[float, float, float, float])
 assert_type(scalar.to_rotvec(q), tuple[float, float, float])
 assert_type(namedtuple.to_axis_angle(q), namedtuple.AxisAngle)
@@ -36,7 +41,8 @@ from quatops import types as quat_types
 from quatops.python import hamilton as python_hamilton
 from quatops.python import jpl as python_jpl
 
-assert_type(python_hamilton.multiply(q, q), tuple[float, float, float, float])
+assert_type(python_hamilton.multiply(lhs=q, rhs=q), tuple[float, float, float, float])
+assert_type(python_jpl.divide(q, q), tuple[float, float, float, float])
 assert_type(python_hamilton.to_rotvec(q), tuple[float, float, float])
 assert_type(python_jpl.from_hamilton(q), tuple[float, float, float, float])
 assert_type(quat_types.HamiltonQuaternion(*q), h_dataclass.Quaternion)

@@ -3,7 +3,6 @@
 import importlib
 import subprocess
 import sys
-import unittest
 
 COMMON = (
     "from_xyzw",
@@ -11,7 +10,12 @@ COMMON = (
     "from_wxyz",
     "to_wxyz",
     "conjugate",
+    "add",
+    "subtract",
+    "negate",
+    "scale",
     "multiply",
+    "divide",
     "norm",
     "normalize",
     "inverse",
@@ -20,42 +24,51 @@ COMMON = (
     "to_axis_angle",
     "from_rotvec",
     "to_rotvec",
+    "from_rotation_vector",
+    "to_rotation_vector",
+    "exp",
+    "log",
+    "sin",
+    "cos",
+    "to_rotation_matrix",
+    "to_left_matrix",
+    "to_right_matrix",
+    "sinh",
+    "cosh",
+    "tanh",
+    "power",
+    "pow_real",
+    "sqrt",
+    "slerp",
+    "skew_matrix",
+    "so3_left_jacobian",
+    "so3_right_jacobian",
+    "so3_left_jacobian_inverse",
+    "so3_right_jacobian_inverse",
+    "integrate_angular_velocity",
 )
 JPL_EXTRA = ("from_hamilton", "to_hamilton")
 
-try:
-    import numpy as np
-except ImportError:
-    np = None
-
-
-class BackendFirstTests(unittest.TestCase):
-    def assertDirectExports(self, alias_name, target_name, operations):
+class BackendFirstTests:
+    def assert_direct_exports(self, alias_name, target_name, operations):
         alias = importlib.import_module(alias_name)
         target = importlib.import_module(target_name)
         for name in operations:
-            with self.subTest(alias=alias_name, operation=name):
-                self.assertIs(getattr(alias, name), getattr(target, name))
+            assert getattr(alias, name) is getattr(target, name)
 
     def test_python_aliases_are_the_native_scalar_functions(self):
-        self.assertDirectExports(
+        self.assert_direct_exports(
             "quatops.python.hamilton", "quatops.hamilton.scalar", COMMON
         )
-        self.assertDirectExports(
+        self.assert_direct_exports(
             "quatops.python.jpl", "quatops.jpl.scalar", COMMON + JPL_EXTRA
         )
 
     def test_types_explicitly_select_convention_and_representation(self):
         types = importlib.import_module("quatops.types")
-        self.assertFalse(hasattr(types, "Quaternion"))
-        self.assertIs(
-            types.HamiltonQuaternion,
-            importlib.import_module("quatops.hamilton.dataclass").Quaternion,
-        )
-        self.assertIs(
-            types.JPLQuaternion,
-            importlib.import_module("quatops.jpl.dataclass").Quaternion,
-        )
+        assert not hasattr(types, "Quaternion")
+        assert types.HamiltonQuaternion is importlib.import_module("quatops.hamilton.dataclass").Quaternion
+        assert types.JPLQuaternion is importlib.import_module("quatops.jpl.dataclass").Quaternion
         for convention in ("hamilton", "jpl"):
             for representation in ("namedtuple", "dataclass"):
                 alias = importlib.import_module(
@@ -65,10 +78,7 @@ class BackendFirstTests(unittest.TestCase):
                     f"quatops.{convention}.{representation}"
                 )
                 for name in ("Quaternion", "AxisAngle", "RotVec"):
-                    with self.subTest(
-                        convention=convention, representation=representation, name=name
-                    ):
-                        self.assertIs(getattr(alias, name), getattr(target, name))
+                    assert getattr(alias, name) is getattr(target, name)
 
     def test_scalar_backend_first_imports_do_not_load_numpy_or_plainquat(self):
         script = """\
@@ -86,21 +96,16 @@ assert not any(name == 'plainquat' or name.startswith('plainquat.') for name in 
         result = subprocess.run(
             [sys.executable, "-c", script], capture_output=True, text=True, check=False
         )
-        self.assertEqual(result.returncode, 0, result.stderr)
+        assert result.returncode == 0, result.stderr
 
-    @unittest.skipIf(np is None, "NumPy is not installed")
     def test_numpy_aliases_are_the_four_native_kernels(self):
         numpy_namespace = importlib.import_module("quatops.numpy")
-        self.assertFalse(hasattr(numpy_namespace, "multiply"))
+        assert not hasattr(numpy_namespace, "multiply")
         for convention in ("hamilton", "jpl"):
             for order in ("wxyz", "xyzw"):
                 operations = COMMON + (JPL_EXTRA if convention == "jpl" else ())
-                self.assertDirectExports(
+                self.assert_direct_exports(
                     f"quatops.numpy.{convention}.{order}",
                     f"quatops.{convention}.numpy_{order}",
                     operations,
                 )
-
-
-if __name__ == "__main__":
-    unittest.main()

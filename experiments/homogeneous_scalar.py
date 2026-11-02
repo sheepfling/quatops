@@ -14,13 +14,14 @@ representable. No compensated product algorithm here prevents underflow.
 """
 
 import math
+from collections.abc import Iterable
 
 from quatops import scalar
 
 _SPLITTER = 134217729.0  # 2**27 + 1 for binary64 Dekker splitting
 
 
-def _two_product(a, b):
+def _two_product(a: float, b: float) -> tuple[float, float]:
     """Return product and residual when no intermediate underflow occurs."""
     high = a * b
     a_temp, b_temp = _SPLITTER * a, _SPLITTER * b
@@ -30,7 +31,7 @@ def _two_product(a, b):
     return high, low
 
 
-def _sum_products(*terms):
+def _sum_products(*terms: tuple[int, float, float]) -> float:
     parts = []
     for sign, a, b in terms:
         high, low = _two_product(a, b)
@@ -38,7 +39,8 @@ def _sum_products(*terms):
     return math.fsum(parts)
 
 
-def _dot(a, b, c, x, y, z):
+def _dot(a: float, b: float, c: float, x: float, y: float,
+         z: float) -> float:
     terms = sorted((a * x, b * y, c * z), key=abs, reverse=True)
     if (terms[0] > 0 and terms[1] > 0 and terms[2] < 0) or (
         terms[0] < 0 and terms[1] < 0 and terms[2] > 0
@@ -47,7 +49,7 @@ def _dot(a, b, c, x, y, z):
     return math.fsum(terms)
 
 
-def rotate(q, v):
+def rotate(q: Iterable[float], v: Iterable[float]) -> tuple[float, float, float]:
     """Rotate a vector, using compensated quadratic numerator coefficients.
 
     Experimental: scaling and individual products can underflow, and matrix
@@ -82,3 +84,16 @@ def rotate(q, v):
     )
     result = tuple(_dot(*row, x_v, y_v, z_v) / denom for row in rows)
     return scalar._checked(result)
+
+
+def main() -> None:
+    """Print a small example when this prototype module is run directly."""
+    q = (1.0, 2.0, 3.0, 4.0)
+    vector = (1.0, -2.0, 3.0)
+    print("Experimental scalar rotation prototype")
+    print("q:", q, "v:", vector)
+    print("rotated:", rotate(q, vector))
+
+
+if __name__ == "__main__":
+    main()

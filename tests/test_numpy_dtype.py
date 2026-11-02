@@ -1,56 +1,48 @@
 """NumPy dtype conversion and floating-error policy are part of the API."""
 
-import unittest
+import pytest
 from decimal import Decimal
 from fractions import Fraction
 
-try:
-    import numpy as np
+import numpy as np
 
-    from quatops.numpy.hamilton import wxyz as qnp
-except ImportError:
-    np = None
-    qnp = None
+from quatops.numpy.hamilton import wxyz as qnp
 
 
-@unittest.skipIf(np is None, 'NumPy is not installed')
-class NumPyDtypeTests(unittest.TestCase):
+class NumPyDtypeTests:
     def test_supported_native_dtypes_promote_to_float64(self):
         for dtype in (np.bool_, np.int8, np.uint64, np.float16, np.float32, np.float64):
-            with self.subTest(dtype=dtype):
-                values = np.array([1, 0, 0, 0], dtype=dtype)
-                self.assertEqual(qnp.from_xyzw(values).dtype, np.dtype('float64'))
-                self.assertEqual(qnp.to_xyzw(values).dtype, np.dtype('float64'))
-                self.assertEqual(qnp.conjugate(values).dtype, np.dtype('float64'))
-                self.assertEqual(qnp.multiply(values, values).dtype, np.dtype('float64'))
-                self.assertEqual(np.asarray(qnp.norm(values)).dtype, np.dtype('float64'))
-                self.assertEqual(qnp.normalize(values).dtype, np.dtype('float64'))
-                self.assertEqual(qnp.inverse(values).dtype, np.dtype('float64'))
-                self.assertEqual(qnp.rotate(values, [1, 0, 0]).dtype, np.dtype('float64'))
+            values = np.array([1, 0, 0, 0], dtype=dtype)
+            assert qnp.from_xyzw(values).dtype == np.dtype('float64')
+            assert qnp.to_xyzw(values).dtype == np.dtype('float64')
+            assert qnp.conjugate(values).dtype == np.dtype('float64')
+            assert qnp.multiply(values, values).dtype == np.dtype('float64')
+            assert np.asarray(qnp.norm(values)).dtype == np.dtype('float64')
+            assert qnp.normalize(values).dtype == np.dtype('float64')
+            assert qnp.inverse(values).dtype == np.dtype('float64')
+            assert qnp.rotate(values, [1, 0, 0]).dtype == np.dtype('float64')
         # Float64 conversion is not exact for every integer.
-        self.assertEqual(qnp.conjugate(np.array([2**53 + 1, 0, 0, 0], dtype=np.uint64))[0], float(2**53))
+        assert qnp.conjugate(np.array([2**53 + 1, 0, 0, 0], dtype=np.uint64))[0] == float(2**53)
 
     def test_norm_returns_numpy_scalar_for_single_quaternion(self):
         previous = np.seterr(all='raise')
         try:
             for values, expected in (([3, 4, 0, 0], 5.0), ([0, 0, 0, 0], 0.0),
                                      ([5e-324] * 4, 1e-323)):
-                with self.subTest(values=values):
-                    result = qnp.norm(values)
-                    self.assertIs(type(result), np.float64)
-                    self.assertEqual(result, expected)
+                result = qnp.norm(values)
+                assert type(result) is np.float64
+                assert result == expected
             for shape in ((1, 4), (2, 3, 4), (0, 4), (2, 0, 4)):
-                with self.subTest(shape=shape):
-                    result = qnp.norm(np.ones(shape))
-                    self.assertIsInstance(result, np.ndarray)
-                    self.assertEqual(result.shape, shape[:-1])
-                    self.assertEqual(result.dtype, np.dtype('float64'))
-            with self.assertRaises(ValueError):
+                result = qnp.norm(np.ones(shape))
+                assert isinstance(result, np.ndarray)
+                assert result.shape == shape[:-1]
+                assert result.dtype == np.dtype('float64')
+            with pytest.raises(ValueError):
                 qnp.norm(np.array(1.0))
-            with self.assertRaises(OverflowError):
+            with pytest.raises(OverflowError):
                 qnp.norm([1e308] * 4)
-            self.assertEqual(np.geterr(), {'divide': 'raise', 'over': 'raise',
-                                         'under': 'raise', 'invalid': 'raise'})
+            assert np.geterr() == {'divide': 'raise', 'over': 'raise',
+                                         'under': 'raise', 'invalid': 'raise'}
         finally:
             np.seterr(**previous)
 
@@ -65,13 +57,13 @@ class NumPyDtypeTests(unittest.TestCase):
         ):
             for operation in (qnp.from_xyzw, qnp.to_xyzw, qnp.conjugate,
                               qnp.norm, qnp.normalize, qnp.inverse):
-                with self.subTest(dtype=bad.dtype, operation=operation.__name__), self.assertRaises(ValueError):
+                with pytest.raises(ValueError):
                     operation(bad)
-            with self.assertRaises(ValueError):
+            with pytest.raises(ValueError):
                 qnp.multiply(bad, [1, 0, 0, 0])
-            with self.assertRaises(ValueError):
+            with pytest.raises(ValueError):
                 qnp.rotate(bad, [1, 0, 0])
-        with self.assertRaises(ValueError):
+        with pytest.raises(ValueError):
             qnp.rotate([1, 0, 0, 0], np.array([1, 0, 0], dtype=complex))
 
     def test_numpy_seterr_does_not_override_policy(self):
@@ -79,14 +71,14 @@ class NumPyDtypeTests(unittest.TestCase):
         try:
             np.testing.assert_allclose(qnp.normalize([1e-300] * 4), [.5] * 4)
             np.testing.assert_allclose(qnp.inverse([1e-300, 0, 0, 0]), [1e300, 0, 0, 0])
-            with self.assertRaises(OverflowError):
+            with pytest.raises(OverflowError):
                 qnp.norm([1e308] * 4)
-            with self.assertRaises(OverflowError):
+            with pytest.raises(OverflowError):
                 qnp.multiply([1e308, 0, 0, 0], [1e308, 0, 0, 0])
-            with self.assertRaises(ValueError):
+            with pytest.raises(ValueError):
                 qnp.normalize([0, 0, 0, 0])
-            self.assertEqual(np.geterr(), {'divide': 'raise', 'over': 'raise',
-                                         'under': 'raise', 'invalid': 'raise'})
+            assert np.geterr() == {'divide': 'raise', 'over': 'raise',
+                                         'under': 'raise', 'invalid': 'raise'}
         finally:
             np.seterr(**previous)
 
@@ -103,29 +95,20 @@ class NumPyDtypeTests(unittest.TestCase):
             (qnp.inverse, (q,)), (qnp.rotate, (q, v)),
         )
         for operation, args in operations:
-            with self.subTest(operation=operation.__name__):
-                operation(*args)
-                np.testing.assert_array_equal(q, q_before)
-                np.testing.assert_array_equal(v, v_before)
+            operation(*args)
+            np.testing.assert_array_equal(q, q_before)
+            np.testing.assert_array_equal(v, v_before)
 
     def test_empty_leading_dimensions_broadcast(self):
-        self.assertEqual(qnp.multiply(np.ones((0, 1, 4)), np.ones((1, 3, 4))).shape,
-                         (0, 3, 4))
-        self.assertEqual(qnp.rotate(np.ones((0, 1, 4)), np.ones((1, 3, 3))).shape,
-                         (0, 3, 3))
-        self.assertEqual(qnp.multiply(np.ones((2, 0, 4)), np.ones((1, 0, 4))).shape,
-                         (2, 0, 4))
-        self.assertEqual(qnp.rotate(np.ones((2, 0, 4)), np.ones((1, 0, 3))).shape,
-                         (2, 0, 3))
+        assert qnp.multiply(np.ones((0, 1, 4)), np.ones((1, 3, 4))).shape == (0, 3, 4)
+        assert qnp.rotate(np.ones((0, 1, 4)), np.ones((1, 3, 3))).shape == (0, 3, 3)
+        assert qnp.multiply(np.ones((2, 0, 4)), np.ones((1, 0, 4))).shape == (2, 0, 4)
+        assert qnp.rotate(np.ones((2, 0, 4)), np.ones((1, 0, 3))).shape == (2, 0, 3)
 
     def test_finite_out_of_range_extended_float_is_rejected_on_conversion(self):
         if np.finfo(np.longdouble).max <= np.finfo(np.float64).max:
-            self.skipTest('longdouble has no larger range than float64')
+            pytest.skip('longdouble has no larger range than float64')
         values = np.array([np.longdouble('1e400'), 0, 0, 0], dtype=np.longdouble)
-        self.assertTrue(np.isfinite(values).all())
-        with self.assertRaises(ValueError):
+        assert np.isfinite(values).all()
+        with pytest.raises(ValueError):
             qnp.norm(values)
-
-
-if __name__ == '__main__':
-    unittest.main()

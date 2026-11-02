@@ -6,19 +6,22 @@ not a correctly rounded implementation and does not replace quatops.numpy.hamilt
 """
 
 import numpy as np
+from numpy.typing import NDArray
 
 from quatops._numpy import _components, _result, _sum_three
 
 _SPLIT = 134217729.0  # 2**27 + 1 for Dekker splitting of binary64 values.
 
 
-def _two_sum(a, b):
+def _two_sum(a: NDArray[np.float64],
+             b: NDArray[np.float64]) -> tuple[NDArray[np.float64], NDArray[np.float64]]:
     total = a + b
     tail = total - a
     return total, (a - (total - tail)) + (b - tail)
 
 
-def _two_product(a, b):
+def _two_product(a: NDArray[np.float64],
+                 b: NDArray[np.float64]) -> tuple[NDArray[np.float64], NDArray[np.float64]]:
     # Quaternion inputs have magnitude at most 0.5, so splitting does not
     # overflow. The residual is not exact for underflowed products.
     product = a * b
@@ -32,7 +35,7 @@ def _two_product(a, b):
     return product, error
 
 
-def _sum_expansion(terms):
+def _sum_expansion(terms: list[NDArray[np.float64]]) -> NDArray[np.float64]:
     # Summing high terms plus product and addition residuals, sufficient for
     # the examples but not a general exact floating expansion.
     total = np.zeros_like(terms[0])
@@ -43,7 +46,9 @@ def _sum_expansion(terms):
     return total + error
 
 
-def _coefficient(pairs):
+def _coefficient(
+    pairs: tuple[tuple[NDArray[np.float64], NDArray[np.float64], int], ...],
+) -> NDArray[np.float64]:
     highs = []
     lows = []
     for a, b, sign in pairs:
@@ -53,7 +58,7 @@ def _coefficient(pairs):
     return _sum_expansion(highs + lows)
 
 
-def rotate(q, v):
+def rotate(q: object, v: object) -> NDArray[np.float64]:
     """Compute q*(0,v)*q^-1, vectorized, as a precision experiment."""
     q = _components(q, 4, "quaternion")
     v = _components(v, 3, "vector")
@@ -89,3 +94,15 @@ def rotate(q, v):
             axis=-1,
         )
         return _result(numer / norm2[..., None])
+
+
+def main() -> None:
+    """Print a small batched example when run as a script."""
+    q = np.array(((1.0, 2.0, 3.0, 4.0), (5.0, 12.0, 13.0, 0.0)))
+    vectors = np.array(((1.0, -2.0, 3.0), (1e308, 1.0, 1.0)))
+    print("Experimental NumPy rotation prototype")
+    print("rotated:", rotate(q, vectors))
+
+
+if __name__ == "__main__":
+    main()

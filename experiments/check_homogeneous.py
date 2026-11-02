@@ -5,13 +5,18 @@ unavailable backend produces a nonzero exit status.
 Fraction is used only in this test oracle, never as a runtime kernel.
 """
 
+from __future__ import annotations
+
 import importlib
 import math
 import sys
+from collections.abc import Iterable, Sequence
 from fractions import Fraction
+from types import ModuleType
+from typing import Callable, Optional
 
 
-def exact_rotate(q, v):
+def exact_rotate(q: Iterable[float], v: Iterable[float]) -> tuple[float, float, float]:
     w, x, y, z = (Fraction.from_float(float(t)) for t in q)
     vx, vy, vz = (Fraction.from_float(float(t)) for t in v)
     denominator = w * w + x * x + y * y + z * z
@@ -56,7 +61,8 @@ CASES = (
 )
 
 
-def compare_one(label, function, q, v):
+def compare_one(label: str, function: Callable[..., object], q: Iterable[float],
+                v: Iterable[float]) -> bool:
     try:
         expected = exact_rotate(q, v)
     except OverflowError:
@@ -98,7 +104,7 @@ def compare_one(label, function, q, v):
     return passed
 
 
-def extra_checks(module):
+def extra_checks(module: ModuleType) -> bool:
     print("  API checks:")
     passed = 0
     for q, v in (
@@ -119,7 +125,7 @@ def extra_checks(module):
     return passed == 4
 
 
-def array_checks(module):
+def array_checks(module: ModuleType) -> bool:
     import numpy as np
 
     q = np.array([[[1.0, 0.0, 0.0, 0.0]], [[1.0, 0.0, 0.0, 1.0]]])
@@ -172,8 +178,9 @@ def array_checks(module):
     return batch_ok and empty_ok
 
 
-def main():
-    names = sys.argv[1:] or ["homogeneous_scalar", "homogeneous_numpy"]
+def main(names: Optional[Sequence[str]] = None) -> int:  # noqa: UP045
+    names = list(names if names is not None else sys.argv[1:])
+    names = names or ["homogeneous_scalar", "homogeneous_numpy"]
     all_passed = True
     for name in names:
         try:

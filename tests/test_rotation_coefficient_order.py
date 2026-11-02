@@ -1,22 +1,15 @@
 """Regress a scalar/NumPy difference in diagonal rotation coefficients."""
 
-import math
-import unittest
 from fractions import Fraction
 
 from quatops import scalar
 
-try:
-    import numpy as np
+import numpy as np
 
-    from quatops.numpy.hamilton import wxyz as qnp
-except ImportError:
-    np = None
-    qnp = None
+from quatops.numpy.hamilton import wxyz as qnp
 
 
-@unittest.skipIf(np is None, 'NumPy is not installed')
-class RotationCoefficientOrderTests(unittest.TestCase):
+class RotationCoefficientOrderTests:
     def test_near_cancelling_diagonal_coefficients(self):
         # These binary inputs have exact, nonzero tiny diagonal coefficients.
         # Adding the tiny square to one before subtracting one erases it.
@@ -32,16 +25,11 @@ class RotationCoefficientOrderTests(unittest.TestCase):
         try:
             actual = qnp.rotate(q, v)
             for i, axis in ((0, 1), (1, 2)):
-                with self.subTest(i=i):
-                    self.assertTrue(math.isclose(actual[i, axis], expected, rel_tol=1e-15))
-                    self.assertTrue(math.isclose(actual[i, axis], scalar.rotate(q[i], v[i])[axis], rel_tol=1e-15))
-            self.assertEqual(np.geterr(), {'divide': 'raise', 'over': 'raise',
-                                         'under': 'raise', 'invalid': 'raise'})
+                np.testing.assert_allclose(actual[i, axis], expected, rtol=1e-15, atol=0)
+                np.testing.assert_allclose(actual[i, axis], scalar.rotate(q[i], v[i])[axis], rtol=1e-15, atol=0)
+            assert np.geterr() == {'divide': 'raise', 'over': 'raise',
+                                         'under': 'raise', 'invalid': 'raise'}
             np.testing.assert_array_equal(q, q_before)
             np.testing.assert_array_equal(v, v_before)
         finally:
             np.seterr(**previous)
-
-
-if __name__ == '__main__':
-    unittest.main()

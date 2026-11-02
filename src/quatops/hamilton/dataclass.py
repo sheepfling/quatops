@@ -1,41 +1,6 @@
-"""Explicit Hamilton dataclass operations; same functions as the legacy module."""
+"""Zero-adapter exports for Hamilton dataclass operations."""
 
-from ..dataclass import (
-    AxisAngle,
-    Quaternion,
-    RotVec,
-    conjugate,
-    from_axis_angle,
-    from_rotvec,
-    from_wxyz,
-    from_xyzw,
-    inverse,
-    multiply,
-    norm,
-    normalize,
-    rotate,
-    to_axis_angle,
-    to_rotvec,
-    to_wxyz,
-    to_xyzw,
-)
+from .. import dataclass as _implementation
+from ..dataclass import *  # noqa: F403
 
-__all__ = [
-    "AxisAngle",
-    "Quaternion",
-    "RotVec",
-    "conjugate",
-    "from_axis_angle",
-    "from_rotvec",
-    "from_wxyz",
-    "from_xyzw",
-    "inverse",
-    "multiply",
-    "norm",
-    "normalize",
-    "rotate",
-    "to_axis_angle",
-    "to_rotvec",
-    "to_wxyz",
-    "to_xyzw",
-]
+__all__ = list(_implementation.__all__)

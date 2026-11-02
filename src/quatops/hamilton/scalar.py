@@ -1,43 +1,6 @@
-"""Explicit Hamilton scalar operations; same functions as the legacy module."""
+"""Zero-adapter exports for Hamilton operations on scalar tuples."""
 
-from ..scalar import (
-    AxisAngle,
-    Quaternion,
-    RotVec,
-    Vector,
-    conjugate,
-    from_axis_angle,
-    from_rotvec,
-    from_wxyz,
-    from_xyzw,
-    inverse,
-    multiply,
-    norm,
-    normalize,
-    rotate,
-    to_axis_angle,
-    to_rotvec,
-    to_wxyz,
-    to_xyzw,
-)
+from .. import scalar as _implementation
+from ..scalar import *  # noqa: F403
 
-__all__ = [
-    "AxisAngle",
-    "Quaternion",
-    "RotVec",
-    "Vector",
-    "conjugate",
-    "from_axis_angle",
-    "from_rotvec",
-    "from_wxyz",
-    "from_xyzw",
-    "inverse",
-    "multiply",
-    "norm",
-    "normalize",
-    "rotate",
-    "to_axis_angle",
-    "to_rotvec",
-    "to_wxyz",
-    "to_xyzw",
-]
+__all__ = list(_implementation.__all__)

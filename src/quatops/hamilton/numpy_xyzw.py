@@ -1,7 +1,7 @@
 """Native NumPy Hamilton quaternions: scalar-last ``(..., 4)`` in xyzw order.
 
 The product uses a positive vector cross term. Rotations are active and
-right-handed; ``multiply(q, r)`` applies ``r`` first. Scalar-last ordering
+right-handed; ``multiply(lhs, rhs)`` applies ``rhs`` first. Scalar-last ordering
 does not change the Hamilton algebra. Arrays use float64 with the same
 validation and NumPy floating-point policy as the scalar-first NumPy backend.
 """
@@ -10,7 +10,52 @@ from typing import Any
 
 import numpy as np
 
-from .._numpy import _components, _direction, _result, _scaled, _sum_three
+from .._numpy import (
+    _algebraic,
+    _binary,
+    _canonicalize,
+    _components,
+    _direction,
+    _dot_quaternions,
+    _factor,
+    _from_rotation_matrix,
+    _from_two_vectors,
+    _left_divide,
+    _matrix_components,
+    _norm_squared,
+    _power,
+    _result,
+    _right_divide,
+    _rotation_distance,
+    _rotations_equivalent,
+    _scale,
+    _scaled,
+    _skew,
+    _slerp,
+    _so3_jacobian,
+    _sum_three,
+)
+
+_SCALAR_LAST = True
+
+def exp(q: Any) -> np.ndarray:
+    """Return the algebraic quaternion exponential in this storage order."""
+    return _algebraic(q, _SCALAR_LAST, "exp")
+
+
+def log(q: Any) -> np.ndarray:
+    """Return the principal algebraic quaternion logarithm in this order."""
+    return _algebraic(q, _SCALAR_LAST, "log")
+
+
+def sin(q: Any) -> np.ndarray:
+    """Return the algebraic quaternion sine in this storage order."""
+    return _algebraic(q, _SCALAR_LAST, "sin")
+
+
+def cos(q: Any) -> np.ndarray:
+    """Return the algebraic quaternion cosine in this storage order."""
+    return _algebraic(q, _SCALAR_LAST, "cos")
 
 
 def from_xyzw(q: Any) -> np.ndarray:
@@ -45,10 +90,30 @@ def conjugate(q: Any) -> np.ndarray:
     return out
 
 
-def multiply(q: Any, r: Any) -> np.ndarray:
-    """Return the Hamilton product; for active rotations, ``r`` acts first."""
-    a = _components(q, 4, "q")
-    b = _components(r, 4, "r")
+def add(lhs: Any, rhs: Any) -> np.ndarray:
+    """Add quaternion components with leading-axis broadcasting."""
+    return _binary(lhs, rhs, np.add)
+
+
+def subtract(lhs: Any, rhs: Any) -> np.ndarray:
+    """Subtract quaternion components with leading-axis broadcasting."""
+    return _binary(lhs, rhs, np.subtract)
+
+
+def negate(q: Any) -> np.ndarray:
+    """Negate every quaternion component."""
+    return _result(-_components(q, 4, "quaternion"))
+
+
+def scale(q: Any, factor: Any) -> np.ndarray:
+    """Scale every component by one finite real number."""
+    return _scale(q, factor)
+
+
+def multiply(lhs: Any, rhs: Any) -> np.ndarray:
+    """Return Hamilton product ``lhs * rhs``; in rotations, rhs acts first."""
+    a = _components(lhs, 4, "lhs")
+    b = _components(rhs, 4, "rhs")
     a, b = np.broadcast_arrays(a, b)
     ax, ay, az, aw = np.moveaxis(a, -1, 0)
     bx, by, bz, bw = np.moveaxis(b, -1, 0)
@@ -90,6 +155,11 @@ def inverse(q: Any) -> np.ndarray:
     with np.errstate(all="ignore"):
         out = (scaled / scaled_state.sum_squares) / scaled_state.scale
     return _result(out)
+
+
+def divide(lhs: Any, rhs: Any) -> np.ndarray:
+    """Return the right quotient ``lhs * inverse(rhs)``."""
+    return multiply(lhs, inverse(rhs))
 
 
 def rotate(q: Any, v: Any) -> np.ndarray:
@@ -214,3 +284,367 @@ def to_rotvec(q: Any) -> np.ndarray:
         small_vector = (2.0 * vector) / w[..., None]
         result = np.where(tiny[..., None], small_vector, axis * angle[..., None])
     return np.where(result == 0, 0.0, _result(result))
+
+
+def to_rotation_matrix(q: Any) -> np.ndarray:
+    """Return active rotation matrices with shape (..., 3, 3)."""
+    return _matrix_components(q, 1, True, "rotation")
+
+
+def to_left_matrix(q: Any) -> np.ndarray:
+    """Return left multiplication matrices with shape (..., 4, 4)."""
+    return _matrix_components(q, 1, True, "left")
+
+
+def to_right_matrix(q: Any) -> np.ndarray:
+    """Return right multiplication matrices with shape (..., 4, 4)."""
+    return _matrix_components(q, 1, True, "right")
+
+
+def from_rotation_vector(r: Any) -> np.ndarray:
+    """Convert a physical rotation vector in radians to a quaternion."""
+    return from_rotvec(r)
+
+
+def to_rotation_vector(q: Any) -> np.ndarray:
+    """Extract the canonical physical rotation vector in radians."""
+    return to_rotvec(q)
+
+
+def sinh(q: Any) -> np.ndarray:
+    """Return quaternion hyperbolic sine in the selected coefficient order."""
+    return _algebraic(q, _SCALAR_LAST, "sinh")
+
+
+def cosh(q: Any) -> np.ndarray:
+    """Return quaternion hyperbolic cosine in the selected coefficient order."""
+    return _algebraic(q, _SCALAR_LAST, "cosh")
+
+
+def tanh(q: Any) -> np.ndarray:
+    """Return quaternion hyperbolic tangent as sinh(q) / cosh(q)."""
+    return divide(sinh(q), cosh(q))
+
+
+def power(q: Any, exponent: Any) -> np.ndarray:
+    """Raise quaternions to an integer or principal real power."""
+    return _power(q, exponent, _SCALAR_LAST, epsilon=1)
+
+
+def pow_real(q: Any, exponent: Any) -> np.ndarray:
+    """Raise quaternions to a principal real power."""
+    return power(q, exponent)
+
+
+def sqrt(q: Any) -> np.ndarray:
+    """Return the principal quaternion square root."""
+    return power(q, 0.5)
+
+
+def slerp(q0: Any, q1: Any, t: Any, shortest: bool = True) -> np.ndarray:
+    """Spherically interpolate rotations, preserving batch dimensions."""
+    if not isinstance(shortest, bool):
+        raise ValueError("shortest must be a bool")  # noqa: TRY004
+    return _slerp(q0, q1, t, _SCALAR_LAST, shortest)
+
+
+def skew_matrix(v: Any) -> np.ndarray:
+    """Return batched 3x3 cross-product matrices."""
+    return _skew(v)
+
+
+def so3_left_jacobian(r: Any) -> np.ndarray:
+    """Return batched SO(3) left Jacobians."""
+    return _so3_jacobian(r, 1)
+
+
+def so3_right_jacobian(r: Any) -> np.ndarray:
+    """Return batched SO(3) right Jacobians."""
+    return _so3_jacobian(r, -1)
+
+
+def so3_left_jacobian_inverse(r: Any) -> np.ndarray:
+    """Return batched inverse SO(3) left Jacobians."""
+    return _so3_jacobian(r, 1, True)
+
+
+def so3_right_jacobian_inverse(r: Any) -> np.ndarray:
+    """Return batched inverse SO(3) right Jacobians."""
+    return _so3_jacobian(r, -1, True)
+
+
+def integrate_angular_velocity(q: Any, omega: Any, dt: Any, frame: str = "body") -> np.ndarray:
+    """Integrate constant physical angular velocity in body or world frame."""
+    if frame not in ("body", "world"):
+        raise ValueError("frame must be 'body' or 'world'")
+    step = _factor(dt, "dt")
+    angular = _components(omega, 3, "angular velocity")
+    with np.errstate(all="ignore"):
+        delta = _result(angular * step)
+    increment = from_rotation_vector(delta)
+    attitude = normalize(q)
+    product = multiply(attitude, increment) if frame == "body" else multiply(increment, attitude)
+    return normalize(product)
+
+
+def tan(q: Any) -> np.ndarray:
+    """Return the algebraic quaternion tangent ``sin(q) / cos(q)``."""
+    return divide(sin(q), cos(q))
+
+
+def dot(lhs: Any, rhs: Any) -> np.ndarray:
+    return _dot_quaternions(lhs, rhs)
+
+
+def norm_squared(q: Any) -> np.ndarray:
+    return _norm_squared(q)
+
+
+def right_divide(lhs: Any, rhs: Any) -> np.ndarray:
+    return _right_divide(lhs, rhs, 1, _SCALAR_LAST)
+
+
+def left_divide(lhs: Any, rhs: Any) -> np.ndarray:
+    return _left_divide(lhs, rhs, 1, _SCALAR_LAST)
+
+
+def rotation_distance(q0: Any, q1: Any) -> np.ndarray:
+    return _rotation_distance(q0, q1, 1, _SCALAR_LAST)
+
+
+def rotations_equivalent(q0: Any, q1: Any, atol: Any = 1e-12) -> np.ndarray:
+    return _rotations_equivalent(q0, q1, atol, 1, _SCALAR_LAST)
+
+
+def canonicalize(q: Any) -> np.ndarray:
+    return _canonicalize(q, _SCALAR_LAST, 1)
+
+
+def from_rotation_matrix(matrix: Any, atol: Any = 1e-8) -> np.ndarray:
+    return _from_rotation_matrix(matrix, 1, _SCALAR_LAST, atol)
+
+
+def from_two_vectors(source: Any, target: Any) -> np.ndarray:
+    return _from_two_vectors(source, target, 1, _SCALAR_LAST)
+
+
+
+from .. import scalar as _advanced_scalar
+from .._numpy import (
+    _align_vectors,
+    _from_homogeneous_matrix,
+    _integrate_angular_velocity_samples,
+    _make_sign_continuous,
+    _map_scalar_ordered,
+    _random_quaternion,
+    _rotation_covariance,
+    _rotation_mean,
+)
+
+
+def _map_scalar(
+    function: Any,
+    *values: Any,
+    component_arguments: dict[int, tuple[int, str]],
+    result_shape: tuple[int, ...],
+) -> np.ndarray:
+    return _map_scalar_ordered(
+        function, *values, component_arguments=component_arguments,
+        result_shape=result_shape, array_scalar_last=_SCALAR_LAST,
+        function_scalar_last=False,
+    )
+
+
+# Extended quaternion mathematics and attitude APIs.
+def asin(q: Any) -> np.ndarray:
+    return _map_scalar(_advanced_scalar.asin, q,
+                       component_arguments={0: (4, "quaternion")}, result_shape=(4,))
+
+
+def acos(q: Any) -> np.ndarray:
+    return _map_scalar(_advanced_scalar.acos, q,
+                       component_arguments={0: (4, "quaternion")}, result_shape=(4,))
+
+
+def atan(q: Any) -> np.ndarray:
+    return _map_scalar(_advanced_scalar.atan, q,
+                       component_arguments={0: (4, "quaternion")}, result_shape=(4,))
+
+
+def asinh(q: Any) -> np.ndarray:
+    return _map_scalar(_advanced_scalar.asinh, q,
+                       component_arguments={0: (4, "quaternion")}, result_shape=(4,))
+
+
+def acosh(q: Any) -> np.ndarray:
+    return _map_scalar(_advanced_scalar.acosh, q,
+                       component_arguments={0: (4, "quaternion")}, result_shape=(4,))
+
+
+def atanh(q: Any) -> np.ndarray:
+    return _map_scalar(_advanced_scalar.atanh, q,
+                       component_arguments={0: (4, "quaternion")}, result_shape=(4,))
+
+
+def expm1(q: Any) -> np.ndarray:
+    return _map_scalar(_advanced_scalar.expm1, q,
+                       component_arguments={0: (4, "quaternion")}, result_shape=(4,))
+
+
+def log1p(q: Any) -> np.ndarray:
+    return _map_scalar(_advanced_scalar.log1p, q,
+                       component_arguments={0: (4, "quaternion")}, result_shape=(4,))
+
+
+def log2(q: Any) -> np.ndarray:
+    return _map_scalar(_advanced_scalar.log2, q,
+                       component_arguments={0: (4, "quaternion")}, result_shape=(4,))
+
+
+def log10(q: Any) -> np.ndarray:
+    return _map_scalar(_advanced_scalar.log10, q,
+                       component_arguments={0: (4, "quaternion")}, result_shape=(4,))
+
+
+def power_quaternion(q: Any, exponent: Any) -> np.ndarray:
+    return _map_scalar(_advanced_scalar.power_quaternion, q, exponent,
+                       component_arguments={0: (4, "quaternion"), 1: (4, "exponent")},
+                       result_shape=(4,))
+
+
+def commutator(lhs: Any, rhs: Any) -> np.ndarray:
+    return _map_scalar(_advanced_scalar.commutator, lhs, rhs,
+                       component_arguments={0: (4, "lhs"), 1: (4, "rhs")},
+                       result_shape=(4,))
+
+
+def scalar_part(q: Any) -> np.ndarray:
+    return _map_scalar(_advanced_scalar.scalar_part, q,
+                       component_arguments={0: (4, "quaternion")}, result_shape=())
+
+
+def vector_part(q: Any) -> np.ndarray:
+    return _map_scalar(_advanced_scalar.vector_part, q,
+                       component_arguments={0: (4, "quaternion")}, result_shape=(3,))
+
+
+def quaternion_derivative(q: Any, omega: Any, frame: str = "body") -> np.ndarray:
+    return _map_scalar(_advanced_scalar.quaternion_derivative, q, omega, frame,
+                       component_arguments={0: (4, "quaternion"), 1: (3, "omega")},
+                       result_shape=(4,))
+
+
+def integrate_angular_velocity_samples(
+    q: Any, omegas: Any, times: Any, frame: str = "body", method: str = "midpoint"
+) -> np.ndarray:
+    return _integrate_angular_velocity_samples(
+        _advanced_scalar.integrate_angular_velocity_samples, q, omegas, times, frame, method,
+        array_scalar_last=True, function_scalar_last=False,
+    )
+
+
+def boxplus(q: Any, delta: Any, frame: str = "body") -> np.ndarray:
+    return _map_scalar(_advanced_scalar.boxplus, q, delta, frame,
+                       component_arguments={0: (4, "quaternion"), 1: (3, "delta")},
+                       result_shape=(4,))
+
+
+def boxminus(q: Any, reference: Any, frame: str = "body") -> np.ndarray:
+    return _map_scalar(_advanced_scalar.boxminus, q, reference, frame,
+                       component_arguments={0: (4, "q"), 1: (4, "reference")},
+                       result_shape=(3,))
+
+
+def nlerp(q0: Any, q1: Any, t: Any, shortest: bool = True) -> np.ndarray:
+    return _map_scalar(_advanced_scalar.nlerp, q0, q1, t, shortest,
+                       component_arguments={0: (4, "q0"), 1: (4, "q1")},
+                       result_shape=(4,))
+
+
+def squad(q0: Any, q1: Any, a: Any, b: Any, t: Any) -> np.ndarray:
+    return _map_scalar(_advanced_scalar.squad, q0, q1, a, b, t,
+                       component_arguments={0: (4, "q0"), 1: (4, "q1"),
+                                            2: (4, "a"), 3: (4, "b")},
+                       result_shape=(4,))
+
+
+def align_sign(q: Any, reference: Any) -> np.ndarray:
+    return _map_scalar(_advanced_scalar.align_sign, q, reference,
+                       component_arguments={0: (4, "q"), 1: (4, "reference")},
+                       result_shape=(4,))
+
+
+def make_sign_continuous(quaternions: Any) -> np.ndarray:
+    return _make_sign_continuous(_advanced_scalar.make_sign_continuous, quaternions)
+
+
+def from_euler(angles: Any, sequence: str = "xyz") -> np.ndarray:
+    return _map_scalar(_advanced_scalar.from_euler, angles, sequence,
+                       component_arguments={0: (3, "angles")}, result_shape=(4,))
+
+
+def to_euler(q: Any, sequence: str = "xyz") -> np.ndarray:
+    return _map_scalar(_advanced_scalar.to_euler, q, sequence,
+                       component_arguments={0: (4, "quaternion")}, result_shape=(3,))
+
+
+def from_mrp(sigma: Any) -> np.ndarray:
+    return _map_scalar(_advanced_scalar.from_mrp, sigma,
+                       component_arguments={0: (3, "sigma")}, result_shape=(4,))
+
+
+def to_mrp(q: Any) -> np.ndarray:
+    return _map_scalar(_advanced_scalar.to_mrp, q,
+                       component_arguments={0: (4, "quaternion")}, result_shape=(3,))
+
+
+def swing_twist(q: Any, axis: Any) -> tuple[np.ndarray, np.ndarray]:
+    values = _map_scalar(_advanced_scalar.swing_twist, q, axis,
+                         component_arguments={0: (4, "quaternion"), 1: (3, "axis")},
+                         result_shape=(2, 4))
+    return values[..., 0, :], values[..., 1, :]
+
+
+def rotation_mean(quaternions: Any, weights: Any = None, method: str = "markley",
+                  tolerance: Any = 1e-12, max_iterations: int = 100) -> np.ndarray:
+    return _rotation_mean(_advanced_scalar.rotation_mean, quaternions, weights,
+                          method, tolerance, max_iterations,
+                          array_scalar_last=True, function_scalar_last=False)
+
+
+def rotation_covariance(quaternions: Any, mean: Any = None, weights: Any = None,
+                        frame: str = "body") -> np.ndarray:
+    return _rotation_covariance(_advanced_scalar.rotation_covariance, quaternions,
+                                mean, weights, frame,
+                                array_scalar_last=True, function_scalar_last=False)
+
+
+def align_vectors(source: Any, target: Any, weights: Any = None) -> np.ndarray:
+    return _align_vectors(_advanced_scalar.align_vectors, source, target, weights,
+                          array_scalar_last=True, function_scalar_last=False)
+
+
+def random_quaternion(size: Any = None, rng: Any = None) -> np.ndarray:
+    return _random_quaternion(size, rng, 1, _SCALAR_LAST)
+
+
+def random_rotation(size: Any = None, rng: Any = None) -> np.ndarray:
+    return random_quaternion(size, rng)
+
+
+def to_homogeneous_matrix(q: Any, translation: Any = (0.0, 0.0, 0.0)) -> np.ndarray:
+    return _map_scalar(_advanced_scalar.to_homogeneous_matrix, q, translation,
+                       component_arguments={0: (4, "quaternion"), 1: (3, "translation")},
+                       result_shape=(4, 4))
+
+
+def from_homogeneous_matrix(matrix: Any, atol: Any = 1e-8) -> np.ndarray:
+    return _from_homogeneous_matrix(
+        matrix, _advanced_scalar.from_homogeneous_matrix, atol,
+        array_scalar_last=_SCALAR_LAST, function_scalar_last=False,
+    )
+
+
+def so3_adjoint(q: Any) -> np.ndarray:
+    return _map_scalar(_advanced_scalar.so3_adjoint, q,
+                       component_arguments={0: (4, "quaternion")}, result_shape=(3, 3))
