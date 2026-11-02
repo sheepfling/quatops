@@ -147,48 +147,10 @@ def divide(lhs: Iterable[FloatT], rhs: Iterable[FloatT]) -> Quaternion:
     return Quaternion(*scalar.divide(lhs, rhs))
 
 
-def rotate(q: Iterable[FloatT], v: Iterable[FloatT]) -> scalar.Vector:
-    """Actively rotate ``v`` by ``q * (0, v) * inverse(q)``.
-
-    Accepts any finite nonzero quaternion; no input is normalized or mutated.
-    """
-    _, parts = scalar._scaled(scalar._quaternion(q))
-    w, x, y, z = parts
-    vx, vy, vz = scalar._vector(v)
-    w2, x2, y2, z2 = w*w, x*x, y*y, z*z
-    denominator = w2 + x2 + y2 + z2
-    def coefficient(value: FloatLike) -> float:
-        return min(1.0, max(-1.0, value / denominator))
-
-    m00 = coefficient(w2 + x2 - y2 - z2)
-    m01 = coefficient(2*(x*y - w*z))
-    m02 = coefficient(2*(x*z + w*y))
-    m10 = coefficient(2*(x*y + w*z))
-    m11 = coefficient(w2 - x2 + y2 - z2)
-    m12 = coefficient(2*(y*z - w*x))
-    m20 = coefficient(2*(x*z - w*y))
-    m21 = coefficient(2*(y*z + w*x))
-    m22 = coefficient(w2 - x2 - y2 + z2)
-    values = (scalar._dot3(m00, m01, m02, vx, vy, vz),
-              scalar._dot3(m10, m11, m12, vx, vy, vz),
-              scalar._dot3(m20, m21, m22, vx, vy, vz))
-    scalar._checked(values)
-    return values
-
-
-def to_rotation_matrix(q: Iterable[FloatT]) -> tuple[tuple[float, ...], ...]:
-    """Return the active Hamilton rotation as a norm-aware 3x3 matrix."""
-    return scalar.to_rotation_matrix(q)
-
-
-def to_left_matrix(q: Iterable[FloatT]) -> tuple[tuple[float, ...], ...]:
-    """Return the Hamilton left-product matrix in scalar-first order."""
-    return scalar.to_left_matrix(q)
-
-
-def to_right_matrix(q: Iterable[FloatT]) -> tuple[tuple[float, ...], ...]:
-    """Return the Hamilton right-product matrix in scalar-first order."""
-    return scalar.to_right_matrix(q)
+rotate = scalar.rotate
+to_rotation_matrix = scalar.to_rotation_matrix
+to_left_matrix = scalar.to_left_matrix
+to_right_matrix = scalar.to_right_matrix
 
 def sinh(q: Iterable[FloatT]) -> Quaternion:
     """Return the algebraic hyperbolic sine as a named quaternion."""
@@ -226,29 +188,11 @@ def slerp(q0: Iterable[FloatT], q1: Iterable[FloatT], t: FloatLike,
     return Quaternion(*scalar.slerp(q0, q1, t, shortest=shortest))
 
 
-def skew_matrix(v: Iterable[FloatT]) -> tuple[tuple[float, ...], ...]:
-    """Return the 3x3 cross-product matrix for a three-vector."""
-    return scalar.skew_matrix(v)
-
-
-def so3_left_jacobian(r: Iterable[FloatT]) -> tuple[tuple[float, ...], ...]:
-    """Return the SO(3) left Jacobian for a physical rotation vector."""
-    return scalar.so3_left_jacobian(r)
-
-
-def so3_right_jacobian(r: Iterable[FloatT]) -> tuple[tuple[float, ...], ...]:
-    """Return the SO(3) right Jacobian for a physical rotation vector."""
-    return scalar.so3_right_jacobian(r)
-
-
-def so3_left_jacobian_inverse(r: Iterable[FloatT]) -> tuple[tuple[float, ...], ...]:
-    """Return the inverse SO(3) left Jacobian."""
-    return scalar.so3_left_jacobian_inverse(r)
-
-
-def so3_right_jacobian_inverse(r: Iterable[FloatT]) -> tuple[tuple[float, ...], ...]:
-    """Return the inverse SO(3) right Jacobian."""
-    return scalar.so3_right_jacobian_inverse(r)
+skew_matrix = scalar.skew_matrix
+so3_left_jacobian = scalar.so3_left_jacobian
+so3_right_jacobian = scalar.so3_right_jacobian
+so3_left_jacobian_inverse = scalar.so3_left_jacobian_inverse
+so3_right_jacobian_inverse = scalar.so3_right_jacobian_inverse
 
 
 def integrate_angular_velocity(q: Iterable[FloatT], omega: Iterable[FloatT], dt: FloatLike,
@@ -338,14 +282,8 @@ def tan(q: Iterable[FloatT]) -> Quaternion:
     return Quaternion(*scalar.tan(q))
 
 
-def dot(lhs: Iterable[FloatT], rhs: Iterable[FloatT]) -> float:
-    """Return the Euclidean coefficient dot product."""
-    return scalar.dot(lhs, rhs)
-
-
-def norm_squared(q: Iterable[FloatT]) -> float:
-    """Return the squared Euclidean coefficient norm."""
-    return scalar.norm_squared(q)
+dot = scalar.dot
+norm_squared = scalar.norm_squared
 
 
 def right_divide(lhs: Iterable[FloatT], rhs: Iterable[FloatT]) -> Quaternion:
@@ -358,14 +296,8 @@ def left_divide(lhs: Iterable[FloatT], rhs: Iterable[FloatT]) -> Quaternion:
     return Quaternion(*scalar.left_divide(lhs, rhs))
 
 
-def rotation_distance(q0: Iterable[FloatT], q1: Iterable[FloatT]) -> float:
-    """Return the shortest geodesic angle between two rotations in radians."""
-    return scalar.rotation_distance(q0, q1)
-
-
-def rotations_equivalent(q0: Iterable[FloatT], q1: Iterable[FloatT], atol: FloatLike = 1e-12) -> bool:
-    """Return whether two rotations differ by at most ``atol`` radians."""
-    return scalar.rotations_equivalent(q0, q1, atol)
+rotation_distance = scalar.rotation_distance
+rotations_equivalent = scalar.rotations_equivalent
 
 
 def canonicalize(q: Iterable[FloatT]) -> Quaternion:
@@ -450,9 +382,7 @@ def commutator(lhs: Iterable[FloatT], rhs: Iterable[FloatT]) -> Quaternion:
     return Quaternion(*scalar.commutator(lhs, rhs))
 
 
-def scalar_part(q: Iterable[FloatT]) -> float:
-    """Return the scalar coefficient."""
-    return scalar.scalar_part(q)
+scalar_part = scalar.scalar_part
 
 
 def vector_part(q: Iterable[FloatT]) -> RotVec:
@@ -552,12 +482,7 @@ def rotation_mean(quaternions: Iterable[Iterable[FloatT]],
     return Quaternion(*scalar.rotation_mean(quaternions, weights, method, tolerance, max_iterations))
 
 
-def rotation_covariance(quaternions: Iterable[Iterable[FloatT]],
-                        mean: Iterable[FloatT] | None = None,
-                        weights: Iterable[FloatT] | None = None,
-                        frame: str = "body") -> tuple[tuple[float, ...], ...]:
-    """Return weighted population covariance in a local rotation tangent."""
-    return scalar.rotation_covariance(quaternions, mean, weights, frame)
+rotation_covariance = scalar.rotation_covariance
 
 
 def align_vectors(source: Iterable[Iterable[FloatT]], target: Iterable[Iterable[FloatT]],
@@ -576,11 +501,7 @@ def random_rotation(rng: object | None = None) -> Quaternion:
     return Quaternion(*scalar.random_rotation(rng))
 
 
-def to_homogeneous_matrix(
-    q: Iterable[FloatT], translation: Iterable[FloatT] = (0.0, 0.0, 0.0)
-) -> tuple[tuple[float, ...], ...]:
-    """Return a 4x4 homogeneous rotation and translation matrix."""
-    return scalar.to_homogeneous_matrix(q, translation)
+to_homogeneous_matrix = scalar.to_homogeneous_matrix
 
 
 def from_homogeneous_matrix(
@@ -590,9 +511,7 @@ def from_homogeneous_matrix(
     return Quaternion(*scalar.from_homogeneous_matrix(matrix, atol))
 
 
-def so3_adjoint(q: Iterable[FloatT]) -> tuple[tuple[float, ...], ...]:
-    """Return the SO(3) adjoint matrix."""
-    return scalar.so3_adjoint(q)
+so3_adjoint = scalar.so3_adjoint
 
 
 __all__ = [

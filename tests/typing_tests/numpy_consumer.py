@@ -1,8 +1,9 @@
 """Installed-wheel NumPy layout type checks with the optional NumPy extra."""
 
-from typing import Any, assert_type
+from typing import Any
 
 from numpy.typing import NDArray
+from typing_extensions import assert_type
 
 from quatops.hamilton import numpy_wxyz as hw
 from quatops.hamilton import numpy_xyzw as hx

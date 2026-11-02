@@ -410,17 +410,15 @@ def rotate(q: Iterable[FloatT], v: Iterable[FloatT]) -> Vector:
     vx, vy, vz = _vector(v)
     w2, x2, y2, z2 = w*w, x*x, y*y, z*z
     den = w2 + x2 + y2 + z2
-    def coefficient(value: FloatLike) -> float:
-        return min(1.0, max(-1.0, value / den))
-    m00 = coefficient(w2 + x2 - y2 - z2)
-    m01 = coefficient(2*(x*y + w*z))
-    m02 = coefficient(2*(x*z - w*y))
-    m10 = coefficient(2*(x*y - w*z))
-    m11 = coefficient(w2 - x2 + y2 - z2)
-    m12 = coefficient(2*(y*z + w*x))
-    m20 = coefficient(2*(x*z + w*y))
-    m21 = coefficient(2*(y*z - w*x))
-    m22 = coefficient(w2 - x2 - y2 + z2)
+    m00 = min(1.0, max(-1.0, (w2 + x2 - y2 - z2) / den))
+    m01 = min(1.0, max(-1.0, (2*(x*y + w*z)) / den))
+    m02 = min(1.0, max(-1.0, (2*(x*z - w*y)) / den))
+    m10 = min(1.0, max(-1.0, (2*(x*y - w*z)) / den))
+    m11 = min(1.0, max(-1.0, (w2 - x2 + y2 - z2) / den))
+    m12 = min(1.0, max(-1.0, (2*(y*z + w*x)) / den))
+    m20 = min(1.0, max(-1.0, (2*(x*z + w*y)) / den))
+    m21 = min(1.0, max(-1.0, (2*(y*z - w*x)) / den))
+    m22 = min(1.0, max(-1.0, (w2 - x2 - y2 + z2) / den))
     return _checked((_dot3(m00, m01, m02, vx, vy, vz),
                      _dot3(m10, m11, m12, vx, vy, vz),
                      _dot3(m20, m21, m22, vx, vy, vz)))  # type: ignore[return-value]

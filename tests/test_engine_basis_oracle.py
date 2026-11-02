@@ -1,6 +1,7 @@
 """SciPy-oracle tests for low-overhead game-engine basis conversions."""
 
 import itertools
+from importlib.util import find_spec
 
 import numpy as np
 import pytest
@@ -13,6 +14,8 @@ from quatops.types.hamilton_dataclass import Quaternion as HamiltonDataclass
 from quatops.types.hamilton_namedtuple import Quaternion as HamiltonNamedTuple
 from quatops.types.jpl_dataclass import Quaternion as JPLDataclass
 from quatops.types.jpl_namedtuple import Quaternion as JPLNamedTuple
+
+NUMBA_AVAILABLE = find_spec("numba") is not None
 
 
 def _all_signed_axes():
@@ -29,7 +32,7 @@ def _matrix_from_axes(axes):
     matrix = np.zeros((3, 3), dtype=float)
     for row, axis in enumerate(axes):
         sign = -1.0 if axis.startswith("-") else 1.0
-        name = axis[1:] if axis.startswith("-") else axis
+        name = axis.removeprefix("-")
         matrix[row, "xyz".index(name)] = sign
     return matrix
 
@@ -173,3 +176,55 @@ def test_numpy_map_rejects_invalid_component_axis_and_shape():
         engine_numpy.map_hamilton_xyzw(np.ones((2, 4)), axis_map, component_axis=3)
     with pytest.raises(ValueError, match="length four"):
         engine_numpy.map_hamilton_xyzw(np.ones((2, 3)), axis_map)
+
+
+@pytest.mark.skipif(not NUMBA_AVAILABLE, reason="Numba is an optional dependency")
+@pytest.mark.parametrize(
+    "array_map,scalar_map,source_kind",
+    (
+        ("map_hamilton_xyzw", "map_hamilton_xyzw", "hamilton_xyzw"),
+        ("map_hamilton_wxyz", "map_hamilton_wxyz", "hamilton_wxyz"),
+        ("map_jpl_xyzw", "map_jpl_xyzw", "jpl_xyzw"),
+        ("map_jpl_wxyz", "map_jpl_wxyz", "jpl_wxyz"),
+    ),
+)
+def test_large_numpy_engine_maps_compile_and_match_scalar(
+    array_map, scalar_map, source_kind
+):
+    from quatops import _numpy as numpy_internal
+
+    rng = np.random.default_rng(0xE61E)
+    source_xyzw = Rotation.random(512, random_state=rng).as_quat()
+    source_values = {
+        "hamilton_xyzw": source_xyzw,
+        "hamilton_wxyz": source_xyzw[:, (3, 0, 1, 2)],
+        "jpl_xyzw": source_xyzw * np.array((-1.0, -1.0, -1.0, 1.0)),
+        "jpl_wxyz": (source_xyzw * np.array((-1.0, -1.0, -1.0, 1.0)))[:,
+                     (3, 0, 1, 2)],
+    }[source_kind]
+    mapper = getattr(engine_numpy, array_map)
+    axis_map = SignedAxisMap(("y", "-z", "x"))
+    scalar = getattr(axis_map, scalar_map)
+
+    for values in (source_values, source_values.astype(np.float32)):
+        expected = np.asarray([scalar(tuple(value)) for value in values])
+        actual = mapper(values, axis_map)
+        assert actual.dtype == values.dtype
+        np.testing.assert_array_equal(actual, expected)
+
+    component_first = mapper(source_values.T, axis_map, component_axis=0)
+    np.testing.assert_array_equal(
+        component_first,
+        np.asarray([scalar(tuple(value)) for value in source_values]).T,
+    )
+    assert numpy_internal._NUMBA_ROTATION_KERNELS["engine_axis_map"].nopython_signatures
+
+
+def test_numpy_engine_map_uses_numpy_fallback_without_numba(monkeypatch):
+    axis_map = SignedAxisMap(("y", "-z", "x"))
+    values = Rotation.random(160, random_state=0).as_quat()
+    expected = np.asarray([axis_map.map_hamilton_xyzw(tuple(value)) for value in values])
+    monkeypatch.setattr(engine_numpy, "_numba_rotation_kernel", lambda _operation: None)
+    np.testing.assert_array_equal(
+        engine_numpy.map_hamilton_xyzw(values, axis_map), expected
+    )

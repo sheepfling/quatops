@@ -16,30 +16,41 @@ import numpy as np
 
 from ..._numpy import (
     _algebraic,
+    _align_sign_samples,
+    _analytic_samples,
     _binary,
     _canonicalize,
+    _commutator_samples,
     _components,
     _direction,
     _dot_quaternions,
     _euler_from_angles,
     _euler_to_angles,
     _factor,
+    _from_axis_angle_samples,
     _from_rotation_matrix,
+    _from_rotvec_samples,
     _from_two_vectors,
+    _inverse_samples,
     _left_divide,
     _matrix_components,
+    _multiply,
+    _norm_samples,
     _norm_squared,
+    _normalize_samples,
     _power,
     _result,
     _right_divide,
+    _rotate,
     _rotation_distance,
     _rotations_equivalent,
+    _scalar_part,
     _scale,
-    _scaled,
     _skew,
-    _slerp,
     _so3_jacobian,
-    _sum_three,
+    _to_axis_angle_samples,
+    _to_rotvec_samples,
+    _vector_part,
 )
 
 _SCALAR_LAST = False
@@ -114,54 +125,24 @@ def scale(q: Any, factor: Any) -> np.ndarray:
     return _scale(q, factor)
 
 
-def _multiply(a: np.ndarray, b: np.ndarray) -> np.ndarray:
-    a, b = np.broadcast_arrays(a, b)
-    aw, ax, ay, az = np.moveaxis(a, -1, 0)
-    bw, bx, by, bz = np.moveaxis(b, -1, 0)
-    with np.errstate(all="ignore"):
-        return np.stack((aw*bw - ax*bx - ay*by - az*bz,
-                         aw*bx + ax*bw + ay*bz - az*by,
-                         aw*by - ax*bz + ay*bw + az*bx,
-                         aw*bz + ax*by - ay*bx + az*bw), axis=-1)
-
-
 def multiply(lhs: Any, rhs: Any) -> np.ndarray:
     """Return Hamilton product ``lhs * rhs``; in rotations, rhs acts first."""
-    a = _components(lhs, 4, "lhs")
-    b = _components(rhs, 4, "rhs")
-    return _result(_multiply(a, b))
+    return _multiply(lhs, rhs, _SCALAR_LAST, 1)
 
 
 def norm(q: Any) -> Any:
     """Return the norm as a float64 scalar or array of leading shape."""
-    a = _components(q, 4, "quaternion")
-    with np.errstate(all="ignore"):
-        scale = np.max(np.abs(a), axis=-1, keepdims=True)
-        scaled = np.divide(a, scale, out=np.zeros_like(a), where=scale != 0)
-        result = (scale * np.sqrt(np.sum(scaled * scaled, axis=-1, keepdims=True)))[..., 0]
-    # Ellipsis indexing can leave a zero-dimensional ndarray; the public
-    # contract returns a NumPy scalar for a single (4,) quaternion.
-    return _result(result[()] if result.ndim == 0 else result)
+    return _norm_samples(q)
 
 
 def normalize(q: Any) -> np.ndarray:
     """Return unit quaternions; raise ValueError if any norm is zero."""
-    a = _components(q, 4, "quaternion")
-    scaled = _scaled(a)
-    with np.errstate(all="ignore"):
-        out = scaled.unit_scale / np.sqrt(scaled.sum_squares)
-    return _result(out)
+    return _normalize_samples(q)
 
 
 def inverse(q: Any) -> np.ndarray:
     """Return multiplicative inverses; raise ValueError for any zero norm."""
-    a = _components(q, 4, "quaternion")
-    scaled_state = _scaled(a)
-    scaled = scaled_state.unit_scale.copy()
-    scaled[..., 1:] *= -1
-    with np.errstate(all="ignore"):
-        out = (scaled / scaled_state.sum_squares) / scaled_state.scale
-    return _result(out)
+    return _inverse_samples(q, _SCALAR_LAST)
 
 
 def divide(lhs: Any, rhs: Any) -> np.ndarray:
@@ -172,42 +153,10 @@ def divide(lhs: Any, rhs: Any) -> np.ndarray:
 def rotate(q: Any, v: Any) -> np.ndarray:
     """Actively rotate vectors by nonzero quaternions using ``q v q⁻¹``.
 
-    Quaternion and vector leading axes broadcast. The input is never
-    normalized; equivalent quaternion rescaling is used to limit overflow.
-    Each output component is a compensated sum of separately formed products.
+    Leading quaternion and vector axes broadcast. A scaled cross-product
+    calculation rotates without normalizing or mutating the input values.
     """
-    a = _components(q, 4, "quaternion")
-    v = _components(v, 3, "vector")
-    scaled_state = _scaled(a)
-    scaled = scaled_state.unit_scale
-    sums = scaled_state.sum_squares
-    shape = np.broadcast_shapes(scaled.shape[:-1], v.shape[:-1])
-    scaled = np.broadcast_to(scaled, shape + (4,))
-    v = np.broadcast_to(v, shape + (3,))
-    sums = np.broadcast_to(sums[..., 0], shape)
-    w, x, y, z = np.moveaxis(scaled, -1, 0)
-    vx, vy, vz = np.moveaxis(v, -1, 0)
-    with np.errstate(all="ignore"):
-        # Matrix coefficients remain bounded by one mathematically; clipping
-        # last-bit roundoff prevents an artificial overflow at max float.
-        ww, xx, yy, zz = w*w, x*x, y*y, z*z
-        # Match scalar evaluation order: cancel ww and xx before adding a
-        # smaller square in m11 and m22. Other cancellation error remains.
-        m00 = np.clip(((ww + xx) - yy - zz) / sums, -1.0, 1.0)
-        m01 = np.clip((2 * (x*y - w*z)) / sums, -1.0, 1.0)
-        m02 = np.clip((2 * (x*z + w*y)) / sums, -1.0, 1.0)
-        m10 = np.clip((2 * (x*y + w*z)) / sums, -1.0, 1.0)
-        m11 = np.clip(((ww - xx) + yy - zz) / sums, -1.0, 1.0)
-        m12 = np.clip((2 * (y*z - w*x)) / sums, -1.0, 1.0)
-        m20 = np.clip((2 * (x*z - w*y)) / sums, -1.0, 1.0)
-        m21 = np.clip((2 * (y*z + w*x)) / sums, -1.0, 1.0)
-        m22 = np.clip(((ww - xx) - yy + zz) / sums, -1.0, 1.0)
-        result = np.stack((
-            _sum_three(m00*vx, m01*vy, m02*vz),
-            _sum_three(m10*vx, m11*vy, m12*vz),
-            _sum_three(m20*vx, m21*vy, m22*vz),
-        ), axis=-1)
-    return _result(result)
+    return _rotate(q, v, scalar_last=False, epsilon=1)
 
 
 
@@ -239,18 +188,14 @@ def from_axis_angle(a: Any) -> np.ndarray:
     for zero angles. Finite angles are accepted; huge-angle accuracy is subject
     to the platform trigonometric implementation.
     """
-    a = _components(a, 4, "axis-angle")
-    axis, _, _ = _direction(a[..., :3])
-    return _from_unit_axis_angle(axis, a[..., 3])
+    return _from_axis_angle_samples(a, 1, _SCALAR_LAST)
 
 
 def from_rotvec(r: Any) -> np.ndarray:
     """Convert (..., 3) axis-times-radians vectors to unit quaternions."""
-    r = _components(r, 3, "rotation vector")
-    axis, scale, length = _direction(r, allow_zero=True)
-    with np.errstate(all="ignore"):
-        angle = (scale * length)[..., 0]
-    return _from_unit_axis_angle(axis, _result(angle))
+    return _from_rotvec_samples(
+        _advanced_scalar.from_rotvec, r, 1, _SCALAR_LAST, False
+    )
 
 
 def _axis_angle(q: Any) -> tuple:
@@ -288,24 +233,14 @@ def to_axis_angle(q: Any) -> np.ndarray:
     Quaternion magnitude and sign are not retained. Identity uses +X as axis.
     Exact w=0 half-turns choose the first nonzero axis component positive.
     """
-    axis, angle = _axis_angle(q)
-    return np.concatenate((axis, angle[..., None]), axis=-1)
+    return _to_axis_angle_samples(q, 1, _SCALAR_LAST)
 
 
 def to_rotvec(q: Any) -> np.ndarray:
     """Return (..., 3) canonical axis-times-principal-radians vectors."""
-    axis, angle = _axis_angle(q)
-    original = _canonical_rotation_quaternion(_components(q, 4, "quaternion"))
-    w = original[..., 0]
-    vector = original[..., 1:]
-    with np.errstate(all="ignore"):
-        vector_scale = np.max(np.abs(vector), axis=-1)
-        tiny = (w > 0) & (vector_scale <= w * 1e-8)
-        # Compute each tiny component independently; multiplying the rounded
-        # angle by a unit axis can introduce a second subnormal rounding.
-        small_vector = (2.0 * vector) / w[..., None]
-        result = np.where(tiny[..., None], small_vector, axis * angle[..., None])
-    return np.where(result == 0, 0.0, _result(result))
+    return _to_rotvec_samples(
+        _advanced_scalar.to_rotvec, q, 1, _SCALAR_LAST, False
+    )
 
 
 def to_rotation_matrix(q: Any) -> np.ndarray:
@@ -345,7 +280,7 @@ def cosh(q: Any) -> np.ndarray:
 
 def tanh(q: Any) -> np.ndarray:
     """Return quaternion hyperbolic tangent as sinh(q) / cosh(q)."""
-    return divide(sinh(q), cosh(q))
+    return _analytic_samples(_advanced_scalar.tanh, q, "tanh", _SCALAR_LAST, False)
 
 
 def power(q: Any, exponent: Any) -> np.ndarray:
@@ -367,7 +302,7 @@ def slerp(q0: Any, q1: Any, t: Any, shortest: bool = True) -> np.ndarray:
     """Spherically interpolate rotations, preserving batch dimensions."""
     if not isinstance(shortest, bool):
         raise ValueError("shortest must be a bool")  # noqa: TRY004
-    return _slerp(q0, q1, t, _SCALAR_LAST, shortest)
+    return _slerp_samples(q0, q1, t, _SCALAR_LAST, shortest)
 
 
 def skew_matrix(v: Any) -> np.ndarray:
@@ -411,7 +346,7 @@ def integrate_angular_velocity(q: Any, omega: Any, dt: Any, frame: str = "body")
 
 def tan(q: Any) -> np.ndarray:
     """Return the algebraic quaternion tangent ``sin(q) / cos(q)``."""
-    return divide(sin(q), cos(q))
+    return _analytic_samples(_advanced_scalar.tan, q, "tan", _SCALAR_LAST, False)
 
 
 def dot(lhs: Any, rhs: Any) -> np.ndarray:
@@ -463,27 +398,24 @@ def from_two_vectors(source: Any, target: Any) -> np.ndarray:
 from ... import scalar as _advanced_scalar
 from ..._numpy import (
     _align_vectors,
+    _boxminus_samples,
+    _boxplus_samples,
     _from_homogeneous_matrix,
+    _from_mrp_samples,
     _integrate_angular_velocity_samples,
     _make_sign_continuous,
-    _map_scalar_ordered,
+    _nlerp_samples,
+    _power_quaternion_samples,
+    _quaternion_derivative_samples,
     _random_quaternion,
     _rotation_covariance,
     _rotation_mean,
+    _slerp_samples,
+    _squad_samples,
+    _swing_twist_samples,
+    _to_homogeneous_matrix_samples,
+    _to_mrp_samples,
 )
-
-
-def _map_scalar(
-    function: Any,
-    *values: Any,
-    component_arguments: dict[int, tuple[int, str]],
-    result_shape: tuple[int, ...],
-) -> np.ndarray:
-    return _map_scalar_ordered(
-        function, *values, component_arguments=component_arguments,
-        result_shape=result_shape, array_scalar_last=_SCALAR_LAST,
-        function_scalar_last=False,
-    )
 
 
 # Extended quaternion mathematics and attitude APIs.
@@ -491,123 +423,108 @@ def asin(q: Any) -> np.ndarray:
     """Return the principal quaternion arcsine.
 
 NumPy inputs preserve batch axes; compatible leading axes broadcast."""
-    return _map_scalar(_advanced_scalar.asin, q,
-                       component_arguments={0: (4, "quaternion")}, result_shape=(4,))
+    return _analytic_samples(_advanced_scalar.asin, q, "asin", _SCALAR_LAST, False)
 
 
 def acos(q: Any) -> np.ndarray:
     """Return the principal quaternion arccosine.
 
 NumPy inputs preserve batch axes; compatible leading axes broadcast."""
-    return _map_scalar(_advanced_scalar.acos, q,
-                       component_arguments={0: (4, "quaternion")}, result_shape=(4,))
+    return _analytic_samples(_advanced_scalar.acos, q, "acos", _SCALAR_LAST, False)
 
 
 def atan(q: Any) -> np.ndarray:
     """Return the principal quaternion arctangent.
 
 NumPy inputs preserve batch axes; compatible leading axes broadcast."""
-    return _map_scalar(_advanced_scalar.atan, q,
-                       component_arguments={0: (4, "quaternion")}, result_shape=(4,))
+    return _analytic_samples(_advanced_scalar.atan, q, "atan", _SCALAR_LAST, False)
 
 
 def asinh(q: Any) -> np.ndarray:
     """Return the principal quaternion inverse hyperbolic sine.
 
 NumPy inputs preserve batch axes; compatible leading axes broadcast."""
-    return _map_scalar(_advanced_scalar.asinh, q,
-                       component_arguments={0: (4, "quaternion")}, result_shape=(4,))
+    return _analytic_samples(_advanced_scalar.asinh, q, "asinh", _SCALAR_LAST, False)
 
 
 def acosh(q: Any) -> np.ndarray:
     """Return the principal quaternion inverse hyperbolic cosine.
 
 NumPy inputs preserve batch axes; compatible leading axes broadcast."""
-    return _map_scalar(_advanced_scalar.acosh, q,
-                       component_arguments={0: (4, "quaternion")}, result_shape=(4,))
+    return _analytic_samples(_advanced_scalar.acosh, q, "acosh", _SCALAR_LAST, False)
 
 
 def atanh(q: Any) -> np.ndarray:
     """Return the principal quaternion inverse hyperbolic tangent.
 
 NumPy inputs preserve batch axes; compatible leading axes broadcast."""
-    return _map_scalar(_advanced_scalar.atanh, q,
-                       component_arguments={0: (4, "quaternion")}, result_shape=(4,))
+    return _analytic_samples(_advanced_scalar.atanh, q, "atanh", _SCALAR_LAST, False)
 
 
 def expm1(q: Any) -> np.ndarray:
     """Return ``exp(q)-1``, using a convergent series near zero.
 
 NumPy inputs preserve batch axes; compatible leading axes broadcast."""
-    return _map_scalar(_advanced_scalar.expm1, q,
-                       component_arguments={0: (4, "quaternion")}, result_shape=(4,))
+    return _analytic_samples(_advanced_scalar.expm1, q, "expm1", _SCALAR_LAST, False)
 
 
 def log1p(q: Any) -> np.ndarray:
     """Return ``log(1+q)``, using a convergent series near zero.
 
 NumPy inputs preserve batch axes; compatible leading axes broadcast."""
-    return _map_scalar(_advanced_scalar.log1p, q,
-                       component_arguments={0: (4, "quaternion")}, result_shape=(4,))
+    return _analytic_samples(_advanced_scalar.log1p, q, "log1p", _SCALAR_LAST, False)
 
 
 def log2(q: Any) -> np.ndarray:
     """Return the principal JPL quaternion logarithm to base two.
 
 NumPy inputs preserve batch axes; compatible leading axes broadcast."""
-    return _map_scalar(_advanced_scalar.log2, q,
-                       component_arguments={0: (4, "quaternion")}, result_shape=(4,))
+    return _analytic_samples(_advanced_scalar.log2, q, "log2", _SCALAR_LAST, False)
 
 
 def log10(q: Any) -> np.ndarray:
     """Return the principal JPL quaternion logarithm to base ten.
 
 NumPy inputs preserve batch axes; compatible leading axes broadcast."""
-    return _map_scalar(_advanced_scalar.log10, q,
-                       component_arguments={0: (4, "quaternion")}, result_shape=(4,))
+    return _analytic_samples(_advanced_scalar.log10, q, "log10", _SCALAR_LAST, False)
 
 
 def power_quaternion(q: Any, exponent: Any) -> np.ndarray:
     """Raise ``q`` to a quaternion exponent as ``exp(exponent ⊙ log(q))``.
 
 NumPy inputs preserve batch axes; compatible leading axes broadcast."""
-    return _map_scalar(_advanced_scalar.power_quaternion, q, exponent,
-                       component_arguments={0: (4, "quaternion"), 1: (4, "exponent")},
-                       result_shape=(4,))
+    return _power_quaternion_samples(
+        _advanced_scalar.power_quaternion, q, exponent, 1,
+        _SCALAR_LAST, False,
+    )
 
 
 def commutator(lhs: Any, rhs: Any) -> np.ndarray:
-    """Return the JPL algebra commutator ``lhs⊙rhs - rhs⊙lhs``.
+    """Return the Hamilton algebra commutator ``lhs*rhs - rhs*lhs``.
 
 NumPy inputs preserve batch axes; compatible leading axes broadcast."""
-    return _map_scalar(_advanced_scalar.commutator, lhs, rhs,
-                       component_arguments={0: (4, "lhs"), 1: (4, "rhs")},
-                       result_shape=(4,))
+    return _commutator_samples(lhs, rhs, 1, _SCALAR_LAST)
 
 
 def scalar_part(q: Any) -> np.ndarray:
     """Return the real/scalar coefficient of a Hamilton ``wxyz`` value.
 
 NumPy inputs preserve batch axes; compatible leading axes broadcast."""
-    return _map_scalar(_advanced_scalar.scalar_part, q,
-                       component_arguments={0: (4, "quaternion")}, result_shape=())
+    return _scalar_part(q, _SCALAR_LAST)
 
 
 def vector_part(q: Any) -> np.ndarray:
     """Return the three imaginary coefficients of a Hamilton ``wxyz`` value.
 
 NumPy inputs preserve batch axes; compatible leading axes broadcast."""
-    return _map_scalar(_advanced_scalar.vector_part, q,
-                       component_arguments={0: (4, "quaternion")}, result_shape=(3,))
+    return _vector_part(q, _SCALAR_LAST)
 
 
 def quaternion_derivative(q: Any, omega: Any, frame: str = "body") -> np.ndarray:
     """Return ``dq/dt`` for a right-handed physical angular rate.
 
 NumPy inputs preserve batch axes; compatible leading axes broadcast."""
-    return _map_scalar(_advanced_scalar.quaternion_derivative, q, omega, frame,
-                       component_arguments={0: (4, "quaternion"), 1: (3, "omega")},
-                       result_shape=(4,))
+    return _quaternion_derivative_samples(q, omega, frame, 1, _SCALAR_LAST)
 
 
 def integrate_angular_velocity_samples(
@@ -625,46 +542,42 @@ def boxplus(q: Any, delta: Any, frame: str = "body") -> np.ndarray:
     """Apply a local physical rotation-vector increment to an attitude.
 
 NumPy inputs preserve batch axes; compatible leading axes broadcast."""
-    return _map_scalar(_advanced_scalar.boxplus, q, delta, frame,
-                       component_arguments={0: (4, "quaternion"), 1: (3, "delta")},
-                       result_shape=(4,))
+    return _boxplus_samples(
+        _advanced_scalar.from_rotvec, q, delta, frame, 1, _SCALAR_LAST, False
+    )
 
 
 def boxminus(q: Any, reference: Any, frame: str = "body") -> np.ndarray:
     """Return the physical local rotation vector from ``reference`` to ``q``.
 
 NumPy inputs preserve batch axes; compatible leading axes broadcast."""
-    return _map_scalar(_advanced_scalar.boxminus, q, reference, frame,
-                       component_arguments={0: (4, "q"), 1: (4, "reference")},
-                       result_shape=(3,))
+    return _boxminus_samples(
+        _advanced_scalar.to_rotvec, q, reference, frame, 1, _SCALAR_LAST, False
+    )
 
 
 def nlerp(q0: Any, q1: Any, t: Any, shortest: bool = True) -> np.ndarray:
     """Normalized linear interpolation of JPL rotations.
 
 NumPy inputs preserve batch axes; compatible leading axes broadcast."""
-    return _map_scalar(_advanced_scalar.nlerp, q0, q1, t, shortest,
-                       component_arguments={0: (4, "q0"), 1: (4, "q1")},
-                       result_shape=(4,))
+    return _nlerp_samples(
+        _advanced_scalar.nlerp, q0, q1, t, shortest,
+        array_scalar_last=_SCALAR_LAST, function_scalar_last=False,
+    )
 
 
 def squad(q0: Any, q1: Any, a: Any, b: Any, t: Any) -> np.ndarray:
     """Evaluate JPL SQUAD from endpoints and their control quaternions.
 
 NumPy inputs preserve batch axes; compatible leading axes broadcast."""
-    return _map_scalar(_advanced_scalar.squad, q0, q1, a, b, t,
-                       component_arguments={0: (4, "q0"), 1: (4, "q1"),
-                                            2: (4, "a"), 3: (4, "b")},
-                       result_shape=(4,))
+    return _squad_samples(q0, q1, a, b, t, _SCALAR_LAST)
 
 
 def align_sign(q: Any, reference: Any) -> np.ndarray:
     """Choose the sign of ``q`` closest to ``reference`` without normalization.
 
 NumPy inputs preserve batch axes; compatible leading axes broadcast."""
-    return _map_scalar(_advanced_scalar.align_sign, q, reference,
-                       component_arguments={0: (4, "q"), 1: (4, "reference")},
-                       result_shape=(4,))
+    return _align_sign_samples(q, reference)
 
 
 def make_sign_continuous(quaternions: Any) -> np.ndarray:
@@ -713,26 +626,25 @@ def from_mrp(sigma: Any) -> np.ndarray:
     """Convert modified Rodrigues parameters to a unit JPL quaternion.
 
 NumPy inputs preserve batch axes; compatible leading axes broadcast."""
-    return _map_scalar(_advanced_scalar.from_mrp, sigma,
-                       component_arguments={0: (3, "sigma")}, result_shape=(4,))
+    return _from_mrp_samples(
+        _advanced_scalar.from_mrp, sigma, 1, _SCALAR_LAST, False
+    )
 
 
 def to_mrp(q: Any) -> np.ndarray:
     """Convert a JPL attitude to principal modified Rodrigues parameters.
 
 NumPy inputs preserve batch axes; compatible leading axes broadcast."""
-    return _map_scalar(_advanced_scalar.to_mrp, q,
-                       component_arguments={0: (4, "quaternion")}, result_shape=(3,))
+    return _to_mrp_samples(
+        _advanced_scalar.to_mrp, q, 1, _SCALAR_LAST, False
+    )
 
 
 def swing_twist(q: Any, axis: Any) -> tuple[np.ndarray, np.ndarray]:
     """Decompose a JPL attitude as ``swing ⊙ twist`` about an axis.
 
 NumPy inputs preserve batch axes; compatible leading axes broadcast."""
-    values = _map_scalar(_advanced_scalar.swing_twist, q, axis,
-                         component_arguments={0: (4, "quaternion"), 1: (3, "axis")},
-                         result_shape=(2, 4))
-    return values[..., 0, :], values[..., 1, :]
+    return _swing_twist_samples(q, axis, 1, _SCALAR_LAST)
 
 
 def rotation_mean(quaternions: Any, weights: Any = None, method: str = "markley",
@@ -778,9 +690,7 @@ def to_homogeneous_matrix(q: Any, translation: Any = (0.0, 0.0, 0.0)) -> np.ndar
     """Return a 4x4 homogeneous matrix for a JPL attitude and translation.
 
 NumPy inputs preserve batch axes; compatible leading axes broadcast."""
-    return _map_scalar(_advanced_scalar.to_homogeneous_matrix, q, translation,
-                       component_arguments={0: (4, "quaternion"), 1: (3, "translation")},
-                       result_shape=(4, 4))
+    return _to_homogeneous_matrix_samples(q, translation, 1, _SCALAR_LAST)
 
 
 def from_homogeneous_matrix(matrix: Any, atol: Any = 1e-8) -> np.ndarray:
@@ -788,8 +698,7 @@ def from_homogeneous_matrix(matrix: Any, atol: Any = 1e-8) -> np.ndarray:
 
 NumPy inputs preserve batch axes; compatible leading axes broadcast."""
     return _from_homogeneous_matrix(
-        matrix, _advanced_scalar.from_homogeneous_matrix, atol,
-        array_scalar_last=_SCALAR_LAST, function_scalar_last=False,
+        matrix, 1, atol, array_scalar_last=_SCALAR_LAST,
     )
 
 
@@ -797,5 +706,4 @@ def so3_adjoint(q: Any) -> np.ndarray:
     """Return the SO(3) adjoint matrix, equal to the active rotation matrix.
 
 NumPy inputs preserve batch axes; compatible leading axes broadcast."""
-    return _map_scalar(_advanced_scalar.so3_adjoint, q,
-                       component_arguments={0: (4, "quaternion")}, result_shape=(3, 3))
+    return _matrix_components(q, 1, _SCALAR_LAST, "rotation")

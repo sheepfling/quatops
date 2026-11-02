@@ -1,6 +1,8 @@
 """Static acceptance of real scalar inputs beyond Python's built-in float."""
 
-from typing import SupportsFloat, assert_type
+from typing import SupportsFloat
+
+from typing_extensions import assert_type
 
 import numpy as np
 

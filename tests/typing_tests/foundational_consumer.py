@@ -1,6 +1,6 @@
 """Static return-type checks for the foundational scalar API additions."""
 
-from typing import assert_type
+from typing_extensions import assert_type
 
 from quatops import dataclass, namedtuple, scalar
 from quatops.hamilton import dataclass as hamilton_dataclass

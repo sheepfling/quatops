@@ -22,15 +22,35 @@ RotVec = Vector
 def _components(
     values: Iterable[FloatT], length: int, name: str
 ) -> tuple[float, ...]:
-    try:
-        items = tuple(values)
-    except TypeError as exc:
-        raise ValueError(f"{name} must be an iterable of {length} real numbers") from exc
+    if type(values) is tuple:
+        items = values
+    else:
+        try:
+            items = tuple(values)
+        except TypeError as exc:
+            raise ValueError(
+                f"{name} must be an iterable of {length} real numbers"
+            ) from exc
     if len(items) != length:
         raise ValueError(f"{name} must contain exactly {length} components")
+
+    if length == 4:
+        first, second, third, fourth = items
+        if (type(first) is float and type(second) is float
+                and type(third) is float and type(fourth) is float):
+            if not (isfinite(first) and isfinite(second)
+                    and isfinite(third) and isfinite(fourth)):
+                raise ValueError(f"{name} must contain finite real numbers")
+            return items
+    elif length == 3:
+        first, second, third = items
+        if type(first) is float and type(second) is float and type(third) is float:
+            if not (isfinite(first) and isfinite(second) and isfinite(third)):
+                raise ValueError(f"{name} must contain finite real numbers")
+            return items
+
     if type(items[0]) is float and all(type(value) is float for value in items):
-        # Built-in float tuples are the common hot path. Keep the static
-        # SupportsFloat contract without protocol checks or redundant casts.
+        # Built-in floats need no conversion; keep their tuple as the result.
         result = items
     else:
         if not all(isinstance(value, Real) or isinstance(value, FloatLike)
@@ -69,7 +89,16 @@ def _real_scalar(value: FloatLike, name: str) -> float:
 
 
 def _checked(values: tuple) -> tuple:
-    if not all(isfinite(value) for value in values):
+    if len(values) == 4:
+        finite = (isfinite(values[0]) and isfinite(values[1])
+                  and isfinite(values[2]) and isfinite(values[3]))
+    elif len(values) == 3:
+        finite = isfinite(values[0]) and isfinite(values[1]) and isfinite(values[2])
+    elif len(values) == 1:
+        finite = isfinite(values[0])
+    else:
+        finite = all(isfinite(value) for value in values)
+    if not finite:
         raise OverflowError("quaternion operation produced a non-finite result")
     return values
 
@@ -555,21 +584,18 @@ def rotate(q: Iterable[FloatT], v: Iterable[FloatT]) -> Vector:
     w, x, y, z = parts
     vx, vy, vz = _vector(v)
     w2, x2, y2, z2 = w*w, x*x, y*y, z*z
-    inv_denominator = 1./ (w2 + x2 + y2 + z2)
+    denominator = w2 + x2 + y2 + z2
     # Compute each component independently.  A shared vector scale can erase a
     # small component when another one is near the largest representable float.
-    def coefficient(value: FloatLike) -> float:
-        return min(1.0, max(-1.0, value * inv_denominator))
-
-    m00 = coefficient(w2 + x2 - y2 - z2)
-    m01 = coefficient(2*(x*y - w*z))
-    m02 = coefficient(2*(x*z + w*y))
-    m10 = coefficient(2*(x*y + w*z))
-    m11 = coefficient(w2 - x2 + y2 - z2)
-    m12 = coefficient(2*(y*z - w*x))
-    m20 = coefficient(2*(x*z - w*y))
-    m21 = coefficient(2*(y*z + w*x))
-    m22 = coefficient(w2 - x2 - y2 + z2)
+    m00 = min(1.0, max(-1.0, (w2 + x2 - y2 - z2) / denominator))
+    m01 = min(1.0, max(-1.0, (2*(x*y - w*z)) / denominator))
+    m02 = min(1.0, max(-1.0, (2*(x*z + w*y)) / denominator))
+    m10 = min(1.0, max(-1.0, (2*(x*y + w*z)) / denominator))
+    m11 = min(1.0, max(-1.0, (w2 - x2 + y2 - z2) / denominator))
+    m12 = min(1.0, max(-1.0, (2*(y*z - w*x)) / denominator))
+    m20 = min(1.0, max(-1.0, (2*(x*z - w*y)) / denominator))
+    m21 = min(1.0, max(-1.0, (2*(y*z + w*x)) / denominator))
+    m22 = min(1.0, max(-1.0, (w2 - x2 - y2 + z2) / denominator))
     return _checked((_dot3(m00, m01, m02, vx, vy, vz),
                      _dot3(m10, m11, m12, vx, vy, vz),
                      _dot3(m20, m21, m22, vx, vy, vz)))  # type: ignore[return-value]

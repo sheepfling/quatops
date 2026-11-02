@@ -45,14 +45,14 @@ An earlier local run on another checkout passed in the environment listed
 below. It is historical evidence, not an automatic claim about later source
 changes; rerun the setup commands above to verify the checkout you are using.
 
-The full suite passed in the repository environment on CPython 3.15.2 with
-NumPy 2.5.4, numpy-quaternion 2024.0.3, SciPy 1.18.1, and pytest 9.2.0:
+The full default source suite passed in the repository environment on CPython
+3.15.2 with NumPy 2.5.4, numpy-quaternion 2024.0.3, SciPy 1.18.1, and pytest
+9.2.0:
 
-**1,335 passed, 6 skipped.** Five skips are the expected Hamilton cases for a
-golden test of explicit JPL-to-Hamilton conversion; the remaining skip is the
-extended-range check because this platform's `longdouble` has no wider range
-than `float64`. SciPy-backed and numpy-quaternion reference tests ran in this
-environment.
+**1,325 passed, 1 skipped; 111 opt-in benchmark tests were deselected.** The
+skip is the extended-range check because this platform's `longdouble` has no
+wider range than `float64`. SciPy-backed and numpy-quaternion reference tests
+ran in this environment.
 
 The three documented Mypy consumer files also passed with no issues. The
 float32 consumer checks scalar inputs and explicit Python-float outputs across
@@ -172,14 +172,90 @@ workloads compare multiply and rotate on 10,000 XYZW quaternions. Timings
 include input validation and result construction, and are local sanity checks,
 not a general performance guarantee.
 
-On the repository machine, an interleaved run with CPython 3.15.2 and NumPy
-2.5.4 put nearly all matched scalar workloads within about 4% between
-conventions. JPL dataclass inversion and JPL matrix-to-quaternion conversion
-were about 11% and 5–7% faster, respectively. NumPy multiply and rotate were
-within measurement resolution. `tests/test_namespaces.py` checks direct
+The recorded run found broadly similar scalar performance between Hamilton
+and JPL, with operation-specific winners. NumPy multiplication and rotation
+were comparable between conventions. `tests/test_namespaces.py` checks direct
 function identity for convention-neutral JPL kernels and patches
 Hamilton/conversion paths while exercising basic and extended JPL scalar
 operations.
+
+Reproducible scalar and batch comparisons live in `tests/benchmarks/`. Run
+`.venv/bin/python experiments/one_off_benchmark.py` to compare hot and cold
+Hamilton/JPL one-off workloads. Add `--include-vectorized` to include array
+workloads. The report labels each workload's winner; `--json PATH` records the
+medians and environment for that run.
+
+Run all grouped vectorized comparisons and save the raw results with:
+
+```sh
+.venv/bin/python -m pytest tests/benchmarks -m benchmark --benchmark-only --benchmark-group-by=group --benchmark-columns=median --benchmark-json=/tmp/quatops-benchmarks.json
+```
+
+The benchmark groups check correctness before timing and warm optional Numba
+kernels. The recorded run used CPython 3.15.2, NumPy 2.5.4, SciPy 1.18.1,
+numpy-quaternion 2024.0.3, and Numba 0.68.1. The run reports a winner for each
+one-off case and shows vectorized parity for the tested conversion and rotation
+workloads. Some prebuilt SciPy and raw numpy-quaternion routes remain faster;
+the JSON report keeps each per-case result visible.
+
+Numba remains optional and lazy. Install the `performance` extra to enable the
+compiled multiplication, vector rotation, matrix, Euler, rotation-vector,
+axis-angle, integration, interpolation, MRP, analytic-function and power,
+skew/Jacobian, sequence-continuity, batch-estimation, and coefficient paths.
+Most kernels serve batches of 128 or more; sampled integration uses trajectory
+count times interval count. The pure NumPy fallbacks remain available when
+Numba is absent or a kernel cannot compile.
+
+## Additional compiled NumPy coverage
+
+Inspect Numba dispatcher coverage and confirm that every registered kernel
+compiled a nopython signature:
+
+```sh
+.venv/bin/python experiments/numba_coverage.py
+```
+
+The report warms the public batch paths for Hamilton/JPL and WXYZ/XYZW, then
+lists each registered `njit` signature or GUFunc loop signature as `compiled`,
+`registered` (loaded but not compiled), or `missing`. The pytest suite runs the
+same check, so an installed Numba backend with an uncompiled registered kernel
+fails validation. This measures dispatcher compilation coverage; it does not
+measure which branches or source lines inside the compiled kernels ran.
+The recorded CPython 3.15.2 / Numba 0.68.1 run compiled all 32 registered
+dispatchers.
+
+Run the grouped interpolation, MRP, integration, and coefficient-operation
+comparisons with:
+
+```sh
+.venv/bin/python -m pytest tests/benchmarks/test_numpy_fast_coverage.py -m benchmark --benchmark-only --benchmark-group-by=group --benchmark-columns=median
+```
+
+The preflight checks correctness and compares compiled, fallback, and external
+implementations. In the recorded run, compiled interpolation, MRP, and sampled
+integration paths outperformed their scalar or NumPy fallbacks. Coefficient
+operations had mixed rankings: normalization, inverse, and dot were
+competitive with checked numpy-quaternion, while norm remained slower. Use the
+saved benchmark output for exact medians and the current winner per operation.
+
+The remaining compiled paths have their own opt-in comparisons:
+
+```sh
+.venv/bin/python -m pytest tests/benchmarks/test_numpy_remaining_numba.py -m benchmark --benchmark-only --benchmark-group-by=group --benchmark-columns=median
+```
+
+The recorded run showed faster compiled axis-angle, analytic-function, power,
+estimator, and Jacobian paths than their NumPy or scalar fallbacks. QuatOps
+`exp` and `log` were comparable to raw and checked numpy-quaternion for the
+tested batch. These are qualitative results from one machine; the benchmark
+output contains exact medians and environment metadata for each rerun.
+
+Other batch APIs reuse the compiled primitives: SQUAD composes SLERP, local
+attitude updates compose rotation-vector conversion and multiplication,
+quaternion derivatives use the multiplication kernel, and homogeneous
+transforms and SO(3) adjoints use the matrix kernels. Their correctness is
+covered in `tests/test_numba_compatibility.py`; this benchmark file reports
+direct timings for the added batch paths above.
 
 ## Package and numerical scope
 

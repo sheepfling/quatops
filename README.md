@@ -1,56 +1,90 @@
 # QuatOps
 
-## Reuse verified quaternion math with conventions chosen up front
+QuatOps provides verified quaternion algebra and rotation operations through
+lightweight Python functions for individual quaternions and vectorized NumPy
+APIs for large batches.
 
-QuatOps exists so applications and coding agents can use quaternion math
-without reimplementing it just to keep a lightweight, plain-Python path. The
-canonical `quatops.python.hamilton` and `quatops.python.jpl` backends operate on
-ordinary four-tuples: no quaternion wrapper class, no third-party runtime
-dependency, and no per-call convention dispatch. Their public operations are
-covered by seeded tests against independent references (including
-`numpy-quaternion` and SciPy) and separately derived invariants; see the
-[oracle coverage](docs/ORACLE_COVERAGE.md).
+## Why QuatOps?
+
+AI coding agents often rewrite small quaternion operations instead of using a
+library. The formulas are short, but every copy becomes another implementation
+to verify, with its own assumptions about multiplication, coefficient order,
+rotation behavior, and numerical edge cases.
+
+The performance needs also differ by workload. For individual operations,
+direct Python arithmetic can avoid the object construction and conversion
+overhead of a broader API such as SciPy's `Rotation`. For large batches,
+vectorized NumPy operations avoid a Python loop over every quaternion.
+
+QuatOps brings both approaches into one tested library:
+
+- **Lightweight Python operations.** Ordinary four-tuples, no quaternion wrapper
+  class, no third-party runtime dependency, and no per-call convention dispatch.
+- **Vectorized NumPy operations.** Array and batch processing with explicit
+  coefficient order and component-axis placement.
+- **Explicit conventions.** Choose Hamilton or JPL at import time and use the
+  selected module throughout your code.
+- **Independent verification.** Public operations are covered by seeded tests
+  against independent references, including SciPy and `numpy-quaternion`,
+  alongside separately derived invariants. See the
+  [oracle coverage](docs/ORACLE_COVERAGE.md).
+
+The aim is to make the lightweight implementation reusable and tested, while
+providing a consistent approach when the workload calls for NumPy.
 
 If an operation you need is missing, add it to QuatOps with oracle coverage
 rather than copying an unverified quaternion kernel into an application.
 
-## When to use QuatOps
+## Quick start
 
-QuatOps selects convention and representation at import time, keeping those
-choices visible in code and avoiding per-call convention dispatch or
-convention conversion.
+For individual operations, use the plain Python tuple backend:
 
-Choose a different tool when its data model better fits the job:
+```python
+from math import pi
 
-| Use | Best fit |
-| --- | --- |
-| QuatOps | Explicit Hamilton/JPL behavior, plain Python tuple support, or direct access to quaternion algebra alongside rotation tools. |
-| [SciPy `Rotation`](https://docs.scipy.org/doc/scipy/reference/generated/scipy.spatial.transform.Rotation.html) | A rotation-focused object with conversions among quaternions, matrices, rotation vectors, Euler angles, and other rotation representations. |
-| [`numpy-quaternion`](https://quaternion.readthedocs.io/en/latest/) | A quaternion dtype integrated with NumPy arrays and NumPy-style quaternion arithmetic. |
+from quatops.python import hamilton
 
-QuatOps covers general quaternion algebra alongside rotation operations. These
-tools overlap; choose based on the conventions, value model, and ecosystem
-that fit your code.
+q = hamilton.from_axis_angle((0, 0, 1, pi / 2))
+rotated = hamilton.rotate(q, (1, 0, 0))
+```
 
-**Terminology:** a *tuple backend* stores quaternion values as Python tuples;
-NamedTuple, dataclass, and NumPy backends name other value representations.
-The *scalar coefficient* is the real component `w`. `wxyz` (`scalar-first`)
-and `xyzw` (`scalar-last`) describe where that coefficient appears, not the
-value representation. The top-level `quatops.scalar` module is the historical
-Hamilton tuple backend; its quaternion coefficients are stored as `wxyz`.
+For NumPy operations, select the convention and coefficient order explicitly:
+
+```python
+from math import pi
+
+from quatops.numpy.jpl import xyzw as jpl_xyzw
+
+q = jpl_xyzw.from_rotvec((0, 0, pi / 2))
+rotated = jpl_xyzw.rotate(q, (1, 0, 0))
+```
+
+The NumPy modules also provide vectorized operations over arrays and batches.
 
 ## Choose an API
 
-Choose the convention to match the system that provides or consumes your
-quaternions. Hamilton uses the positive vector cross term; JPL uses the
-negative one. Both represent active, right-handed rotations. `wxyz` and
-`xyzw` describe coefficient order; they do **not** select Hamilton or JPL.
-Use a JPL module's `from_hamilton` or `to_hamilton` when converting
-conventions. Reordering components alone does not convert a quaternion.
+Select the convention and representation at import time. QuatOps does not need
+to dispatch on those choices or convert conventions on every call.
+
+### Convention
+
+Choose the convention used by the system that provides or consumes your
+quaternions. Hamilton uses the positive vector cross term; JPL uses the negative
+one. In QuatOps, both backends expose active, right-handed rotations.
+
+Coefficient order is a separate choice: `wxyz` and `xyzw` specify where the
+scalar coefficient `w` appears. They do **not** select Hamilton or JPL.
+Use a JPL module's `from_hamilton` or `to_hamilton` to convert conventions;
+reordering components alone does not perform that conversion.
+
+If the source system does not state its convention, verify its multiplication
+rule rather than inferring it from coefficient order.
+
+### Representation
 
 | Representation | Pick it when |
 | --- | --- |
-| Plain Python tuple | You want ordinary tuple values, no third-party runtime dependency, and minimal representation overhead. |
+| Plain Python tuple | You want ordinary values, minimal representation overhead, and no third-party runtime dependency. |
 | `NamedTuple` | You want named immutable fields and tuple-style unpacking. |
 | Frozen slotted dataclass | You want named immutable attributes and do not need tuple indexing. |
 | NumPy array | You want vectorized operations over arrays or batches and already use NumPy. |
@@ -65,57 +99,33 @@ Use these fully specified module paths for new code:
 | NumPy, `wxyz` coefficient order | `quatops.numpy.hamilton.wxyz` | `quatops.numpy.jpl.wxyz` |
 | NumPy, `xyzw` coefficient order | `quatops.numpy.hamilton.xyzw` | `quatops.numpy.jpl.xyzw` |
 
-For NumPy, choose `wxyz` or `xyzw` to match the coefficient order expected by
-the surrounding code. The standard modules put the four-value quaternion
-component axis last (`(..., 4)`). Choose a `components_first` module only when
-your arrays need that axis at axis 0 (`(4, ...)`). For example,
-`quatops.numpy.jpl.components_first.xyzw` accepts `(4, ...)` quaternions whose
-four values are ordered `x, y, z, w`. Coefficient order and component-axis
-placement are independent choices.
+Call operations through the selected module so the convention stays visible at
+each call site. Plain tuples and NumPy arrays carry no convention tag; explicitly
+convert values before passing them to another convention.
 
-For new code, import a fully specified module and call operations through that
-module. This keeps the convention visible at each call site. If the source
-system does not state its convention, verify its multiplication rule; do not
-guess from `wxyz` or `xyzw`:
+### NumPy layout
 
-```python
-from quatops.numpy.jpl import xyzw as jpl_xyzw
+Choose `wxyz` or `xyzw` to match the coefficient order expected by the
+surrounding code. The standard modules place the quaternion component axis
+last: `(..., 4)`.
 
-q = jpl_xyzw.from_rotvec((0.0, 0.0, 1.0))
-```
+Use a `components_first` module when that axis belongs at axis 0: `(4, ...)`.
+For example, `quatops.numpy.jpl.components_first.xyzw` accepts arrays with shape
+`(4, ...)`, with components ordered `x, y, z, w` along axis 0.
 
-Plain tuples and NumPy arrays carry no convention tag. Keep operations
-qualified through the selected module, and explicitly convert values before
-passing them to another convention.
+Coefficient order and component-axis placement are independent choices.
 
-The package retains alternative import paths for compatibility. The
-[API contract](docs/API.md#alternative-import-paths) lists them; they do not
-auto-detect or convert a value's convention. Use the canonical paths in the
-table above for new code. The full storage rules, operation catalog,
-validation behavior, and numerical limits are in the
-[API contract](docs/API.md).
+## How QuatOps fits
 
-## Example
+QuatOps covers general quaternion algebra alongside rotation operations.
+Choose based on the workload, conventions, and value representation your code
+needs.
 
-```python
-from math import pi
-from quatops.python import hamilton
-
-q = hamilton.from_axis_angle((0, 0, 1, pi / 2))
-rotated = hamilton.rotate(q, (1, 0, 0))
-```
-
-For NumPy arrays, import a complete layout module, for example:
-
-```python
-from quatops.numpy.jpl import xyzw
-
-q = xyzw.from_rotvec((0, 0, pi / 2))
-rotated = xyzw.rotate(q, (1, 0, 0))
-```
-
-For arrays with the coefficient axis at axis 0, use the matching
-`components_first` module.
+| Tool | Best fit |
+| --- | --- |
+| QuatOps | Lightweight Python operations, vectorized NumPy batches, explicit Hamilton/JPL behavior, and quaternion algebra alongside rotation tools. |
+| [SciPy `Rotation`](https://docs.scipy.org/doc/scipy/reference/generated/scipy.spatial.transform.Rotation.html) | A rotation-focused object with conversions among quaternions, matrices, rotation vectors, Euler angles, and other rotation representations. |
+| [`numpy-quaternion`](https://quaternion.readthedocs.io/en/latest/) | A quaternion dtype integrated with NumPy arrays and NumPy-style quaternion arithmetic. |
 
 For game-engine boundaries, use a caller-defined `SignedAxisMap` to convert
 quaternion keyframes once, then sample them with the target engine's native
@@ -124,8 +134,30 @@ SLERP. See the [trajectory guide](docs/engines/trajectory.md) and the
 
 ## Install
 
-`python -m pip install .` installs the dependency-free scalar backends. Use
-`python -m pip install '.[numpy]'` for NumPy operations.
+From a source checkout, install the dependency-free Python backends:
 
-Contributor setup, verification, performance timing, and research experiments
-are collected in the [documentation map](docs/README.md).
+```bash
+python -m pip install .
+```
+
+To include NumPy operations:
+
+```bash
+python -m pip install '.[numpy]'
+```
+
+## Documentation and compatibility
+
+The [API contract](docs/API.md) covers storage rules, available operations,
+validation behavior, and numerical limits. The
+[documentation map](docs/README.md) collects contributor setup, verification,
+performance timing, and research experiments.
+
+The package retains alternative import paths for compatibility. In particular,
+`quatops.scalar` is the historical Hamilton tuple backend and stores
+coefficients in `wxyz` order. Here, `scalar` names that historical API;
+the scalar coefficient is the real component `w`.
+
+See [alternative import paths](docs/API.md#alternative-import-paths) for the
+full list. These paths do not auto-detect or convert conventions. Use the
+fully specified module paths above for new code.

@@ -1,6 +1,6 @@
 """Installed-wheel typing_tests smoke test; checked by mypy, Pyright, and ty."""
 
-from typing import assert_type
+from typing_extensions import assert_type
 
 from quatops import dataclass, namedtuple, scalar
 

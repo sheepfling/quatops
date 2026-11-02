@@ -11,6 +11,11 @@ from typing import Any
 
 import numpy as np
 
+from .. import _numpy
+from .._numpy import (
+    _numba_rotation_kernel,
+    _warn_numba_failure,
+)
 from .basis import SignedAxisMap
 
 
@@ -38,6 +43,24 @@ def _map(
         raise ValueError("the quaternion component axis must have length four")
     if not isinstance(axis_map, SignedAxisMap):
         raise TypeError("axis_map must be a SignedAxisMap")
+
+    sample_count = moved.size // 4
+    if sample_count >= 128 and values.dtype in (np.dtype("float32"), np.dtype("float64")):
+        kernel = _numba_rotation_kernel("engine_axis_map")
+        if kernel is not None:
+            rows = np.ascontiguousarray(moved.reshape((-1, 4)))
+            indices = np.asarray(axis_map._indices, dtype=np.int64)
+            signs = np.asarray(
+                axis_map._jpl_signs if jpl else axis_map._hamilton_signs,
+                dtype=np.int64,
+            )
+            try:
+                result = kernel(rows, indices, signs, scalar_first)
+            except Exception as exc:  # noqa: BLE001
+                _numpy._NUMBA_ROTATION_KERNELS.pop("engine_axis_map", None)
+                _warn_numba_failure("engine axis map", exc)
+            else:
+                return np.moveaxis(result.reshape(moved.shape), -1, axis)
 
     output = np.empty_like(moved)
     offset = 1 if scalar_first else 0
@@ -80,8 +103,8 @@ def map_jpl_wxyz(q: Any, axis_map: SignedAxisMap,
 
 
 __all__ = [
-    "map_hamilton_xyzw",
     "map_hamilton_wxyz",
-    "map_jpl_xyzw",
+    "map_hamilton_xyzw",
     "map_jpl_wxyz",
+    "map_jpl_xyzw",
 ]
