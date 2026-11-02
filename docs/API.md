@@ -369,11 +369,96 @@ as in the other NumPy APIs.
 
 ### Attitude conversions, alignment, statistics, and random sampling
 
-`from_euler(angles, sequence='xyz')` and `to_euler(q, sequence='xyz')` use
-radians and the six Tait-Bryan axis permutations. A lowercase sequence such as
-`'xyz'` means fixed/extrinsic rotations; the uppercase form `'XYZ'` means
-body/intrinsic rotations. At gimbal lock, `to_euler` sets the third angle to
-zero. The conversions match SciPy's sequence convention.
+`from_euler(angles, sequence='xyz', *, degrees=False)` constructs a rotation.
+`to_euler(q, sequence='xyz', gimbal_tolerance=1e-12, *, degrees=False)` extracts
+angles, and `to_euler_with_status(q, sequence='xyz', *, degrees=False,
+gimbal_tolerance=1e-12)` also reports singularity. Angles are radians unless
+`degrees=True`. In each angle triple, entries one, two, and three correspond to
+the first, second, and third letters of `sequence`, in that order.
+The default `sequence='xyz'` is extrinsic Tait-Bryan rotation about fixed X,
+then Y, then Z axes. Pass `sequence='ZYX'` for the intrinsic yaw-pitch-roll
+example below.
+
+There are twelve axis patterns, each with lowercase and uppercase spellings:
+
+| Family | Lowercase patterns |
+| --- | --- |
+| Tait-Bryan (three distinct axes) | `xyz`, `xzy`, `yxz`, `yzx`, `zxy`, `zyx` |
+| Proper Euler (first and third axes match) | `xyx`, `xzx`, `yxy`, `yzy`, `zxz`, `zyz` |
+
+This gives 24 valid sequence strings: 12 lowercase extrinsic forms and their
+12 uppercase intrinsic forms.
+
+Lowercase means extrinsic rotations about fixed, global axes. Uppercase means
+intrinsic rotations about the moving body axes. Use one case throughout; mixed
+case sequences are invalid. These case rules match SciPy's
+[`Rotation.from_euler`](https://docs.scipy.org/doc/scipy/reference/generated/scipy.spatial.transform.Rotation.from_euler.html)
+convention.
+
+The sequence also specifies the active rotation order. For column vectors, let
+`R_x(a)` denote the active, right-handed matrix for angle `a` about X, and
+likewise for Y and Z. Then lowercase `xyz` with angles `(a, b, c)` gives
+`R_z(c) R_y(b) R_x(a)`: the fixed-axis rotations occur about X, then Y, then Z.
+Uppercase `XYZ` with the same triple gives
+`R_x(a) R_y(b) R_z(c)`: the body-axis rotations occur about X, then Y, then Z.
+Equivalently, `XYZ` with `(a, b, c)` represents the same rotation as `zyx`
+with `(c, b, a)`. These meanings are identical in Hamilton and JPL modules and
+in `wxyz`, `xyzw`, and component-first storage; those choices affect quaternion
+coefficient signs and placement, not the Euler sequence.
+
+These Euler APIs describe active rotations. `rotate(q, v)` applies the
+represented rotation to the vector, `v_rotated = R v`, while the coordinate
+basis stays fixed. A passive coordinate transform uses the inverse rotation,
+`R^-1 = R^T`. Compute it with `rotate(inverse(q), v)`; extract its Euler angles
+with `to_euler(inverse(q), sequence)`. Thus `to_euler(q, ...)` extracts angles
+for the active map represented by `q`.
+
+For a Tait-Bryan yaw-pitch-roll example, choose the convention explicitly:
+`sequence='ZYX'` with `(yaw, pitch, roll)` means intrinsic body-axis rotations
+about Z, then Y, then X, and gives
+`R_z(yaw) R_y(pitch) R_x(roll)`. The equivalent extrinsic call is
+`sequence='xyz'` with `(roll, pitch, yaw)`. The `zyx` and `ZYX` spellings use
+different axis frames, so their same-valued triples describe different
+rotations. The name “yaw-pitch-roll” alone does not specify an Euler convention.
+
+The returned angles are principal representatives. The first and third angles
+lie in `[-pi, pi)`. The middle angle lies in `[-pi/2, pi/2]` for Tait-Bryan
+sequences and `[0, pi]` for proper Euler sequences. The singular middle angles
+are `+/-pi/2` for Tait-Bryan and `0` or `pi` for proper Euler. At a singularity,
+the third requested angle is set to zero and the first is chosen to preserve
+the rotation.
+
+`gimbal_tolerance` must satisfy `0 <= gimbal_tolerance < pi/2`. It is an angular
+distance in radians from either singular middle-angle endpoint and defaults to
+`1e-12`. When the distance is within the tolerance, extraction uses the
+singular representative.
+`to_euler_with_status` returns `EulerResult(angles, gimbal_lock)`, where the
+flag is true for exact or tolerance-snapped singularities. `degrees=True`
+converts the angle values only; `gimbal_tolerance` remains in radians.
+Quaternion inputs may be scaled by any finite nonzero factor. Since many angle
+triples represent the same rotation, round trips should compare rotations
+rather than expect the original triple.
+
+For engine-specific Euler orders, units, basis mappings, and keyframe
+trajectory conversion, see the separate [game-engine references](engines/README.md).
+Those pages document external library conventions; this API contract remains
+the source of truth for QuatOps behavior.
+
+`quatops.engines.SignedAxisMap` provides precomputed signed-axis conversion
+from caller-declared source axes to engine XYZW quaternion values. Its scalar
+methods accept Hamilton or JPL coefficients in either order; the optional
+`quatops.engines.numpy` module maps NumPy batches while preserving their
+component axis. These conversions preserve magnitude and keyframe signs; they
+do not normalize or choose interpolation paths.
+
+NumPy Euler functions accept independent `angle_axis` and `component_axis`
+arguments, each defaulting to `-1` in trailing-component modules and `0` in
+`components_first` modules. For `from_euler`, `angle_axis` locates the input
+length-three axis and `component_axis` selects the output quaternion axis. For
+the inverse functions, these identify the input quaternion axis and output
+length-three angle axis respectively. All other axes remain batch dimensions.
+The `to_euler_with_status` mask has exactly those batch dimensions and no angle
+or quaternion component axis.
 
 `from_mrp(sigma)` converts modified Rodrigues parameters to a canonical unit
 quaternion. `to_mrp(q)` first chooses the canonical sign and returns the

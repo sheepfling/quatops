@@ -2,6 +2,7 @@
 
 from ..hamilton.dataclass import (
     AxisAngle,
+    EulerResult,
     Quaternion,
     RotVec,
     add,
@@ -51,6 +52,7 @@ from ..hamilton.dataclass import (
 
 __all__ = [
     'AxisAngle',
+    'EulerResult',
     'Quaternion',
     'RotVec',
     'add',
@@ -124,6 +126,7 @@ from ..hamilton.dataclass import (
     squad,
     swing_twist,
     to_euler,
+    to_euler_with_status,
     to_homogeneous_matrix,
     to_mrp,
     vector_part,
@@ -162,6 +165,7 @@ __all__ += [
     'squad',
     'swing_twist',
     'to_euler',
+    'to_euler_with_status',
     'to_homogeneous_matrix',
     'to_mrp',
     'vector_part',

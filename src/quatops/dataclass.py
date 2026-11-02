@@ -12,6 +12,7 @@ from dataclasses import dataclass
 from math import hypot
 
 from . import scalar as _scalar
+from ._advanced import EulerResult
 from ._typing import FloatLike, FloatT
 
 @dataclass(frozen=True)
@@ -424,13 +425,25 @@ def make_sign_continuous(quaternions: Iterable[Iterable[FloatT]]) -> tuple[Quate
     """Choose consecutive signs so adjacent coefficient dots are nonnegative."""
     return tuple(Quaternion(*q) for q in _scalar.make_sign_continuous(quaternions))
 
-def from_euler(angles: Iterable[FloatT], sequence: str = "xyz") -> Quaternion:
-    """Construct a rotation from three radians and a Tait-Bryan sequence."""
-    return Quaternion(*_scalar.from_euler(angles, sequence))
+def from_euler(angles: Iterable[FloatT], sequence: str = "xyz", *,
+               degrees: bool = False) -> Quaternion:
+    """Construct a rotation from angles and an Euler axis sequence."""
+    return Quaternion(*_scalar.from_euler(angles, sequence, degrees=degrees))
 
-def to_euler(q: Iterable[FloatT], sequence: str = "xyz") -> RotVec:
-    """Extract three principal radians in the requested Tait-Bryan sequence."""
-    return RotVec(*_scalar.to_euler(q, sequence))
+def to_euler(q: Iterable[FloatT], sequence: str = "xyz",
+             gimbal_tolerance: FloatLike = 1e-12, *,
+             degrees: bool = False) -> RotVec:
+    """Extract principal angles in the requested Euler sequence."""
+    return RotVec(*_scalar.to_euler(q, sequence, degrees=degrees,
+                                   gimbal_tolerance=gimbal_tolerance))
+
+
+def to_euler_with_status(q: Iterable[FloatT], sequence: str = "xyz", *,
+                         degrees: bool = False,
+                         gimbal_tolerance: FloatLike = 1e-12) -> EulerResult:
+    result = _scalar.to_euler_with_status(q, sequence, degrees=degrees,
+                                         gimbal_tolerance=gimbal_tolerance)
+    return EulerResult(RotVec(*result.angles), result.gimbal_lock)
 
 def from_mrp(sigma: Iterable[FloatT]) -> Quaternion:
     """Convert modified Rodrigues parameters to a unit rotation."""
@@ -489,6 +502,7 @@ def so3_adjoint(q: Iterable[FloatT]) -> tuple[tuple[float, ...], ...]:
 
 __all__ = [
     "AxisAngle",
+    "EulerResult",
     "Quaternion",
     "RotVec",
     "acos",
@@ -567,6 +581,7 @@ __all__ = [
     "tanh",
     "to_axis_angle",
     "to_euler",
+    "to_euler_with_status",
     "to_homogeneous_matrix",
     "to_left_matrix",
     "to_mrp",

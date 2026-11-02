@@ -16,9 +16,16 @@ from tests.oracle_support import (
     vectors_to_trailing,
 )
 
-EULER_SEQUENCES = tuple(
+TAIT_BRYAN_SEQUENCES = tuple(
     "".join(axes) for axes in itertools.permutations("xyz")
-) + tuple("".join(axes).upper() for axes in itertools.permutations("xyz"))
+)
+PROPER_EULER_SEQUENCES = ("xyx", "xzx", "yxy", "yzy", "zxz", "zyz")
+EULER_SEQUENCES = (
+    TAIT_BRYAN_SEQUENCES
+    + PROPER_EULER_SEQUENCES
+    + tuple(sequence.upper() for sequence in TAIT_BRYAN_SEQUENCES)
+    + tuple(sequence.upper() for sequence in PROPER_EULER_SEQUENCES)
+)
 
 
 def _scipy_rotations(public_wxyz: np.ndarray, is_jpl: bool) -> Rotation:
@@ -36,6 +43,17 @@ def _canonical_coefficients(public_wxyz: np.ndarray, is_jpl: bool) -> np.ndarray
     hamilton[flip] *= -1.0
     hamilton[hamilton == 0.0] = 0.0
     return as_hamilton_coefficients(hamilton, is_jpl)
+
+
+def _scipy_rotations_from_public_array(
+    values: np.ndarray, is_jpl: bool, scalar_last: bool, component_axis: int
+) -> Rotation:
+    q = np.moveaxis(values, component_axis, -1)
+    if scalar_last:
+        x, y, z, w = np.moveaxis(q, -1, 0)
+        q = np.stack((w, x, y, z), axis=-1)
+    hamilton = as_hamilton_coefficients(q, is_jpl)
+    return Rotation.from_quat(hamilton.reshape((-1, 4))[..., (1, 2, 3, 0)])
 
 
 def _make_quaternions(module, values: np.ndarray, is_numpy: bool, component_first: bool):
@@ -305,6 +323,23 @@ def test_euler_conversions_match_scipy_for_all_sequences(
                 rtol=5e-13, atol=5e-13,
                 err_msg=f"{backend_name}.to_euler({sequence})",
             )
+            degree_input = orient_vectors(np.rad2deg(angles), component_first)
+            degree_made = module.from_euler(degree_input, sequence, degrees=True)
+            np.testing.assert_allclose(
+                _scipy_rotations(_wxyz_values(module, degree_made, True, component_first),
+                                 is_jpl).as_matrix(),
+                Rotation.from_euler(sequence, np.rad2deg(angles), degrees=True).as_matrix(),
+                rtol=4e-13, atol=4e-13,
+                err_msg=f"{backend_name}.from_euler({sequence}, degrees=True)",
+            )
+            degree_extracted = vectors_to_trailing(
+                module.to_euler(made, sequence, degrees=True), component_first
+            )
+            np.testing.assert_allclose(
+                Rotation.from_euler(sequence, degree_extracted, degrees=True).as_matrix(),
+                expected.as_matrix(), rtol=5e-13, atol=5e-13,
+                err_msg=f"{backend_name}.to_euler({sequence}, degrees=True)",
+            )
     else:
         for sequence in EULER_SEQUENCES:
             for row in angles:
@@ -320,6 +355,131 @@ def test_euler_conversions_match_scipy_for_all_sequences(
                     rtol=5e-13, atol=5e-13,
                     err_msg=f"{backend_name}.to_euler({sequence})",
                 )
+                degree_row = np.rad2deg(row)
+                degree_made = module.from_euler(degree_row, sequence, degrees=True)
+                np.testing.assert_allclose(
+                    _scipy_rotations(
+                        _wxyz_values(module, [degree_made], False, False), is_jpl
+                    ).as_matrix()[0],
+                    Rotation.from_euler(sequence, degree_row, degrees=True).as_matrix(),
+                    rtol=4e-13, atol=4e-13,
+                    err_msg=f"{backend_name}.from_euler({sequence}, degrees=True)",
+                )
+                degree_extracted = module.to_euler(made, sequence, degrees=True)
+                np.testing.assert_allclose(
+                    Rotation.from_euler(sequence, tuple(degree_extracted), degrees=True).as_matrix(),
+                    expected.as_matrix(), rtol=5e-13, atol=5e-13,
+                    err_msg=f"{backend_name}.to_euler({sequence}, degrees=True)",
+                )
+
+
+@pytest.mark.parametrize(
+    "backend_name,module,is_jpl,is_numpy,component_first",
+    BACKENDS,
+    ids=[backend[0] for backend in BACKENDS],
+)
+def test_euler_gimbal_status_matches_scipy_rotations(
+    backend_name, module, is_jpl, is_numpy, component_first
+):
+    for sequence in EULER_SEQUENCES:
+        proper = sequence[0].lower() == sequence[2].lower()
+        singular_middle = 0.0 if proper else math.pi / 2.0
+        opposite_middle = math.pi if proper else -math.pi / 2.0
+        angles = np.array(((0.3, singular_middle, -0.2),
+                           (-0.4, opposite_middle, 0.25),
+                           (0.1, 0.37 if proper else -0.29, 0.2)))
+        expected = Rotation.from_euler(sequence, angles)
+        if is_numpy:
+            made = module.from_euler(orient_vectors(angles, component_first), sequence)
+            result = module.to_euler_with_status(made, sequence)
+            extracted = vectors_to_trailing(result.angles, component_first)
+            actual_status = np.asarray(result.gimbal_lock)
+            actual = _scipy_rotations(
+                _wxyz_values(module, made, True, component_first), is_jpl
+            )
+        else:
+            made = [module.from_euler(tuple(row), sequence) for row in angles]
+            results = [module.to_euler_with_status(value, sequence) for value in made]
+            extracted = np.stack([tuple(result.angles) for result in results])
+            actual_status = np.asarray([result.gimbal_lock for result in results])
+            actual = _scipy_rotations(
+                _wxyz_values(module, made, False, False), is_jpl
+            )
+            degree_results = [
+                module.to_euler_with_status(value, sequence, degrees=True)
+                for value in made
+            ]
+            degree_extracted = np.stack([tuple(result.angles) for result in degree_results])
+            np.testing.assert_array_equal(
+                [result.gimbal_lock for result in degree_results], actual_status
+            )
+            np.testing.assert_allclose(
+                Rotation.from_euler(sequence, degree_extracted, degrees=True).as_matrix(),
+                expected.as_matrix(), rtol=7e-13, atol=7e-13,
+                err_msg=f"{backend_name}.to_euler_with_status({sequence}, degrees=True)",
+            )
+        np.testing.assert_array_equal(actual_status, (True, True, False),
+                                      err_msg=f"{backend_name}.to_euler_with_status({sequence})")
+        np.testing.assert_allclose(actual.as_matrix(), expected.as_matrix(),
+                                   rtol=4e-13, atol=4e-13)
+        np.testing.assert_allclose(
+            Rotation.from_euler(sequence, extracted).as_matrix(), expected.as_matrix(),
+            rtol=7e-13, atol=7e-13,
+            err_msg=f"{backend_name}.singular representatives for {sequence}",
+        )
+        np.testing.assert_allclose(extracted[:2, 2], 0.0, atol=0.0,
+                                   err_msg=f"{backend_name}.third angle at {sequence} lock")
+
+
+@pytest.mark.parametrize(
+    "backend_name,module,is_jpl,is_numpy,component_first",
+    [backend for backend in BACKENDS if backend[3]],
+    ids=[backend[0] for backend in BACKENDS if backend[3]],
+)
+@pytest.mark.parametrize("component_axis", (0, -1))
+@pytest.mark.parametrize("sequence", EULER_SEQUENCES)
+def test_numpy_euler_independent_axes_and_read_only_batch(
+    backend_name, module, is_jpl, is_numpy, component_first, component_axis, sequence
+):
+    rng = np.random.default_rng(0xA815 + len(backend_name))
+    storage = rng.uniform(-45.0, 45.0, size=(2, 3, 8))
+    angles = storage[:, :, ::2]
+    proper = sequence[0].lower() == sequence[2].lower()
+    if proper:
+        angles[:, 1, :] = rng.uniform(30.0, 150.0, size=(2, 4))
+    angles[0, :, 0] = (23.0, 0.0 if proper else 90.0, -37.0)
+    angles.setflags(write=False)
+    angle_values = np.moveaxis(angles, 1, -1)
+    expected = Rotation.from_euler(sequence, angle_values.reshape((-1, 3)), degrees=True)
+
+    made = module.from_euler(
+        angles, sequence, degrees=True, angle_axis=1, component_axis=component_axis
+    )
+    actual = _scipy_rotations_from_public_array(
+        made, is_jpl, scalar_last=backend_name.endswith("xyzw"),
+        component_axis=component_axis,
+    )
+    expected_matrices = expected.as_matrix().reshape((2, 4, 3, 3))
+    np.testing.assert_allclose(actual.as_matrix().reshape((2, 4, 3, 3)), expected_matrices,
+                               rtol=5e-13, atol=5e-13,
+                               err_msg=f"{backend_name}.from_euler arbitrary axes")
+
+    scaled = made * -3.75
+    result = module.to_euler_with_status(
+        scaled, sequence, degrees=True, component_axis=component_axis, angle_axis=2
+    )
+    extracted = np.moveaxis(result.angles, 2, -1)
+    assert result.angles.shape == (2, 4, 3)
+    assert result.gimbal_lock.shape == (2, 4)
+    expected_status = np.zeros((2, 4), dtype=bool)
+    expected_status[0, 0] = True
+    np.testing.assert_array_equal(result.gimbal_lock, expected_status)
+    np.testing.assert_allclose(
+        Rotation.from_euler(sequence, extracted.reshape((-1, 3)), degrees=True)
+        .as_matrix().reshape((2, 4, 3, 3)),
+        expected_matrices, rtol=8e-13, atol=8e-13,
+        err_msg=f"{backend_name}.to_euler arbitrary axes",
+    )
 
 
 @pytest.mark.parametrize(

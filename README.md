@@ -117,6 +117,11 @@ rotated = xyzw.rotate(q, (1, 0, 0))
 For arrays with the coefficient axis at axis 0, use the matching
 `components_first` module.
 
+For game-engine boundaries, use a caller-defined `SignedAxisMap` to convert
+quaternion keyframes once, then sample them with the target engine's native
+SLERP. See the [trajectory guide](docs/engines/trajectory.md) and the
+[Unreal, Unity, and Godot references](docs/engines/README.md).
+
 ## Install
 
 `python -m pip install .` installs the dependency-free scalar backends. Use

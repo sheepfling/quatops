@@ -13,6 +13,8 @@ from collections.abc import Iterable, Sequence
 from typing import Callable, cast
 
 from . import scalar as _h
+from ._euler_sequence import euler_metadata as _euler_sequence_metadata
+from ._euler_types import EulerResult
 from ._typing import FloatLike, FloatT
 
 Quaternion = _h.Quaternion
@@ -28,7 +30,7 @@ def _frame(frame: str) -> str:
 
 def _sequence(sequence: str) -> tuple[str, bool]:
     if not isinstance(sequence, str) or len(sequence) != 3:
-        raise ValueError("sequence must be three distinct axis letters")
+        raise ValueError("sequence must contain three axis letters")
     if sequence.islower():
         intrinsic = False
     elif sequence.isupper():
@@ -36,8 +38,12 @@ def _sequence(sequence: str) -> tuple[str, bool]:
     else:
         raise ValueError("sequence must use all lowercase or all uppercase letters")
     axes = sequence.lower()
-    if len(set(axes)) != 3 or set(axes) != {"x", "y", "z"}:
-        raise ValueError("sequence must be a permutation of xyz")
+    if any(axis not in "xyz" for axis in axes):
+        raise ValueError("sequence must contain only x, y, and z")
+    if len(set(axes)) == 2 and axes[0] == axes[2] and axes[0] != axes[1]:
+        return axes, intrinsic
+    if set(axes) != {"x", "y", "z"}:
+        raise ValueError("sequence must be Tait-Bryan or proper Euler")
     return axes, intrinsic
 
 
@@ -94,30 +100,190 @@ def _euler_from_matrix(matrix: Sequence[Sequence[FloatT]], sequence: str) -> Vec
     return direction * result[0], result[1], 0.0
 
 
-def from_euler(angles: Iterable[FloatT], sequence: str = "xyz") -> Quaternion:
-    """Construct a rotation from three radians and a Tait-Bryan axis order.
+def _wrap_euler_outer(angle: float) -> float:
+    wrapped = math.remainder(angle, math.tau)
+    return -math.pi if wrapped == math.pi else wrapped
+
+
+def _euler_from_components(
+    w: float,
+    x: float,
+    y: float,
+    z: float,
+    sequence: str,
+    gimbal_tolerance: FloatLike = 1e-12,
+    with_status: bool = False,
+) -> Vector | EulerResult:
+    """Extract Euler angles from already validated Hamilton coefficients."""
+    tolerance = _h._real_scalar(gimbal_tolerance, "gimbal_tolerance")
+    if tolerance < 0.0 or tolerance >= math.pi / 2.0:
+        raise ValueError("gimbal_tolerance must be in [0, pi/2)")
+
+    magnitude = max(abs(w), abs(x), abs(y), abs(z))
+    if magnitude == 0.0:
+        raise ValueError("quaternion must be nonzero")
+    w, x, y, z = (value / magnitude for value in (w, x, y, z))
+
+    intrinsic, i, j, k, ell, epsilon, proper = _euler_sequence_metadata(sequence)
+    coefficients = (w, x, y, z)
+    if proper:
+        a = w
+        b = coefficients[i]
+        c = coefficients[j]
+        d = epsilon * coefficients[ell]
+        kappa = 1.0
+    else:
+        a = w + coefficients[j]
+        b = coefficients[i] + epsilon * coefficients[k]
+        c = w - coefficients[j]
+        d = coefficients[i] - epsilon * coefficients[k]
+        kappa = epsilon
+
+    r_plus = math.hypot(a, b)
+    r_minus = math.hypot(c, d)
+    chi = 2.0 * math.atan2(r_minus, r_plus)
+    gimbal_lock = chi <= tolerance or math.pi - chi <= tolerance
+    if chi <= tolerance:
+        chi = 0.0
+        u = math.atan2(b, a)
+        alpha, gamma = ((2.0 * u, 0.0) if intrinsic
+                        else (0.0, 2.0 * kappa * u))
+    elif math.pi - chi <= tolerance:
+        chi = math.pi
+        v = math.atan2(d, c)
+        alpha, gamma = ((2.0 * v, 0.0) if intrinsic
+                        else (0.0, -2.0 * kappa * v))
+    else:
+        u = math.atan2(b, a)
+        v = math.atan2(d, c)
+        alpha, gamma = u + v, kappa * (u - v)
+
+    beta = chi if proper else math.pi / 2.0 - chi
+    if not intrinsic:
+        alpha, gamma = gamma, alpha
+    result = (_wrap_euler_outer(alpha), beta, _wrap_euler_outer(gamma))
+    return EulerResult(result, gimbal_lock) if with_status else result
+
+
+def _euler_from_quaternion(
+    q: Iterable[FloatT], sequence: str, gimbal_tolerance: FloatLike = 1e-12,
+    *, with_status: bool = False,
+) -> Vector | EulerResult:
+    return _euler_from_components(*_h._quaternion(q), sequence, gimbal_tolerance,
+                                  with_status)
+
+
+def from_euler(
+    angles: Iterable[FloatT], sequence: str = "xyz", *, degrees: bool = False
+) -> Quaternion:
+    """Construct a rotation from angles and an Euler axis sequence.
 
     Lowercase sequences are extrinsic (fixed-axis); uppercase sequences are
-    intrinsic (body-axis). All six permutations are supported.
+    intrinsic (body-axis). All six Tait-Bryan and six proper Euler sequences
+    are supported. Angles use radians unless ``degrees=True``.
     """
-    values, axes = _euler_angles(angles, sequence)
-    result = (1.0, 0.0, 0.0, 0.0)
-    for axis, angle in zip(axes, values):
-        vector = {"x": (1.0, 0.0, 0.0), "y": (0.0, 1.0, 0.0),
-                  "z": (0.0, 0.0, 1.0)}[axis]
-        increment = _h.from_axis_angle((*vector, angle))
-        result = _h.multiply(increment, result)
-    return _h.canonicalize(_h.normalize(result))
+    values = _h._vector(angles)
+    intrinsic, i, j, k, ell, epsilon, proper = _euler_sequence_metadata(sequence)
+    if not isinstance(degrees, bool):
+        raise ValueError("degrees must be a bool")  # noqa: TRY004
+    if degrees:
+        values = tuple(math.radians(value) for value in values)  # type: ignore[assignment]
+    if not intrinsic:
+        values = tuple(reversed(values))  # type: ignore[assignment]
+    a1, a2, a3 = values
+    return _euler_from_validated_angles(
+        a1, a2, a3, i, j, k, ell, epsilon, proper,
+        algebra_epsilon=1, scalar_last=False,
+    )
 
 
-def to_euler(q: Iterable[FloatT], sequence: str = "xyz") -> Vector:
-    """Extract three principal radians in the requested Euler sequence.
+def _euler_from_validated_angles(
+    a1: float,
+    a2: float,
+    a3: float,
+    i: int,
+    j: int,
+    k: int,
+    ell: int,
+    epsilon: int,
+    proper: bool,
+    *,
+    algebra_epsilon: int,
+    scalar_last: bool,
+) -> Quaternion:
+    """Build canonical quaternion coefficients in the requested storage order."""
+    if proper:
+        u = 0.5 * a1 + 0.5 * a3
+        v = 0.5 * a1 - 0.5 * a3
+        w = math.cos(0.5 * a2) * math.cos(u)
+        qi = algebra_epsilon * math.cos(0.5 * a2) * math.sin(u)
+        qj = algebra_epsilon * math.sin(0.5 * a2) * math.cos(v)
+        qell = algebra_epsilon * epsilon * math.sin(0.5 * a2) * math.sin(v)
+        components = [0.0, 0.0, 0.0, 0.0]
+        components[0], components[i], components[j], components[ell] = w, qi, qj, qell
+    else:
+        c1, c2, c3 = math.cos(a1 * 0.5), math.cos(a2 * 0.5), math.cos(a3 * 0.5)
+        s1, s2, s3 = math.sin(a1 * 0.5), math.sin(a2 * 0.5), math.sin(a3 * 0.5)
+        w = c1*c2*c3 - epsilon*s1*s2*s3
+        qi = s1*c2*c3 + epsilon*c1*s2*s3
+        qj = c1*s2*c3 - epsilon*s1*c2*s3
+        qk = c1*c2*s3 + epsilon*s1*s2*c3
+        components = [w, 0.0, 0.0, 0.0]
+        components[i], components[j], components[k] = (
+            algebra_epsilon * qi, algebra_epsilon * qj, algebra_epsilon * qk
+        )
 
-    At gimbal lock, the third angle is set to zero. Lowercase sequences are
-    extrinsic; uppercase sequences are intrinsic.
+    if scalar_last:
+        result = [components[1], components[2], components[3], components[0]]
+        tie_component = next((value for value in result[:3] if value != 0.0), -1.0)
+        flip = result[3] < 0.0 or (
+            result[3] == 0.0 and algebra_epsilon * tie_component < 0.0
+        )
+    else:
+        result = components
+        tie_component = next((value for value in result[1:] if value != 0.0), 1.0)
+        flip = result[0] < 0.0 or (result[0] == 0.0 and tie_component < 0.0)
+    if flip:
+        result = [-value for value in result]
+    result = [0.0 if value == 0.0 else value for value in result]
+    return cast(Quaternion, tuple(result))
+
+
+def to_euler(
+    q: Iterable[FloatT], sequence: str = "xyz",
+    gimbal_tolerance: FloatLike = 1e-12, *, degrees: bool = False,
+) -> Vector:
+    """Extract principal angles in a Tait-Bryan or proper Euler sequence.
+
+    Lowercase sequences are extrinsic; uppercase sequences are intrinsic. At
+    gimbal lock, the third angle of the requested sequence is set to zero.
+    ``gimbal_tolerance`` is the angular distance in radians at which the
+    singular representative is used. Angles are in radians unless
+    ``degrees=True``.
     """
-    _sequence(sequence)
-    return _euler_from_matrix(_h.to_rotation_matrix(q), sequence)
+    if not isinstance(degrees, bool):
+        raise ValueError("degrees must be a bool")  # noqa: TRY004
+    angles = cast(Vector, _euler_from_quaternion(q, sequence, gimbal_tolerance))
+    if degrees:
+        return tuple(math.degrees(value) for value in angles)  # type: ignore[arg-type,return-value]
+    return angles
+
+
+def to_euler_with_status(
+    q: Iterable[FloatT], sequence: str = "xyz", *, degrees: bool = False,
+    gimbal_tolerance: FloatLike = 1e-12,
+) -> EulerResult:
+    """Extract Euler angles together with the scalar gimbal-lock flag."""
+    if not isinstance(degrees, bool):
+        raise ValueError("degrees must be a bool")  # noqa: TRY004
+    result = _euler_from_quaternion(q, sequence, gimbal_tolerance, with_status=True)
+    assert isinstance(result, EulerResult)
+    if not degrees:
+        return result
+    return EulerResult(
+        tuple(math.degrees(value) for value in result.angles),  # type: ignore[arg-type]
+        result.gimbal_lock,
+    )
 
 
 def scalar_part(q: Iterable[FloatT]) -> float:
@@ -639,7 +805,8 @@ def _public_names() -> tuple[str, ...]:
         "log1p", "log10", "log2", "make_sign_continuous", "nlerp", "power_quaternion",
         "quaternion_derivative", "random_quaternion", "random_rotation", "rotation_covariance",
         "rotation_mean", "scalar_part", "so3_adjoint", "squad", "swing_twist",
-        "to_euler", "to_homogeneous_matrix", "to_mrp", "vector_part",
+        "to_euler", "to_euler_with_status", "to_homogeneous_matrix", "to_mrp",
+        "vector_part",
     )
 
 

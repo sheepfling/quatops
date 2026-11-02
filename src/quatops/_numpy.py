@@ -8,6 +8,9 @@ from typing import Any, Callable, NamedTuple
 
 import numpy as np
 
+from ._euler_sequence import euler_metadata as _euler_sequence_metadata
+from ._euler_types import EulerResult
+
 
 class _Scaled(NamedTuple):
     scale: np.ndarray
@@ -49,6 +52,154 @@ def _factor(value: Any, name: str = "factor") -> float:
     if not isfinite(result):
         raise ValueError(f"{name} must be a finite real number")
     return result
+
+
+def _axis_index(value: Any, ndim: int, name: str) -> int:
+    if isinstance(value, bool) or not isinstance(value, Integral):
+        raise ValueError(f"{name} must be an integer array axis")  # noqa: TRY004
+    axis = int(value)
+    if axis < -ndim or axis >= ndim:
+        raise ValueError(f"{name} is out of bounds for an array with {ndim} dimensions")
+    return axis % ndim
+
+
+def _euler_from_angles(
+    angles: Any,
+    sequence: str,
+    *,
+    degrees: bool,
+    angle_axis: int,
+    component_axis: int,
+    algebra_epsilon: int,
+    scalar_last: bool,
+) -> np.ndarray:
+    """Vectorized direct Euler-to-quaternion formulas with configurable axes."""
+    original = np.asarray(angles)
+    if original.ndim == 0:
+        raise ValueError("angles must have a length-three angle axis")
+    source_axis = _axis_index(angle_axis, original.ndim, "angle_axis")
+    moved = np.moveaxis(original, source_axis, -1)
+    values = _components(moved, 3, "angles")
+    if not isinstance(degrees, bool):
+        raise ValueError("degrees must be a bool")  # noqa: TRY004
+    intrinsic, i, j, k, ell, epsilon, proper = _euler_sequence_metadata(sequence)
+    if not intrinsic:
+        values = values[..., ::-1]
+    if degrees:
+        values = np.deg2rad(values)
+    a1, a2, a3 = np.moveaxis(values, -1, 0)
+    with np.errstate(all="ignore"):
+        if proper:
+            u = 0.5 * a1 + 0.5 * a3
+            v = 0.5 * a1 - 0.5 * a3
+            w = np.cos(0.5 * a2) * np.cos(u)
+            qi = np.cos(0.5 * a2) * np.sin(u)
+            qj = np.sin(0.5 * a2) * np.cos(v)
+            qell = epsilon * np.sin(0.5 * a2) * np.sin(v)
+            h = [np.zeros_like(w), np.zeros_like(w), np.zeros_like(w), np.zeros_like(w)]
+            h[0], h[i], h[j], h[ell] = w, qi, qj, qell
+        else:
+            half = values * 0.5
+            c1, c2, c3 = np.cos(half[..., 0]), np.cos(half[..., 1]), np.cos(half[..., 2])
+            s1, s2, s3 = np.sin(half[..., 0]), np.sin(half[..., 1]), np.sin(half[..., 2])
+            w = c1*c2*c3 - epsilon*s1*s2*s3
+            qi = s1*c2*c3 + epsilon*c1*s2*s3
+            qj = c1*s2*c3 - epsilon*s1*c2*s3
+            qk = c1*c2*s3 + epsilon*s1*s2*c3
+            h = [w, np.zeros_like(w), np.zeros_like(w), np.zeros_like(w)]
+            h[i], h[j], h[k] = qi, qj, qk
+        first_is_negative = (
+            (h[1] < 0.0)
+            | ((h[1] == 0.0) & (h[2] < 0.0))
+            | ((h[1] == 0.0) & (h[2] == 0.0) & (h[3] < 0.0))
+        )
+        flip = (h[0] < 0.0) | ((h[0] == 0.0) & first_is_negative)
+        if scalar_last:
+            result = np.stack((algebra_epsilon*h[1], algebra_epsilon*h[2],
+                               algebra_epsilon*h[3], h[0]), axis=-1)
+        else:
+            result = np.stack((h[0], algebra_epsilon*h[1],
+                               algebra_epsilon*h[2], algebra_epsilon*h[3]), axis=-1)
+        np.negative(result, out=result, where=flip[..., None])
+        np.copyto(result, 0.0, where=result == 0.0)
+        result = np.moveaxis(result, -1, _axis_index(component_axis, result.ndim, "component_axis"))
+    return result
+
+
+def _euler_to_angles(
+    q: Any,
+    sequence: str,
+    *,
+    degrees: bool,
+    gimbal_tolerance: Any,
+    component_axis: int,
+    angle_axis: int,
+    algebra_epsilon: int,
+    scalar_last: bool,
+    with_status: bool,
+) -> Any:
+    """Vectorized, scaled quaternion-to-Euler phase extraction."""
+    original = np.asarray(q)
+    if original.ndim == 0:
+        raise ValueError("quaternion must have a length-four component axis")
+    source_axis = _axis_index(component_axis, original.ndim, "component_axis")
+    values = _components(np.moveaxis(original, source_axis, -1), 4, "quaternion")
+    if not isinstance(degrees, bool):
+        raise ValueError("degrees must be a bool")  # noqa: TRY004
+    tolerance = _factor(gimbal_tolerance, "gimbal_tolerance")
+    if tolerance < 0.0 or tolerance >= np.pi / 2.0:
+        raise ValueError("gimbal_tolerance must be in [0, pi/2)")
+    intrinsic, i, j, k, ell, epsilon, proper = _euler_sequence_metadata(sequence)
+    scale = np.max(np.abs(values), axis=-1)
+    if np.any(scale == 0.0):
+        raise ValueError("quaternion must be nonzero")
+    scaled = values / scale[..., None]
+    if scalar_last:
+        x, y, z, w = np.moveaxis(scaled, -1, 0)
+    else:
+        w, x, y, z = np.moveaxis(scaled, -1, 0)
+    x, y, z = algebra_epsilon*x, algebra_epsilon*y, algebra_epsilon*z
+    coefficients = (w, x, y, z)
+    if proper:
+        a, b = w, coefficients[i]
+        c, d = coefficients[j], epsilon*coefficients[ell]
+        kappa = 1
+    else:
+        a = w + coefficients[j]
+        b = coefficients[i] + epsilon*coefficients[k]
+        c = w - coefficients[j]
+        d = coefficients[i] - epsilon*coefficients[k]
+        kappa = epsilon
+    r_plus, r_minus = np.hypot(a, b), np.hypot(c, d)
+    chi = 2.0 * np.arctan2(r_minus, r_plus)
+    near_zero = chi <= tolerance
+    near_pi = np.pi - chi <= tolerance
+    locked = near_zero | near_pi
+    # Endpoint branches ignore the ambiguous phase whose vector vanishes.
+    u = np.arctan2(b, a)
+    v = np.arctan2(d, c)
+    if intrinsic:
+        alpha = np.where(near_zero, 2.0*u,
+                         np.where(near_pi, 2.0*v, u + v))
+        gamma = np.where(locked, 0.0, kappa*(u - v))
+    else:
+        alpha = np.where(near_zero, 2.0*kappa*u,
+                         np.where(near_pi, -2.0*kappa*v, kappa*(u - v)))
+        gamma = np.where(locked, 0.0, u + v)
+    chi = np.where(near_zero, 0.0, np.where(near_pi, np.pi, chi))
+    beta = chi if proper else np.pi / 2.0 - chi
+    alpha = np.where(alpha >= np.pi, alpha - 2.0*np.pi,
+                     np.where(alpha < -np.pi, alpha + 2.0*np.pi, alpha))
+    gamma = np.where(gamma >= np.pi, gamma - 2.0*np.pi,
+                     np.where(gamma < -np.pi, gamma + 2.0*np.pi, gamma))
+    angles = np.stack((alpha, beta, gamma), axis=-1)
+    if degrees:
+        angles = np.rad2deg(angles)
+    output_axis = _axis_index(angle_axis, angles.ndim, "angle_axis")
+    angles = np.moveaxis(angles, -1, output_axis)
+    if not with_status:
+        return angles
+    return EulerResult(angles, locked)
 
 
 def _binary(

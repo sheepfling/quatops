@@ -4,6 +4,16 @@ from importlib import import_module
 
 import numpy as np
 import quaternion
+from scipy.spatial.transform import Rotation
+
+
+def random_rotations(count: int, rng: np.random.Generator) -> Rotation:
+    """Use the SciPy random-generator keyword supported by the installed version."""
+    try:
+        return Rotation.random(count, rng=rng)
+    except TypeError:
+        # SciPy before 1.15 calls this parameter ``random_state``.
+        return Rotation.random(count, random_state=rng)
 
 SCALAR_MODULES = (
     "quatops.scalar",

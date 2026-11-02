@@ -11,6 +11,7 @@ from tests.oracle_support import (
     from_wxyz,
     matrices_to_trailing,
     orient_vectors,
+    random_rotations,
     to_wxyz,
 )
 
@@ -26,7 +27,7 @@ def _rotations_from_public(values: np.ndarray, is_jpl: bool) -> Rotation:
 
 
 def _sample_cloud(rng: np.random.Generator, batch_count: int, sample_count: int):
-    centers = Rotation.random(batch_count, rng=rng)
+    centers = random_rotations(batch_count, rng)
     tangent = rng.normal(scale=0.19, size=(batch_count, sample_count, 3))
     rotations = [Rotation.from_rotvec(tangent[index]) * centers[index]
                  for index in range(batch_count)]
@@ -211,7 +212,7 @@ def test_weighted_wahba_alignment_matches_scipy_for_batched_inputs(
 ):
     rng = np.random.default_rng(0xA119 + len(backend_name))
     batch_count, vector_count = 8, 10
-    truths = Rotation.random(batch_count, rng=rng)
+    truths = random_rotations(batch_count, rng)
     source = rng.normal(size=(batch_count, vector_count, 3))
     target = np.stack([
         truth.apply(vectors) + rng.normal(scale=0.012, size=vectors.shape)
@@ -280,7 +281,7 @@ def test_swing_twist_factors_match_independent_scipy_factorization(
 ):
     rng = np.random.default_rng(0x5A17 + len(backend_name))
     count = 40
-    rotations = Rotation.random(count, rng=rng)
+    rotations = random_rotations(count, rng)
     public = _public_coefficients(rotations, is_jpl)
     axes = rng.normal(size=(count, 3))
     axes /= np.linalg.norm(axes, axis=-1, keepdims=True)

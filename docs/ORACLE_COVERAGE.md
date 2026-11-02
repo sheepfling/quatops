@@ -35,8 +35,11 @@ implemented identities where neither package supplies the operation.
 - [x] Coefficient and convention conversions: `wxyz`/`xyzw`, Hamilton/JPL,
   canonicalization, sign alignment/continuity, and rotation distance/equality.
 - [x] Axis-angle, MRP, Euler, and two-vector conversions against NumPy
-  quaternion, SciPy, or explicit axis-angle formulas, including singular and
-  antipodal cases.
+  quaternion, SciPy, explicit axis-angle formulas, and frozen Unity.Mathematics
+  and Godot Euler golden fixtures, including singular and antipodal cases.
+- [x] Engine-boundary signed-axis conversion and trajectory commutation:
+  all 48 signed maps are checked against SciPy, and the full suite passes with
+  the focused NumPy layout and SLERP commutation cases included.
 - [x] Interpolation and local attitude updates: SLERP, NLERP, SQUAD, boxplus,
   and boxminus against independent composition/interpolation references;
   explicitly exercise sign-preserving long arcs and SLERP/NLERP extrapolation.
@@ -90,6 +93,11 @@ branch-policy exception next to the tests. Run the full suite with the local
 - Coefficient/convention conversion, axis-angle, Euler, MRP, vector alignment,
   and rotation-vector aliases:
   [`test_rotation_conversion_oracle.py`](../tests/test_rotation_conversion_oracle.py).
+- Engine signed-axis maps and basis-converted SLERP trajectories:
+  [`test_engine_basis_oracle.py`](../tests/test_engine_basis_oracle.py).
+- Frozen upstream Unity.Mathematics/Godot Euler-to-quaternion and matrix values:
+  [`test_engine_euler_golden.py`](../tests/test_engine_euler_golden.py) with
+  source-attributed values in [`engine_euler_fixtures.json`](../tests/golden/engine_euler_fixtures.json).
 - SLERP, NLERP, SQUAD, boxplus/boxminus, quaternion derivatives, and angular
   velocity integration:
   [`test_manifold_kinematics_oracle.py`](../tests/test_manifold_kinematics_oracle.py).
