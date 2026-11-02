@@ -50,7 +50,7 @@ def _map(
         if sign > 0:
             output[..., destination_index] = source_component
         else:
-            np.negative(source_component, out=output[..., destination_index])
+            output[..., destination_index] = -source_component
     output[..., 3] = moved[..., scalar_index]
     return np.moveaxis(output, -1, axis)
 
