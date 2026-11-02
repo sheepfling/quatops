@@ -84,10 +84,9 @@ Plain tuples and NumPy arrays carry no convention tag. Keep operations
 qualified through the selected module, and explicitly convert values before
 passing them to another convention.
 
-The package retains some alias and historical import paths, including
-`quatops.scalar` and convention-first facades such as
-`quatops.jpl.numpy_xyzw`. They point to the same convention-specific kernels
-and add no runtime dispatch or convention conversion. Use the paths in the
+The package retains alternative import paths for compatibility. The
+[API contract](docs/API.md#alternative-import-paths) lists them; they do not
+auto-detect or convert a value's convention. Use the canonical paths in the
 table above for new code. The full storage rules, operation catalog,
 validation behavior, and numerical limits are in the
 [API contract](docs/API.md).

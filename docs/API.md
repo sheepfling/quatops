@@ -63,22 +63,11 @@ quaternion.
 
 ## Representations and construction
 
-Backend-first names are direct aliases to the native convention-specific
-kernels, so importing a different name does not add per-call dispatch or
-conversion. Convention-first `quatops.hamilton` and `quatops.jpl` modules
-remain available.
-
-The explicit Hamilton scalar module exports the same function objects as
-`quatops.scalar`. JPL scalar operations use native xyzw formulas or direct
-aliases for convention-neutral kernels; operation calls do not convert
-quaternions through `from_hamilton`/`to_hamilton`. Dot, squared norm, skew,
-SO(3) Jacobians, coefficient sign alignment, and sign continuity are direct
-function aliases. Input validation and construction of the selected
-NamedTuple or dataclass result remain part of each public call.
-
-Run `.venv/bin/python experiments/run.py convention-benchmark` to compare
-matched Hamilton/JPL calls across tuple, NamedTuple, dataclass, and NumPy
-representations on the current machine.
+For new code, use the canonical module paths below and keep operations
+qualified through the selected module. The import path makes the convention
+and representation visible; it does not tag input values or check where they
+came from. Every operation interprets its inputs according to the selected
+module.
 
 | Representation | Hamilton | JPL |
 | --- | --- | --- |
@@ -89,10 +78,41 @@ representations on the current machine.
 | NumPy `xyzw` | `quatops.numpy.hamilton.xyzw` | `quatops.numpy.jpl.xyzw` |
 
 `quatops.python` and `quatops.numpy` are namespaces without default operations.
-Import `quatops.python.hamilton` or `quatops.python.jpl` to choose a scalar
-convention. `quatops.types.HamiltonQuaternion` and
-`quatops.types.JPLQuaternion` alias the respective frozen dataclass classes;
-`quatops.types` has no bare default `Quaternion`.
+Import a leaf module such as `quatops.python.jpl` or
+`quatops.numpy.jpl.xyzw`; neither namespace chooses a convention for you.
+`quatops.types.HamiltonQuaternion` and `quatops.types.JPLQuaternion` alias the
+respective frozen dataclass classes; `quatops.types` has no bare default
+`Quaternion`.
+
+### Alternative import paths
+
+The package keeps these convention-first and historical paths available. Each
+path resolves to fixed behavior; none auto-detects or converts between Hamilton
+and JPL. Some older names, especially `quatops.scalar`, are less explicit, so
+use the canonical paths above in new code. The component-first NumPy aliases
+also select the axis-0 layout described below.
+
+| Canonical module | Other supported path(s) |
+| --- | --- |
+| `quatops.python.hamilton` | `quatops.scalar`, `quatops.hamilton.scalar` |
+| `quatops.python.jpl` | `quatops.jpl.scalar` |
+| `quatops.types.hamilton_namedtuple` | `quatops.namedtuple`, `quatops.hamilton.namedtuple` |
+| `quatops.types.jpl_namedtuple` | `quatops.jpl.namedtuple` |
+| `quatops.types.hamilton_dataclass` | `quatops.dataclass`, `quatops.hamilton.dataclass` |
+| `quatops.types.jpl_dataclass` | `quatops.jpl.dataclass` |
+| `quatops.numpy.hamilton.wxyz` | `quatops.hamilton.numpy_wxyz` |
+| `quatops.numpy.hamilton.xyzw` | `quatops.hamilton.numpy_xyzw` |
+| `quatops.numpy.jpl.wxyz` | `quatops.jpl.numpy_wxyz` |
+| `quatops.numpy.jpl.xyzw` | `quatops.jpl.numpy_xyzw` |
+| `quatops.numpy.hamilton.components_first.wxyz` | `quatops.hamilton.numpy_wxyz_components_first` |
+| `quatops.numpy.hamilton.components_first.xyzw` | `quatops.hamilton.numpy_xyzw_components_first` |
+| `quatops.numpy.jpl.components_first.wxyz` | `quatops.jpl.numpy_wxyz_components_first` |
+| `quatops.numpy.jpl.components_first.xyzw` | `quatops.jpl.numpy_xyzw_components_first` |
+
+Tuple, array, NamedTuple, and dataclass inputs are interpreted by value under
+the selected module. The library cannot determine whether an input was created
+for the other convention. Keep calls in one convention-specific module and use
+`from_hamilton` or `to_hamilton` when a conversion is intended.
 
 ### Python scalar input types
 
@@ -105,11 +125,8 @@ scalar results remain built-in floats. The component-input annotations use a
 these APIs intentionally do not preserve input precision or type. Complex
 values, strings, and values that cannot convert to a finite float are rejected.
 
-The convention-first NumPy paths `quatops.hamilton.numpy_wxyz`,
-`quatops.hamilton.numpy_xyzw`, `quatops.jpl.numpy_wxyz`, and
-`quatops.jpl.numpy_xyzw` re-export the corresponding fully specified native
-functions. NumPy operations do not select a convention or layout at runtime and
-do not convert inputs on each call.
+NumPy operations do not select a convention or layout at runtime and do not
+convert inputs on each call.
 
 The standard NumPy modules store the four quaternion coefficients on the last
 axis: quaternions have shape `(..., 4)` and vectors have shape `(..., 3)`. The
@@ -120,10 +137,6 @@ axis: quaternions have shape `(..., 4)` and vectors have shape `(..., 3)`. The
 `quatops.numpy.jpl.components_first.xyzw`. They accept quaternions shaped
 `(4, ...)` and vectors shaped `(3, ...)`; the `wxyz` or `xyzw` suffix
 independently selects whether `w` comes first or last within the four values.
-Matching convention-first aliases end in
-`numpy_wxyz_components_first` or `numpy_xyzw_components_first` under
-`quatops.hamilton` and `quatops.jpl`.
-
 Operations with the coefficient axis at axis 0 follow the same validation and batch-broadcasting
 rules as their trailing-axis counterparts. Quaternion, axis-angle, and
 three-vector outputs put the component axis first. Matrix outputs put both
