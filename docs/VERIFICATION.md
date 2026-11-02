@@ -1,5 +1,8 @@
 # Verification
 
+This is a contributor guide. Package users do not need the development tools
+or checks described here.
+
 NumPy is an optional runtime dependency. SciPy is a development dependency and
 serves as an independent reference for rotation behavior. Public NumPy modules
 select both convention and storage order, for example

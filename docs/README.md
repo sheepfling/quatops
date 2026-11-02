@@ -4,6 +4,9 @@ Start with the [project README](../README.md) for installation, a backend
 chooser, and short examples. Use the [API contract](API.md) as the source of
 truth for current behavior and public signatures.
 
+The verification and experiment guides are for contributors and researchers;
+package users can stay with the README and API contract.
+
 ## For contributors and coding agents
 
 1. Read the README and choose a fully specified convention and representation

@@ -113,36 +113,10 @@ rotated = xyzw.rotate(q, (1, 0, 0))
 For arrays with the coefficient axis at axis 0, use the matching
 `components_first` module.
 
-## Install and verify
+## Install
 
-`python -m pip install .` installs the dependency-free scalar backends. Use `python -m pip install '.[numpy]'` for NumPy operations. For development, create and populate the repository-local environment, then run its test and static-check tools:
+`python -m pip install .` installs the dependency-free scalar backends. Use
+`python -m pip install '.[numpy]'` for NumPy operations.
 
-```sh
-# Create the environment once, if .venv does not already exist.
-python3 -m venv .venv
-.venv/bin/python -m pip install -e '.[dev]'
-.venv/bin/python -m pytest -q
-.venv/bin/mypy \
-    tests/typing_tests/foundational_consumer.py \
-    tests/typing_tests/consumer.py \
-    tests/typing_tests/float32_consumer.py
-.venv/bin/ruff check --select F,E9 src tests experiments
-```
-
-The `dev` extra includes NumPy, numpy-quaternion, SciPy (the numerical
-reference dependency), pytest, Mypy, Ruff, and SciPy stubs.
-Pytest is configured to import directly from `src`, so no `PYTHONPATH` setting
-is needed. Use the repository-local `.venv` so the oracle tests and static
-checks run with the declared development dependencies.
-
-For workload-specific timings, use the
-[experiment suite](experiments/README.md). Treat those results as local
-measurements, not general performance guarantees.
-
-See the [documentation map](docs/README.md) for the API reference, verification
-record, experiment guide, and research notes. The API contract describes the
-implemented axis-angle and rotation-vector behavior.
-
-To run a local experiment without setting `PYTHONPATH`, see the
-[experiment guide](experiments/README.md) and use
-`.venv/bin/python experiments/run.py --list`.
+Contributor setup, verification, performance timing, and research experiments
+are collected in the [documentation map](docs/README.md).

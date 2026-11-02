@@ -1,5 +1,7 @@
 # QuatOps experiments
 
+These contributor and research tools are optional for package users.
+
 Run commands from the repository root with Python 3.9 or newer. The launcher
 adds the checkout's `src/` directory automatically, so you do not need to set
 `PYTHONPATH`. In this checkout, use `.venv/bin/python` so optional dependencies
