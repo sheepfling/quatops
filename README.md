@@ -1,14 +1,18 @@
 # QuatOps
 
-## Quaternion math, with fewer convention surprises
+## Reuse verified quaternion math with conventions chosen up front
 
-QuatOps brings quaternion algebra and 3D rotation tools together in a small,
-typed toolkit. Its goals are to make conventions visible, keep the basic Python
-path lightweight, and provide a consistent set of operations across plain
-Python and NumPy representations. Choose a fully specified module: there is no
-convention flag, automatic dispatch, or required quaternion wrapper. The
-tuple-based Python backends use only the standard library; NumPy is optional.
-SciPy is used only for development checks.
+QuatOps exists so applications and coding agents can use quaternion math
+without reimplementing it just to keep a lightweight, plain-Python path. The
+canonical `quatops.python.hamilton` and `quatops.python.jpl` backends operate on
+ordinary four-tuples: no quaternion wrapper class, no third-party runtime
+dependency, and no per-call convention dispatch. Their public operations are
+covered by seeded tests against independent references (including
+`numpy-quaternion` and SciPy) and separately derived invariants; see the
+[oracle coverage](docs/ORACLE_COVERAGE.md).
+
+If an operation you need is missing, add it to QuatOps with oracle coverage
+rather than copying an unverified quaternion kernel into an application.
 
 ## When to use QuatOps
 
