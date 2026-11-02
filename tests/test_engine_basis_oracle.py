@@ -67,12 +67,12 @@ def test_numpy_maps_preserve_layout_dtype_and_match_scipy():
     axes = ("y", "z", "-x")
     axis_map = SignedAxisMap(axes)
     basis = _matrix_from_axes(axes)
-    expected = basis @ Rotation.from_quat(source_xyzw).as_matrix() @ basis.T
+    expected = basis @ Rotation.from_quat(source_xyzw.astype(np.float64)).as_matrix() @ basis.T
 
     trailing = engine_numpy.map_hamilton_xyzw(source_xyzw, axis_map)
     assert trailing.dtype == source_xyzw.dtype
     np.testing.assert_allclose(
-        Rotation.from_quat(trailing).as_matrix(), expected, rtol=0.0, atol=2e-6
+        Rotation.from_quat(trailing.astype(np.float64)).as_matrix(), expected, rtol=0.0, atol=2e-6
     )
 
     leading = engine_numpy.map_hamilton_xyzw(source_xyzw.T, axis_map,
