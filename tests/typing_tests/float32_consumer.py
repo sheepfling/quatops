@@ -2,9 +2,8 @@
 
 from typing import SupportsFloat
 
-from typing_extensions import assert_type
-
 import numpy as np
+from typing_extensions import assert_type
 
 from quatops import dataclass, namedtuple, scalar
 from quatops.hamilton import dataclass as hamilton_dataclass
