@@ -131,24 +131,14 @@ python3 -m venv .venv
 ```
 
 The `dev` extra includes NumPy, numpy-quaternion, SciPy (the numerical
-reference dependency), pytest, pytest-benchmark, Mypy, Ruff, and SciPy stubs.
+reference dependency), pytest, Mypy, Ruff, and SciPy stubs.
 Pytest is configured to import directly from `src`, so no `PYTHONPATH` setting
 is needed. Use the repository-local `.venv` so the oracle tests and static
 checks run with the declared development dependencies.
 
-Run the opt-in public-operation benchmarks with:
-
-```sh
-.venv/bin/python -m pytest -m benchmark --benchmark-only
-```
-
-They compare scalar and 10,000-quaternion NumPy multiply and rotate calls for
-Hamilton and JPL against SciPy `Rotation`. Inputs and SciPy rotation objects
-are prepared before timing; each benchmark checks that the compared results
-agree. Pytest reports measurements but does not enforce timing thresholds.
-Results describe these workloads and this machine; they do not establish a
-general speed advantage. The wider [experiment suite](experiments/README.md)
-covers more QuatOps operations and backend comparisons.
+For workload-specific timings, use the
+[experiment suite](experiments/README.md). Treat those results as local
+measurements, not general performance guarantees.
 
 See the [documentation map](docs/README.md) for the API reference, verification
 record, experiment guide, and historical research notes. The old

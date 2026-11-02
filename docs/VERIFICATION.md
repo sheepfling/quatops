@@ -20,12 +20,10 @@ python3 -m venv .venv
 .venv/bin/ruff check --select F,E9 src tests experiments
 ```
 
-The `dev` extra installs NumPy, numpy-quaternion, SciPy, pytest,
-pytest-benchmark, SciPy stubs, Mypy, and Ruff. Pytest's `pythonpath` setting
+The `dev` extra installs NumPy, numpy-quaternion, SciPy, pytest, SciPy stubs,
+Mypy, and Ruff. Pytest's `pythonpath` setting
 loads the checkout's `src` package directly. The repository `.venv` is ignored
-by Git and is the expected environment for Python checks. Normal pytest runs
-exclude the opt-in performance tests; run them separately with
-`.venv/bin/python -m pytest -m benchmark --benchmark-only`.
+by Git and is the expected environment for Python checks.
 
 ## Recorded source-suite run
 
