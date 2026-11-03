@@ -19,7 +19,9 @@ from .._numpy import (
     _binary,
     _canonicalize,
     _commutator_samples,
+    _component_transform,
     _components,
+    _conjugate_samples,
     _direction,
     _dot_quaternions,
     _euler_from_angles,
@@ -78,45 +80,37 @@ def from_xyzw(q: Any) -> np.ndarray:
 
     This changes only component layout, not quaternion convention.
     """
-    a = _components(q, 4, "quaternion")
-    return a[..., [3, 0, 1, 2]]
+    return _component_transform(q, True, False)
 
 
 def to_xyzw(q: Any) -> np.ndarray:
     """Reorder scalar-first JPL components to scalar-last layout."""
-    a = _components(q, 4, "quaternion")
-    return a[..., [1, 2, 3, 0]]
+    return _component_transform(q, False, True)
 
 
 def from_wxyz(q: Any) -> np.ndarray:
     """Validate and copy scalar-first JPL values without changing convention."""
-    return _components(q, 4, "quaternion").copy()
+    return _component_transform(q, False, False)
 
 
 def to_wxyz(q: Any) -> np.ndarray:
     """Validate and copy scalar-first JPL values without changing convention."""
-    return _components(q, 4, "quaternion").copy()
+    return _component_transform(q, False, False)
 
 
 def from_hamilton(q: Any) -> np.ndarray:
     """Convert Hamilton wxyz to JPL wxyz without normalization."""
-    out = _components(q, 4, "Hamilton quaternion").copy()
-    out[..., 1:] *= -1
-    return out
+    return _component_transform(q, False, False, True, "Hamilton quaternion")
 
 
 def to_hamilton(q: Any) -> np.ndarray:
     """Convert JPL wxyz to Hamilton wxyz without normalization."""
-    out = _components(q, 4, "JPL quaternion").copy()
-    out[..., 1:] *= -1
-    return out
+    return _component_transform(q, False, False, True, "JPL quaternion")
 
 
 def conjugate(q: Any) -> np.ndarray:
     """Conjugate a wxyz quaternion without changing its magnitude."""
-    out = _components(q, 4, "quaternion").copy()
-    out[..., 1:] *= -1
-    return out
+    return _conjugate_samples(q, _SCALAR_LAST)
 
 
 def add(lhs: Any, rhs: Any) -> np.ndarray:

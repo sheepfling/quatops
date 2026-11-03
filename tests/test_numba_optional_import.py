@@ -68,12 +68,25 @@ def _assert_numpy_operations():
         (numpy_wxyz, scalar_first),
         (numpy_xyzw, scalar_last),
     ):
+        assert_array_equal(backend.add(identity, identity), 2.0 * identity)
+        assert_array_equal(backend.subtract(identity, identity), np.zeros_like(identity))
+        assert_array_equal(backend.conjugate(identity), identity)
+        assert_array_equal(backend.negate(identity), -identity)
+        assert_array_equal(backend.scale(identity, 1.0), identity)
+        assert_array_equal(backend.scalar_part(identity), np.ones(COUNT))
+        assert_array_equal(backend.vector_part(identity), np.zeros((COUNT, 3)))
+        assert_array_equal(backend.canonicalize(identity), identity)
+        assert_array_equal(backend.commutator(identity, identity), np.zeros_like(identity))
+        assert_array_equal(backend.from_two_vectors(vectors, vectors), identity)
         assert_array_equal(backend.left_divide(identity, identity), identity)
         assert_array_equal(backend.right_divide(identity, identity), identity)
         assert_array_equal(backend.rotation_distance(identity, identity), np.zeros(COUNT))
         assert_array_equal(
             backend.rotations_equivalent(identity, identity), np.ones(COUNT, dtype=bool)
         )
+        multiplication_identity = np.tile(np.eye(4), (COUNT, 1, 1))
+        assert_array_equal(backend.to_left_matrix(identity), multiplication_identity)
+        assert_array_equal(backend.to_right_matrix(identity), multiplication_identity)
     assert_array_equal(wxyz.rotate(scalar_first, vectors), vectors)
     assert_array_equal(xyzw.rotate(scalar_last, vectors), vectors)
     matrices = np.tile(np.eye(3), (COUNT, 1, 1))
@@ -105,6 +118,22 @@ def _assert_numpy_operations():
     assert_array_equal(numpy_xyzw.from_rotvec(rotation_vectors), scalar_last)
     assert_array_equal(numpy_wxyz.to_rotvec(scalar_first), rotation_vectors)
     assert_array_equal(numpy_xyzw.to_rotvec(scalar_last), rotation_vectors)
+    assert_array_equal(wxyz.from_xyzw(scalar_last), scalar_first)
+    assert_array_equal(wxyz.to_xyzw(scalar_first), scalar_last)
+    assert_array_equal(xyzw.from_wxyz(scalar_first), scalar_last)
+    assert_array_equal(xyzw.to_wxyz(scalar_last), scalar_first)
+    assert_array_equal(numpy_wxyz.from_xyzw(scalar_last), scalar_first)
+    assert_array_equal(numpy_wxyz.to_xyzw(scalar_first), scalar_last)
+    assert_array_equal(numpy_xyzw.from_wxyz(scalar_first), scalar_last)
+    assert_array_equal(numpy_xyzw.to_wxyz(scalar_last), scalar_first)
+    assert_array_equal(numpy_wxyz.from_hamilton(scalar_first), scalar_first * (1, -1, -1, -1))
+    assert_array_equal(numpy_wxyz.to_hamilton(scalar_first), scalar_first * (1, -1, -1, -1))
+    assert_array_equal(numpy_xyzw.from_hamilton(scalar_first), scalar_last * (-1, -1, -1, 1))
+    assert_array_equal(numpy_xyzw.to_hamilton(scalar_last), scalar_first * (1, -1, -1, -1))
+    random_h = wxyz.random_quaternion(size=COUNT, rng=np.random.default_rng(83))
+    random_h_again = wxyz.random_rotation(size=COUNT, rng=np.random.default_rng(83))
+    assert_array_equal(random_h, random_h_again)
+    np.testing.assert_allclose(wxyz.norm(random_h), np.ones(COUNT), atol=3e-15, rtol=0)
     assert_array_equal(wxyz.nlerp(scalar_first, scalar_first, 0.5), scalar_first)
     assert_array_equal(xyzw.nlerp(scalar_last, scalar_last, 0.5), scalar_last)
     assert_array_equal(numpy_wxyz.nlerp(scalar_first, scalar_first, 0.5), scalar_first)
@@ -193,6 +222,10 @@ def test_missing_numba_is_a_quiet_numpy_fallback(
         return original_import(name, *args, **kwargs)
 
     monkeypatch.setattr(builtins, "__import__", missing_numba)
+    angles = np.zeros((8192, 3))
+    identity = np.tile((0.0, 0.0, 0.0, 1.0), (8192, 1))
+    assert_array_equal(xyzw.from_euler(angles), identity)
+    assert_array_equal(xyzw.to_euler(identity), angles)
     _assert_numpy_operations()
 
     assert not [record for record in caplog.records if record.name == "quatops._numpy"]
@@ -278,6 +311,14 @@ def test_acceleration_execution_failures_disable_the_dispatchers(
         "inverse": 0,
         "norm": 0,
         "dot": 0,
+        "quaternion_matrix": 0,
+        "canonicalize": 0,
+        "commutator": 0,
+        "from_two_vectors": 0,
+        "conjugate": 0,
+        "component_transform": 0,
+        "vector_part": 0,
+        "random_quaternion": 0,
     }
 
     def fail(operation):
@@ -298,6 +339,7 @@ def test_acceleration_execution_failures_disable_the_dispatchers(
         {
             "from_rotation_matrix": fail("from_matrix"),
             "to_rotation_matrix": fail("to_matrix"),
+            "quaternion_matrix": fail("quaternion_matrix"),
             "engine_axis_map": fail("engine_map"),
             "from_rotvec": fail("from_rotvec"),
             "to_rotvec": fail("to_rotvec"),
@@ -310,6 +352,13 @@ def test_acceleration_execution_failures_disable_the_dispatchers(
             "inverse": fail("inverse"),
             "norm": fail("norm"),
             "dot": fail("dot"),
+            "canonicalize": fail("canonicalize"),
+            "commutator": fail("commutator"),
+            "from_two_vectors": fail("from_two_vectors"),
+            "conjugate": fail("conjugate"),
+            "component_transform": fail("component_transform"),
+            "vector_part": fail("vector_part"),
+            "random_quaternion": fail("random_quaternion"),
         },
     )
 
@@ -333,8 +382,48 @@ def test_acceleration_execution_failures_disable_the_dispatchers(
         "inverse": 1,
         "norm": 1,
         "dot": 1,
+        "quaternion_matrix": 1,
+        "canonicalize": 1,
+        "commutator": 1,
+        "from_two_vectors": 1,
+        "conjugate": 1,
+        "component_transform": 1,
+        "vector_part": 1,
+        "random_quaternion": 1,
     }
     assert not _numpy._NUMBA_MULTIPLY
     assert _numpy._NUMBA_ROTATE is None
     assert not _numpy._NUMBA_ROTATION_KERNELS
-    assert sum(record.name == "quatops._numpy" for record in caplog.records) == 16
+    assert sum(record.name == "quatops._numpy" for record in caplog.records) == 24
+
+
+def test_euler_kernel_execution_failures_disable_dispatchers(
+    monkeypatch, caplog, reset_numba_state
+):
+    attempts = {"from_euler": 0, "to_euler": 0}
+
+    def fail(operation):
+        def dispatch(*args, **kwargs):
+            attempts[operation] += 1
+            raise RuntimeError("simulated Euler kernel compilation failure")
+
+        return dispatch
+
+    monkeypatch.setattr(_numpy, "_NUMBA_ROTATION_CHECKED", True)
+    monkeypatch.setattr(
+        _numpy,
+        "_NUMBA_ROTATION_KERNELS",
+        {
+            "from_euler": fail("from_euler"),
+            "to_euler": fail("to_euler"),
+        },
+    )
+    count = 8192
+    angles = np.zeros((count, 3))
+    identity = np.tile((0.0, 0.0, 0.0, 1.0), (count, 1))
+
+    assert_array_equal(xyzw.from_euler(angles), identity)
+    assert_array_equal(xyzw.to_euler(identity), angles)
+    assert attempts == {"from_euler": 1, "to_euler": 1}
+    assert not _numpy._NUMBA_ROTATION_KERNELS
+    assert sum(record.name == "quatops._numpy" for record in caplog.records) == 2

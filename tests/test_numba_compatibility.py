@@ -1,12 +1,14 @@
 """Compile the optional batch kernels on each supported Python version."""
 
 from importlib.util import find_spec
+from itertools import permutations
 
 import numpy as np
 import pytest
 from numpy.testing import assert_allclose
 from scipy.spatial.transform import Rotation
 
+from experiments.numba_coverage import _api_catalog, _api_catalog_complete
 from quatops import _numpy
 from quatops.hamilton import scalar as hamilton_scalar
 from quatops.jpl import scalar as jpl_scalar
@@ -17,6 +19,19 @@ from quatops.numpy.jpl import xyzw as jpl_xyzw
 
 NUMBA_AVAILABLE = find_spec("numba") is not None
 COUNT = 128
+
+
+def test_numba_api_catalog_covers_every_public_numpy_and_engine_export():
+    catalog = _api_catalog()
+    categorized = [
+        name
+        for routes in catalog.values()
+        for names in routes.values()
+        for name in names
+    ]
+
+    assert _api_catalog_complete()
+    assert len(categorized) == len(set(categorized))
 
 
 @pytest.mark.skipif(not NUMBA_AVAILABLE, reason="Numba is an optional dependency")
@@ -168,7 +183,7 @@ def test_numba_compiles_batched_rotation_matrix_kernels_for_all_layouts():
 
 
 @pytest.mark.skipif(not NUMBA_AVAILABLE, reason="Numba is an optional dependency")
-def test_numba_compiles_batched_euler_kernels_for_all_sequences():
+def test_batched_euler_conversions_match_scipy_for_all_sequences():
     rng = np.random.default_rng(8)
     angles = rng.uniform(-0.8, 0.8, size=(COUNT, 3))
     cases = (
@@ -177,10 +192,15 @@ def test_numba_compiles_batched_euler_kernels_for_all_sequences():
         jpl_wxyz,
         jpl_xyzw,
     )
-    sequences = (
+    tait_bryan = (
         "xyz", "xzy", "yxz", "yzx", "zxy", "zyx",
         "XYZ", "XZY", "YXZ", "YZX", "ZXY", "ZYX",
     )
+    proper = tuple(
+        f"{first}{middle}{first}"
+        for first, middle in permutations("xyz", 2)
+    )
+    sequences = (*tait_bryan, *proper, *(sequence.upper() for sequence in proper))
 
     for sequence in sequences:
         expected = Rotation.from_euler(sequence, angles).as_matrix()
@@ -196,7 +216,12 @@ def test_numba_compiles_batched_euler_kernels_for_all_sequences():
                 rtol=0.0, atol=3e-14,
             )
 
-        for middle_angle in (-np.pi / 2.0, np.pi / 2.0):
+        middle_angles = (
+            (0.0, np.pi)
+            if sequence[0].lower() == sequence[2].lower()
+            else (-np.pi / 2.0, np.pi / 2.0)
+        )
+        for middle_angle in middle_angles:
             singular_angles = np.tile((0.4, middle_angle, -0.7), (COUNT, 1))
             expected_singular = Rotation.from_euler(
                 sequence, singular_angles
@@ -213,6 +238,37 @@ def test_numba_compiles_batched_euler_kernels_for_all_sequences():
     assert set(_numpy._NUMBA_ROTATION_KERNELS) == set(
         _numpy._NUMBA_ROTATION_KERNEL_NAMES
     )
+
+
+@pytest.mark.skipif(not NUMBA_AVAILABLE, reason="Numba is an optional dependency")
+def test_numba_euler_paths_preserve_axes_degrees_and_lock_status():
+    count = 8192
+    angles = np.zeros((3, count), dtype=np.float64)
+    angles[0] = np.linspace(-25.0, 25.0, count)
+    angles[1] = 90.0
+    angles[2] = np.linspace(31.0, -31.0, count)
+    quaternions = hamilton_xyzw.from_euler(
+        angles,
+        "xyz",
+        degrees=True,
+        angle_axis=0,
+        component_axis=0,
+    )
+    assert quaternions.shape == (4, count)
+
+    result = hamilton_xyzw.to_euler_with_status(
+        quaternions,
+        "xyz",
+        degrees=True,
+        gimbal_tolerance=1e-6,
+        component_axis=0,
+        angle_axis=0,
+    )
+    assert result.angles.shape == angles.shape
+    np.testing.assert_array_equal(result.gimbal_lock, np.ones(count, dtype=bool))
+    expected = Rotation.from_euler("xyz", angles.T, degrees=True).as_matrix()
+    recovered = Rotation.from_euler("xyz", result.angles.T, degrees=True).as_matrix()
+    assert_allclose(recovered, expected, rtol=0.0, atol=3e-14)
 
 
 @pytest.mark.skipif(not NUMBA_AVAILABLE, reason="Numba is an optional dependency")
@@ -447,6 +503,12 @@ def test_compiled_primitives_cover_batched_advanced_operations():
         control_a = backend.from_rotvec(vectors - deltas)
         control_b = backend.from_rotvec(vectors + 2.0 * deltas)
 
+        for operation in ("to_left_matrix", "to_right_matrix"):
+            matrix_operation = getattr(backend, operation)
+            actual_matrix = matrix_operation(q0)
+            expected_matrix = np.asarray([matrix_operation(value) for value in q0])
+            assert_allclose(actual_matrix, expected_matrix, rtol=0.0, atol=0.0)
+
         for frame in ("body", "world"):
             derivative = backend.quaternion_derivative(q0, rates, frame)
             expected_derivative = np.asarray(
@@ -498,6 +560,150 @@ def test_compiled_primitives_cover_batched_advanced_operations():
             atol=3e-14,
         )
         assert_allclose(backend.so3_adjoint(q0), backend.to_rotation_matrix(q0))
+
+    assert _numpy._NUMBA_ROTATION_KERNELS["quaternion_matrix"].nopython_signatures
+
+
+@pytest.mark.skipif(not NUMBA_AVAILABLE, reason="Numba is an optional dependency")
+def test_numba_compiles_canonicalize_commutator_and_two_vector_batches():
+    rng = np.random.default_rng(94)
+    count = COUNT
+    hamilton_values = rng.normal(size=(count, 4))
+    hamilton_values[0] = 0.0
+    hamilton_values[1] = (0.0, -1.0, 0.0, 0.0)
+    hamilton_values[2] = (-1.0, 0.0, 0.0, 0.0)
+    hamilton_values[3] = (-0.5, 0.2, -0.3, 0.4)
+    left_vectors = rng.normal(size=(count, 3))
+    right_vectors = rng.normal(size=(count, 3))
+    left_vectors[0] = (1.0, 0.0, 0.0)
+    right_vectors[0] = (1.0, 0.0, 0.0)
+    left_vectors[1] = (1.0, 0.0, 0.0)
+    right_vectors[1] = (-1.0, 0.0, 0.0)
+    left_vectors[2] = (1e308, -1e308, 1e308)
+    right_vectors[2] = (-1e308, 1e308, 1e308)
+    left_vectors[3] = (1e-300, 2e-300, -1e-300)
+    right_vectors[3] = (-2e-300, 1e-300, 3e-300)
+    cases = (hamilton_wxyz, hamilton_xyzw, jpl_wxyz, jpl_xyzw)
+
+    for backend in cases:
+        values = backend.from_wxyz(hamilton_values)
+        other = backend.from_rotvec(rng.normal(scale=0.3, size=(count, 3)))
+
+        canonical = backend.canonicalize(values)
+        expected_canonical = np.asarray(
+            [backend.canonicalize(value) for value in values]
+        )
+        assert_allclose(canonical, expected_canonical, rtol=0.0, atol=0.0)
+
+        commutator = backend.commutator(values, other)
+        expected_commutator = np.asarray(
+            [backend.commutator(left, right) for left, right in zip(values, other)]
+        )
+        assert_allclose(commutator, expected_commutator, rtol=0.0, atol=0.0)
+
+        rotations = backend.from_two_vectors(left_vectors, right_vectors)
+        expected_rotations = np.asarray(
+            [
+                backend.from_two_vectors(left, right)
+                for left, right in zip(left_vectors, right_vectors)
+            ]
+        )
+        assert_allclose(rotations, expected_rotations, rtol=2e-15, atol=2e-15)
+
+        zero_vectors = left_vectors.copy()
+        zero_vectors[0] = 0.0
+        with pytest.raises(ValueError, match="axis must be nonzero"):
+            backend.from_two_vectors(zero_vectors, right_vectors)
+
+    for operation in ("canonicalize", "commutator", "from_two_vectors"):
+        assert _numpy._NUMBA_ROTATION_KERNELS[operation].nopython_signatures
+
+
+@pytest.mark.skipif(not NUMBA_AVAILABLE, reason="Numba is an optional dependency")
+def test_numba_compiles_remaining_coefficient_and_sampling_helpers():
+    rng = np.random.default_rng(2612)
+    count = COUNT
+    hamilton_values = rng.normal(size=(count, 4))
+    other_values = rng.normal(size=(count, 4))
+    cases = (
+        (hamilton_wxyz, False, 1),
+        (hamilton_xyzw, True, 1),
+        (jpl_wxyz, False, -1),
+        (jpl_xyzw, True, -1),
+    )
+
+    for backend, scalar_last, epsilon in cases:
+        values = (
+            hamilton_values[:, (1, 2, 3, 0)]
+            if scalar_last
+            else hamilton_values
+        )
+        other = (
+            other_values[:, (1, 2, 3, 0)]
+            if scalar_last
+            else other_values
+        )
+        vector_start = 0 if scalar_last else 1
+        expected_conjugate = values.copy()
+        expected_conjugate[:, vector_start : vector_start + 3] *= -1.0
+        assert_allclose(backend.add(values, other), values + other, rtol=0.0, atol=0.0)
+        assert_allclose(backend.subtract(values, other), values - other, rtol=0.0, atol=0.0)
+        assert_allclose(backend.conjugate(values), expected_conjugate, rtol=0.0, atol=0.0)
+        assert_allclose(backend.negate(values), -values, rtol=0.0, atol=0.0)
+        assert_allclose(backend.scale(values, -1.75), values * -1.75, rtol=0.0, atol=0.0)
+        assert_allclose(backend.scalar_part(values), values[:, 3 if scalar_last else 0])
+        assert_allclose(
+            backend.vector_part(values),
+            values[:, :3] if scalar_last else values[:, 1:],
+            rtol=0.0,
+            atol=0.0,
+        )
+
+        assert_allclose(backend.from_xyzw(backend.to_xyzw(values)), values, rtol=0.0, atol=0.0)
+        assert_allclose(backend.from_wxyz(backend.to_wxyz(values)), values, rtol=0.0, atol=0.0)
+
+        if epsilon < 0:
+            expected_jpl_wxyz = hamilton_values.copy()
+            expected_jpl_wxyz[:, 1:] *= -1.0
+            expected_jpl_xyzw = expected_jpl_wxyz[:, (1, 2, 3, 0)]
+            expected_from_hamilton = expected_jpl_xyzw if scalar_last else expected_jpl_wxyz
+            assert_allclose(backend.from_hamilton(hamilton_values), expected_from_hamilton)
+            assert_allclose(
+                backend.to_hamilton(expected_from_hamilton),
+                hamilton_values,
+                rtol=0.0,
+                atol=0.0,
+            )
+
+        uniforms = np.random.default_rng(428).random((count, 3))
+        u1, u2, u3 = uniforms.T
+        x = np.sqrt(1.0 - u1) * np.sin(2.0 * np.pi * u2)
+        y = np.sqrt(1.0 - u1) * np.cos(2.0 * np.pi * u2)
+        z = np.sqrt(u1) * np.sin(2.0 * np.pi * u3)
+        scalar = np.sqrt(u1) * np.cos(2.0 * np.pi * u3)
+        if epsilon < 0:
+            x, y, z = -x, -y, -z
+        expected_random = (
+            np.column_stack((x, y, z, scalar))
+            if scalar_last
+            else np.column_stack((scalar, x, y, z))
+        )
+        random_quaternions = backend.random_quaternion(
+            size=count, rng=np.random.default_rng(428)
+        )
+        random_rotations = backend.random_rotation(
+            size=count, rng=np.random.default_rng(428)
+        )
+        assert_allclose(random_quaternions, expected_random, rtol=3e-15, atol=3e-15)
+        assert_allclose(random_rotations, expected_random, rtol=3e-15, atol=3e-15)
+
+    for operation in (
+        "conjugate",
+        "component_transform",
+        "vector_part",
+        "random_quaternion",
+    ):
+        assert _numpy._NUMBA_ROTATION_KERNELS[operation].nopython_signatures
 
 
 @pytest.mark.skipif(not NUMBA_AVAILABLE, reason="Numba is an optional dependency")

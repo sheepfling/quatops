@@ -19,7 +19,9 @@ from .._numpy import (
     _binary,
     _canonicalize,
     _commutator_samples,
+    _component_transform,
     _components,
+    _conjugate_samples,
     _direction,
     _dot_quaternions,
     _euler_from_angles,
@@ -75,12 +77,12 @@ def cos(q: Any) -> np.ndarray:
 
 def from_xyzw(q: Any) -> np.ndarray:
     """Return a copy of scalar-last ``(..., 4)`` quaternion values."""
-    return _components(q, 4, "quaternion").copy()
+    return _component_transform(q, True, True)
 
 
 def to_xyzw(q: Any) -> np.ndarray:
     """Return a copy of the JPL quaternion in scalar-last order."""
-    return _components(q, 4, "quaternion").copy()
+    return _component_transform(q, True, True)
 
 
 def from_wxyz(q: Any) -> np.ndarray:
@@ -88,14 +90,12 @@ def from_wxyz(q: Any) -> np.ndarray:
 
     This only changes layout; it does not change quaternion convention.
     """
-    a = _components(q, 4, "quaternion")
-    return a[..., [1, 2, 3, 0]]
+    return _component_transform(q, False, True)
 
 
 def to_wxyz(q: Any) -> np.ndarray:
     """Reorder JPL components to scalar-first layout without changing convention."""
-    a = _components(q, 4, "quaternion")
-    return a[..., [3, 0, 1, 2]]
+    return _component_transform(q, True, False)
 
 
 def from_hamilton(q: Any) -> np.ndarray:
@@ -103,25 +103,17 @@ def from_hamilton(q: Any) -> np.ndarray:
 
     This changes convention as well as layout, without normalization.
     """
-    a = _components(q, 4, "Hamilton quaternion")
-    out = a[..., [1, 2, 3, 0]]
-    out[..., :3] *= -1
-    return out
+    return _component_transform(q, False, True, True, "Hamilton quaternion")
 
 
 def to_hamilton(q: Any) -> np.ndarray:
     """Convert JPL xyzw to Hamilton wxyz without normalization."""
-    a = _components(q, 4, "JPL quaternion")
-    out = a[..., [3, 0, 1, 2]]
-    out[..., 1:] *= -1
-    return out
+    return _component_transform(q, True, False, True, "JPL quaternion")
 
 
 def conjugate(q: Any) -> np.ndarray:
     """Conjugate an xyzw quaternion without changing its magnitude."""
-    out = _components(q, 4, "quaternion").copy()
-    out[..., :3] *= -1
-    return out
+    return _conjugate_samples(q, _SCALAR_LAST)
 
 
 def add(lhs: Any, rhs: Any) -> np.ndarray:

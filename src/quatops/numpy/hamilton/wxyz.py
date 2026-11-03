@@ -21,7 +21,9 @@ from ..._numpy import (
     _binary,
     _canonicalize,
     _commutator_samples,
+    _component_transform,
     _components,
+    _conjugate_samples,
     _direction,
     _dot_quaternions,
     _euler_from_angles,
@@ -77,32 +79,27 @@ def cos(q: Any) -> np.ndarray:
 
 def from_xyzw(q: Any) -> np.ndarray:
     """Convert scalar-last ``(..., 4)`` values to scalar-first layout."""
-    a = _components(q, 4, "quaternion")
-    return a[..., [3, 0, 1, 2]]
+    return _component_transform(q, True, False)
 
 
 def to_xyzw(q: Any) -> np.ndarray:
     """Convert scalar-first ``(..., 4)`` values to scalar-last layout."""
-    a = _components(q, 4, "quaternion")
-    return a[..., [1, 2, 3, 0]]
+    return _component_transform(q, False, True)
 
 
 def from_wxyz(q: Any) -> np.ndarray:
     """Validate and copy scalar-first values; no convention conversion."""
-    return _components(q, 4, "quaternion").copy()
+    return _component_transform(q, False, False)
 
 
 def to_wxyz(q: Any) -> np.ndarray:
     """Validate and copy scalar-first values; no convention conversion."""
-    return _components(q, 4, "quaternion").copy()
+    return _component_transform(q, False, False)
 
 
 def conjugate(q: Any) -> np.ndarray:
     """Return the quaternion conjugate; preserve its magnitude."""
-    a = _components(q, 4, "quaternion")
-    out = a.copy()
-    out[..., 1:] *= -1
-    return out
+    return _conjugate_samples(q, _SCALAR_LAST)
 
 
 def add(lhs: Any, rhs: Any) -> np.ndarray:

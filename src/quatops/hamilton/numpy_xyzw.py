@@ -17,7 +17,9 @@ from .._numpy import (
     _binary,
     _canonicalize,
     _commutator_samples,
+    _component_transform,
     _components,
+    _conjugate_samples,
     _direction,
     _dot_quaternions,
     _euler_from_angles,
@@ -73,12 +75,12 @@ def cos(q: Any) -> np.ndarray:
 
 def from_xyzw(q: Any) -> np.ndarray:
     """Return a copy of scalar-last ``(..., 4)`` quaternion values."""
-    return _components(q, 4, "quaternion").copy()
+    return _component_transform(q, True, True)
 
 
 def to_xyzw(q: Any) -> np.ndarray:
     """Return a copy of the Hamilton quaternion in scalar-last order."""
-    return _components(q, 4, "quaternion").copy()
+    return _component_transform(q, True, True)
 
 
 def from_wxyz(q: Any) -> np.ndarray:
@@ -86,21 +88,17 @@ def from_wxyz(q: Any) -> np.ndarray:
 
     This only changes layout; it does not change quaternion convention.
     """
-    a = _components(q, 4, "quaternion")
-    return a[..., [1, 2, 3, 0]]
+    return _component_transform(q, False, True)
 
 
 def to_wxyz(q: Any) -> np.ndarray:
     """Reorder Hamilton components to scalar-first layout without changing convention."""
-    a = _components(q, 4, "quaternion")
-    return a[..., [3, 0, 1, 2]]
+    return _component_transform(q, True, False)
 
 
 def conjugate(q: Any) -> np.ndarray:
     """Conjugate an xyzw quaternion without changing its magnitude."""
-    out = _components(q, 4, "quaternion").copy()
-    out[..., :3] *= -1
-    return out
+    return _conjugate_samples(q, _SCALAR_LAST)
 
 
 def add(lhs: Any, rhs: Any) -> np.ndarray:

@@ -63,21 +63,47 @@ fallback, and the optional Numba batch mapper. It checks exact outputs before
 timing each route.
 
 Large NumPy batches use optional Numba kernels for multiplication, vector
-rotation, matrix/rotation-vector/axis-angle conversion, interpolation, MRP,
-analytic functions and powers, integration, SO(3) Jacobians, sequence
-continuity, batch estimators, coefficient operations, and signed-axis
-game-engine mapping. Install them with
-`.venv/bin/python -m pip install -e '.[performance]'`. Most paths switch at 128
-items; sampled integration uses trajectory count times interval count. The
-first eligible call compiles each kernel; Numba caches them for later runs.
+rotation, 3x3 rotations and 4x4 quaternion multiplication matrices,
+rotation-vector/axis-angle and Euler conversion, interpolation, MRP, analytic
+functions and powers, integration, SO(3) Jacobians, sequence continuity, batch
+estimators, selected coefficient operations and transforms, random sampling,
+canonicalization, commutators, two-vector rotations, and signed-axis
+game-engine mapping.
+Install them with
+`.venv/bin/python -m pip install -e '.[performance]'`. Most kernels switch at
+128 items; parallel Euler conversion and parallel rotation distance switch at
+8192. Sampled integration uses trajectory count times interval count. SQUAD
+reuses the SLERP kernel. Boxplus/boxminus compose the existing rotation-vector
+and multiplication paths, while swing-twist composes normalization, inverse,
+and multiplication paths. The first eligible call compiles each kernel; Numba
+caches them for later runs.
 Without Numba, QuatOps uses its NumPy fallbacks, and small arrays stay on those
 paths. If an installed Numba fails to import or compile a kernel, QuatOps logs
 the failure, disables that accelerator, and continues with NumPy. Benchmark
 preflight calls compile the kernels before timing, so the results show
 steady-state performance. Pytest prints the NumPy, numpy-quaternion, SciPy, and
-Numba versions. Run `experiments/numba_coverage.py` to inspect actual compiled
-signatures, or `tests/benchmarks/test_numpy_remaining_numba.py` for the
-axis-angle, analytic, power, Jacobian, sequence, and estimator comparisons.
+Numba versions. Run `.venv/bin/python experiments/numba_coverage.py` for the
+full public API route catalog and actual compiled signatures. It exercises all
+89 unique Hamilton/JPL exports, the four engine mapping functions, and the
+component-first adapters; it also fails if an API route is unclassified or a
+registered Numba dispatcher did not compile. The output separates direct Numba
+routes from compositions that reuse shared kernels and ordinary NumPy
+vectorization. The catalog is also checked by
+`tests/test_numba_compatibility.py`. The 4x4 matrix, SQUAD, boxplus, and
+boxminus benchmarks live in `tests/benchmarks/test_numpy_matrix_candidates.py`
+and `tests/benchmarks/test_numpy_remaining_candidates.py`. The remaining
+canonicalize, commutator, and two-vector kernels are compared with their NumPy
+fallbacks in `tests/benchmarks/test_numpy_helper_candidates.py`. Coefficient
+conjugation and extraction, convention/layout transforms, and random sampling
+are benchmarked in `tests/benchmarks/test_numpy_remaining_helpers.py`. Simple
+arithmetic, scalar extraction, and copy-only layout helpers stay on NumPy when
+the optional kernel does not improve the batch route.
+
+```sh
+.venv/bin/python -m pytest tests/benchmarks/test_numpy_helper_candidates.py \
+  -m benchmark --benchmark-only --benchmark-group-by=group \
+  --benchmark-columns=median
+```
 
 CI exercises the Numba kernels on every advertised Python version, from 3.9
 through 3.15. `requires-python` remains open-ended at `>=3.9`. The performance

@@ -122,6 +122,25 @@ def _euler_from_angles(
         values = values[..., ::-1]
     if degrees:
         values = np.deg2rad(values)
+    if values.size // 3 >= 8192:
+        kernel = _numba_rotation_kernel("from_euler")
+        if kernel is not None:
+            rows = np.ascontiguousarray(values.reshape((-1, 3)))
+            try:
+                result = kernel(
+                    rows, i, j, k, ell, epsilon, proper,
+                    algebra_epsilon, scalar_last,
+                )
+            except Exception as exc:  # noqa: BLE001
+                _NUMBA_ROTATION_KERNELS.pop("from_euler", None)
+                _warn_numba_failure("from Euler angles", exc)
+            else:
+                result = result.reshape(values.shape[:-1] + (4,))
+                return np.moveaxis(
+                    result,
+                    -1,
+                    _axis_index(component_axis, result.ndim, "component_axis"),
+                )
     a1, a2, a3 = np.moveaxis(values, -1, 0)
     with np.errstate(all="ignore"):
         if proper:
@@ -185,6 +204,27 @@ def _euler_to_angles(
     if tolerance < 0.0 or tolerance >= np.pi / 2.0:
         raise ValueError("gimbal_tolerance must be in [0, pi/2)")
     intrinsic, i, j, k, ell, epsilon, proper = _euler_sequence_metadata(sequence)
+    if values.size // 4 >= 8192:
+        kernel = _numba_rotation_kernel("to_euler")
+        if kernel is not None:
+            rows = np.ascontiguousarray(values.reshape((-1, 4)))
+            try:
+                result, locked, valid = kernel(
+                    rows, i, j, k, ell, epsilon, proper, intrinsic,
+                    tolerance, algebra_epsilon, scalar_last, degrees,
+                )
+            except Exception as exc:  # noqa: BLE001
+                _NUMBA_ROTATION_KERNELS.pop("to_euler", None)
+                _warn_numba_failure("to Euler angles", exc)
+            else:
+                if not valid:
+                    raise ValueError("quaternion must be nonzero")
+                angles = result.reshape(values.shape[:-1] + (3,))
+                output_axis = _axis_index(angle_axis, angles.ndim, "angle_axis")
+                angles = np.moveaxis(angles, -1, output_axis)
+                if not with_status:
+                    return _result(angles)
+                return EulerResult(angles, locked.reshape(values.shape[:-1]))
     scale = np.max(np.abs(values), axis=-1)
     if np.any(scale == 0.0):
         raise ValueError("quaternion must be nonzero")
@@ -237,6 +277,141 @@ def _euler_to_angles(
     return EulerResult(angles, locked)
 
 
+def _from_euler_numba_impl(
+    angles: np.ndarray,
+    first_axis: int,
+    middle_axis: int,
+    last_axis: int,
+    repeated_axis: int,
+    sequence_epsilon: int,
+    proper: bool,
+    algebra_epsilon: int,
+    scalar_last: bool,
+) -> np.ndarray:
+    """Construct canonical quaternion rows from prepared Euler angles."""
+    result = np.empty((angles.shape[0], 4), dtype=np.float64)
+    for sample in _NUMBA_PRANGE(angles.shape[0]):
+        a1, a2, a3 = angles[sample, 0], angles[sample, 1], angles[sample, 2]
+        h = np.zeros(4, dtype=np.float64)
+        if proper:
+            u = 0.5 * a1 + 0.5 * a3
+            v = 0.5 * a1 - 0.5 * a3
+            c2 = cos(0.5 * a2)
+            s2 = sin(0.5 * a2)
+            h[0] = c2 * cos(u)
+            h[first_axis] = c2 * sin(u)
+            h[middle_axis] = s2 * cos(v)
+            h[repeated_axis] = sequence_epsilon * s2 * sin(v)
+        else:
+            c1, c2, c3 = cos(0.5 * a1), cos(0.5 * a2), cos(0.5 * a3)
+            s1, s2, s3 = sin(0.5 * a1), sin(0.5 * a2), sin(0.5 * a3)
+            h[0] = c1*c2*c3 - sequence_epsilon*s1*s2*s3
+            h[first_axis] = s1*c2*c3 + sequence_epsilon*c1*s2*s3
+            h[middle_axis] = c1*s2*c3 - sequence_epsilon*s1*c2*s3
+            h[last_axis] = c1*c2*s3 + sequence_epsilon*s1*s2*c3
+
+        first_is_negative = (
+            h[1] < 0.0
+            or (h[1] == 0.0 and h[2] < 0.0)
+            or (h[1] == 0.0 and h[2] == 0.0 and h[3] < 0.0)
+        )
+        flip = h[0] < 0.0 or (h[0] == 0.0 and first_is_negative)
+        for component in range(4):
+            if scalar_last:
+                value = h[component + 1] * algebra_epsilon if component < 3 else h[0]
+            else:
+                value = h[0] if component == 0 else h[component] * algebra_epsilon
+            if flip:
+                value = -value
+            result[sample, component] = 0.0 if value == 0.0 else value
+    return result
+
+
+def _to_euler_numba_impl(
+    quaternions: np.ndarray,
+    first_axis: int,
+    middle_axis: int,
+    last_axis: int,
+    repeated_axis: int,
+    sequence_epsilon: int,
+    proper: bool,
+    intrinsic: bool,
+    tolerance: float,
+    algebra_epsilon: int,
+    scalar_last: bool,
+    degrees: bool,
+) -> tuple[np.ndarray, np.ndarray, bool]:
+    """Extract principal Euler angles and gimbal-lock flags from rows."""
+    result = np.empty((quaternions.shape[0], 3), dtype=np.float64)
+    locked = np.empty(quaternions.shape[0], dtype=np.bool_)
+    valid_rows = np.ones(quaternions.shape[0], dtype=np.bool_)
+    for sample in _NUMBA_PRANGE(quaternions.shape[0]):
+        if scalar_last:
+            x, y, z, w = (
+                quaternions[sample, 0], quaternions[sample, 1],
+                quaternions[sample, 2], quaternions[sample, 3],
+            )
+        else:
+            w, x, y, z = (
+                quaternions[sample, 0], quaternions[sample, 1],
+                quaternions[sample, 2], quaternions[sample, 3],
+            )
+        scale = max(abs(w), abs(x), abs(y), abs(z))
+        if scale == 0.0:
+            valid_rows[sample] = False
+            result[sample, :] = np.nan
+            locked[sample] = False
+            continue
+        w, x, y, z = w / scale, x / scale, y / scale, z / scale
+        x, y, z = algebra_epsilon*x, algebra_epsilon*y, algebra_epsilon*z
+        coefficients = (w, x, y, z)
+        if proper:
+            a, b = w, coefficients[first_axis]
+            c = coefficients[middle_axis]
+            d = sequence_epsilon * coefficients[repeated_axis]
+            kappa = 1
+        else:
+            a = w + coefficients[middle_axis]
+            b = coefficients[first_axis] + sequence_epsilon * coefficients[last_axis]
+            c = w - coefficients[middle_axis]
+            d = coefficients[first_axis] - sequence_epsilon * coefficients[last_axis]
+            kappa = sequence_epsilon
+
+        chi = 2.0 * atan2(hypot(c, d), hypot(a, b))
+        near_zero = chi <= tolerance
+        near_pi = pi - chi <= tolerance
+        is_locked = near_zero or near_pi
+        u = atan2(b, a)
+        v = atan2(d, c)
+        if intrinsic:
+            alpha = 2.0*u if near_zero else (2.0*v if near_pi else u + v)
+            gamma = 0.0 if is_locked else kappa*(u - v)
+        else:
+            alpha = (
+                2.0*kappa*u if near_zero
+                else (-2.0*kappa*v if near_pi else kappa*(u - v))
+            )
+            gamma = 0.0 if is_locked else u + v
+        chi = 0.0 if near_zero else (pi if near_pi else chi)
+        beta = chi if proper else pi / 2.0 - chi
+        if alpha >= pi:
+            alpha -= 2.0*pi
+        elif alpha < -pi:
+            alpha += 2.0*pi
+        if gamma >= pi:
+            gamma -= 2.0*pi
+        elif gamma < -pi:
+            gamma += 2.0*pi
+        if degrees:
+            factor = 180.0 / pi
+            alpha, beta, gamma = alpha*factor, beta*factor, gamma*factor
+        result[sample, 0] = alpha
+        result[sample, 1] = beta
+        result[sample, 2] = gamma
+        locked[sample] = is_locked
+    return result, locked, np.all(valid_rows)
+
+
 def _binary(
     lhs: Any,
     rhs: Any,
@@ -251,12 +426,76 @@ def _binary(
     return _result(result)
 
 
+def _conjugate_samples(q: Any, scalar_last: bool) -> np.ndarray:
+    """Conjugate components, using Numba for large scalar-first batches."""
+    values = _components(q, 4, "quaternion")
+    if not scalar_last and values.size // 4 >= 128 and values.flags.c_contiguous:
+        kernel = _numba_rotation_kernel("conjugate")
+        if kernel is not None:
+            rows = values.reshape((-1, 4))
+            try:
+                result = kernel(rows)
+            except Exception as exc:  # noqa: BLE001
+                _NUMBA_ROTATION_KERNELS.pop("conjugate", None)
+                _warn_numba_failure("quaternion conjugation", exc)
+            else:
+                return result.reshape(values.shape)
+    result = values.copy()
+    vector_start = 0 if scalar_last else 1
+    result[..., vector_start : vector_start + 3] *= -1.0
+    return result
+
+
 def _scale(q: Any, factor: Any) -> np.ndarray:
     """Scale quaternion components by one finite real scalar."""
     array = _components(q, 4, "quaternion")
     with np.errstate(all="ignore"):
         result = array * _factor(factor)
     return _result(result)
+
+
+def _component_transform(
+    q: Any,
+    source_scalar_last: bool,
+    target_scalar_last: bool,
+    negate_vector: bool = False,
+    name: str = "quaternion",
+) -> np.ndarray:
+    """Copy, reorder, or convert convention for a quaternion component batch."""
+    values = _components(q, 4, name)
+    is_copy = source_scalar_last == target_scalar_last and not negate_vector
+    if is_copy:
+        return values.copy()
+    accelerate_transform = (
+        not source_scalar_last and target_scalar_last
+    ) or (negate_vector and not source_scalar_last)
+    if accelerate_transform and values.size // 4 >= 128 and values.flags.c_contiguous:
+        kernel = _numba_rotation_kernel("component_transform")
+        if kernel is not None:
+            rows = values.reshape((-1, 4))
+            try:
+                result = kernel(
+                    rows,
+                    source_scalar_last,
+                    target_scalar_last,
+                    negate_vector,
+                )
+            except Exception as exc:  # noqa: BLE001
+                _NUMBA_ROTATION_KERNELS.pop("component_transform", None)
+                _warn_numba_failure("quaternion component transform", exc)
+            else:
+                return result.reshape(values.shape)
+
+    if source_scalar_last == target_scalar_last:
+        result = values.copy()
+    elif source_scalar_last:
+        result = values[..., (3, 0, 1, 2)]
+    else:
+        result = values[..., (1, 2, 3, 0)]
+    if negate_vector:
+        vector_start = 0 if target_scalar_last else 1
+        result[..., vector_start : vector_start + 3] *= -1.0
+    return result
 
 
 def _algebraic(q: Any, scalar_last: bool, operation: str) -> np.ndarray:
@@ -1139,6 +1378,17 @@ def _matrix_components(q: Any, epsilon: int, scalar_last: bool, kind: str) -> np
                     if not nonzero:
                         raise ValueError("zero quaternion has no normalization or inverse")
                     return result.reshape(a.shape[:-1] + (3, 3))
+    elif kind in ("left", "right") and a.size // 4 >= 128:
+        kernel = _numba_rotation_kernel("quaternion_matrix")
+        if kernel is not None:
+            rows = np.ascontiguousarray(a.reshape((-1, 4)))
+            try:
+                result = kernel(rows, epsilon, scalar_last, kind == "right")
+            except Exception as exc:  # noqa: BLE001
+                _NUMBA_ROTATION_KERNELS.pop("quaternion_matrix", None)
+                _warn_numba_failure("quaternion multiplication matrices", exc)
+            else:
+                return result.reshape(a.shape[:-1] + (4, 4))
     if kind == "rotation" and not np.all(np.isfinite(a)):
         raise ValueError("quaternion must contain finite float64 values")
     if scalar_last:
@@ -1331,6 +1581,61 @@ def _rotation_matrix_numba_impl(
         result[index, 2, 1] = 2.0 * (y*z + epsilon*w*x) / denominator
         result[index, 2, 2] = (w*w - x*x - y*y + z*z) / denominator
     return result, finite, nonzero
+
+
+def _quaternion_matrix_numba_impl(
+    quaternions: np.ndarray,
+    epsilon: int,
+    scalar_last: bool,
+    right: bool,
+) -> np.ndarray:
+    """Build left or right 4x4 multiplication matrices in one batch pass."""
+    result = np.empty((quaternions.shape[0], 4, 4), dtype=np.float64)
+    cross = -epsilon if right else epsilon
+    for index in range(quaternions.shape[0]):
+        if scalar_last:
+            x, y, z, w = (
+                quaternions[index, 0], quaternions[index, 1],
+                quaternions[index, 2], quaternions[index, 3],
+            )
+            result[index, 0, 0] = w
+            result[index, 0, 1] = -cross * z
+            result[index, 0, 2] = cross * y
+            result[index, 0, 3] = x
+            result[index, 1, 0] = cross * z
+            result[index, 1, 1] = w
+            result[index, 1, 2] = -cross * x
+            result[index, 1, 3] = y
+            result[index, 2, 0] = -cross * y
+            result[index, 2, 1] = cross * x
+            result[index, 2, 2] = w
+            result[index, 2, 3] = z
+            result[index, 3, 0] = -x
+            result[index, 3, 1] = -y
+            result[index, 3, 2] = -z
+            result[index, 3, 3] = w
+        else:
+            w, x, y, z = (
+                quaternions[index, 0], quaternions[index, 1],
+                quaternions[index, 2], quaternions[index, 3],
+            )
+            result[index, 0, 0] = w
+            result[index, 0, 1] = -x
+            result[index, 0, 2] = -y
+            result[index, 0, 3] = -z
+            result[index, 1, 0] = x
+            result[index, 1, 1] = w
+            result[index, 1, 2] = -cross * z
+            result[index, 1, 3] = cross * y
+            result[index, 2, 0] = y
+            result[index, 2, 1] = cross * z
+            result[index, 2, 2] = w
+            result[index, 2, 3] = -cross * x
+            result[index, 3, 0] = z
+            result[index, 3, 1] = -cross * y
+            result[index, 3, 2] = cross * x
+            result[index, 3, 3] = w
+    return result
 
 
 def _from_rotvec_numba_impl(
@@ -3104,12 +3409,266 @@ def _engine_axis_map_numba_impl(
     return result
 
 
+def _canonicalize_numba_impl(
+    quaternions: np.ndarray, epsilon: int, scalar_last: bool
+) -> np.ndarray:
+    """Choose canonical signs and clear signed zeros in one batch pass."""
+    result = np.empty_like(quaternions)
+    scalar_index = 3 if scalar_last else 0
+    vector_start = 0 if scalar_last else 1
+    for row in range(quaternions.shape[0]):
+        scalar = quaternions[row, scalar_index]
+        first = 0.0
+        for offset in range(3):
+            value = quaternions[row, vector_start + offset]
+            if value != 0.0:
+                first = value
+                break
+        flip = scalar < 0.0 or (
+            scalar == 0.0 and ((first < 0.0) if epsilon > 0 else (first > 0.0))
+        )
+        for component in range(4):
+            value = -quaternions[row, component] if flip else quaternions[row, component]
+            result[row, component] = 0.0 if value == 0.0 else value
+    return result
+
+
+def _commutator_numba_impl(
+    lhs: np.ndarray, rhs: np.ndarray, epsilon: int, scalar_last: bool
+) -> np.ndarray:
+    """Compute a quaternion commutator from its vector cross product."""
+    result = np.zeros_like(lhs)
+    vector_start = 0 if scalar_last else 1
+    factor = 2.0 * epsilon
+    for row in range(lhs.shape[0]):
+        ax, ay, az = (
+            lhs[row, vector_start],
+            lhs[row, vector_start + 1],
+            lhs[row, vector_start + 2],
+        )
+        bx, by, bz = (
+            rhs[row, vector_start],
+            rhs[row, vector_start + 1],
+            rhs[row, vector_start + 2],
+        )
+        result[row, vector_start] = factor * (ay * bz - az * by)
+        result[row, vector_start + 1] = factor * (az * bx - ax * bz)
+        result[row, vector_start + 2] = factor * (ax * by - ay * bx)
+    return result
+
+
+def _from_two_vectors_numba_impl(
+    source: np.ndarray, target: np.ndarray, epsilon: int, scalar_last: bool
+) -> tuple[np.ndarray, bool]:
+    """Build shortest rotations between vector rows without batch temporaries."""
+    result = np.empty((source.shape[0], 4), dtype=np.float64)
+    valid = True
+    for row in range(source.shape[0]):
+        source_scale = max(
+            abs(source[row, 0]), abs(source[row, 1]), abs(source[row, 2])
+        )
+        target_scale = max(
+            abs(target[row, 0]), abs(target[row, 1]), abs(target[row, 2])
+        )
+        if source_scale == 0.0 or target_scale == 0.0:
+            valid = False
+            continue
+
+        sx, sy, sz = (
+            source[row, 0] / source_scale,
+            source[row, 1] / source_scale,
+            source[row, 2] / source_scale,
+        )
+        tx, ty, tz = (
+            target[row, 0] / target_scale,
+            target[row, 1] / target_scale,
+            target[row, 2] / target_scale,
+        )
+        source_norm = sqrt(sx * sx + sy * sy + sz * sz)
+        target_norm = sqrt(tx * tx + ty * ty + tz * tz)
+        ux, uy, uz = sx / source_norm, sy / source_norm, sz / source_norm
+        vx, vy, vz = tx / target_norm, ty / target_norm, tz / target_norm
+
+        cosine = min(1.0, max(-1.0, (ux * vx + uy * vy) + uz * vz))
+        cross_x = uy * vz - uz * vy
+        cross_y = uz * vx - ux * vz
+        cross_z = ux * vy - uy * vx
+        antiparallel = (
+            cosine < 0.0 and cross_x == 0.0 and cross_y == 0.0 and cross_z == 0.0
+        )
+        if antiparallel:
+            least_aligned = 0
+            smallest = abs(ux)
+            if abs(uy) < smallest:
+                least_aligned, smallest = 1, abs(uy)
+            if abs(uz) < smallest:
+                least_aligned = 2
+            basis_x = 1.0 if least_aligned == 0 else 0.0
+            basis_y = 1.0 if least_aligned == 1 else 0.0
+            basis_z = 1.0 if least_aligned == 2 else 0.0
+            cross_x = uy * basis_z - uz * basis_y
+            cross_y = uz * basis_x - ux * basis_z
+            cross_z = ux * basis_y - uy * basis_x
+            cross_scale = max(abs(cross_x), abs(cross_y), abs(cross_z))
+            cross_x /= cross_scale
+            cross_y /= cross_scale
+            cross_z /= cross_scale
+            cross_norm = sqrt(cross_x * cross_x + cross_y * cross_y + cross_z * cross_z)
+            vector_x, vector_y, vector_z = (
+                cross_x / cross_norm,
+                cross_y / cross_norm,
+                cross_z / cross_norm,
+            )
+            scalar = 0.0
+        else:
+            vector_x, vector_y, vector_z = cross_x, cross_y, cross_z
+            scalar = 1.0 + cosine
+
+        quaternion_scale = max(
+            abs(scalar), abs(vector_x), abs(vector_y), abs(vector_z)
+        )
+        scalar /= quaternion_scale
+        vector_x /= quaternion_scale
+        vector_y /= quaternion_scale
+        vector_z /= quaternion_scale
+        quaternion_norm = sqrt(
+            scalar * scalar + vector_x * vector_x + vector_y * vector_y + vector_z * vector_z
+        )
+        scalar /= quaternion_norm
+        vector_x /= quaternion_norm
+        vector_y /= quaternion_norm
+        vector_z /= quaternion_norm
+
+        # Match the Hamilton canonical sign before converting conventions.
+        first = vector_x if vector_x != 0.0 else (vector_y if vector_y != 0.0 else vector_z)
+        if scalar < 0.0 or (scalar == 0.0 and first < 0.0):
+            scalar, vector_x, vector_y, vector_z = (
+                -scalar, -vector_x, -vector_y, -vector_z
+            )
+        if epsilon < 0:
+            vector_x, vector_y, vector_z = -vector_x, -vector_y, -vector_z
+        if scalar_last:
+            result[row, 0], result[row, 1], result[row, 2], result[row, 3] = (
+                vector_x, vector_y, vector_z, scalar
+            )
+            scalar_index, vector_start = 3, 0
+        else:
+            result[row, 0], result[row, 1], result[row, 2], result[row, 3] = (
+                scalar, vector_x, vector_y, vector_z
+            )
+            scalar_index, vector_start = 0, 1
+
+        # Apply the final layout/convention-specific tie rule used by _canonicalize.
+        scalar = result[row, scalar_index]
+        first = 0.0
+        for offset in range(3):
+            value = result[row, vector_start + offset]
+            if value != 0.0:
+                first = value
+                break
+        flip = scalar < 0.0 or (
+            scalar == 0.0 and ((first < 0.0) if epsilon > 0 else (first > 0.0))
+        )
+        for component in range(4):
+            value = -result[row, component] if flip else result[row, component]
+            result[row, component] = 0.0 if value == 0.0 else value
+    return result, valid
+
+
+def _conjugate_numba_impl(quaternions: np.ndarray) -> np.ndarray:
+    """Conjugate scalar-first quaternion rows in one contiguous pass."""
+    result = np.empty_like(quaternions)
+    for row in range(quaternions.shape[0]):
+        result[row, 0] = quaternions[row, 0]
+        result[row, 1] = -quaternions[row, 1]
+        result[row, 2] = -quaternions[row, 2]
+        result[row, 3] = -quaternions[row, 3]
+    return result
+
+
+def _component_transform_numba_impl(
+    values: np.ndarray,
+    source_scalar_last: bool,
+    target_scalar_last: bool,
+    negate_vector: bool,
+) -> np.ndarray:
+    """Reorder quaternion rows and optionally convert Hamilton/JPL signs."""
+    result = np.empty_like(values)
+    for row in range(values.shape[0]):
+        if source_scalar_last:
+            scalar = values[row, 3]
+            x, y, z = values[row, 0], values[row, 1], values[row, 2]
+        else:
+            scalar = values[row, 0]
+            x, y, z = values[row, 1], values[row, 2], values[row, 3]
+        if negate_vector:
+            x, y, z = -x, -y, -z
+        if target_scalar_last:
+            result[row, 0], result[row, 1], result[row, 2], result[row, 3] = (
+                x, y, z, scalar
+            )
+        else:
+            result[row, 0], result[row, 1], result[row, 2], result[row, 3] = (
+                scalar, x, y, z
+            )
+    return result
+
+
+def _vector_part_numba_impl(
+    quaternions: np.ndarray, scalar_last: bool
+) -> np.ndarray:
+    """Copy vector components from each quaternion row."""
+    result = np.empty((quaternions.shape[0], 3), dtype=np.float64)
+    vector_start = 0 if scalar_last else 1
+    for row in range(quaternions.shape[0]):
+        for component in range(3):
+            result[row, component] = quaternions[row, vector_start + component]
+    return result
+
+
+def _random_quaternion_numba_impl(
+    samples: np.ndarray, epsilon: int, scalar_last: bool
+) -> np.ndarray:
+    """Map Shoemake uniform samples to quaternion rows."""
+    result = np.empty((samples.shape[0], 4), dtype=np.float64)
+    two_pi = 2.0 * pi
+    for row in range(samples.shape[0]):
+        u1, u2, u3 = samples[row, 0], samples[row, 1], samples[row, 2]
+        root_complement = sqrt(1.0 - u1)
+        root = sqrt(u1)
+        x = root_complement * sin(two_pi * u2)
+        y = root_complement * cos(two_pi * u2)
+        z = root * sin(two_pi * u3)
+        scalar = root * cos(two_pi * u3)
+        if epsilon < 0:
+            x, y, z = -x, -y, -z
+        if scalar_last:
+            result[row, 0], result[row, 1], result[row, 2], result[row, 3] = (
+                x, y, z, scalar
+            )
+        else:
+            result[row, 0], result[row, 1], result[row, 2], result[row, 3] = (
+                scalar, x, y, z
+            )
+    return result
+
+
 _NUMBA_ROTATION_KERNEL_NAMES = frozenset(
     {
         "algebraic",
         "from_axis_angle",
         "from_rotation_matrix",
         "to_rotation_matrix",
+        "quaternion_matrix",
+        "canonicalize",
+        "commutator",
+        "from_two_vectors",
+        "conjugate",
+        "component_transform",
+        "vector_part",
+        "random_quaternion",
+        "from_euler",
+        "to_euler",
         "from_rotvec",
         "to_rotvec",
         "integrate_angular_velocity",
@@ -3191,6 +3750,36 @@ def _numba_rotation_kernel(operation: str) -> Any:
                     ),
                     "to_rotation_matrix": njit(cache=True, nogil=True)(
                         _rotation_matrix_numba_impl
+                    ),
+                    "quaternion_matrix": njit(cache=True, nogil=True)(
+                        _quaternion_matrix_numba_impl
+                    ),
+                    "canonicalize": njit(cache=True, nogil=True)(
+                        _canonicalize_numba_impl
+                    ),
+                    "commutator": njit(cache=True, nogil=True)(
+                        _commutator_numba_impl
+                    ),
+                    "from_two_vectors": njit(cache=True, nogil=True)(
+                        _from_two_vectors_numba_impl
+                    ),
+                    "conjugate": njit(cache=True, nogil=True)(
+                        _conjugate_numba_impl
+                    ),
+                    "component_transform": njit(cache=True, nogil=True)(
+                        _component_transform_numba_impl
+                    ),
+                    "vector_part": njit(cache=True, nogil=True)(
+                        _vector_part_numba_impl
+                    ),
+                    "random_quaternion": njit(cache=True, nogil=True)(
+                        _random_quaternion_numba_impl
+                    ),
+                    "from_euler": njit(cache=True, nogil=True, parallel=True)(
+                        _from_euler_numba_impl
+                    ),
+                    "to_euler": njit(cache=True, nogil=True, parallel=True)(
+                        _to_euler_numba_impl
                     ),
                     "from_rotvec": njit(cache=True, nogil=True)(
                         _from_rotvec_numba_impl
@@ -3566,9 +4155,11 @@ def _squad_samples(
         first_q, second_q, first_control, second_control = np.broadcast_arrays(*values)
     except ValueError as exc:
         raise ValueError("component batch dimensions are not broadcastable") from exc
-    first = _slerp(first_q, second_q, amount, scalar_last)
-    second = _slerp(first_control, second_control, amount, scalar_last)
-    return _slerp(first, second, 2.0 * amount * (1.0 - amount), scalar_last)
+    first = _slerp_samples(first_q, second_q, amount, scalar_last)
+    second = _slerp_samples(first_control, second_control, amount, scalar_last)
+    return _slerp_samples(
+        first, second, 2.0 * amount * (1.0 - amount), scalar_last
+    )
 
 
 def _boxplus_samples(
@@ -4107,6 +4698,17 @@ def _random_quaternion(size: Any, rng: Any, epsilon: int, scalar_last: bool) -> 
         raise ValueError("rng.random must accept the requested output shape") from exc
     if u.shape != shape + (3,) or not np.all(np.isfinite(u)) or np.any((u < 0.0) | (u >= 1.0)):
         raise ValueError("rng.random must return values in [0, 1) with the requested shape")
+    if u.size // 3 >= 128 and u.flags.c_contiguous:
+        kernel = _numba_rotation_kernel("random_quaternion")
+        if kernel is not None:
+            rows = u.reshape((-1, 3))
+            try:
+                result = kernel(rows, epsilon, scalar_last)
+            except Exception as exc:  # noqa: BLE001
+                _NUMBA_ROTATION_KERNELS.pop("random_quaternion", None)
+                _warn_numba_failure("random quaternion sampling", exc)
+            else:
+                return _result(result.reshape(shape + (4,)))
     u1, u2, u3 = np.moveaxis(u, -1, 0)
     x = np.sqrt(1.0 - u1) * np.sin(2.0 * np.pi * u2)
     y = np.sqrt(1.0 - u1) * np.cos(2.0 * np.pi * u2)
@@ -4268,6 +4870,18 @@ def _commutator_samples(
         a, b = np.broadcast_arrays(a, b)
     except ValueError as exc:
         raise ValueError("component batch dimensions are not broadcastable") from exc
+    if a.size // 4 >= 128:
+        kernel = _numba_rotation_kernel("commutator")
+        if kernel is not None:
+            left = np.ascontiguousarray(a.reshape((-1, 4)))
+            right = np.ascontiguousarray(b.reshape((-1, 4)))
+            try:
+                result = kernel(left, right, epsilon, scalar_last)
+            except Exception as exc:  # noqa: BLE001
+                _NUMBA_ROTATION_KERNELS.pop("commutator", None)
+                _warn_numba_failure("quaternion commutator", exc)
+            else:
+                return _result(result.reshape(a.shape))
     a_vector = a[..., :3] if scalar_last else a[..., 1:]
     b_vector = b[..., :3] if scalar_last else b[..., 1:]
     with np.errstate(all="ignore"):
@@ -4290,6 +4904,17 @@ def _scalar_part(q: Any, scalar_last: bool) -> np.ndarray:
 def _vector_part(q: Any, scalar_last: bool) -> np.ndarray:
     """Return vector coefficients in the input batch shape."""
     values = _components(q, 4, "quaternion")
+    if not scalar_last and values.size // 4 >= 128 and values.flags.c_contiguous:
+        kernel = _numba_rotation_kernel("vector_part")
+        if kernel is not None:
+            rows = values.reshape((-1, 4))
+            try:
+                result = kernel(rows, scalar_last)
+            except Exception as exc:  # noqa: BLE001
+                _NUMBA_ROTATION_KERNELS.pop("vector_part", None)
+                _warn_numba_failure("vector component extraction", exc)
+            else:
+                return _result(result.reshape(values.shape[:-1] + (3,)))
     vector = values[..., :3] if scalar_last else values[..., 1:]
     return _result(vector.copy())
 
@@ -4441,6 +5066,17 @@ def _rotations_equivalent(q0: Any, q1: Any, atol: Any, epsilon: int,
 
 def _canonicalize(q: Any, scalar_last: bool, epsilon: int = 1) -> np.ndarray:
     a = _components(q, 4, "quaternion").copy()
+    if a.size // 4 >= 128:
+        kernel = _numba_rotation_kernel("canonicalize")
+        if kernel is not None:
+            rows = np.ascontiguousarray(a.reshape((-1, 4)))
+            try:
+                result = kernel(rows, epsilon, scalar_last)
+            except Exception as exc:  # noqa: BLE001
+                _NUMBA_ROTATION_KERNELS.pop("canonicalize", None)
+                _warn_numba_failure("quaternion canonicalization", exc)
+            else:
+                return _result(result.reshape(a.shape))
     if scalar_last:
         scalar, vector = a[..., 3], a[..., :3]
         tie_positive = epsilon > 0
@@ -4507,6 +5143,22 @@ def _from_two_vectors(source: Any, target: Any, epsilon: int,
                       scalar_last: bool) -> np.ndarray:
     a, b = _components(source, 3, "source"), _components(target, 3, "target")
     a, b = np.broadcast_arrays(a, b)
+    if a.size // 3 >= 128:
+        kernel = _numba_rotation_kernel("from_two_vectors")
+        if kernel is not None:
+            source_rows = np.ascontiguousarray(a.reshape((-1, 3)))
+            target_rows = np.ascontiguousarray(b.reshape((-1, 3)))
+            try:
+                result, valid = kernel(
+                    source_rows, target_rows, epsilon, scalar_last
+                )
+            except Exception as exc:  # noqa: BLE001
+                _NUMBA_ROTATION_KERNELS.pop("from_two_vectors", None)
+                _warn_numba_failure("two-vector rotation", exc)
+            else:
+                if not valid:
+                    raise ValueError("axis must be nonzero")
+                return _result(result.reshape(a.shape[:-1] + (4,)))
     ua, _, _ = _direction(a)
     ub, _, _ = _direction(b)
     cosine = np.clip(np.sum(ua * ub, axis=-1), -1.0, 1.0)
