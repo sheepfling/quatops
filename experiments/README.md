@@ -1,67 +1,83 @@
-# Native engine proof captures
+# Experiments and benchmarks
 
-These projects and scripts are auxiliary evidence for the coordinate and
-rotation conventions used by QuatOps. They stay outside `src/` and never run
-as package runtime dependencies.
+These scripts and opt-in tests are contributor tools. They are not part of the
+runtime package. For the user-facing documentation, start with the
+[project README](../README.md); for development checks, see
+[contributor verification](../docs/contributing/VERIFICATION.md).
 
-## Version layout
+Run from the repository root with the local `.venv`. List the experiment
+commands with:
 
-Keep each pinned engine build in its own folder:
-
-```text
-experiments/<engine>/<version>/capture project and scripts
-tests/golden/<engine>/<version>/native_rotation.json
+```sh
+.venv/bin/python experiments/run.py --list
 ```
 
-The engine folder contains an index; the version folder owns its exact project,
-capture command, runtime/build identity, and proof-profile details. A new engine
-release gets a new sibling version folder and fixture. Do not replace an older
-version's capture in place.
+Install optional experiment dependencies when needed:
 
-Every native fixture records the engine-reported version and a `proof_profile`
-for Euler conversion/readback, matrix conversion, axis-angle, rotation vectors,
-shortest/full-path SLERP, normalization, basis action, and composition/frame
-mapping. `not exposed` means the pinned public API has no corresponding route;
-it does not imply equivalent behavior. Read each engine page for the facts and
-limits specific to that runtime, and [proof-matrix.md](../docs/engines/proof-matrix.md)
-for coverage parity.
-
-Converter acceptance captures share the fixed inputs in
-[`interoperability/v1`](interoperability/README.md). Their canonical-to-native,
-native-to-canonical, vector-action, and cross-engine checks are tracked in
-[CAP-300](../docs/engines/CAP-300.md), separately from each engine's math proof
-profile.
-
-## Pinned captures
-
-- [Unreal Engine](unreal/README.md): [5.7.4](unreal/5.7.4/README.md)
-- [Unity Editor](unity/README.md): [6000.5.2f1](unity/6000.5.2f1/README.md)
-- [Godot Engine](godot/README.md): [4.7 stable](godot/4.7-stable/README.md),
-  [4.8-dev1](godot/4.8-dev1/README.md)
-- [Blender](blender/README.md): [5.1.2](blender/5.1.2/README.md)
-
-Native runtime captures and the later SciPy/QuatOps comparisons are separate
-evidence steps. Each version guide gives both commands.
-
-## Additional mathematical oracles and transports
-
-These targets use a separate version layout because mathematical packages and
-asset/pose formats have different evidence boundaries:
-
-```text
-experiments/oracles/<library>/<version>/
-experiments/transports/<format>/<spec-version>/<loader>/<version>/
-tests/golden/oracles/<library>/<version>/
-tests/golden/transports/<format>/<spec-version>/<loader>/<version>/
+```sh
+.venv/bin/python -m pip install -e '.[experiments]'
 ```
 
-- [Oracle index](oracles/README.md): CesiumJS 1.124.0, Three.js 0.187.0,
-  OpenCV 4.13.0, PROJ 9.5.1, CSPICE through SpiceyPy 8.3.0, and MuJoCo 3.17.0.
-- [Transport index](transports/README.md): glTF 2.0 with Three.js, Blender,
-  VTK, and Trimesh importer captures, plus OpenUSD 26.11 stage evaluation.
+## Script commands
 
-The additive [Wave 2 capture package](quatops_capture_wave2/LOCAL_REPLAY.md)
-retains the supplied source archive, shared corpus, native library runs,
-local Cesium and Three.js captures, Khronos validation, and separate SciPy
-replay. Its target/version pages under `experiments/oracles/` and
-`experiments/transports/` point to the promoted frozen outputs.
+| Command | Purpose | Requirements |
+| --- | --- | --- |
+| `check-homogeneous` | Compare rotation prototypes with exact rational cases | NumPy |
+| `homogeneous-scalar` | Run a scalar rotation prototype example | None |
+| `homogeneous-numpy` | Run a batched NumPy rotation prototype example | NumPy |
+| `homogeneous-benchmark` | Time experimental and current rotation kernels | NumPy |
+| `rotation-benchmark` | Compare rotation formulas with Fraction and Decimal references | NumPy, SciPy |
+| `numpy-layout-benchmark` | Compare NumPy convention and layout paths | NumPy |
+| `convention-benchmark` | Compare matched Hamilton/JPL operations across representations | NumPy |
+| `one_off_benchmark.py` | Compare scalar hot/cold paths and optional vectorized backends | `dev` extra |
+| `numba_coverage.py` | Report public API routes and compiled dispatcher signatures | Numba optional |
+
+The homogeneous and high-precision rotation programs are research prototypes,
+not production implementations. Their correctness and future work are tracked
+in [issue #6](https://github.com/sheepfling/quatops/issues/6).
+
+## Run performance benchmarks
+
+The one-off runner checks outputs, labels each run's winner, and can save that
+run's metadata and results to a local JSON file:
+
+```sh
+.venv/bin/python experiments/one_off_benchmark.py --json /tmp/quatops-one-off.json
+.venv/bin/python experiments/one_off_benchmark.py --include-vectorized \
+    --json /tmp/quatops-performance.json
+```
+
+For grouped NumPy and engine comparisons:
+
+```sh
+.venv/bin/python -m pytest tests/benchmarks -m benchmark --benchmark-only \
+    --benchmark-group-by=group --benchmark-columns=median \
+    --benchmark-json=/tmp/quatops-benchmarks.json
+```
+
+Benchmark groups verify outputs before timing. Optional Numba kernels are
+prewarmed where applicable so measurements focus on steady-state calls. The
+groups compare scalar one-off representations, NumPy batches, SciPy, and
+numpy-quaternion where an equivalent operation is available. The signed-axis
+engine benchmark compares scalar, NumPy fallback, and optional Numba routes.
+
+Treat every report as evidence for that exact run only. Preserve detailed
+results as local or CI artifacts with their environment metadata; do not copy
+medians or winner tables into long-lived documentation. Timing thresholds are
+not part of the benchmark tests.
+
+## Optional Numba paths
+
+Install the performance extra to enable Numba acceleration:
+
+```sh
+.venv/bin/python -m pip install -e '.[performance]'
+```
+
+Large NumPy batches use optional kernels for multiplication, vector rotation,
+matrix and conversion operations, interpolation, integration, estimation,
+selected coefficient operations, random sampling, and signed-axis game-engine
+mapping. Small arrays and unavailable or failed optional kernels use NumPy
+fallbacks. The full route catalog is generated from the current public exports
+by `experiments/numba_coverage.py`; no timing result is implied by a compiled
+signature.

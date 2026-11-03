@@ -1,0 +1,52 @@
+[[orchestration.steps]]
+kind = "rule"
+name = "JSON structure"
+rule = "json-structure"
+
+[[orchestration.steps]]
+kind = "rule"
+name = "Output escaping"
+rule = "output-escaping"
+
+[[orchestration.steps]]
+kind = "rule"
+name = "Path discovery"
+rule = "path-discovery"
+
+[[orchestration.steps]]
+kind = "rule"
+name = "Line length"
+rule = "line-length"
+
+[[orchestration.steps]]
+kind = "rule"
+name = "File size"
+rule = "file-size"
+
+[[orchestration.steps]]
+kind = "rule"
+name = "Numeric literal review"
+rule = "numeric-literals"
+
+[[orchestration.steps]]
+kind = "rule"
+name = "Source family review"
+rule = "source-families"
+
+[[orchestration.steps]]
+kind = "rule"
+name = "Test quality review"
+rule = "test-quality"
+
+[[orchestration.profiles]]
+name = "python-review"
+steps = [
+  "JSON structure",
+  "Output escaping",
+  "Path discovery",
+  "Line length",
+  "File size",
+  "Numeric literal review",
+  "Source family review",
+  "Test quality review",
+]

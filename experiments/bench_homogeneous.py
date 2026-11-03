@@ -8,6 +8,7 @@ import platform
 import statistics
 import sys
 import timeit
+from collections.abc import Mapping
 from functools import partial
 from typing import Callable
 
@@ -16,7 +17,6 @@ import numpy as np
 from experiments import homogeneous_numpy, homogeneous_scalar
 from quatops import scalar as current_scalar
 from quatops.numpy.hamilton import wxyz as current_numpy
-from typing import Mapping
 
 CASES: Mapping[str, tuple[tuple[float, ...], tuple[float, ...]]] = {
     "ordinary": ((1.0, 2.0, 3.0, 4.0), (1.0, 2.0, 3.0)),

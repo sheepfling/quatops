@@ -5,17 +5,16 @@ import math
 import numpy as np
 import pytest
 
-from quatops.hamilton import scalar as h
 from quatops.hamilton import dataclass as hd
 from quatops.hamilton import namedtuple as hn
-from quatops.jpl import scalar as j
+from quatops.hamilton import scalar as h
 from quatops.jpl import dataclass as jd
 from quatops.jpl import namedtuple as jn
+from quatops.jpl import scalar as j
 from quatops.numpy.hamilton import wxyz as hw
 from quatops.numpy.hamilton import xyzw as hx
 from quatops.numpy.jpl import wxyz as jw
 from quatops.numpy.jpl import xyzw as jx
-
 
 SCALARS = (h, j, hd, hn, jd, jn)
 TYPED = (hd, hn, jd, jn)

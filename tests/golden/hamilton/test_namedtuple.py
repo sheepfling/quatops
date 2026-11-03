@@ -1,7 +1,9 @@
 import math
+
 import numpy as np
 
 from quatops.hamilton import namedtuple
+
 
 def test_namedtuple_reference_values():
     q = namedtuple.from_wxyz((1, 2, 3, 4))

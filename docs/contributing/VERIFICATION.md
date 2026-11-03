@@ -11,7 +11,7 @@ development dependencies:
 
 ```sh
 python3 -m venv .venv
-.venv/bin/python -m pip install -e '.[dev]'
+.venv/bin/python -m pip install -e '.[dev,typecheck]'
 ```
 
 Use the repository `.venv` for all Python commands. Do not substitute a global
@@ -25,7 +25,8 @@ These are the same checks used by CI:
 .venv/bin/python -m pytest -q
 .venv/bin/python -m mypy tests/typing_tests/foundational_consumer.py \
     tests/typing_tests/consumer.py tests/typing_tests/float32_consumer.py
-.venv/bin/ruff check --select F,E9 src tests experiments
+.venv/bin/pyright --pythonpath .venv/bin/python
+.venv/bin/ruff check src tests experiments
 ```
 
 Pytest's default configuration skips opt-in performance cases. The routine
@@ -68,6 +69,6 @@ kernels, and ordinary NumPy vectorization. The compatibility tests also check
 that registered dispatchers compile when Numba is installed. Correctness tests
 remain runnable without Numba through the NumPy fallbacks.
 
-## Interoperability evidence index
+## Interoperability evidence
 
-The consolidated engine, oracle, transport, and layer-capture inventory is in [INTEROPERABILITY_EVIDENCE.md](../INTEROPERABILITY_EVIDENCE.md). Canonical converter acceptance details are in [CAP-300](../engines/CAP-300.md).
+See the [interoperability evidence atlas](../INTEROPERABILITY_EVIDENCE.md) for the consolidated engine, oracle, transport, and native-capture coverage matrix.

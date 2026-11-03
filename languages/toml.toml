@@ -1,0 +1,9 @@
+[[orchestration.steps]]
+kind = "command"
+name = "TOML syntax"
+argv = ["{python}", "scripts/check_toml_syntax.py", "{files}"]
+files = { include = ["**/*.toml", "*.toml"] }
+
+[[orchestration.profiles]]
+name = "toml"
+steps = ["TOML syntax"]

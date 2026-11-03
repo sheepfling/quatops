@@ -1,12 +1,11 @@
 """Behavioral tests shared by the pure-Python and optional array interfaces."""
 
-import pytest
 import math
 
-from quatops import scalar
-
 import numpy as np
+import pytest
 
+from quatops import scalar
 from quatops.numpy.hamilton import wxyz as qnp
 
 try:

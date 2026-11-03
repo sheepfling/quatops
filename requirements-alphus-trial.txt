@@ -1,0 +1,4 @@
+# Pinned native tools used by the manual Alphus review workflow.
+mdrepo==0.0.1.post0
+rumdl==0.2.79
+yamllint==1.38.0

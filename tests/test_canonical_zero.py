@@ -1,13 +1,12 @@
 """Canonical sign and explicitly bounded subnormal conversion regressions."""
 
-import pytest
 import math
 from dataclasses import FrozenInstanceError
 
-from quatops import dataclass, namedtuple, scalar
-
 import numpy as np
+import pytest
 
+from quatops import dataclass, namedtuple, scalar
 from quatops.numpy.hamilton import wxyz as qnumpy
 
 BACKENDS = (scalar, namedtuple, dataclass, qnumpy)

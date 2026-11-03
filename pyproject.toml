@@ -27,6 +27,11 @@ classifiers = [
 [project.optional-dependencies]
 numpy = ["numpy>=1.20"]
 experiments = ["numpy>=1.20", "scipy>=1.7"]
+alphus-trial = [
+    "yamllint==1.38.0",
+    "rumdl==0.2.79",
+    "mdrepo==0.0.1.post0; python_version >= '3.11'",
+]
 performance = [
     "numpy>=1.20",
     "numba>=0.60; python_version < '3.10'",
@@ -45,13 +50,16 @@ dev = [
     "numba>=0.63; python_version >= '3.14' and python_version < '3.15'",
     "numba>=0.68; python_version >= '3.15'",
     "mypy>=1.10",
+    "pydantic>=2,<3",
     "pytest>=7",
     "pytest-benchmark>=4.0",
     "ruff>=0.8",
     "scipy>=1.7",
     "scipy-stubs; python_version >= '3.10'",
     "typing-extensions>=4.6",
+    "tomli>=2; python_version < '3.11'",
 ]
+typecheck = ["pyright[nodejs]==1.1.414"]
 
 [tool.setuptools]
 package-dir = { "" = "src" }
@@ -77,3 +85,20 @@ addopts = "-ra -m 'not benchmark'"
 markers = [
     "benchmark: opt-in performance measurements; no timing thresholds",
 ]
+
+[tool.pyright]
+include = [
+    "src",
+    "tests/typing_tests/foundational_consumer.py",
+    "tests/typing_tests/consumer.py",
+    "tests/typing_tests/float32_consumer.py",
+    "tests/typing_tests/numpy_consumer.py",
+]
+# Package exports are assembled from runtime adapter tables and compatibility
+# modules. The namespace and component-axis tests assert the resulting exports.
+reportUnsupportedDunderAll = "none"
+
+[tool.ruff.lint]
+# The package intentionally re-exports backend APIs with star imports.
+# Keep their targeted F403 suppressions active in ordinary Ruff runs.
+extend-select = ["F403"]

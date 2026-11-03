@@ -79,10 +79,10 @@ needs.
 | [SciPy `Rotation`](https://docs.scipy.org/doc/scipy/reference/generated/scipy.spatial.transform.Rotation.html) | A rotation-focused object with conversions among quaternions, matrices, rotation vectors, Euler angles, and other rotation representations. |
 | [`numpy-quaternion`](https://quaternion.readthedocs.io/en/latest/) | A quaternion dtype integrated with NumPy arrays and NumPy-style quaternion arithmetic. |
 
-For engine boundaries, use a caller-defined `SignedAxisMap` to convert
+For game-engine boundaries, use a caller-defined `SignedAxisMap` to convert
 quaternion keyframes once, then sample them with the target engine's native
 SLERP. See the [trajectory guide](docs/engines/trajectory.md) and the
-[engine references](docs/engines/README.md).
+[Unreal, Unity, and Godot references](docs/engines/README.md).
 
 ## Install
 

@@ -1,9 +1,9 @@
 """Regression tests for extreme NumPy input magnitudes and error handling."""
 
-import pytest
 import math
 
 import numpy as np
+import pytest
 
 from quatops.numpy.hamilton import wxyz as qnp
 
