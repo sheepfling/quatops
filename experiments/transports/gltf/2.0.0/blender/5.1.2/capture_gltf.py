@@ -185,7 +185,6 @@ def main():
             ("key-0", t0),
             ("midpoint-0-1", (t0 + t1) / 2.0),
             *boundary_samples,
-            ("before-key-1", t1 - epsilon),
             ("key-1", t1),
             ("after-key-1", t1 + epsilon),
             ("midpoint-1-2", (t1 + t2) / 2.0),

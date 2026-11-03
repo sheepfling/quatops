@@ -302,7 +302,7 @@ def test_blender_importer_axis_mapping_and_quaternion_animation_profiles_are_fro
     )
 
     for sample in rows["STEP"]["samples"]:
-        if sample["sample"] in {"before-key-1-1e-06", "before-key-1"}:
+        if sample["sample"] == "before-key-1-1e-06":
             continue
         index = min(
             max(
