@@ -1,6 +1,7 @@
 import math
 
 import numpy as np
+
 from quatops.numpy.jpl import xyzw
 
 

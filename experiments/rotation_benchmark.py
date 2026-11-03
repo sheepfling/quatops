@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import sys
 import timeit
 from collections.abc import Iterable
@@ -10,6 +12,7 @@ from numpy import ndarray
 
 from quatops import scalar
 from quatops.numpy.hamilton import wxyz as nq
+
 
 def frac_rot(q: Iterable[float] | ndarray, v: Iterable[float] | ndarray) -> tuple[float, ...]:
     w, x, y, z = map(F.from_float, map(float, q))

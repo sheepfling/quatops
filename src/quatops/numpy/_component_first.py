@@ -208,9 +208,10 @@ def bind_component_first(backend: ModuleType, module_name: str) -> dict[str, Any
                     for parameter in fn_signature.parameters.values()
                 ])
 
+            adapted: Any
             if operation == "from_euler":
                 @wraps(fn)
-                def adapted(
+                def from_euler_adapter(
                     angles: Any,
                     sequence: str = "xyz",
                     *,
@@ -222,9 +223,10 @@ def bind_component_first(backend: ModuleType, module_name: str) -> dict[str, Any
                         angles, sequence, degrees=degrees, angle_axis=angle_axis,
                         component_axis=component_axis,
                     )
+                adapted = from_euler_adapter
             elif operation == "to_euler":
                 @wraps(fn)
-                def adapted(
+                def to_euler_adapter(
                     q: Any,
                     sequence: str = "xyz",
                     gimbal_tolerance: float = 1e-12,
@@ -237,9 +239,10 @@ def bind_component_first(backend: ModuleType, module_name: str) -> dict[str, Any
                         q, sequence, gimbal_tolerance, degrees=degrees,
                         component_axis=component_axis, angle_axis=angle_axis,
                     )
+                adapted = to_euler_adapter
             elif operation == "to_euler_with_status":
                 @wraps(fn)
-                def adapted(
+                def to_euler_with_status_adapter(
                     q: Any,
                     sequence: str = "xyz",
                     *,
@@ -253,9 +256,10 @@ def bind_component_first(backend: ModuleType, module_name: str) -> dict[str, Any
                         gimbal_tolerance=gimbal_tolerance,
                         component_axis=component_axis, angle_axis=angle_axis,
                     )
+                adapted = to_euler_with_status_adapter
             else:
                 @wraps(fn)
-                def adapted(*args: Any, **kwargs: Any) -> Any:
+                def generic_adapter(*args: Any, **kwargs: Any) -> Any:
                     bound = fn_signature.bind(*args, **kwargs)
                     for parameter in inputs:
                         if parameter in bound.arguments:
@@ -270,6 +274,7 @@ def bind_component_first(backend: ModuleType, module_name: str) -> dict[str, Any
                                 )
                     result = fn(*bound.args, **bound.kwargs)
                     return _move_output_to_first(operation, result)
+                adapted = generic_adapter
 
             adapted.__module__ = module_name
             adapted.__signature__ = adapter_signature

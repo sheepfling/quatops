@@ -438,7 +438,11 @@ def test_component_first_advanced_outputs_match_trailing_layout(trailing_path):
         actual = getattr(leading, name)(*converted, **kwargs)
         if name in ("to_homogeneous_matrix", "so3_adjoint", "rotation_covariance"):
             actual_last = np.moveaxis(actual, (0, 1), (-2, -1))
-        elif name in ("to_euler", "to_mrp") or name in ("rotation_mean", "align_vectors", "integrate_angular_velocity_samples"):
+        elif name in ("to_euler", "to_mrp") or name in (
+            "rotation_mean",
+            "align_vectors",
+            "integrate_angular_velocity_samples",
+        ):
             actual_last = _to_last(actual)
         else:
             actual_last = actual

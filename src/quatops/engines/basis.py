@@ -20,8 +20,14 @@ class SignedAxisMap:
     they preserve input magnitude and do not normalize or alter keyframe signs.
     """
 
-    __slots__ = ("destination_axes", "_indices", "_vector_signs",
-                 "_hamilton_signs", "_jpl_signs", "determinant")
+    __slots__ = (
+        "_hamilton_signs",
+        "_indices",
+        "_jpl_signs",
+        "_vector_signs",
+        "destination_axes",
+        "determinant",
+    )
 
     destination_axes: tuple[str, str, str]
     _indices: tuple[int, int, int]

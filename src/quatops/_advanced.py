@@ -10,7 +10,7 @@ import cmath
 import math
 import random
 from collections.abc import Iterable, Sequence
-from typing import Callable, cast
+from typing import Callable
 
 from . import scalar as _h
 from ._euler_sequence import euler_metadata as _euler_sequence_metadata
@@ -56,7 +56,7 @@ def _euler_angles(angles: Iterable[FloatT], sequence: str) -> tuple[Vector, str]
 
 
 def _static_euler_from_matrix(
-    matrix: Sequence[Sequence[FloatT]], axes: str
+    matrix: Sequence[Sequence[float]], axes: str
 ) -> tuple[Vector, bool]:
     """Extract static-axis Tait-Bryan angles and report gimbal lock."""
     i = "xyz".index(axes[0])
@@ -80,7 +80,7 @@ def _static_euler_from_matrix(
     return (first, second, third), singular
 
 
-def _euler_from_matrix(matrix: Sequence[Sequence[FloatT]], sequence: str) -> Vector:
+def _euler_from_matrix(matrix: Sequence[Sequence[float]], sequence: str) -> Vector:
     """Extract Tait-Bryan angles, setting the final angle to zero at lock."""
     axes, intrinsic = _sequence(sequence)
     if not intrinsic:
@@ -246,7 +246,7 @@ def _euler_from_validated_angles(
     if flip:
         result = [-value for value in result]
     result = [0.0 if value == 0.0 else value for value in result]
-    return cast(Quaternion, tuple(result))
+    return tuple(result)  # type: ignore[return-value]
 
 
 def to_euler(
@@ -263,7 +263,9 @@ def to_euler(
     """
     if not isinstance(degrees, bool):
         raise ValueError("degrees must be a bool")  # noqa: TRY004
-    angles = cast(Vector, _euler_from_quaternion(q, sequence, gimbal_tolerance))
+    angles: Vector = _euler_from_quaternion(
+        q, sequence, gimbal_tolerance
+    )  # type: ignore[assignment]
     if degrees:
         return tuple(math.degrees(value) for value in angles)  # type: ignore[arg-type,return-value]
     return angles
@@ -276,8 +278,9 @@ def to_euler_with_status(
     """Extract Euler angles together with the scalar gimbal-lock flag."""
     if not isinstance(degrees, bool):
         raise ValueError("degrees must be a bool")  # noqa: TRY004
-    result = _euler_from_quaternion(q, sequence, gimbal_tolerance, with_status=True)
-    assert isinstance(result, EulerResult)
+    result: EulerResult = _euler_from_quaternion(
+        q, sequence, gimbal_tolerance, with_status=True
+    )  # type: ignore[assignment]
     if not degrees:
         return result
     return EulerResult(
@@ -343,7 +346,7 @@ def integrate_angular_velocity_samples(
         if method == "left":
             rate: Vector = left
         else:
-            rate = cast(Vector, tuple((a + b) * 0.5 for a, b in zip(left, right)))
+            rate = tuple((a + b) * 0.5 for a, b in zip(left, right))  # type: ignore[assignment]
         result = _h.integrate_angular_velocity(
             result, rate, stamps[index + 1] - stamps[index], frame=side
         )
@@ -472,7 +475,7 @@ def swing_twist(q: Iterable[FloatT], axis: Iterable[FloatT]) -> tuple[Quaternion
     return swing, twist
 
 
-def _jacobi_largest(matrix: Sequence[Sequence[FloatT]]) -> tuple[float, tuple[float, ...], float]:
+def _jacobi_largest(matrix: Sequence[Sequence[float]]) -> tuple[float, tuple[float, ...], float]:
     """Return the largest eigenpair and runner-up for a real symmetric matrix."""
     size = len(matrix)
     a = [list(row) for row in matrix]
@@ -579,13 +582,13 @@ def rotation_covariance(
         raise ValueError("at least one quaternion is required")
     sample_weights = _weights(weights, len(samples))
     center = _h.normalize(mean) if mean is not None else rotation_mean(samples, sample_weights)
-    errors = cast(tuple[Vector, ...], tuple(
+    errors = tuple(
         _h.boxminus(sample, center, frame=side) for sample in samples
-    ))
+    )  # type: ignore[assignment]
     covariance = tuple(tuple(math.fsum(weight * error[i] * error[j]
                                         for error, weight in zip(errors, sample_weights))
                               for j in range(3)) for i in range(3))
-    return cast(Matrix3, covariance)
+    return covariance  # type: ignore[return-value]
 
 
 def align_vectors(
@@ -611,12 +614,12 @@ def align_vectors(
     sample_weights = _weights(weights, len(sources))
     source_scale = max(abs(value) for vector in sources for value in vector)
     target_scale = max(abs(value) for vector in targets for value in vector)
-    source_vectors = cast(tuple[Vector, ...], tuple(
+    source_vectors = tuple(
         tuple(value / source_scale for value in vector) for vector in raw_sources
-    ))
-    target_vectors = cast(tuple[Vector, ...], tuple(
+    )  # type: ignore[assignment]
+    target_vectors = tuple(
         tuple(value / target_scale for value in vector) for vector in raw_targets
-    ))
+    )  # type: ignore[assignment]
     b = [[math.fsum(weight * src[i] * dst[j]
                     for src, dst, weight in zip(source_vectors, target_vectors, sample_weights))
           for j in range(3)] for i in range(3)]
@@ -649,7 +652,8 @@ def random_quaternion(rng: object | None = None) -> Quaternion:
     draw = getattr(source, "random", None)
     if not callable(draw):
         raise ValueError("rng must provide random()")  # noqa: TRY004
-    u1, u2, u3 = (float(draw()) for _ in range(3))
+    draw_float: Callable[[], FloatLike] = draw  # type: ignore[assignment]
+    u1, u2, u3 = (float(draw_float()) for _ in range(3))
     if any(not math.isfinite(u) or not 0.0 <= u < 1.0 for u in (u1, u2, u3)):
         raise ValueError("rng.random() must return values in [0, 1)")
     x = math.sqrt(1.0 - u1) * math.sin(2.0 * math.pi * u2)
@@ -794,7 +798,7 @@ def from_homogeneous_matrix(
 
 def so3_adjoint(q: Iterable[FloatT]) -> Matrix3:
     """Return the SO(3) adjoint matrix, equal to the active rotation matrix."""
-    return cast(Matrix3, _h.to_rotation_matrix(q))
+    return _h.to_rotation_matrix(q)  # type: ignore[return-value]
 
 
 def _public_names() -> tuple[str, ...]:

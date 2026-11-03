@@ -1,9 +1,10 @@
 """Extreme vector magnitudes in all pure-Python rotation backends."""
 
-import pytest
 import dataclasses
 import math
 import sys
+
+import pytest
 
 from quatops import dataclass, namedtuple, scalar
 

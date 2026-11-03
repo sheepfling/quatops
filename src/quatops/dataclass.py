@@ -15,6 +15,7 @@ from . import scalar as _scalar
 from ._advanced import EulerResult
 from ._typing import FloatLike, FloatT
 
+
 @dataclass(frozen=True)
 class Quaternion:
     """A distinct immutable quaternion value with named scalar-first fields.
@@ -165,7 +166,7 @@ def integrate_angular_velocity(q: Iterable[FloatT], omega: Iterable[FloatT], dt:
 class AxisAngle:
     """Axis followed by angle in radians; construction is unchecked."""
 
-    __slots__ = ("ax", "ay", "az", "angle")
+    __slots__ = ("angle", "ax", "ay", "az")
     ax: float
     ay: float
     az: float

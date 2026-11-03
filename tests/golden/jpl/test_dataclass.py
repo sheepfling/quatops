@@ -1,7 +1,9 @@
 import math
+
 import numpy as np
 
 from quatops.jpl import dataclass
+
 
 def test_dataclass_reference_values():
     q = dataclass.from_hamilton((1, 2, 3, 4))

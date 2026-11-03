@@ -1,0 +1,13 @@
+[[orchestration.steps]]
+kind = "command"
+name = "JSON syntax"
+argv = [
+  "{python}", "-c",
+  "import json, sys; from pathlib import Path; [json.loads(Path(path).read_text(encoding='utf-8')) for path in sys.argv[1:]]",
+  "{files}",
+]
+files = { include = ["**/*.json", "*.json"] }
+
+[[orchestration.profiles]]
+name = "json"
+steps = ["JSON syntax"]
