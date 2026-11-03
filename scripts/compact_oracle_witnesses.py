@@ -1,38 +1,138 @@
-"""One-time reduction of broad discovery captures to reviewed witnesses.
+"""Select retained native witnesses from a temporary discovery capture.
 
-The original file digest is retained in provenance before the successful
-discovery rows are removed. Native capture programs remain the replay source.
+The input stays untouched. Case IDs and field projections below are the
+retention contract; selected values are copied into a separate output file.
 """
 
+from __future__ import annotations
+
+import argparse
 import hashlib
+from collections.abc import Callable, Hashable
+from copy import deepcopy
 from pathlib import Path
+from typing import Any, Literal
 
-from evidence_json import dump_evidence_json, read_evidence_document
+from scripts.evidence_json import dump_evidence_json, read_evidence_document
 
-ROOT = Path(__file__).resolve().parents[1]
-FILES = (
-    ROOT / "tests/golden/oracles/threejs/0.187.0/native_rotation.json",
-    ROOT / "tests/golden/oracles/mujoco/3.17.0/native_rotation.json",
-    ROOT / "tests/golden/oracles/spiceypy/8.3.0/native_rotation.json",
+Target = Literal["threejs", "mujoco", "spiceypy"]
+Record = dict[str, Any]
+
+AXIS_ANGLE_CASES = (
+    "axis-angle-0-00",
+    "axis-angle-1-05",
+    "axis-angle-2-05",
+    "axis-angle-3-05",
+    "axis-angle-3-14",
 )
+QUATERNION_CASES = (
+    "algebra-0",
+    "algebra-6",
+    "algebra-7",
+    "rotation-identity",
+    "rotation-random-000",
+    "rotation-random-000-antipodal",
+    "invalid-rotation-zero",
+    "invalid-rotation-nonunit",
+    "invalid-rotation-tiny",
+)
+MATRIX_CASES = ("matrix-identity", "matrix-x90", "matrix-mixed-rational")
+INTEGRATION_CASES = (
+    "integration-0-0-0",
+    "integration-0-1-1",
+    "integration-1-0-1",
+    "integration-2-3-3",
+)
+QUATERNION_DIFFERENCE_CASES = (
+    "axis-angle-0-05__minus__axis-angle-1-05",
+    "axis-angle-3-05__minus__axis-angle-0-05",
+)
+ANGULAR_VELOCITY_CASES = ("integration-0-0-0", "integration-2-3-3")
+NEAR_LOCK_CASE = "boundary-offset-ZYX-+1-+1e-04"
 
 
-def choose(rows, predicate, key=lambda row: row.get("case_id")):
-    result = {}
+def _select_ids(rows: list[Record], case_ids: tuple[str, ...]) -> list[Record]:
+    """Select named rows in declared order; reject duplicate or missing IDs."""
+    required = set(case_ids)
+    indexed: dict[str, Record] = {}
     for row in rows:
-        if predicate(row):
-            result.setdefault(key(row), row)
-    return list(result.values())
+        case_id = row["case_id"]
+        if case_id in required:
+            if case_id in indexed:
+                raise ValueError(f"duplicate retained case ID: {case_id}")
+            indexed[case_id] = row
+    missing = [case_id for case_id in case_ids if case_id not in indexed]
+    if missing:
+        raise ValueError(f"missing retained case IDs: {', '.join(missing)}")
+    return [indexed[case_id] for case_id in case_ids]
 
 
-def compact_threejs(data, path):
-    obs = data["observations"]
-    near_lock = choose(
-        obs["euler_boundaries"],
-        lambda row: row["case_id"] == "boundary-offset-ZYX-+1-+1e-04",
+def _first_per_key(
+    rows: list[Record],
+    key_fields: tuple[str, ...],
+    *,
+    include: Callable[[Record], bool] = lambda _row: True,
+) -> list[Record]:
+    """Keep the first matching row per declared key in capture order."""
+    selected: list[Record] = []
+    seen: set[tuple[Hashable, ...]] = set()
+    for row in rows:
+        if include(row):
+            key = tuple(row[field] for field in key_fields)
+            if key not in seen:
+                seen.add(key)
+                selected.append(row)
+    return selected
+
+
+def _rows(observations: Record, name: str) -> list[Record]:
+    rows = observations[name]
+    if not isinstance(rows, list) or any(not isinstance(row, dict) for row in rows):
+        raise TypeError(f"observations.{name} must be an array of objects")
+    return rows
+
+
+def _counts(observations: Record) -> dict[str, int]:
+    return {
+        name: len(rows)
+        for name, rows in observations.items()
+        if isinstance(rows, list)
+    }
+
+
+def _provenance(document: Record, source_sha256: str, *, threejs: bool = False) -> Record:
+    current = document.get("provenance", {})
+    if not isinstance(current, dict):
+        raise TypeError("provenance must be an object")
+    policy = (
+        "selected API witnesses; redundant matrix views/actions and hierarchy "
+        "duplicates removed; broad successful sweeps discarded"
+        if threejs
+        else "selected native witnesses; broad successful sweeps discarded"
     )
-    if len(near_lock) != 1:
-        raise ValueError("expected the minimized Three.js near-lock regression")
+    retained = {
+        **current,
+        "full_discovery_capture_sha256": current.get(
+            "full_discovery_capture_sha256", source_sha256
+        ),
+        "retention_policy": policy,
+    }
+    if threejs:
+        retained["retention_revision"] = 3
+    return retained
+
+
+def _compact_threejs(document: Record, source_sha256: str) -> Record:
+    source = document["observations"]
+    if not isinstance(source, dict):
+        raise TypeError("observations must be an object")
+    retained = {
+        name: rows
+        for name, rows in source.items()
+        if name not in {"euler_orders", "euler_boundaries", "euler_reorder", "object3d_hierarchy"}
+    }
+
+    near_lock = _select_ids(_rows(source, "euler_boundaries"), (NEAR_LOCK_CASE,))[0]
     regression_fields = (
         "case_id",
         "order",
@@ -41,207 +141,160 @@ def compact_threejs(data, path):
         "euler_quaternion_xyzw",
         "quaternion_readback_roundtrip_xyzw",
     )
-    obs["euler_regressions"] = [{key: near_lock[0][key] for key in regression_fields}]
-    for field in ("euler_orders", "euler_boundaries", "euler_reorder"):
-        obs.pop(field, None)
-    keep_axis_angles = {
-        "axis-angle-0-00",
-        "axis-angle-1-05",
-        "axis-angle-2-05",
-        "axis-angle-3-05",
-        "axis-angle-3-14",
-    }
-    obs["axis_angle"] = choose(
-        obs["axis_angle"], lambda row: row["case_id"] in keep_axis_angles
-    )
-    keep_quaternions = {
-        "algebra-0",
-        "algebra-6",
-        "algebra-7",
-        "rotation-identity",
-        "rotation-random-000",
-        "rotation-random-000-antipodal",
-        "invalid-rotation-zero",
-        "invalid-rotation-nonunit",
-        "invalid-rotation-tiny",
-    }
-    obs["quaternion_normalization"] = choose(
-        obs["quaternion_normalization"],
-        lambda row: row["case_id"] in keep_quaternions,
-    )
-    keep_matrices = {"matrix-identity", "matrix-x90", "matrix-mixed-rational"}
-    obs["independent_matrices"] = choose(
-        obs["independent_matrices"],
-        lambda row: row["case_id"] in keep_matrices,
-    )
-    obs["two_vector_alignment"] = obs["two_vector_alignment"][:2]
-    obs["axis_angle"] = [
+    retained["euler_regressions"] = [
+        {field: near_lock[field] for field in regression_fields}
+    ]
+
+    retained["axis_angle"] = [
         {
-            key: row[key]
-            for key in (
+            field: row[field]
+            for field in (
                 "case_id",
                 "input_axis_xyz",
                 "input_angle_radians",
                 "quaternion_xyzw",
             )
         }
-        for row in obs["axis_angle"]
+        for row in _select_ids(_rows(source, "axis_angle"), AXIS_ANGLE_CASES)
     ]
-    for row in obs["quaternion_normalization"]:
-        for field in ("input_xyzw", "length", "length_squared"):
-            row.pop(field, None)
-    for row in obs["shortest_slerp"]:
-        keep_weights = (
-            {-0.5, 0.5, 1.5} if row["case_id"] == "interp-quarter-turn" else {0.5}
-        )
-        row["samples"] = [
-            sample for sample in row["samples"] if sample["t"] in keep_weights
-        ]
-    obs["independent_matrices"] = [
+    retained["quaternion_normalization"] = [
         {
             key: value
             for key, value in row.items()
-            if key != "quaternion_rotated_positive_basis_vectors_xyz"
+            if key not in {"input_xyzw", "length", "length_squared"}
         }
-        for row in obs["independent_matrices"]
+        for row in _select_ids(
+            _rows(source, "quaternion_normalization"), QUATERNION_CASES
+        )
+    ]
+    retained["independent_matrices"] = [
+        {
+            key: value
+            for key, value in row.items()
+            if key
+            not in {
+                "matrix4_elements_column_major",
+                "quaternion_rotated_positive_basis_vectors_xyz",
+            }
+        }
+        for row in _select_ids(
+            _rows(source, "independent_matrices"), MATRIX_CASES
+        )
         if row["domain"] == "proper_rotation"
     ]
-    obs.pop("object3d_hierarchy", None)
-    data["counts"] = {
-        name: len(rows) for name, rows in obs.items() if isinstance(rows, list)
+
+    alignment = [
+        row
+        for row in _rows(source, "two_vector_alignment")
+        if row["from_case_index"] == 0 and row["to_case_index"] in (1, 2)
+    ]
+    if len(alignment) != 2:
+        raise ValueError("expected the two named Three.js vector-alignment cases")
+    retained["two_vector_alignment"] = alignment
+
+    slerp_rows = []
+    for row in _rows(source, "shortest_slerp"):
+        slerp_rows.append(
+            {
+                **row,
+                "samples": [
+                    sample for sample in row["samples"] if sample["t"] == 0.5
+                ],
+            }
+        )
+    retained["shortest_slerp"] = slerp_rows
+    return {
+        **document,
+        "observations": retained,
+        "counts": _counts(retained),
+        "provenance": _provenance(document, source_sha256, threejs=True),
     }
-    provenance = data["provenance"]
-    provenance.setdefault(
-        "full_discovery_capture_sha256", hashlib.sha256(path.read_bytes()).hexdigest()
-    )
-    provenance["retention_revision"] = 3
-    provenance["retention_policy"] = (
-        "selected API witnesses; redundant matrix views/actions and hierarchy "
-        "duplicates removed; broad successful sweeps discarded"
-    )
-    path.write_text(dump_evidence_json(data), encoding="utf-8", newline="\n")
 
 
-def compact(data, path):
-    obs = data["observations"]
-    if path.parts[-3] == "threejs":
-        compact_threejs(data, path)
-        return
-    if path.parts[-3] == "mujoco":
-        obs["euler_orders"] = choose(
-            obs["euler_orders"],
-            lambda r: r["case_id"] != "euler-identity",
-            key=lambda r: (r["order_label"], r["sequence_case"]),
-        )
-    else:
-        obs["euler_orders"] = choose(
-            obs["euler_orders"],
-            lambda r: r["case_id"] != "euler-identity",
-            key=lambda r: r["order"],
-        )
+def _compact_other(target: Literal["mujoco", "spiceypy"], document: Record, source_sha256: str) -> Record:
+    source = document["observations"]
+    if not isinstance(source, dict):
+        raise TypeError("observations must be an object")
+    retained = dict(source)
 
-    # One discriminating boundary per order, plus the measured Three.js ZYX
-    # near-lock regression. Preserve raw bits attached to each chosen input.
-    boundary_rows = obs["euler_boundaries"]
-    if path.parts[-3] == "threejs":
-        retained = choose(
-            boundary_rows, lambda r: r["case_id"] == "boundary-offset-ZYX-+1-+1e-04"
+    if "euler_orders" in source:
+        key = ("order_label", "sequence_case") if target == "mujoco" else ("order",)
+        retained["euler_orders"] = _first_per_key(
+            _rows(source, "euler_orders"),
+            key,
+            include=lambda row: row["case_id"] != "euler-identity",
         )
-        for row in boundary_rows:
-            if not any(x["order"] == row["order"] for x in retained):
-                retained.append(row)
-    else:
-        field = "order_label" if path.parts[-3] == "mujoco" else "order"
-        retained = choose(boundary_rows, lambda r: True, key=lambda r: r[field])
-    obs["euler_boundaries"] = retained
+    if "euler_boundaries" in source:
+        order = "order_label" if target == "mujoco" else "order"
+        retained["euler_boundaries"] = _first_per_key(
+            _rows(source, "euler_boundaries"), (order,)
+        )
+    for group, case_ids in (
+        ("axis_angle", AXIS_ANGLE_CASES),
+        ("quaternion_normalization", QUATERNION_CASES),
+        ("proper_matrices", MATRIX_CASES),
+        ("independent_matrices", (*MATRIX_CASES, "matrix-shear")),
+        ("integration", INTEGRATION_CASES),
+        ("sub_quat", QUATERNION_DIFFERENCE_CASES),
+        ("qdq2av", ANGULAR_VELOCITY_CASES),
+    ):
+        if group in source:
+            retained[group] = _select_ids(_rows(source, group), case_ids)
+    if "two_vector_alignment" in source:
+        alignment = [
+            row
+            for row in _rows(source, "two_vector_alignment")
+            if row["from_case_index"] == 0 and row["to_case_index"] in (1, 2)
+        ]
+        if len(alignment) != 2:
+            raise ValueError("expected the two named vector-alignment cases")
+        retained["two_vector_alignment"] = alignment
 
-    if "axis_angle" in obs:
-        obs["axis_angle"] = choose(
-            obs["axis_angle"],
-            lambda r: (
-                r["case_id"]
-                in {
-                    "axis-angle-0-00",
-                    "axis-angle-1-05",
-                    "axis-angle-2-05",
-                    "axis-angle-3-05",
-                    "axis-angle-3-14",
-                }
-            ),
-        )
-    if "quaternion_normalization" in obs:
-        keep = {
-            "algebra-0",
-            "algebra-6",
-            "algebra-7",
-            "rotation-identity",
-            "rotation-random-000",
-            "rotation-random-000-antipodal",
-            "invalid-rotation-zero",
-            "invalid-rotation-nonunit",
-            "invalid-rotation-tiny",
-        }
-        obs["quaternion_normalization"] = choose(
-            obs["quaternion_normalization"], lambda r: r["case_id"] in keep
-        )
-    if "proper_matrices" in obs:
-        obs["proper_matrices"] = choose(
-            obs["proper_matrices"],
-            lambda r: (
-                r["case_id"]
-                in {"matrix-identity", "matrix-x90", "matrix-mixed-rational"}
-            ),
-        )
-    if "independent_matrices" in obs:
-        obs["independent_matrices"] = choose(
-            obs["independent_matrices"],
-            lambda r: (
-                r["case_id"]
-                in {
-                    "matrix-identity",
-                    "matrix-x90",
-                    "matrix-mixed-rational",
-                    "matrix-shear",
-                }
-            ),
-        )
-    if "two_vector_alignment" in obs:
-        obs["two_vector_alignment"] = obs["two_vector_alignment"][:2]
-    if "integration" in obs:
-        rows = obs["integration"]
-        obs["integration"] = [rows[0], rows[5], rows[17], rows[-1]]
-    if "sub_quat" in obs:
-        obs["sub_quat"] = [obs["sub_quat"][0], obs["sub_quat"][-1]]
-    if "qdq2av" in obs:
-        obs["qdq2av"] = [obs["qdq2av"][0], obs["qdq2av"][-1]]
-
-    data["provenance"]["full_discovery_capture_sha256"] = hashlib.sha256(
-        path.read_bytes()
-    ).hexdigest()
-    data["provenance"]["retention_policy"] = (
-        "selected native witnesses; broad successful sweeps discarded"
-    )
-    data["counts"] = {
-        name: len(rows) for name, rows in obs.items() if isinstance(rows, list)
+    counts = _counts(retained)
+    counts = {
+        {"integration": "integration_and_derivatives", "sub_quat": "quaternion_differences"}.get(
+            name, name
+        ): count
+        for name, count in counts.items()
     }
-    if "integration" in data["counts"]:
-        data["counts"]["integration_and_derivatives"] = data["counts"].pop(
-            "integration"
-        )
-    if "sub_quat" in data["counts"]:
-        data["counts"]["quaternion_differences"] = data["counts"].pop("sub_quat")
-    path.write_text(dump_evidence_json(data), encoding="utf-8", newline="\n")
+    return {
+        **document,
+        "observations": retained,
+        "counts": counts,
+        "provenance": _provenance(document, source_sha256),
+    }
+
+
+def compact_capture(target: Target, document: Record, source_sha256: str) -> Record:
+    """Return selected witness data without modifying the source capture."""
+    document = deepcopy(document)
+    if target == "threejs":
+        return _compact_threejs(document, source_sha256)
+    return _compact_other(target, document, source_sha256)
+
+
+def main() -> None:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("target", choices=("threejs", "mujoco", "spiceypy"))
+    parser.add_argument("discovery_capture", type=Path)
+    parser.add_argument("retained_output", type=Path)
+    parser.add_argument("--overwrite", action="store_true")
+    args = parser.parse_args()
+    source_path, output_path = args.discovery_capture.resolve(), args.retained_output.resolve()
+    if source_path == output_path:
+        raise ValueError("discovery input and retained output must be different files")
+    if output_path.exists() and not args.overwrite:
+        raise FileExistsError(f"Refusing to replace output without --overwrite: {output_path}")
+
+    source_bytes = source_path.read_bytes()
+    capture = read_evidence_document(source_path)
+    retained = compact_capture(
+        args.target, capture, hashlib.sha256(source_bytes).hexdigest()
+    )
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    output_path.write_text(dump_evidence_json(retained), encoding="utf-8", newline="\n")
+    print(f"Retained {args.target} witnesses at {output_path}")
 
 
 if __name__ == "__main__":
-    for fixture_path in FILES:
-        payload = read_evidence_document(fixture_path)
-        provenance = payload.get("provenance", {})
-        if "full_discovery_capture_sha256" in provenance and (
-            fixture_path.parts[-3] != "threejs"
-            or provenance.get("retention_revision") == 3
-        ):
-            print(f"already compact: {fixture_path.relative_to(ROOT)}")
-            continue
-        compact(payload, fixture_path)
-        print(f"compacted {fixture_path.relative_to(ROOT)}")
+    main()

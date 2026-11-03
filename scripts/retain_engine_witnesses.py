@@ -4,53 +4,151 @@ from __future__ import annotations
 
 import argparse
 import hashlib
+from copy import deepcopy
+from dataclasses import dataclass
 from pathlib import Path
+from typing import cast
 
-from evidence_json import (
-    dump_evidence_json,
-    parse_evidence_document,
-    read_evidence_document,
-)
+from pydantic import JsonValue
+
+if __package__:
+    from scripts.evidence_json import (
+        dump_evidence_json,
+        parse_evidence_document,
+        read_evidence_document,
+    )
+else:
+    from evidence_json import (
+        dump_evidence_json,
+        parse_evidence_document,
+        read_evidence_document,
+    )
 
 ROOT = Path(__file__).resolve().parents[1]
+JsonRecord = dict[str, JsonValue]
+
+
+@dataclass(frozen=True, slots=True)
+class EngineRetentionConfig:
+    version: str | None
+    source: str
+    map_key: str
+    frame_key: str
+    api: str
+    rule: str
+    inverse: str
+
+
 ENGINE_CONFIG = {
-    "unreal": {
-        "version": "5.7.4",
-        "source": "experiments/unreal/5.7.4/Source/QuatOpsUnrealCapture/Private/QuatOpsUnrealCaptureTests.cpp",
-        "map_key": "source_to_unreal_axis_map",
-        "frame_key": "unreal_world_frame",
-        "api": "UE::Math::TQuat<T>(X,Y,Z,W); TQuat::RotateVector",
-        "rule": "native_xyzw=(-y,-x,-z,w)",
-        "inverse": "canonical_wxyz=(W,-Y,-X,-Z)",
-    },
-    "unity": {
-        "version": "6000.5.2f1",
-        "source": "experiments/unity/6000.5.2f1/Assets/Editor/QuatOpsEngineCapture.cs",
-        "map_key": "source_to_unity_axis_map",
-        "frame_key": "unity_world_frame",
-        "api": "UnityEngine.Quaternion(x,y,z,w); Quaternion * Vector3",
-        "rule": "native_xyzw=(-x,-z,-y,w)",
-        "inverse": "canonical_wxyz=(W,-X,-Z,-Y)",
-    },
-    "godot": {
-        "version": None,
-        "source": "experiments/godot/capture.gd",
-        "map_key": "source_to_godot_axis_map",
-        "frame_key": "godot_world_frame",
-        "api": "Quaternion(x,y,z,w); Quaternion * Vector3",
-        "rule": "native_xyzw=(x,z,-y,w)",
-        "inverse": "canonical_wxyz=(W,X,-Z,Y)",
-    },
-    "blender": {
-        "version": "5.1.2",
-        "source": "experiments/blender/5.1.2/capture.py",
-        "map_key": "source_to_blender_axis_map",
-        "frame_key": "blender_world_frame_probe",
-        "api": "mathutils.Quaternion((w,x,y,z)); Quaternion @ Vector",
-        "rule": "native_wxyz=(w,x,y,z)",
-        "inverse": "canonical_wxyz=native_wxyz",
-    },
+    "unreal": EngineRetentionConfig(
+        version="5.7.4",
+        source="experiments/unreal/5.7.4/Source/QuatOpsUnrealCapture/Private/QuatOpsUnrealCaptureTests.cpp",
+        map_key="source_to_unreal_axis_map",
+        frame_key="unreal_world_frame",
+        api="UE::Math::TQuat<T>(X,Y,Z,W); TQuat::RotateVector",
+        rule="native_xyzw=(-y,-x,-z,w)",
+        inverse="canonical_wxyz=(W,-Y,-X,-Z)",
+    ),
+    "unity": EngineRetentionConfig(
+        version="6000.5.2f1",
+        source="experiments/unity/6000.5.2f1/Assets/Editor/QuatOpsEngineCapture.cs",
+        map_key="source_to_unity_axis_map",
+        frame_key="unity_world_frame",
+        api="UnityEngine.Quaternion(x,y,z,w); Quaternion * Vector3",
+        rule="native_xyzw=(-x,-z,-y,w)",
+        inverse="canonical_wxyz=(W,-X,-Z,-Y)",
+    ),
+    "godot": EngineRetentionConfig(
+        version=None,
+        source="experiments/godot/capture.gd",
+        map_key="source_to_godot_axis_map",
+        frame_key="godot_world_frame",
+        api="Quaternion(x,y,z,w); Quaternion * Vector3",
+        rule="native_xyzw=(x,z,-y,w)",
+        inverse="canonical_wxyz=(W,X,-Z,Y)",
+    ),
+    "blender": EngineRetentionConfig(
+        version="5.1.2",
+        source="experiments/blender/5.1.2/capture.py",
+        map_key="source_to_blender_axis_map",
+        frame_key="blender_world_frame_probe",
+        api="mathutils.Quaternion((w,x,y,z)); Quaternion @ Vector",
+        rule="native_wxyz=(w,x,y,z)",
+        inverse="canonical_wxyz=native_wxyz",
+    ),
 }
+
+
+def _record(value: object, *, context: str) -> JsonRecord:
+    if not isinstance(value, dict) or any(not isinstance(key, str) for key in value):
+        raise TypeError(f"{context} must be a JSON object with string keys")
+    return cast(JsonRecord, value)
+
+
+def _rows(value: object, *, context: str) -> list[JsonRecord]:
+    if not isinstance(value, list):
+        raise TypeError(f"{context} must be a JSON array")
+    return [_record(row, context=f"{context}[{index}]") for index, row in enumerate(value)]
+
+
+def _quaternion(row: JsonRecord, field: str) -> list[JsonValue]:
+    value = row.get(field)
+    if (
+        not isinstance(value, list)
+        or len(value) != 4
+        or any(isinstance(component, bool) or not isinstance(component, (int, float)) for component in value)
+    ):
+        raise TypeError(f"{field} must contain four numeric coefficients")
+    return value
+
+
+def retain_canonical_interop(
+    canonical_interop: JsonRecord, expected_inputs: dict[str, list[JsonValue]]
+) -> JsonRecord:
+    """Return retained interop data with native inputs paired to named canonicals."""
+    canonical_interop = deepcopy(canonical_interop)
+    if "precision_captures" in canonical_interop:
+        profiles = _record(
+            canonical_interop["precision_captures"], context="precision_captures"
+        )
+        retained_profiles = {
+            name: _retain_profile(_record(profile, context=f"precision_captures.{name}"), expected_inputs)
+            for name, profile in profiles.items()
+        }
+        return cast(
+            JsonRecord,
+            {**canonical_interop, "precision_captures": retained_profiles},
+        )
+    return _retain_profile(canonical_interop, expected_inputs)
+
+
+def _retain_profile(
+    profile: JsonRecord, expected_inputs: dict[str, list[JsonValue]]
+) -> JsonRecord:
+    cases = _rows(profile.get("orientation_cases"), context="orientation_cases")
+    seen: set[str] = set()
+    retained_cases: list[JsonRecord] = []
+    for row in cases:
+        case_id = row.get("case_id")
+        if not isinstance(case_id, str):
+            raise TypeError("orientation case must have a string case_id")
+        if case_id not in expected_inputs:
+            raise ValueError(f"unexpected native orientation case: {case_id}")
+        if case_id in seen:
+            raise ValueError(f"duplicate native orientation case: {case_id}")
+        seen.add(case_id)
+        native_input = _quaternion(row, "canonical_wxyz")
+        retained_cases.append(
+            {
+                **row,
+                "native_input_wxyz": native_input,
+                "canonical_wxyz": deepcopy(expected_inputs[case_id]),
+            }
+        )
+    missing = set(expected_inputs) - seen
+    if missing:
+        raise ValueError(f"native capture is missing orientation cases: {sorted(missing)}")
+    return cast(JsonRecord, {**profile, "orientation_cases": retained_cases})
 
 
 def sha256(path: Path) -> str:
@@ -59,61 +157,78 @@ def sha256(path: Path) -> str:
 
 def retain(engine: str, version: str, source_path: Path, output_dir: Path) -> None:
     config = ENGINE_CONFIG[engine]
-    if config["version"] and version != config["version"]:
-        raise ValueError(f"{engine} version must be {config['version']}")
-    config = dict(config)
-    config["source"] = config["source"].format(version=version)
+    if config.version and version != config.version:
+        raise ValueError(f"{engine} version must be {config.version}")
+    capture_source_name = config.source.format(version=version)
     original_bytes = source_path.read_bytes()
-    captured = parse_evidence_document(original_bytes)
-    canonical_interop = captured["canonical_interop"]
+    captured = _record(
+        parse_evidence_document(original_bytes), context="native capture"
+    )
+    canonical_interop = _record(
+        captured.get("canonical_interop"), context="canonical_interop"
+    )
     canonical_inputs = ROOT / "experiments/interoperability/v1/canonical_inputs.json"
-    input_rows = read_evidence_document(canonical_inputs)["orientations"]
-    expected_inputs = {row["case_id"]: row["canonical_wxyz"] for row in input_rows}
-    expected_cases = set(expected_inputs)
-    precision_capture = (
-        canonical_interop["precision_captures"]["float32"]
-        if "precision_captures" in canonical_interop
-        else canonical_interop
-    )
-    actual_cases = {row["case_id"] for row in precision_capture["orientation_cases"]}
-    if expected_cases != actual_cases:
-        raise ValueError(
-            f"native capture witness IDs differ: expected {sorted(expected_cases)}, got {sorted(actual_cases)}"
-        )
-    if "reverse_composition" not in precision_capture:
-        raise ValueError("native capture is missing the reverse composition witness")
-    profiles = (
-        canonical_interop["precision_captures"].values()
-        if "precision_captures" in canonical_interop
-        else (canonical_interop,)
-    )
-    for profile in profiles:
-        for row in profile["orientation_cases"]:
-            row["native_input_wxyz"] = row["canonical_wxyz"]
-            row["canonical_wxyz"] = expected_inputs[row["case_id"]]
+    input_document = read_evidence_document(canonical_inputs)
+    input_rows = _rows(input_document.get("orientations"), context="orientations")
+    expected_inputs: dict[str, list[JsonValue]] = {}
+    for row in input_rows:
+        case_id = row.get("case_id")
+        if not isinstance(case_id, str):
+            raise TypeError("canonical input must have a string case_id")
+        if case_id in expected_inputs:
+            raise ValueError(f"duplicate canonical input case: {case_id}")
+        expected_inputs[case_id] = _quaternion(row, "canonical_wxyz")
 
-    engine_info = captured["engine"]
+    profiles_to_check = (
+        {
+            name: _record(profile, context=f"precision_captures.{name}")
+            for name, profile in _record(
+                canonical_interop["precision_captures"],
+                context="precision_captures",
+            ).items()
+        }
+        if "precision_captures" in canonical_interop
+        else {"default": canonical_interop}
+    )
+    for name, profile in profiles_to_check.items():
+        if "reverse_composition" not in profile:
+            raise ValueError(f"native capture profile {name!r} lacks reverse composition")
+    canonical_interop = retain_canonical_interop(canonical_interop, expected_inputs)
+
+    engine_info = _record(captured.get("engine"), context="engine")
     if engine == "unreal":
-        source_frame = captured["native_semantics"]["source_frame"]
+        native_semantics = _record(
+            captured.get("native_semantics"), context="native_semantics"
+        )
+        source_frame = native_semantics["source_frame"]
+        map_record = _record(
+            native_semantics[config.map_key], context=config.map_key
+        )
+        native_frame = _record(
+            native_semantics[config.frame_key], context=config.frame_key
+        )
     else:
         source_frame = captured["source_frame"]
-    if engine == "unreal":
-        map_record = captured["native_semantics"][config["map_key"]]
-        native_frame = captured["native_semantics"][config["frame_key"]]
-    else:
-        map_record = captured[config["map_key"]]
-        native_frame = captured.get(
-            config["frame_key"],
-            {
-                "declared_probe_semantics": "identity probe; no universal asset axis inferred"
-            },
+        map_record = _record(captured.get(config.map_key), context=config.map_key)
+        native_frame = _record(
+            captured.get(
+                config.frame_key,
+                {
+                    "declared_probe_semantics": "identity probe; no universal asset axis inferred"
+                },
+            ),
+            context=config.frame_key,
         )
-    capture_source = ROOT / config["source"]
+    axes_from_source = _record(
+        map_record.get("destination_axes_from_source"),
+        context="destination_axes_from_source",
+    )
+    capture_source = ROOT / capture_source_name
     witness = {
         "schema_version": 1,
         "target": {
             "engine": engine_info["name"],
-            "api": config["api"],
+            "api": config.api,
             "version": version,
             "build": engine_info.get("build_hash")
             or engine_info.get("changelist")
@@ -133,9 +248,9 @@ def retain(engine: str, version: str, source_path: Path, output_dir: Path) -> No
             "canonical_action": "active",
             "canonical_frame": source_frame,
             "native_frame": native_frame,
-            "destination_axes_from_source": map_record["destination_axes_from_source"],
-            "conversion_rule": config["rule"],
-            "inverse_rule": config["inverse"],
+            "destination_axes_from_source": axes_from_source,
+            "conversion_rule": config.rule,
+            "inverse_rule": config.inverse,
             "world_and_body_map": "same declared signed-axis map",
             "input_domain": "unit Hamilton quaternion; adapters preserve magnitude and do not normalize",
             "native_precision_tolerance": {"float32": 2e-6, "float64": 2e-14}
@@ -151,7 +266,7 @@ def retain(engine: str, version: str, source_path: Path, output_dir: Path) -> No
         },
         "provenance": {
             "original_capture_sha256": hashlib.sha256(original_bytes).hexdigest(),
-            "capture_source": config["source"].replace("\\", "/"),
+            "capture_source": capture_source_name.replace("\\", "/"),
             "capture_source_sha256": sha256(capture_source),
             "canonical_input_file": "experiments/interoperability/v1/canonical_inputs.json",
             "canonical_input_sha256": sha256(canonical_inputs),

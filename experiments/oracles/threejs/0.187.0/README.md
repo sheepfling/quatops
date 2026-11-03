@@ -11,14 +11,29 @@ From this directory, install exactly the lockfile and run:
 
 ```powershell
 npm ci
-node capture_three.mjs --corpus ..\..\shared\orientation_inputs_v1.json --output ..\..\..\..\tests\golden\oracles\threejs\0.187.0\native_rotation.json
 ```
 
-From the repository root, select the retained native witnesses:
+Keep the full discovery result in a temporary file, then select retained
+witnesses into the repository. The selector reads the raw capture and writes a
+separate output; it never edits its input:
 
 ```powershell
-.venv\Scripts\python.exe scripts\compact_oracle_witnesses.py
+$repositoryRoot = git rev-parse --show-toplevel
+$discovery = Join-Path $env:TEMP 'quatops-threejs-0.187.0-discovery.json'
+node capture_three.mjs --corpus ..\..\shared\orientation_inputs_v1.json --output $discovery
+Push-Location $repositoryRoot
+$selectorArgs = @(
+  'threejs',
+  $discovery,
+  'tests\golden\oracles\threejs\0.187.0\native_rotation.json',
+  '--overwrite'
+)
+.venv\Scripts\python.exe scripts\compact_oracle_witnesses.py @selectorArgs
+Pop-Location
 ```
+
+The selector matches case IDs and checks that required witnesses are present
+exactly once. It stores the raw capture hash in the retained fixture provenance.
 
 The checked-in manifest records Node/V8/platform, `THREE.REVISION`, corpus,
 lockfile and exporter SHA-256 values, plus the observed operation counts.

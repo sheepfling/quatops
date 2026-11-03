@@ -99,6 +99,8 @@ include = [
     "scripts/converter_evidence.py",
     "scripts/validate_converter_evidence.py",
     "scripts/validate_evidence_json.py",
+    "scripts/compact_oracle_witnesses.py",
+    "scripts/retain_engine_witnesses.py",
     "experiments/oracles/sophus/1.24.6/verify_scipy.py",
     "experiments/converters/cesium/1.124.0/create_inputs.py",
     "experiments/converters/eigen/5.0.1/capture_native.py",
