@@ -13,3 +13,5 @@ tests/oracles/** -text
 scripts/evidence_json.py -text
 scripts/compact_oracle_witnesses.py -text
 scripts/retain_*_witnesses.py -text
+# Keep the MuJoCo converter source hash identical across Windows and Unix.
+experiments/converters/mujoco/3.17.0/capture_native.py text eol=lf

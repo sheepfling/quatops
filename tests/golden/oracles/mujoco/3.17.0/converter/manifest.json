@@ -3,7 +3,7 @@
   "review_state": "Pinned native capture only; replay acceptance is recorded by repository tests",
   "execution": {
     "was_run": true,
-    "utc": "2026-11-03T21:28:48.517296+00:00",
+    "utc": "2026-11-03T21:57:39.270369+00:00",
     "python": "3.10.11 (tags/v3.10.11:7d4cc5a, Apr  5 2023, 00:38:17) [MSC v.1929 64 bit (AMD64)]",
     "platform": "Windows-10-10.0.26300-SP0",
     "architecture": "AMD64"
@@ -116,7 +116,7 @@
     }
   ],
   "provenance": {
-    "capture_script_sha256": "a6461297e47c7aa8d5ee6d65d2b59f31dc89045e6bd3a232b4d07a1d0e36d535",
+    "capture_script_sha256": "2289f19f4f20bfcd68a22902d355a9495ab7daa4fd7d992a4bf7635a41a4c4d6",
     "contract_sha256": "6a2de9e8a58581109663850419dc39c01b7ae2674e60b969bdebe1fbeacefe8a",
     "converter_input_spec_sha256": "cfc5dbbc1729c6d22b9f0c2e8f7d3f335ff0b32a65a968f2f48f65a4aaa0eb82",
     "selected_inputs_sha256": "a6f0630806b69d3b3b29a036aa10f63bfe214668329c661598951f84f8f41eec",
