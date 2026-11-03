@@ -71,14 +71,12 @@ function eulerObservation(caseId, family, inputXyz, order, source = null) {
     input_source: source,
     euler_quaternion_xyzw: xyzw(q),
     euler_matrix_rows: matrixRows(m),
-    matrix4_elements_column_major: [...m.elements],
     quaternion_rotated_positive_basis_vectors_xyz: rotateBasis(q),
     matrix_rotated_positive_basis_vectors_xyz: [
       new THREE.Vector3(1, 0, 0).applyMatrix4(m).toArray(),
       new THREE.Vector3(0, 1, 0).applyMatrix4(m).toArray(),
       new THREE.Vector3(0, 0, 1).applyMatrix4(m).toArray(),
     ],
-    quaternion_readback_radians_xyz: [readback.x, readback.y, readback.z],
     quaternion_readback_roundtrip_xyzw: xyzw(roundtrip),
     matrix_quaternion_xyzw: xyzw(matrixQuaternion),
   };
@@ -181,7 +179,6 @@ function makeEngine(corpus) {
       case_id: input.case_id,
       domain: input.domain,
       input_matrix_rows: input.rows,
-      matrix4_elements_column_major: [...m.elements],
       matrix_to_quaternion_xyzw: xyzw(q),
       quaternion_reconstructed_matrix_rows: matrixRows(
         new THREE.Matrix4().makeRotationFromQuaternion(q),
