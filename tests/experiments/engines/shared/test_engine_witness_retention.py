@@ -28,20 +28,17 @@ def test_precision_profiles_are_rebuilt_without_mutating_capture_rows():
     }
     original = deepcopy(capture)
 
-    retained = retain_canonical_interop(
-        capture, {"mixed": canonical_input}
-    )
+    retained = retain_canonical_interop(capture, {"mixed": canonical_input})
 
     assert capture == original
-    assert capture["precision_captures"]["float32"]["orientation_cases"][0] == (
-        original["precision_captures"]["float32"]["orientation_cases"][0]
+    assert (
+        capture["precision_captures"]["float32"]["orientation_cases"][0]
+        == (original["precision_captures"]["float32"]["orientation_cases"][0])
     )
     retained_case = retained["precision_captures"]["float32"]["orientation_cases"][0]
     assert retained_case["native_input_wxyz"] == native_input
     assert retained_case["canonical_wxyz"] == canonical_input
-    assert retained_case["native_result"] == {
-        "rotated_probe_xyz": [1.0, 2.0, 3.0]
-    }
+    assert retained_case["native_result"] == {"rotated_probe_xyz": [1.0, 2.0, 3.0]}
     retained_case["native_result"]["rotated_probe_xyz"][0] = 99.0
     retained_case["canonical_wxyz"][0] = 99.0
     assert capture == original
@@ -51,7 +48,10 @@ def test_precision_profiles_are_rebuilt_without_mutating_capture_rows():
 @pytest.mark.parametrize(
     ("cases", "message"),
     [
-        ([{"case_id": "unexpected", "canonical_wxyz": [1.0, 0.0, 0.0, 0.0]}], "unexpected"),
+        (
+            [{"case_id": "unexpected", "canonical_wxyz": [1.0, 0.0, 0.0, 0.0]}],
+            "unexpected",
+        ),
         (
             [
                 {"case_id": "mixed", "canonical_wxyz": [1.0, 0.0, 0.0, 0.0]},

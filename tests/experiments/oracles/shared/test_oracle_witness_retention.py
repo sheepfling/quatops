@@ -85,8 +85,7 @@ def _threejs_discovery() -> dict[str, object]:
                 for case_id in matrix_cases
             ],
             "two_vector_alignment": [
-                {"from_case_index": 0, "to_case_index": target}
-                for target in (1, 2, 3)
+                {"from_case_index": 0, "to_case_index": target} for target in (1, 2, 3)
             ],
             "shortest_slerp": [
                 {
@@ -129,12 +128,16 @@ def test_threejs_reducer_is_non_mutating_and_keeps_declared_witnesses():
     assert isinstance(slerp, list)
     assert [sample["t"] for sample in slerp[0]["samples"]] == [0.5]
     assert [sample["t"] for sample in slerp[1]["samples"]] == [0.5]
-    assert "matrix4_elements_column_major" not in observations["independent_matrices"][0]
+    assert (
+        "matrix4_elements_column_major" not in observations["independent_matrices"][0]
+    )
     assert (
         "quaternion_rotated_positive_basis_vectors_xyz"
         not in observations["independent_matrices"][0]
     )
-    assert retained["provenance"]["full_discovery_capture_sha256"] == "raw-discovery-hash"
+    assert (
+        retained["provenance"]["full_discovery_capture_sha256"] == "raw-discovery-hash"
+    )
     slerp[0]["samples"][0]["t"] = 99.0
     assert discovery == original
 

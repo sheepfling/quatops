@@ -28,7 +28,7 @@ ROOT = Path(__file__).resolve().parents[1]
 JsonRecord = dict[str, JsonValue]
 
 
-@dataclass(frozen=True, slots=True)
+@dataclass(frozen=True)
 class EngineRetentionConfig:
     version: str | None
     source: str
@@ -88,7 +88,9 @@ def _record(value: object, *, context: str) -> JsonRecord:
 def _rows(value: object, *, context: str) -> list[JsonRecord]:
     if not isinstance(value, list):
         raise TypeError(f"{context} must be a JSON array")
-    return [_record(row, context=f"{context}[{index}]") for index, row in enumerate(value)]
+    return [
+        _record(row, context=f"{context}[{index}]") for index, row in enumerate(value)
+    ]
 
 
 def _quaternion(row: JsonRecord, field: str) -> list[JsonValue]:
@@ -96,7 +98,10 @@ def _quaternion(row: JsonRecord, field: str) -> list[JsonValue]:
     if (
         not isinstance(value, list)
         or len(value) != 4
-        or any(isinstance(component, bool) or not isinstance(component, (int, float)) for component in value)
+        or any(
+            isinstance(component, bool) or not isinstance(component, (int, float))
+            for component in value
+        )
     ):
         raise TypeError(f"{field} must contain four numeric coefficients")
     return value
@@ -112,7 +117,9 @@ def retain_canonical_interop(
             canonical_interop["precision_captures"], context="precision_captures"
         )
         retained_profiles = {
-            name: _retain_profile(_record(profile, context=f"precision_captures.{name}"), expected_inputs)
+            name: _retain_profile(
+                _record(profile, context=f"precision_captures.{name}"), expected_inputs
+            )
             for name, profile in profiles.items()
         }
         return cast(
@@ -147,7 +154,9 @@ def _retain_profile(
         )
     missing = set(expected_inputs) - seen
     if missing:
-        raise ValueError(f"native capture is missing orientation cases: {sorted(missing)}")
+        raise ValueError(
+            f"native capture is missing orientation cases: {sorted(missing)}"
+        )
     return cast(JsonRecord, {**profile, "orientation_cases": retained_cases})
 
 
@@ -192,7 +201,9 @@ def retain(engine: str, version: str, source_path: Path, output_dir: Path) -> No
     )
     for name, profile in profiles_to_check.items():
         if "reverse_composition" not in profile:
-            raise ValueError(f"native capture profile {name!r} lacks reverse composition")
+            raise ValueError(
+                f"native capture profile {name!r} lacks reverse composition"
+            )
     canonical_interop = retain_canonical_interop(canonical_interop, expected_inputs)
 
     engine_info = _record(captured.get("engine"), context="engine")
@@ -201,9 +212,7 @@ def retain(engine: str, version: str, source_path: Path, output_dir: Path) -> No
             captured.get("native_semantics"), context="native_semantics"
         )
         source_frame = native_semantics["source_frame"]
-        map_record = _record(
-            native_semantics[config.map_key], context=config.map_key
-        )
+        map_record = _record(native_semantics[config.map_key], context=config.map_key)
         native_frame = _record(
             native_semantics[config.frame_key], context=config.frame_key
         )

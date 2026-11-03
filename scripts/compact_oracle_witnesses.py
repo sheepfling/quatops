@@ -94,13 +94,13 @@ def _rows(observations: Record, name: str) -> list[Record]:
 
 def _counts(observations: Record) -> dict[str, int]:
     return {
-        name: len(rows)
-        for name, rows in observations.items()
-        if isinstance(rows, list)
+        name: len(rows) for name, rows in observations.items() if isinstance(rows, list)
     }
 
 
-def _provenance(document: Record, source_sha256: str, *, threejs: bool = False) -> Record:
+def _provenance(
+    document: Record, source_sha256: str, *, threejs: bool = False
+) -> Record:
     current = document.get("provenance", {})
     if not isinstance(current, dict):
         raise TypeError("provenance must be an object")
@@ -129,7 +129,13 @@ def _compact_threejs(document: Record, source_sha256: str) -> Record:
     retained = {
         name: rows
         for name, rows in source.items()
-        if name not in {"euler_orders", "euler_boundaries", "euler_reorder", "object3d_hierarchy"}
+        if name
+        not in {
+            "euler_orders",
+            "euler_boundaries",
+            "euler_reorder",
+            "object3d_hierarchy",
+        }
     }
 
     near_lock = _select_ids(_rows(source, "euler_boundaries"), (NEAR_LOCK_CASE,))[0]
@@ -177,9 +183,7 @@ def _compact_threejs(document: Record, source_sha256: str) -> Record:
                 "quaternion_rotated_positive_basis_vectors_xyz",
             }
         }
-        for row in _select_ids(
-            _rows(source, "independent_matrices"), MATRIX_CASES
-        )
+        for row in _select_ids(_rows(source, "independent_matrices"), MATRIX_CASES)
         if row["domain"] == "proper_rotation"
     ]
 
@@ -192,17 +196,13 @@ def _compact_threejs(document: Record, source_sha256: str) -> Record:
         raise ValueError("expected the two named Three.js vector-alignment cases")
     retained["two_vector_alignment"] = alignment
 
-    slerp_rows = []
-    for row in _rows(source, "shortest_slerp"):
-        slerp_rows.append(
-            {
-                **row,
-                "samples": [
-                    sample for sample in row["samples"] if sample["t"] == 0.5
-                ],
-            }
-        )
-    retained["shortest_slerp"] = slerp_rows
+    retained["shortest_slerp"] = [
+        {
+            **row,
+            "samples": [sample for sample in row["samples"] if sample["t"] == 0.5],
+        }
+        for row in _rows(source, "shortest_slerp")
+    ]
     return {
         **document,
         "observations": retained,
@@ -211,7 +211,9 @@ def _compact_threejs(document: Record, source_sha256: str) -> Record:
     }
 
 
-def _compact_other(target: Literal["mujoco", "spiceypy"], document: Record, source_sha256: str) -> Record:
+def _compact_other(
+    target: Literal["mujoco", "spiceypy"], document: Record, source_sha256: str
+) -> Record:
     source = document["observations"]
     if not isinstance(source, dict):
         raise TypeError("observations must be an object")
@@ -252,9 +254,10 @@ def _compact_other(target: Literal["mujoco", "spiceypy"], document: Record, sour
 
     counts = _counts(retained)
     counts = {
-        {"integration": "integration_and_derivatives", "sub_quat": "quaternion_differences"}.get(
-            name, name
-        ): count
+        {
+            "integration": "integration_and_derivatives",
+            "sub_quat": "quaternion_differences",
+        }.get(name, name): count
         for name, count in counts.items()
     }
     return {
@@ -280,11 +283,16 @@ def main() -> None:
     parser.add_argument("retained_output", type=Path)
     parser.add_argument("--overwrite", action="store_true")
     args = parser.parse_args()
-    source_path, output_path = args.discovery_capture.resolve(), args.retained_output.resolve()
+    source_path, output_path = (
+        args.discovery_capture.resolve(),
+        args.retained_output.resolve(),
+    )
     if source_path == output_path:
         raise ValueError("discovery input and retained output must be different files")
     if output_path.exists() and not args.overwrite:
-        raise FileExistsError(f"Refusing to replace output without --overwrite: {output_path}")
+        raise FileExistsError(
+            f"Refusing to replace output without --overwrite: {output_path}"
+        )
 
     source_bytes = source_path.read_bytes()
     capture = read_evidence_document(source_path)
