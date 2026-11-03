@@ -146,13 +146,13 @@ def divide(lhs: Any, rhs: Any) -> np.ndarray:
     return multiply(lhs, inverse(rhs))
 
 
-def rotate(q: Any, v: Any, *, accurate: bool = False) -> np.ndarray:
+def rotate(q: Any, v: Any) -> np.ndarray:
     """Actively rotate vectors with a nonzero Hamilton quaternion.
 
-    Leading quaternion and vector shapes broadcast. Set ``accurate=True`` to
-    round each exact binary64 result once.
+    Leading quaternion and vector shapes broadcast. The scaled cross-product
+    calculation rotates without normalizing or mutating the input values.
     """
-    return _rotate(q, v, scalar_last=True, epsilon=1, accurate=accurate)
+    return _rotate(q, v, scalar_last=True, epsilon=1)
 
 
 def _canonical(q: np.ndarray) -> np.ndarray:

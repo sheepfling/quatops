@@ -49,13 +49,10 @@ class NumPyLayoutsTests:
             q[..., 1:] *= -1
         return q
 
-    def test_explicit_selection_and_legacy_aliases_have_no_convention_selector(self):
+    def test_explicit_selection_and_legacy_aliases_have_no_runtime_selector(self):
         for convention, order, backend in self.backends:
             assert tuple(inspect.signature(backend.multiply).parameters) == ("lhs", "rhs")
-            parameters = inspect.signature(backend.rotate).parameters
-            assert tuple(parameters) == ("q", "v", "accurate")
-            assert parameters["accurate"].kind is inspect.Parameter.KEYWORD_ONLY
-            assert parameters["accurate"].default is False
+            assert tuple(inspect.signature(backend.rotate).parameters) == ("q", "v")
         h_legacy = importlib.import_module("quatops.numpy.hamilton.wxyz")
         j_legacy = importlib.import_module("quatops.numpy.jpl.xyzw")
         h_default, j_default = self.backends[0][2], self.backends[3][2]

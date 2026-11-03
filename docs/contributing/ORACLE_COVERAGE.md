@@ -116,8 +116,6 @@ branch-policy exception next to the tests. Run the full suite with the local
   [`test_analytic_numeric_contract.py`](../../tests/test_analytic_numeric_contract.py), and
   [`test_attitude_numeric_contract.py`](../../tests/test_attitude_numeric_contract.py).
   These examples do not establish a uniform error bound for all inputs.
-- Exact binary64 component rounding for `rotate(..., accurate=True)`:
-  [`test_rotation_componentwise_accuracy.py`](../../tests/test_rotation_componentwise_accuracy.py).
 
 The logarithm of a negative real uses the positive first coefficient axis in
 both Hamilton and JPL algebraic representations. At this singular input, a

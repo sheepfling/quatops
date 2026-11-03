@@ -207,7 +207,7 @@ algebra specified above; their names and composition order are shared.
 | `norm_squared(q)` | Squared Euclidean coefficient norm | Real scalar or array of scalars |
 | `normalize(q)` | Divide by the norm; `q` must be nonzero | Unit quaternion |
 | `inverse(q)` | Multiplicative inverse; `q` must be nonzero | Quaternion |
-| `rotate(q, v, *, accurate=False)` | Active quaternion action; `q` must be nonzero | Three-component vector |
+| `rotate(q, v)` | Active quaternion action; `q` must be nonzero | Three-component vector |
 | `to_rotation_matrix(q)` | Norm-aware active 3×3 rotation matrix; `q` must be nonzero | Matrix |
 | `to_left_matrix(q)` | Matrix `L(q)` such that `L(q) r = multiply(q, r)` | Matrix |
 | `to_right_matrix(q)` | Matrix `P(q)` such that `P(q) r = multiply(r, q)` | Matrix |
@@ -605,37 +605,14 @@ transpose.
 
 ### Componentwise rotation accuracy
 
-`rotate(q, v, accurate=True)` computes the exact active rotation of the
-finite binary64 values obtained after input conversion, then rounds each
-component once to binary64 using round to nearest, ties to even. This includes
-subnormal results and cancellation across components. An exact zero is returned
-as positive zero; a nonzero result that rounds to zero retains its sign. If a
-component rounds to infinity, the operation raises `OverflowError`.
-
-This option is available for the Hamilton and JPL scalar and typed modules,
-and for all NumPy coefficient orders and component-axis layouts. NumPy
-broadcasts normally and rejects the whole call if any result overflows. The
-accurate path uses integer arithmetic per vector, so it is slower and does not
-use the optional Numba rotation kernel. It guarantees results for the values
-*after* conversion to binary64; it cannot recover precision lost when inputs
-were converted from another type. Other operations, including
-`to_rotation_matrix`, do not have this guarantee.
-
-For example, Hamilton `rotate((5, 12, 13, 0), (1e308, 1, 1),
-accurate=True)` returns `17/13` rounded to binary64 for the first component.
-The corresponding JPL quaternion is `(-12, -13, 0, 5)` in `xyzw` or
-`(5, -12, -13, 0)` in `wxyz`.
-
-For Hamilton `q=(1, 1, 1e-8, 0)` and `v=(0, 1e-300, 0)`, the accurate
-middle component is `5e-317` after rounding. The default NumPy calculation
-can lose that subnormal component.
-
-The default `accurate=False` uses the existing floating-point rotation
-kernels. They reduce avoidable overflow but do not guarantee a componentwise
-error bound: quaternion ratios and products can underflow, and cancellation
-can lose accuracy. In the example above the first component can be near
-`1.11e292`. Choose `accurate=True` when small components matter at extreme
-scales.
+The rotation kernels reduce avoidable overflow but do not guarantee a
+componentwise error bound. Quaternion ratios and products can underflow, and
+cancellation can lose accuracy. For Hamilton `q=(5, 12, 13, 0)` and
+`v=(1e308, 1, 1)`, the exact first component is `17/13`, while the computed
+value can be near `1.11e292`. For `q=(1, 1, 1e-8, 0)` and
+`v=(0, 1e-300, 0)`, the NumPy calculation can lose a representable subnormal
+middle component. The homogeneous research prototypes also fail some
+adversarial cases, so the existing kernels remain in use.
 
 The multiplication 4×4 matrices act on quaternion coefficient vectors, not
 on 3D points. `to_left_matrix(q)` satisfies `L(q) @ r == multiply(q, r)`, while
@@ -718,7 +695,7 @@ the tested inputs, not an error bound for every input.
 | Algebra, products, quotients, and `dot` | Intermediate multiplication and summation can round, underflow, or overflow. `dot` uses compensated or exact fallback calculations for some cases; that is not a correct-rounding guarantee for every input. |
 | `norm`, `norm_squared`, `normalize`, and `inverse` | The norm, normalization, and inverse use scaling to handle many extreme magnitudes. `norm_squared` can underflow even when `norm` is nonzero; a finite nonzero quaternion can have an inverse outside the float range. |
 | Algebraic and inverse analytic functions | Principal branches and singularities are defined above. Results depend on floating-point and platform/NumPy mathematical functions, with no general correctly rounded guarantee. |
-| Rotation, matrix, Euler, axis-angle, rotation-vector, and SO(3) conversions | Normalization, trigonometric functions, and branch or tolerance choices can lose precision near extreme scales or singularities. Only `rotate(..., accurate=True)` has the componentwise rounding guarantee described above. |
+| Rotation, matrix, Euler, axis-angle, rotation-vector, and SO(3) conversions | Normalization, trigonometric functions, and branch or tolerance choices can lose precision near extreme scales or singularities. There is no general componentwise rounding guarantee. |
 | Interpolation, local updates, and angular-velocity integration | Unit results and formulas are computed in finite precision; branch selection, extrapolation, and nearly singular endpoints affect conditioning. Constant-rate integration is exact as a mathematical method, subject to arithmetic rounding. |
 | Alignment, rotation statistics, and random sampling | Estimator tolerances, convergence limits, ambiguous samples, and finite-precision eigenvalue calculations affect the result. Sampling behavior also depends on the supplied random generator. |
 
@@ -754,9 +731,7 @@ domain, tolerance, and branch rules are documented with each operation above.
 - Arithmetic that produces a non-finite result raises `OverflowError`. Norm,
   normalization, and inverse use scaled calculations to reduce avoidable
   overflow or underflow; finite underflow and rounding follow floating-point
-  arithmetic. The `accurate=True` rotation option has the stronger contract
-  described in [componentwise rotation accuracy](#componentwise-rotation-accuracy).
-  Other operations can overflow in intermediate calculations even when their
+  arithmetic. Operations can overflow in intermediate calculations even when their
   exact result is representable. NumPy preserves the caller's `numpy.seterr`
   configuration. Inputs are not mutated.
 

@@ -1248,34 +1248,12 @@ def _numba_rotate_kernel() -> Any:
     return _NUMBA_ROTATE
 
 
-def _rotate(
-    q: Any, v: Any, scalar_last: bool, epsilon: int, *, accurate: bool = False
-) -> np.ndarray:
+def _rotate(q: Any, v: Any, scalar_last: bool, epsilon: int) -> np.ndarray:
     """Rotate with a scaled cross-product kernel and a compensated fallback."""
     global _NUMBA_ROTATE
-    if accurate is not True and accurate is not False:
-        raise ValueError("accurate must be a bool")
     coefficients = _components(q, 4, "quaternion")
     vectors = _components(v, 3, "vector")
     shape = np.broadcast_shapes(coefficients.shape[:-1], vectors.shape[:-1])
-    if accurate:
-        from ._rotation_accurate import rotate_accurate
-
-        if np.any(np.all(coefficients == 0.0, axis=-1)):
-            raise ValueError("zero quaternion has no normalization or inverse")
-        rows = np.broadcast_to(coefficients, shape + (4,)).reshape((-1, 4))
-        vector_rows = np.broadcast_to(vectors, shape + (3,)).reshape((-1, 3))
-        result = np.empty((len(rows), 3), dtype=np.float64)
-        for index, (row, vector) in enumerate(zip(rows, vector_rows)):
-            if scalar_last:
-                x, y, z, w = (float(value) for value in row)
-            else:
-                w, x, y, z = (float(value) for value in row)
-            quaternion = (w, epsilon * x, epsilon * y, epsilon * z)
-            result[index] = rotate_accurate(
-                quaternion, tuple(float(value) for value in vector)
-            )
-        return result.reshape(shape + (3,))
     if prod(shape) >= 128:
         kernel = _numba_rotate_kernel()
         if kernel is not None:

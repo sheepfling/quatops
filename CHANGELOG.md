@@ -2,8 +2,6 @@
 
 ## Unreleased
 
-- Adds an explicitly selected `accurate=True` rotation path with correctly
-  rounded binary64 components for scalar and NumPy representations.
 - Clarifies numerical accuracy, singularities, overflow, and convergence
   behavior across operation families, with additional boundary coverage.
 

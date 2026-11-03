@@ -575,19 +575,12 @@ def _dot3(a: FloatLike, b: FloatLike, c: FloatLike, x: FloatLike, y: FloatLike, 
     return fsum(terms)
 
 
-def rotate(q: Iterable[FloatT], v: Iterable[FloatT], *, accurate: bool = False) -> Vector:
+def rotate(q: Iterable[FloatT], v: Iterable[FloatT]) -> Vector:
     """Actively rotate ``v`` by ``q * (0, v) * inverse(q)``.
 
     Any nonzero quaternion is valid; its magnitude has no effect. No input is
     normalized. Internally scaling its components avoids unnecessary overflow.
-    Set ``accurate=True`` to round each exact binary64 result once.
     """
-    if accurate is True:
-        from ._rotation_accurate import rotate_accurate
-
-        return rotate_accurate(_quaternion(q), _vector(v))
-    if accurate is not False:
-        raise ValueError("accurate must be a bool")
     _, parts = _scaled(_quaternion(q))
     w, x, y, z = parts
     vx, vy, vz = _vector(v)
