@@ -22,4 +22,4 @@ uv pip install --python (Join-Path $envDir 'Scripts\python.exe') -r experiments\
 The retained manifest records the OpenCV package version, runtime details, and
 native binary hashes alongside the selected witnesses. The verbose build
 configuration is not retained. Replay the selected boundary evidence with
-`tests/test_opencv_converter.py`.
+`tests/experiments/converters/opencv/test_opencv_converter.py`.

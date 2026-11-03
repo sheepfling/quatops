@@ -46,7 +46,7 @@ The asset, exact native observations, contract, and hashes are in the
 The [capture package](../../experiments/converters/gltf/2.0.0/README.md)
 retains the generator, loader script, dependency lock, and replay instructions.
 Replay is covered by
-[test_gltf_converter_roundtrip.py](../../tests/test_gltf_converter_roundtrip.py).
+[test_gltf_converter_roundtrip.py](../../tests/experiments/converters/gltf/test_gltf_converter_roundtrip.py).
 
 ## Limits
 

@@ -14,4 +14,4 @@ experiments\oracles\mujoco\3.17.0\.venv\Scripts\python.exe experiments\converter
 The capture writes only the selected witnesses and their provenance to
 `tests/golden/oracles/mujoco/3.17.0/converter/`. The existing pinned
 environment and lockfile are under `experiments/oracles/mujoco/3.17.0/`.
-Replay the frozen native values with `tests/test_mujoco_converter.py`.
+Replay the frozen native values with `tests/experiments/converters/mujoco/test_mujoco_converter.py`.

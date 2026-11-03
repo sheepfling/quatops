@@ -17,7 +17,7 @@ recovery. The stage up-axis metadata does not infer or change the source frame.
 The selected native values and exact runtime provenance are in the
 [converter fixture](../../tests/golden/transports/openusd/26.11/converter/manifest.json);
 the replay assertions are in
-[`test_openusd_converter_roundtrip.py`](../../tests/test_openusd_converter_roundtrip.py).
+[`test_openusd_converter_roundtrip.py`](../../tests/experiments/converters/openusd/test_openusd_converter_roundtrip.py).
 This evidence covers the authored orient/translate stack only. It does not
 claim time-sampled animation, scale/shear decomposition, renderer execution,
 or application-specific import behavior. Primary API references:

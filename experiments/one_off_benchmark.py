@@ -28,10 +28,12 @@ import scipy
 
 ROOT = Path(__file__).resolve().parents[1]
 TEST_FILES = (
-    ROOT / "tests" / "benchmarks" / "test_one_off.py",
-    ROOT / "tests" / "benchmarks" / "test_one_off_jpl.py",
+    ROOT / "tests" / "benchmarks" / "hamilton" / "test_one_off.py",
+    ROOT / "tests" / "benchmarks" / "jpl" / "test_one_off_jpl.py",
 )
-VECTOR_TEST_FILE = ROOT / "tests" / "benchmarks" / "test_public_operations.py"
+VECTOR_TEST_FILE = (
+    ROOT / "tests" / "benchmarks" / "quatops" / "test_public_operations.py"
+)
 WINNER_TOLERANCE = 0.01
 
 

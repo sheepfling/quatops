@@ -15,4 +15,4 @@ experiments\oracles\spiceypy\8.3.0\.venv\Scripts\python.exe experiments\converte
 The capture writes only the selected witnesses and their provenance to
 `tests/golden/oracles/spiceypy/8.3.0/converter/`. The existing pinned
 environment and lockfile are under `experiments/oracles/spiceypy/8.3.0/`.
-Replay the frozen native values with `tests/test_spiceypy_converter.py`.
+Replay the frozen native values with `tests/experiments/converters/spiceypy/test_spiceypy_converter.py`.

@@ -21,7 +21,7 @@ the exact native capture-output hash are kept with each version. Godot 4.7 and
 file because the selected native outputs matched exactly.
 
 The broad signed-axis checks are generated in
-[`test_engine_basis_oracle.py`](../../tests/test_engine_basis_oracle.py): all
+[`test_engine_basis_oracle.py`](../../tests/quatops/engines/test_engine_basis_oracle.py): all
 48 signed-axis maps and all four named adapters are checked without storing
 passing randomized outputs. Native fixtures are a small target-contract
 witness set, not a duplicate corpus of the shared mathematics checks.

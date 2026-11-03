@@ -21,7 +21,7 @@ also captured. Both `Quaternionf` and `Quaterniond` are covered.
 
 The native C++ capture does not import QuatOps. Replay tests compare its frozen
 outputs with QuatOps and a separate SciPy matrix calculation in
-[`tests/test_eigen_converter.py`](../../tests/test_eigen_converter.py).
+[`tests/experiments/converters/eigen/test_eigen_converter.py`](../../tests/experiments/converters/eigen/test_eigen_converter.py).
 Eigen is a mathematical library here; the assigned axes do not claim any
 application-specific world, body, camera, or asset frame.
 

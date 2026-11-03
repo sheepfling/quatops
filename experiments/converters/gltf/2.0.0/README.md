@@ -20,4 +20,4 @@ uv run python scripts\retain_gltf_converter_witnesses.py $captureDir
 The retained converter fixture is
 [`tests/golden/transports/gltf/2.0.0/threejs/0.187.0/converter`](../../../../tests/golden/transports/gltf/2.0.0/threejs/0.187.0/converter/manifest.json)
 and the replay is
-[`tests/test_gltf_converter_roundtrip.py`](../../../../tests/test_gltf_converter_roundtrip.py).
+[`tests/experiments/converters/gltf/test_gltf_converter_roundtrip.py`](../../../../tests/experiments/converters/gltf/test_gltf_converter_roundtrip.py).

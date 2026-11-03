@@ -39,4 +39,4 @@ To reselect the compact witnesses from a completed run, use
 `scripts/retain_ros_tf2_witnesses.py <capture-directory>`. The retained fixture
 and QuatOps replay are in
 [`tests/golden/oracles/ros2/0.36.23`](../../../../tests/golden/oracles/ros2/0.36.23/manifest.json)
-and [`tests/test_ros_tf2_converter.py`](../../../../tests/test_ros_tf2_converter.py).
+and [`tests/experiments/converters/ros2/test_ros_tf2_converter.py`](../../../../tests/experiments/converters/ros2/test_ros_tf2_converter.py).

@@ -18,7 +18,7 @@ The selected native matrices, basis/probe images, and build identity are in
 the [versioned converter fixture](../../tests/golden/oracles/opencv/4.13.0/converter/manifest.json).
 The [capture project](../../experiments/converters/opencv/4.13.0/README.md)
 contains the pinned requirements and input preparation/native capture tools.
-Replay is covered by [test_opencv_converter.py](../../tests/test_opencv_converter.py).
+Replay is covered by [test_opencv_converter.py](../../tests/experiments/converters/opencv/test_opencv_converter.py).
 SciPy matrix comparisons during replay are formula checks, separate from the
 captured OpenCV execution.
 

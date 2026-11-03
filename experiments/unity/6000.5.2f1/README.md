@@ -36,9 +36,9 @@ Run the replay and generated frame-map checks with:
 
 ```powershell
 $proofTests = @(
-  'tests\test_canonical_interoperability.py',
-  'tests\test_engine_basis_oracle.py',
-  'tests\test_engine_proof_profiles.py'
+  'tests\quatops\engines\test_canonical_interoperability.py',
+  'tests\quatops\engines\test_engine_basis_oracle.py',
+  'tests\experiments\engines\shared\test_engine_proof_profiles.py'
 )
 .venv\Scripts\python.exe -m pytest -q $proofTests
 ```

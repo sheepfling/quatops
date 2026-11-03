@@ -21,4 +21,4 @@ uv run python scripts\retain_cesium_converter_witnesses.py $captureDir
 The selected native values are retained in
 [`tests/golden/transports/cesium/1.124.0`](../../../../tests/golden/transports/cesium/1.124.0/manifest.json)
 and replayed by
-[`tests/test_cesium_converter.py`](../../../../tests/test_cesium_converter.py).
+[`tests/experiments/converters/cesium/test_cesium_converter.py`](../../../../tests/experiments/converters/cesium/test_cesium_converter.py).

@@ -71,7 +71,7 @@ eight selected unit inputs; `mju_mat2Quat` reversed the matrix route up to
 quaternion sign. A native `mju_axisAngle2Quat` orientation and both operand
 orders of a noncommuting `mju_mulQuat` pair were also checked. The selected
 native values are replayed by
-[`tests/test_mujoco_converter.py`](../../tests/test_mujoco_converter.py),
+[`tests/experiments/converters/mujoco/test_mujoco_converter.py`](../../tests/experiments/converters/mujoco/test_mujoco_converter.py),
 separately from the pinned native capture.
 
 This does not establish model body, joint, camera, or robot-link frames, nor

@@ -66,7 +66,7 @@ that matrix route up to quaternion sign. The native `axisar` matrix followed by
 `m2q` was also checked, as were both operand orders of a noncommuting `qxq`
 pair.
 The native outputs are retained losslessly and replayed by
-[`tests/test_spiceypy_converter.py`](../../tests/test_spiceypy_converter.py),
+[`tests/experiments/converters/spiceypy/test_spiceypy_converter.py`](../../tests/experiments/converters/spiceypy/test_spiceypy_converter.py),
 which compares target actions with QuatOps and a separate SciPy formula.
 
 This establishes only the direct quaternion/matrix boundary above. It does not

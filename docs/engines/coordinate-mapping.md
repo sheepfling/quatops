@@ -62,7 +62,7 @@ select world axes, model-forward axes, or an active/passive interpretation.
 determinants, because such a result is useful to inspect but is not a proper
 quaternion orientation. The scalar/frame primitive checks cover all 48 signed
 maps and all 48-by-48 world/body map pairs in
-[`test_engine_basis_oracle.py`](../../tests/test_engine_basis_oracle.py).
+[`test_engine_basis_oracle.py`](../../tests/quatops/engines/test_engine_basis_oracle.py).
 
 The native Unity, Godot, and Blender examples use separately declared source
 frames; their specific maps are recorded on the [Unity](unity.md),

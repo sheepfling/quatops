@@ -71,17 +71,17 @@ Run the converter acceptance set with:
 
 ```powershell
 $acceptanceTests = @(
-  'tests\test_canonical_interoperability.py',
-  'tests\test_engine_basis_oracle.py',
-  'tests\test_engine_proof_profiles.py',
-  'tests\test_ros_tf2_converter.py',
-  'tests\test_cesium_converter.py',
-  'tests\test_gltf_converter_roundtrip.py',
-  'tests\test_openusd_converter_roundtrip.py',
-  'tests\test_spiceypy_converter.py',
-  'tests\test_mujoco_converter.py',
-  'tests\test_opencv_converter.py',
-  'tests\test_eigen_converter.py'
+  'tests\quatops\engines\test_canonical_interoperability.py',
+  'tests\quatops\engines\test_engine_basis_oracle.py',
+  'tests\experiments\engines\shared\test_engine_proof_profiles.py',
+  'tests\experiments\converters\ros2\test_ros_tf2_converter.py',
+  'tests\experiments\converters\cesium\test_cesium_converter.py',
+  'tests\experiments\converters\gltf\test_gltf_converter_roundtrip.py',
+  'tests\experiments\converters\openusd\test_openusd_converter_roundtrip.py',
+  'tests\experiments\converters\spiceypy\test_spiceypy_converter.py',
+  'tests\experiments\converters\mujoco\test_mujoco_converter.py',
+  'tests\experiments\converters\opencv\test_opencv_converter.py',
+  'tests\experiments\converters\eigen\test_eigen_converter.py'
 )
 .venv\Scripts\python.exe -m pytest -q $acceptanceTests
 ```
@@ -109,12 +109,10 @@ use QuatOps and SciPy formulas to check accepted captured actions. Retained
 fixtures contain selected native witnesses and distinct known discrepancies;
 passing broad sweeps are not included in the product evidence set.
 
-The compact converter suites are `tests/test_ros_tf2_converter.py`,
-`tests/test_cesium_converter.py`, `tests/test_gltf_converter_roundtrip.py`,
-`tests/test_openusd_converter_roundtrip.py`, `tests/test_spiceypy_converter.py`,
-`tests/test_mujoco_converter.py`, `tests/test_opencv_converter.py`, and
-`tests/test_eigen_converter.py`. Accepted converter manifests and selected
-outputs live under `tests/golden/`; the first Sophus and OpenXR discovery
+The compact converter suites are grouped by target under
+`tests/experiments/converters/`: ROS 2/tf2, Cesium, glTF, OpenUSD, SpiceyPy,
+MuJoCo, OpenCV, and Eigen. Accepted converter manifests and selected outputs
+live under `tests/golden/`; the first Sophus and OpenXR discovery
 outputs remain under `experiments/oracles/` pending their target-specific
 review gates. Passing sweep outputs are not copied into accepted witness sets.
 

@@ -26,4 +26,4 @@ The capture verifies the archive digest before compiling with `g++` in C++17
 mode. It keeps the small selected witnesses and build provenance under
 `tests/golden/oracles/eigen/5.0.1/converter/`. The compiler path/version and
 native executable digest are recorded in the manifest. Replay the frozen
-native outputs with `tests/test_eigen_converter.py`.
+native outputs with `tests/experiments/converters/eigen/test_eigen_converter.py`.

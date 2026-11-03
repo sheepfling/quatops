@@ -107,7 +107,7 @@ def main() -> None:
     geo_inputs = ROOT / "experiments/converters/cesium/1.124.0/geographic_inputs.json"
     manifest = {
         "schema_version": "1.0",
-        "review_state": "native capture retained; QuatOps replay covered by tests/test_cesium_converter.py",
+        "review_state": "native capture retained; QuatOps replay covered by tests/experiments/converters/cesium/test_cesium_converter.py",
         "target": run["target"],
         "execution": run["execution"],
         "provenance": {

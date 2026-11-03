@@ -21,7 +21,7 @@ The selected values, frame contract, and version provenance are in the
 [Cesium converter fixture](../../tests/golden/transports/cesium/1.124.0/manifest.json).
 The versioned [capture project](../../experiments/converters/cesium/1.124.0/README.md)
 contains the pinned package, input generator, and native exporter. Replay is
-covered by [test_cesium_converter.py](../../tests/test_cesium_converter.py).
+covered by [test_cesium_converter.py](../../tests/experiments/converters/cesium/test_cesium_converter.py).
 SciPy matrix checks are performed during replay and are reported separately
 from execution in the pinned Cesium runtime.
 

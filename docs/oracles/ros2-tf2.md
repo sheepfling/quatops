@@ -39,7 +39,7 @@ translation and quaternion fields, plus the native `tf2::fromMsg` round trip.
 
 ## QuatOps replay and limits
 
-[`test_ros_tf2_converter.py`](../../tests/test_ros_tf2_converter.py) converts
+[`test_ros_tf2_converter.py`](../../tests/experiments/converters/ros2/test_ros_tf2_converter.py) converts
 the native edge rotations and translations into the declared canonical
 frames, composes the two labelled edges, and compares that result with each
 native forward/reverse lookup. It also compares native transformed points,

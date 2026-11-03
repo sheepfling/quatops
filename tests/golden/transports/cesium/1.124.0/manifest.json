@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "review_state": "native capture retained; QuatOps replay covered by tests/test_cesium_converter.py",
+  "review_state": "native capture retained; QuatOps replay covered by tests/experiments/converters/cesium/test_cesium_converter.py",
   "target": {
     "name": "CesiumJS",
     "package_version": "1.124.0",
