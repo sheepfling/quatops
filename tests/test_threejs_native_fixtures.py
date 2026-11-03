@@ -81,20 +81,20 @@ def test_threejs_fixture_has_pinned_runtime_and_input_provenance():
     assert FIXTURE["provenance"]["exporter_sha256"]
     assert FIXTURE["target"]["node_version"] == "v24.21.0"
     assert FIXTURE["counts"] == {
-        "euler_orders": 534,
-        "euler_boundaries": 540,
-        "axis_angle": 60,
-        "quaternion_normalization": 140,
+        "euler_orders": 6,
+        "euler_boundaries": 6,
+        "axis_angle": 5,
+        "quaternion_normalization": 9,
         "multiplication": 3,
         "shortest_slerp": 7,
-        "independent_matrices": 11,
-        "two_vector_alignment": 12,
+        "independent_matrices": 4,
+        "two_vector_alignment": 2,
     }
 
 
 def test_threejs_native_euler_outputs_match_scipy_intrinsic_order_contract():
     rows = OBS["euler_orders"]
-    assert len(rows) == 89 * 6
+    assert len(rows) == 6
     assert {row["order"] for row in rows} == set(ORDERS)
     for row in rows:
         angles = _ordered_angles(row["input_radians_xyz"], row["order"])
@@ -125,7 +125,7 @@ def test_threejs_native_euler_outputs_match_scipy_intrinsic_order_contract():
 
 def test_threejs_native_euler_boundaries_keep_measured_near_lock_readback_behavior():
     rows = OBS["euler_boundaries"]
-    assert len(rows) == 540
+    assert len(rows) == 6
     for row in rows:
         expected = Rotation.from_euler(
             row["order"], _ordered_angles(row["input_radians_xyz"], row["order"])

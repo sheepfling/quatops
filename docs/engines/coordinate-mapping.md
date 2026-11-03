@@ -70,5 +70,8 @@ frames; their specific maps are recorded on the [Unity](unity.md),
 universal engine-pair mappings.
 
 The reported SciPy results and their limits are summarized in
-[verification](verification.md). Runtime comparison is still needed for the
-engine and asset pipeline actually targeted.
+[verification](verification.md). The versioned native game-engine and
+converter-boundary comparisons are indexed in the
+[proof matrix](proof-matrix.md) and
+[interoperability atlas](../INTEROPERABILITY_EVIDENCE.md). Runtime comparison
+is still needed for any other target API or asset pipeline.

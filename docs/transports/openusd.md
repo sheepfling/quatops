@@ -56,3 +56,22 @@ does not cover renderer behavior, other importers, time-sampled interpolation
 of xform ops, nonuniform-scale decomposition, shear, or a model-forward
 convention. The native OpenUSD capture, its stage asset, and SciPy comparisons
 remain separate evidence types.
+
+## QuatOps stage converter round trip
+
+A separate proof writes a compact USDA stage from explicit canonical
+`+X right, +Y forward, +Z up` inputs using the declared stage map `(+X, +Z,
+-Y)`. The file is then reopened with the pinned `usd-core==26.11` runtime and
+evaluated through `UsdGeom`/`Gf` APIs. The stage has a parent, a composed
+child, and a child with `resetXformStack`; its metadata explicitly says Y-up
+and meters-per-unit 1.
+
+The three selected native observations retain orient-op values, ordered xform
+ops, local and world row-vector matrices, point/direction actions, inverse
+point transforms, and the reset-stack result. The USDA, native outputs, exact
+runtime identity, and script/input/lock hashes are in the versioned
+[converter fixture](../../tests/golden/transports/openusd/26.11/converter/manifest.json).
+Replay is [test_openusd_converter_roundtrip.py](../../tests/test_openusd_converter_roundtrip.py).
+This establishes only the authored orient/translate stack behavior exercised
+by this stage, not scale/shear decomposition, time samples, or renderer/importer
+behavior.

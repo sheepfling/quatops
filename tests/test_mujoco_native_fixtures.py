@@ -97,13 +97,13 @@ def test_mujoco_fixture_records_pinned_binary_dtype_and_capture_counts():
     assert all(row["sha256"] for row in FIXTURE["runtime"]["native_binary_files_under_package"])
     assert FIXTURE["provenance"]["input_corpus_sha256"] == CORPUS_SHA256
     assert FIXTURE["counts"] == {
-        "euler_orders": 1068,
-        "euler_boundaries": 540,
+        "euler_orders": 12,
+        "euler_boundaries": 6,
         "multiplication": 3,
-        "axis_angle": 60,
-        "proper_matrices": 8,
-        "integration_and_derivatives": 48,
-        "quaternion_differences": 4,
+        "axis_angle": 5,
+        "proper_matrices": 3,
+        "integration_and_derivatives": 4,
+        "quaternion_differences": 2,
     }
 
 

@@ -1,163 +1,96 @@
-"""Check that each pinned native fixture declares a comparable proof profile."""
+"""Validate the compact, versioned engine converter witness set."""
 
+import hashlib
 import json
 from pathlib import Path
 
 import pytest
 
 ROOT = Path(__file__).parent.parent
-PROOF_KEYS = {
-    "euler_to_quaternion",
-    "euler_readback_and_threshold_neighbors",
-    "matrix_to_quaternion",
-    "axis_angle",
-    "rotation_vector",
-    "slerp_shortest",
-    "slerp_full_path",
-    "normalization_edges",
-    "basis_vector_action",
-    "composition_and_frame_map",
-}
-BLENDER_PROOF_KEYS = PROOF_KEYS | {
-    "euler_continuity",
-    "rotation_difference",
-    "scene_object_transform",
-    "swing_twist",
-}
-ENGINES = (
-    ("unreal", "5.7.4", "Unreal Engine", "5.7.4"),
-    ("unity", "6000.5.2f1", "Unity Editor", "6000.5.2f1"),
-    ("godot", "4.7-stable", "Godot Engine", "4.7-stable"),
-    ("godot", "4.8-dev1", "Godot Engine", "4.8-dev1"),
-    ("blender", "5.1.2", "Blender", "5.1.2"),
+ORACLE_ROOT = ROOT / "tests" / "oracles"
+TARGETS = (
+    ("unreal", "5.7.4"),
+    ("unity", "6000.5.2f1"),
+    ("godot", "4.7-stable"),
+    ("godot", "4.8-dev1"),
+    ("blender", "5.1.2"),
 )
 
 
-def _fixture(engine, version):
-    path = ROOT / "tests" / "golden" / engine / version / "native_rotation.json"
-    return path, json.loads(path.read_text(encoding="utf-8"))
-
-
-def _all_versioned_fixture_paths():
-    golden_root = ROOT / "tests" / "golden"
-    return sorted(
-        path
-        for engine in ("unreal", "unity", "godot", "blender")
-        for path in (golden_root / engine).glob("*/native_rotation.json")
+def _load(engine, version):
+    base = ORACLE_ROOT / engine / version
+    return (
+        json.loads((base / "contract.json").read_text(encoding="utf-8")),
+        json.loads((base / "witnesses.json").read_text(encoding="utf-8")),
     )
 
 
-@pytest.mark.parametrize("path", _all_versioned_fixture_paths(), ids=lambda p: str(p.relative_to(ROOT)))
-def test_every_versioned_fixture_uses_the_shared_proof_profile(path):
-    _engine, version = path.parts[-3:-1]
-    fixture = json.loads(path.read_text(encoding="utf-8"))
-    assert fixture["evidence_kind"].startswith("native_")
-    assert fixture["engine"]["version"].startswith(version)
-    expected_keys = BLENDER_PROOF_KEYS if _engine == "blender" else PROOF_KEYS
-    assert set(fixture["proof_profile"]) == expected_keys
-    assert all(isinstance(value, str) and value.strip() for value in fixture["proof_profile"].values())
-    assert fixture["quaternion_algebra"] == "Hamilton"
-    if _engine == "blender":
-        assert fixture["quaternion_order"].startswith("mathutils")
-    else:
-        assert fixture["quaternion_order"].startswith("xyzw")
+@pytest.mark.parametrize("engine,version", TARGETS)
+def test_contract_and_witnesses_are_versioned_small_and_provenanced(engine, version):
+    base = ORACLE_ROOT / engine / version
+    contract, witnesses = _load(engine, version)
+    assert contract["engine"]["version"] == version
+    assert contract["engine"]["api"]
+    assert contract["engine"]["native_quaternion_order"] in {"wxyz", "xyzw"}
+    assert contract["engine"]["native_algebra"] == "Hamilton"
+    conversion = contract["conversion"]
+    assert conversion["contract_id"] == "quatops-canonical-hamilton-wxyz-active-rh-v1"
+    assert conversion["canonical_frame"]["handedness"] == "right-handed"
+    assert conversion["destination_axes_from_source"]
+    assert conversion["conversion_rule"]
+    assert conversion["inverse_rule"]
+    assert conversion["world_and_body_map"] == "same declared signed-axis map"
+    assert conversion["input_domain"].startswith("unit Hamilton quaternion")
+    assert witnesses["provenance"]["native_build_record"]["version"].startswith(version)
+    assert (base / "witnesses.json").stat().st_size < 50 * 1024
+
+    expected_hashes = {
+        "witness_sha256": hashlib.sha256(
+            (base / "witnesses.json").read_bytes()
+        ).hexdigest(),
+        "capture_source_sha256": hashlib.sha256(
+            (ROOT / contract["provenance"]["capture_source"]).read_bytes()
+        ).hexdigest(),
+        "canonical_input_sha256": hashlib.sha256(
+            (ROOT / witnesses["provenance"]["canonical_input_file"]).read_bytes()
+        ).hexdigest(),
+    }
+    for key, digest in expected_hashes.items():
+        assert contract["provenance"][key] == digest
 
 
-@pytest.mark.parametrize("engine,version,name,version_prefix", ENGINES)
-def test_native_fixture_is_stored_under_its_engine_version(engine, version, name, version_prefix):
-    path, fixture = _fixture(engine, version)
-    assert path.parts[-3:-1] == (engine, version)
-    assert fixture["evidence_kind"].startswith("native_")
-    assert fixture["engine"]["name"] == name
-    assert fixture["engine"]["version"].startswith(version_prefix)
-    assert fixture["quaternion_algebra"] == "Hamilton"
-    if engine == "blender":
-        assert fixture["quaternion_order"].startswith("mathutils")
-    else:
-        assert fixture["quaternion_order"].startswith("xyzw")
-
-
-@pytest.mark.parametrize("engine,version,name,version_prefix", ENGINES)
-def test_native_fixtures_have_matching_conversion_proof_categories(engine, version, name, version_prefix):
-    _, fixture = _fixture(engine, version)
-    profile = fixture["proof_profile"]
-    assert set(profile) == (BLENDER_PROOF_KEYS if engine == "blender" else PROOF_KEYS)
-    assert all(isinstance(route, str) and route.strip() for route in profile.values())
-    assert len(fixture["cases"]) == 15
-    if engine == "unreal":
-        assert len(fixture["native_semantics"]["cross_products_float32"]) == 3
-        assert len(fixture["native_semantics"]["cross_products_float64"]) == 3
-    elif engine == "blender":
-        assert len(fixture["cross_products"]) == 3
-    else:
-        assert len(fixture["cross_products"]) == 3
-
-    if engine == "unreal":
-        extended = fixture["extended_conversions"]
-        for precision in ("float32", "float64"):
-            assert len(extended[f"matrix_to_quaternion_{precision}"]) >= 9
-            assert len(extended[f"axis_angle_{precision}"]) == 5
-            assert len(extended[f"rotation_vector_{precision}"]) == 5
-            assert len(extended[f"slerp_{precision}"]) == 22
-            assert len(extended[f"normalization_{precision}"]) == 5
-        assert "SlerpFullPath" in profile["slerp_full_path"]
-    elif engine == "blender":
-        extended = fixture["extended_conversions"]
-        assert len(extended["euler_orders"]) == 6 * 87
-        assert {row["order"] for row in extended["euler_orders"]} == {
-            "XYZ", "XZY", "YXZ", "YZX", "ZXY", "ZYX"
-        }
-        assert len(extended["matrix_to_quaternion"]) == 8
-        assert len(extended["axis_angle"]) == 12
-        assert len(extended["rotation_vector"]) == 6
-        assert len(extended["slerp"]) == 25
-        assert len(extended["normalization"]) == 5
-        assert len(extended["rotation_difference"]) == 2
-        assert len(extended["swing_twist"]) == 9
-        assert len(extended["euler_compat_trajectories"]) == 18
-        assert "not exposed" in profile["slerp_full_path"]
-    else:
-        extended = fixture["extended_conversions"]
-        assert len(extended["matrix_to_quaternion"]) == (10 if engine == "godot" else 9)
-        assert len(extended["axis_angle"]) == 5
-        assert len(extended["rotation_vector"]) == 5
-        assert len(extended["slerp"]) == 22
-        assert len(extended["normalization"]) == 5
-        if engine == "godot":
-            assert "slerpni" in profile["slerp_full_path"]
-            assert len(extended["euler_orders"]) == 67 * 6
-            assert {row["order"] for row in extended["euler_orders"]} == {
-                "XYZ", "XZY", "YXZ", "YZX", "ZXY", "ZYX"
-            }
-            assert len(extended["from_to"]) == 9
-            diagnostics = extended["matrix_conversion_diagnostics"]
-            assert len(diagnostics) == 3
-            assert all(case["diagnostic_only"] for case in diagnostics)
-            assert len(extended["rotation_exp_log"]["exp"]) == 6
-            assert len(extended["rotation_exp_log"]["log"]) == 5
-        else:
-            assert "not exposed" in profile["slerp_full_path"]
-            assert "derived" in profile["rotation_vector"]
-            euler_orders = extended["unity_mathematics_euler_orders"]
-            assert len(euler_orders) == 37 * 6
-            assert {row["order"] for row in euler_orders} == {
-                "XYZ", "XZY", "YXZ", "YZX", "ZXY", "ZYX"
-            }
-            assert len(extended["lerp"]) == 18
-            assert "math.nlerp" in extended["capabilities"]["lerp_nlerp"]
-
-
-def test_native_fixtures_keep_the_declared_source_frame_explicit():
-    for engine, version, _, _ in ENGINES:
-        _, fixture = _fixture(engine, version)
-        if engine == "unreal":
-            source_frame = fixture["native_semantics"]["source_frame"]
-            assert source_frame["handedness"] == "right-handed"
-            assert source_frame["positive_x"] == "right"
-            assert source_frame["positive_y"] == "forward"
-            assert source_frame["positive_z"] == "up"
-        else:
-            assert fixture["source_frame"]["handedness"] == "right-handed"
-            assert fixture["source_frame"]["positive_x"] == "right"
-            assert fixture["source_frame"]["positive_y"] == "forward"
-            assert fixture["source_frame"]["positive_z"] == "up"
+def test_witnesses_keep_only_discriminating_inputs_and_native_actions():
+    canonical_inputs = json.loads(
+        (ROOT / "experiments/interoperability/v1/canonical_inputs.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    expected_inputs = {
+        row["case_id"]: row["canonical_wxyz"]
+        for row in canonical_inputs["orientations"]
+    }
+    for engine, version in TARGETS:
+        _, witnesses = _load(engine, version)
+        capture = witnesses["canonical_interop"]
+        captures = capture.get("precision_captures", {"float32": capture})
+        for profile in captures.values():
+            cases = {row["case_id"]: row for row in profile["orientation_cases"]}
+            assert set(cases) == set(expected_inputs)
+            for case_id, expected in expected_inputs.items():
+                row = cases[case_id]
+                assert row["canonical_wxyz"] == expected
+                assert len(row["native_quaternion"]) == 4
+                assert len(row["native_rotated_positive_basis_vectors_xyz"]) == 3
+                assert len(row["native_rotated_probe_vector_xyz"]) == 3
+                assert set(row) == {
+                    "case_id",
+                    "canonical_wxyz",
+                    "native_input_wxyz",
+                    "native_quaternion",
+                    "native_rotated_positive_basis_vectors_xyz",
+                    "native_rotated_probe_vector_xyz",
+                }
+            for product_key in ("composition", "reverse_composition"):
+                product = profile[product_key]
+                assert len(product["native_product_quaternion"]) == 4
+                assert len(product["native_rotated_positive_basis_vectors_xyz"]) == 3

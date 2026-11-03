@@ -1,0 +1,276 @@
+{
+  "schema_version": "1.0",
+  "kind": "quatops_generated_converter_inputs",
+  "canonical_input_sha256": "a6f0630806b69d3b3b29a036aa10f63bfe214668329c661598951f84f8f41eec",
+  "geographic_input_sha256": "ca5c70314444c14cead0cc196f319e5d189657bb818eb59751c07e55ec23ff85",
+  "frame_contract": {
+    "canonical_local": {
+      "handedness": "right",
+      "positive_x": "east/right",
+      "positive_y": "north/forward",
+      "positive_z": "up"
+    },
+    "cesium_local": {
+      "handedness": "right",
+      "positive_x": "east",
+      "positive_y": "north",
+      "positive_z": "ellipsoid normal"
+    },
+    "map_canonical_to_cesium_enu": [
+      "x",
+      "y",
+      "z"
+    ],
+    "destination_local_api": "Cesium Quaternion XYZW; active; Matrix3 column-vector action",
+    "world_placement": "WGS84 ENU-to-ECEF from Cesium Transforms.eastNorthUpToFixedFrame"
+  },
+  "probe_vectors_xyz": [
+    [
+      1.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      1.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      1.0
+    ],
+    [
+      0.25,
+      -1.5,
+      2.75
+    ]
+  ],
+  "cases": [
+    {
+      "case_id": "identity@geo-00",
+      "canonical_orientation_case": "identity",
+      "location_case": "geo-00",
+      "canonical_wxyz": [
+        1.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "quatops_cesium_local_xyzw": [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ],
+      "local_translation_xyz_m": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "longitude_degrees": 0,
+      "latitude_degrees": 0,
+      "height_m": 0
+    },
+    {
+      "case_id": "quarter_x@geo-03",
+      "canonical_orientation_case": "quarter_x",
+      "location_case": "geo-03",
+      "canonical_wxyz": [
+        0.7071067811865476,
+        0.7071067811865476,
+        0.0,
+        0.0
+      ],
+      "quatops_cesium_local_xyzw": [
+        0.7071067811865476,
+        0.0,
+        0.0,
+        0.7071067811865476
+      ],
+      "local_translation_xyz_m": [
+        1.25,
+        -2.5,
+        3.75
+      ],
+      "longitude_degrees": -75,
+      "latitude_degrees": 40,
+      "height_m": 1000
+    },
+    {
+      "case_id": "quarter_y@geo-04",
+      "canonical_orientation_case": "quarter_y",
+      "location_case": "geo-04",
+      "canonical_wxyz": [
+        0.7071067811865476,
+        0.0,
+        0.7071067811865476,
+        0.0
+      ],
+      "quatops_cesium_local_xyzw": [
+        0.0,
+        0.7071067811865476,
+        0.0,
+        0.7071067811865476
+      ],
+      "local_translation_xyz_m": [
+        -7.0,
+        3.5,
+        2.0
+      ],
+      "longitude_degrees": 45,
+      "latitude_degrees": -45,
+      "height_m": 400000
+    },
+    {
+      "case_id": "quarter_z@geo-04",
+      "canonical_orientation_case": "quarter_z",
+      "location_case": "geo-04",
+      "canonical_wxyz": [
+        0.7071067811865476,
+        0.0,
+        0.0,
+        0.7071067811865476
+      ],
+      "quatops_cesium_local_xyzw": [
+        0.0,
+        0.0,
+        0.7071067811865476,
+        0.7071067811865476
+      ],
+      "local_translation_xyz_m": [
+        2.0,
+        5.0,
+        -1.0
+      ],
+      "longitude_degrees": 45,
+      "latitude_degrees": -45,
+      "height_m": 400000
+    },
+    {
+      "case_id": "mixed_a@geo-03",
+      "canonical_orientation_case": "mixed_a",
+      "location_case": "geo-03",
+      "canonical_wxyz": [
+        0.8,
+        0.2,
+        -0.4,
+        0.4
+      ],
+      "quatops_cesium_local_xyzw": [
+        0.2,
+        -0.4,
+        0.4,
+        0.8
+      ],
+      "local_translation_xyz_m": [
+        12.5,
+        -8.25,
+        4.0
+      ],
+      "longitude_degrees": -75,
+      "latitude_degrees": 40,
+      "height_m": 1000
+    },
+    {
+      "case_id": "mixed_b@geo-04",
+      "canonical_orientation_case": "mixed_b",
+      "location_case": "geo-04",
+      "canonical_wxyz": [
+        0.7,
+        -0.3,
+        0.2,
+        0.6164414002968976
+      ],
+      "quatops_cesium_local_xyzw": [
+        -0.3,
+        0.2,
+        0.6164414002968976,
+        0.7
+      ],
+      "local_translation_xyz_m": [
+        -3.0,
+        6.0,
+        9.0
+      ],
+      "longitude_degrees": 45,
+      "latitude_degrees": -45,
+      "height_m": 400000
+    },
+    {
+      "case_id": "antipode_mixed_a@geo-09",
+      "canonical_orientation_case": "antipode_mixed_a",
+      "location_case": "geo-09",
+      "canonical_wxyz": [
+        -0.8,
+        -0.2,
+        0.4,
+        -0.4
+      ],
+      "quatops_cesium_local_xyzw": [
+        -0.2,
+        0.4,
+        -0.4,
+        -0.8
+      ],
+      "local_translation_xyz_m": [
+        0.5,
+        1.0,
+        -2.0
+      ],
+      "longitude_degrees": 0,
+      "latitude_degrees": 90,
+      "height_m": 0
+    },
+    {
+      "case_id": "nonprincipal_halfturn@geo-00",
+      "canonical_orientation_case": "nonprincipal_halfturn",
+      "location_case": "geo-00",
+      "canonical_wxyz": [
+        0.0,
+        0.5773502691896258,
+        0.5773502691896258,
+        0.5773502691896258
+      ],
+      "quatops_cesium_local_xyzw": [
+        0.5773502691896258,
+        0.5773502691896258,
+        0.5773502691896258,
+        0.0
+      ],
+      "local_translation_xyz_m": [
+        4.0,
+        -1.0,
+        2.0
+      ],
+      "longitude_degrees": 0,
+      "latitude_degrees": 0,
+      "height_m": 0
+    },
+    {
+      "case_id": "mixed_a_times_mixed_b@geo-03",
+      "canonical_orientation_case": "mixed_a * mixed_b",
+      "location_case": "geo-03",
+      "canonical_wxyz": [
+        0.4534234398812409,
+        -0.42657656011875905,
+        -0.36328828005937946,
+        0.6931531202375181
+      ],
+      "quatops_cesium_local_xyzw": [
+        -0.42657656011875905,
+        -0.36328828005937946,
+        0.6931531202375181,
+        0.4534234398812409
+      ],
+      "local_translation_xyz_m": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "longitude_degrees": -75,
+      "latitude_degrees": 40,
+      "height_m": 1000
+    }
+  ]
+}

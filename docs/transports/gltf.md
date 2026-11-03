@@ -78,3 +78,21 @@ These captures cover the named loaders and these deterministic assets. They do
 not assert behavior for every application, compression extension, asset
 import setting, animation mixer, model-forward convention, renderer, or full
 glTF conformance beyond the recorded validator reports.
+
+## QuatOps static-file converter round trip
+
+The separate compact proof generates
+[`quatops_hierarchy.gltf`](../../tests/golden/transports/gltf/2.0.0/threejs/0.187.0/converter/quatops_hierarchy.gltf)
+from explicit canonical `+X right, +Y forward, +Z up` inputs. Its declared
+glTF map is `(+X, +Z, -Y)`; the generator uses QuatOps to convert both the
+quaternions and translations, then Three.js `GLTFLoader` loads the emitted file
+in Node.js `v24.21.0` with `three@0.187.0`.
+
+The retained two-node witness checks serialized coefficients, local and world
+matrices, native point and direction actions, inverse point transforms, and
+noncommuting parent/child composition. The selected native output, generated
+input, asset, package lock identity, and script hashes are in the versioned
+[converter fixture](../../tests/golden/transports/gltf/2.0.0/threejs/0.187.0/converter/manifest.json).
+Replay is [test_gltf_converter_roundtrip.py](../../tests/test_gltf_converter_roundtrip.py).
+This proves the static hierarchy boundary for the declared frame map; it does
+not claim a QuatOps animation exporter or universal asset model-forward axis.

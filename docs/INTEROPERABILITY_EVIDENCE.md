@@ -1,110 +1,104 @@
 # Quaternion interoperability evidence atlas
 
-This page is the at-a-glance inventory of rotation conventions and auxiliary
-captures collected for QuatOps. It links to the versioned engine, oracle, and
-transport reports, and separates measured runtime behavior from independent
-formula checks. The detailed reports and frozen fixtures remain the source of
-record for individual observations.
+This atlas separates shared mathematics, target-specific contracts, native
+physical-action evidence, and transport behavior. A native convention capture
+does not by itself validate a QuatOps adapter.
 
-## QuatOps interchange contract
+## Canonical converter contract
 
-The current canonical boundary is active Hamilton WXYZ in a declared
-right-handed frame, rotating column vectors, with unit quaternion inputs.
-Angles used to construct or inspect rotations are radians. A bare quaternion
-does not identify its world or body frame, so conversions carry explicit
-source-to-destination mappings. Algebra, coefficient order, coordinate frames,
-and native API behavior are separate conversion layers.
+Canonical values are active Hamilton WXYZ unit quaternions in an explicit
+right-handed source frame, acting on column vectors. A caller supplies the
+source and destination world/body maps. For one shared orthogonal basis map
+`B`, `R_T = B R_C Bᵀ` and the Hamilton vector part transforms as
+`v_T = det(B) B v_C`. Storage order and algebra remain separate from frame
+conversion. Different world and body maps use
+`R_T = B_world R_C B_bodyᵀ` and require equal determinant parity to yield a
+proper rotation.
 
-For a shared orthogonal coordinate map `B`,
-`R_target = B R_source B^T` and the active Hamilton vector part maps as
-`v_target = det(B) B v_source`, with the scalar coefficient unchanged. For
-different world and body maps, use
-`R_target = B_world R_source B_body^T`; a quaternion result requires matching
-determinants. See [coordinate mapping](engines/coordinate-mapping.md) and the
-[CAP-300 converter matrix](engines/CAP-300.md).
+These are the captured, version-specific quaternion rules for the declared
+canonical frame `+X right, +Y forward, +Z up`:
 
-## Pinned engine conventions
+| Target build | Native interface/order | Declared map | Canonical `(w,x,y,z)` to native values |
+| --- | --- | --- | --- |
+| [Unreal 5.7.4](engines/unreal.md) | `TQuat<T>` / XYZW; float32 and float64 | `(+Y,+X,+Z)`, determinant −1 | `(-y,-x,-z,w)` |
+| [Unity 6000.5.2f1](engines/unity.md) | `UnityEngine.Quaternion` / XYZW; float32 | `(+X,+Z,+Y)`, determinant −1 | `(-x,-z,-y,w)` |
+| [Godot 4.7 stable and 4.8-dev1](engines/godot.md) | `Quaternion` / XYZW; float32 | `(+X,+Z,-Y)`, determinant +1 | `(x,z,-y,w)` |
+| [Blender 5.1.2](engines/blender.md) | `mathutils.Quaternion` / WXYZ | Identity in the assigned probe frame | `(w,x,y,z)` |
 
-The following maps all originate from the explicitly declared canonical probe
-frame `+X right, +Y forward, +Z up` (right-handed). They are evidence for the
-listed runtime and frame pair; they are not universal engine or asset defaults.
+These maps are specific to the source and target frames recorded in each
+versioned [contract and witness set](engines/proof-matrix.md). They are not
+universal engine world-frame or asset-import defaults.
 
-| Target/build | Native quaternion storage | Captured Euler/API facts | Canonical probe map | Converter proof |
-| --- | --- | --- | --- | --- |
-| [Unreal 5.7.4](engines/unreal.md) | Hamilton XYZW | `FRotator` Pitch/Yaw/Roll degrees; native active model `Rz(yaw) Ry(-pitch) Rx(-roll)`; native world `+X forward, +Y right, +Z up`; FQuat product applies RHS first | `("y", "x", "z")`, determinant −1 | Canonical ↔ native and native vector action pass for float32/float64 |
-| [Unity 6000.5.2f1](engines/unity.md) | Hamilton XYZW | `UnityEngine.Quaternion.Euler` takes degrees and applies Z, X, Y; Mathematics Euler constructors take radians and names specify application order | `("x", "z", "y")`, determinant −1 | Canonical ↔ native and native vector action pass; transfer to Godot 4.7 passes |
-| [Godot 4.7 stable](engines/godot.md) | Hamilton XYZW | `Quaternion.from_euler` radians, intrinsic YXZ; `Basis` exposes six named orders; world forward is −Z | `("x", "z", "-y")`, determinant +1 | Canonical ↔ native and native vector action pass; transfer from Unity passes |
-| Godot 4.8-dev1 | Hamilton XYZW | Same captured proof profile as 4.7; this is a development snapshot | `("x", "z", "-y")`, determinant +1 | Pass for the captured snapshot |
-| [Blender 5.1.2](engines/blender.md) | Hamilton WXYZ | Radian Euler inputs, six orders; uppercase labels match SciPy lowercase extrinsic sequences; `euler_compat` improves trajectory continuity | Identity for this fixture’s assigned probe frame only | Canonical ↔ native and native vector action pass in the assigned frame |
+## Retained evidence
 
-The dedicated [engine proof matrix](engines/proof-matrix.md) compares native
-capture categories. The [CAP-300 tests](../tests/test_canonical_interoperability.py)
-also check native-created Euler quaternions in the reverse direction,
-noncommuting composition, and the explicit Unity-to-Godot map
-`diag(1, 1, -1)`. These tests replay frozen runtime outputs; they do not launch
-the engines.
+Each game-engine witness set retains eight canonical inputs: identity, three
+positive quarter-turns, two unequal mixed rotations, one antipode, and a
+nonprincipal half-turn. For each, it stores the exact native quaternion and
+native images of +X, +Y, +Z and an asymmetric probe. Both orders of the
+noncommuting mixed product are included. The selected values are preserved in
+[`tests/oracles`](../tests/oracles/) with engine/build identity, native
+precision, explicit frame contract, capture-source/input hashes, and the hash
+of the original discovery capture.
 
-## External math and coordinate oracles
+The native capture programs call each engine's vector action independently of
+QuatOps. The compact selector retains those values without recomputing them.
+The package tests then compare the physical action with an independently built
+SciPy basis matrix. SciPy formula checks and execution in pinned engine
+runtimes are reported separately.
 
-These runs provide independent convention or operation evidence. A captured
-oracle does not become a QuatOps target adapter until bidirectional conversion
-and native physical-vector equivalence are tested.
+The shared tests generate all 48 signed-axis maps in memory, including both
+determinant parities, noncommuting composition, inverse conversion, and
+distinct world/body corrections. Passing generated outputs are not stored as
+native goldens.
 
-| Oracle/build | Captured convention or behavior | Evidence boundary |
+The Three.js, MuJoCo, CSPICE/SpiceyPy, and OpenUSD files under
+[`tests/golden`](../tests/golden/) now retain small operation-specific witness
+sets. Their provenance preserves native build details and the SHA-256 digest of
+the full discovery capture used to select them. Capture exporters remain
+available for replay. These witnesses are math or transform-stack oracles;
+they do not imply production adapters under `src/`. Separate auxiliary
+converter proofs now exercise QuatOps-generated values through native Cesium,
+Three.js GLTFLoader, OpenUSD, and ROS 2/tf2 boundaries.
+
+Run the converter acceptance set with:
+
+```powershell
+.venv\Scripts\python.exe -m pytest -q tests\test_canonical_interoperability.py tests\test_engine_basis_oracle.py tests\test_engine_proof_profiles.py tests\test_ros_tf2_converter.py tests\test_cesium_converter.py tests\test_gltf_converter_roundtrip.py tests\test_openusd_converter_roundtrip.py
+```
+
+## Converter-boundary evidence and remaining scope
+
+| Target | Captured converter proof | Remaining scope not claimed |
 | --- | --- | --- |
-| [CesiumJS 1.124.0](oracles/cesium.md) | Local HPR uses `Rz(-heading) Ry(-pitch) Rx(roll)`; WGS84 ENU is kept separate from ECEF/model placement | Node native math/placement capture plus SciPy/geodesy checks; no importer or QuatOps adapter |
-| [Three.js 0.187.0](oracles/threejs.md) | Quaternion XYZW; uppercase Euler orders match SciPy intrinsic orders; `Matrix4.elements` is column-major | Pinned Node native API, hierarchy, and loader capture; no general application frame adapter |
-| [OpenCV 4.13.0](oracles/opencv.md) | Rodrigues rotation-vector/matrix APIs captured in binary32 and binary64 with Jacobians | Native Python binding capture and independent SciPy/finite-difference checks; not quaternion evidence |
-| [PROJ 9.5.1](oracles/proj.md) | WGS84 geodetic/ECEF and topocentric frame probes | Native pyproj/PROJ coordinates; supporting geographic frame evidence, not a rotation library |
-| [CSPICE / SpiceyPy 8.3.0](oracles/spiceypy.md) | Scalar-first quaternion routines; `qxq` matches Hamilton product; `eul2m` observed as transpose of the tested SciPy active intrinsic matrix; `qdq2av` depends on derivative multiplication side | Pinned CSPICE runtime plus formula checks; no universal aerospace frame direction inferred |
-| [MuJoCo 3.17.0](oracles/mujoco.md) | WXYZ; active column-vector matrix; local-rate integration right-multiplies; world-rate derivative left-multiplies; Euler case mapping is API-specific | Native Windows wheel plus SciPy, explicit Hamilton, and finite-difference replay |
-| Eigen, Sophus, ROS 2/tf2, OpenXR | No pinned capture in this workspace | Planned; no convention claim accepted |
+| [CesiumJS 1.124.0](oracles/cesium.md) | QuatOps local-ENU orientations placed at selected WGS84 origins with native ENU-to-ECEF transforms, point actions, and inverse recovery; 9 selected witnesses | Other local frames, asset axes, rendering, and time-dependent Earth orientation |
+| [glTF 2.0 / Three.js GLTFLoader 0.187.0](transports/gltf.md) | QuatOps-generated static `.gltf` hierarchy loaded by the pinned native loader; local/world actions, hierarchy composition, inverse, and file hashes | Animation export/import is outside this converter proof; other loaders retain separate behavior evidence |
+| [OpenUSD 26.11](transports/openusd.md) | QuatOps-generated USDA reopened by pinned OpenUSD; orient ops, parent/child composition, reset stack, and native point/direction actions | Time-sampled ops, scale/shear decomposition, renderer/importer behavior, and asset axes |
+| [ROS 2 Jazzy / tf2 0.36.23](oracles/ros2-tf2.md) | Native `BufferCore` three-frame chain, both lookup directions, transformed points, `TransformStamped` fields, and `fromMsg` round trip | DDS/CDR wire transport, live network, time interpolation/extrapolation, and dynamic broadcasters |
+| CSPICE, MuJoCo, OpenCV, PROJ | Independent operation-specific runtime/math captures | No named QuatOps converter is accepted |
+| OpenXR, Eigen, Sophus | No pinned capture in this workspace | Not required for the current converter scope |
 
-## Rotation transports and loaders
+These are auxiliary proofs and fixtures, not new runtime APIs under `src/`.
+The native side was executed in each pinned target runtime; Python replay tests
+separately use QuatOps and SciPy formulas to check the captured actions.
+Cesium's existing 171-observation discovery capture, glTF's broader multi-loader
+captures, and OpenCV/PROJ sweeps remain available as discovery evidence; the
+converter acceptance fixtures retain only selected observations.
 
-File-format semantics, validator output, and named-loader behavior are tracked
-separately. Loader results below are tied to the listed versions and test
-assets.
+The compact converter suites are `tests/test_ros_tf2_converter.py`,
+`tests/test_cesium_converter.py`, `tests/test_gltf_converter_roundtrip.py`,
+and `tests/test_openusd_converter_roundtrip.py`. Their native manifests and
+exact selected outputs live under `tests/golden/`; passing sweep outputs are
+not copied into those witness sets.
 
-| Transport / loader | Captured conventions | Evidence status |
-| --- | --- | --- |
-| [glTF 2.0](transports/gltf.md), [Three.js GLTFLoader 0.187.0](oracles/threejs.md) | TRS and matrix hierarchy; `STEP`; rotational `LINEAR` uses shortest SLERP; `CUBICSPLINE` uses time-scaled Hermite quaternion components followed by normalization | Twelve Wave 2 assets validated; 112 Three.js static/animation observations compared to an independent evaluator |
-| glTF through [Blender 5.1.2](transports/gltf.md) | This importer maps source axes `X→X, Y→Z, Z→−Y`; captured LINEAR/CUBICSPLINE and STEP subframe behaviors differ from the glTF equations in specific probes | Native importer observations; frame result is asset/loader evidence, not Blender’s universal model-forward convention |
-| glTF through [VTK 9.6.2 and Trimesh 4.11.1](transports/gltf.md) | VTK static and animation samples; Trimesh static hierarchy samples | Native library captures from the packet’s Linux environment, replayed from frozen outputs on Windows |
-| Khronos glTF Validator 2.0.0-dev.3.10 | Structural/spec validation for original and twelve Wave 2 assets | All recorded reports have zero errors, warnings, infos, or hints; this is not a rotation-action oracle |
-| [OpenUSD 26.11](transports/openusd.md) | `Gf` real-first quaternion coefficients; `Gf.Rotation` uses degrees; captured matrix/vector actions are row-vector; `xformOpOrder`, parent/local multiplication, and `resetXformStack` are recorded | Pinned OpenUSD runtime and saved stage; SciPy/matrix replay; no importer or QuatOps frame adapter |
+## Evidence policy
 
-## Proof layers and evidence labels
-
-Use these layers to decide what a capture proves:
-
-| Layer | Question answered | Current evidence |
-| --- | --- | --- |
-| Algebra | Hamilton or JPL? Product, conjugate, inverse, active/passive interpretation? | QuatOps scalar/JPL oracle suites; native engine/oracle product captures where listed |
-| Storage | WXYZ or XYZW? Matrix row/column layout? Serialization order? | Named engine adapters; native fixture metadata; Three.js and glTF records; OpenUSD `Gf` records |
-| Frames | Which coordinates map to which, and are world/body maps the same? | Explicit `SignedAxisMap`/`QuaternionFrameMap`; per-capture frame descriptions; Cesium ENU/ECEF and PROJ support |
-| Native action | Does the native API rotate basis and mixed vectors as predicted? | Unreal, Unity, Godot, Blender CAP-300 captures; target-specific oracle observations |
-| Composition | Which operand acts first? How do hierarchy and transform stacks compose? | Engine native product/transform captures; Cesium model-to-ECEF; Three.js Object3D; OpenUSD stage |
-| Interpolation | Which path, sign policy, and animation sampler are used? | Native SLERP captures; glTF STEP/LINEAR/CUBICSPLINE loader probes; Blender Euler trajectories |
-| Numerical behavior | Precision, normalization fallbacks, branch edges, Jacobians? | Versioned engine/oracle fixtures, split by dtype and native API; never generalized across versions without evidence |
-| End-to-end conversion | Do both directions preserve a physical orientation through the target? | CAP-300 pass for Unreal, Unity, Godot 4.7/4.8-dev1, Blender in declared probe frames; pending for external oracles/transports |
-
-### What remains unproven
-
-- Asset-specific model-forward axes and importer settings.
-- QuatOps bidirectional adapters and native-vector acceptance for Cesium,
-  Three.js, OpenCV, PROJ, CSPICE, MuJoCo, and OpenUSD.
-- End-to-end glTF exporter/importer parity across all loaders, compression
-  extensions, animation mixers, and applications.
-- ROS 2/tf2, OpenXR, Eigen, and Sophus pinned captures.
-- Nonuniform-scale shear, renderer/GPU behavior, and animation runtime policies
-  beyond the recorded probes.
-
-## Where to inspect the evidence
-
-- [Engine API facts](engines/README.md) and [native proof matrix](engines/proof-matrix.md).
-- [Canonical converter acceptance](engines/CAP-300.md) and
-  [SciPy/native verification separation](engines/verification.md).
-- [External oracle index](oracles/README.md) and [transport index](transports/README.md).
-- Auxiliary capture projects and fixture locations are linked from each target
-  page; all capture code and data remain outside `src/`.
+- Contracts specify API, algebra, storage, action, frames, conversion and
+  inverse, precision/input domain, and exclusions.
+- Native witnesses store only selected exact values and native basis actions.
+- Capture exporters and environment/build records make selected values
+  reproducible; hashes identify inputs but never replace the values.
+- Random and broad boundary tests stay generated. Promote a minimized native
+  rerun to permanent evidence only when it reveals a distinct contract or
+  regression.
+- Euler, interpolation, scene transforms, geographic placement, and messages
+  receive separate contracts only when QuatOps exposes those features.

@@ -1,4 +1,4 @@
-// Native calls only. Prepared for ROS 2 Jazzy; compilation/runtime remain unverified here.
+// Native calls only. Built and run against the pinned ROS 2 Jazzy container.
 #include <array>
 #include <chrono>
 #include <fstream>
@@ -40,6 +40,12 @@ geometry_msgs::msg::TransformStamped stamped(const std::string& parent,const std
   msg.transform.rotation=tf2::toMsg(t.getRotation());
   msg.transform.translation.x=t.getOrigin().x();msg.transform.translation.y=t.getOrigin().y();msg.transform.translation.z=t.getOrigin().z();
   return msg;
+}
+json stamped_message(const geometry_msgs::msg::TransformStamped& msg) {
+  return {{"parent_frame",msg.header.frame_id},{"child_frame",msg.child_frame_id},
+          {"stamp_sec",msg.header.stamp.sec},{"stamp_nanosec",msg.header.stamp.nanosec},
+          {"translation_xyz",json::array({msg.transform.translation.x,msg.transform.translation.y,msg.transform.translation.z})},
+          {"rotation_xyzw",json::array({msg.transform.rotation.x,msg.transform.rotation.y,msg.transform.rotation.z,msg.transform.rotation.w})}};
 }
 int main(int argc,char** argv) {
   try {
@@ -92,13 +98,14 @@ int main(int argc,char** argv) {
       add("world-base-sensor", "lookup-"+frames.first+"-from-"+frames.second,"tf2::BufferCore::setTransform; lookupTransform; tf2::Transform::operator*",
           {{"target_frame",frames.first},{"source_frame",frames.second},{"stamp_sec",42},
            {"world_from_base",transform(world_base)},{"base_from_sensor",transform(base_sensor)},{"probe_in_source_xyz",varray(probe)}},
-          {{"lookup",transform(lookup)},{"probe_in_target_xyz",varray(lookup*probe)},
+          {{"lookup_message",stamped_message(message)},{"lookup",transform(lookup)},
+           {"message_roundtrip",transform(lookup)},{"probe_in_target_xyz",varray(lookup*probe)},
            {"direct_world_from_sensor",transform(world_base*base_sensor)},
            {"direct_sensor_from_world",transform((world_base*base_sensor).inverse())},
            {"world_probe_sequential",varray(world_base*(base_sensor*probe))}});
     }
     std::cout<<json({{"native_scalar_bytes",sizeof(Native)},{"compiler",__VERSION__},
-      {"cpp_standard",__cplusplus},{"flags","-fno-fast-math; see retained build log"},{"observations",result}}).dump(2)<<'\n';
+      {"cpp_standard",__cplusplus},{"flags","CMake: -Wall -Wextra -Wpedantic -fno-fast-math; C++20"},{"observations",result}}).dump(2)<<'\n';
     return 0;
   }catch(const std::exception& e){std::cerr<<e.what()<<'\n';return 1;}
 }

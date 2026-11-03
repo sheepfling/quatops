@@ -21,6 +21,11 @@ def version_for(package: str) -> tuple[str, Path]:
     raise RuntimeError(f"Cannot resolve {package} package identity. Source the ROS installation first.")
 
 
+def deb_version(package: str) -> str:
+    result=subprocess.run(["dpkg-query","-W","-f=${Version}",package],text=True,capture_output=True,check=True)
+    return result.stdout.strip()
+
+
 def pack(value: Any, label: str) -> Any:
     if isinstance(value,dict):
         return {key:pack(item,label) for key,item in value.items()}
@@ -34,12 +39,17 @@ def pack(value: Any, label: str) -> Any:
 def main() -> None:
     cli=parser(__doc__ or "ROS capture")
     cli.add_argument("--executable",type=Path,required=True)
+    cli.add_argument("--runtime-image",required=True,help="Pinned container image reference, including digest")
     args=cli.parse_args()
-    version,package=version_for("tf2")
-    cap=Capture("ros2_tf2","ROS 2 tf2",version,args.corpus,args.output,Path(__file__),
+    package_versions=[{"name":name,"version":version_for(name)[0],"package_xml_sha256":sha256(version_for(name)[1])}
+        for name in ("tf2","tf2_geometry_msgs","geometry_msgs")]
+    system_versions=[{"name":name,"version":deb_version(name)}
+        for name in ("nlohmann-json3-dev","ros-jazzy-tf2-geometry-msgs")]
+    cap=Capture("ros2_tf2","ROS 2 tf2",package_versions[0]["version"],args.corpus,args.output,Path(__file__),
         {"input":"native tf2Scalar; geometry_msgs double fields", "arithmetic":"tf2Scalar as measured by compiled executable",
          "output":"native scalar and message doubles; inspect native_scalar_bytes", "serialized":"JSON plus native scalar IEEE bits"},
-        dependencies=[{"name":"ROS_DISTRO","version":os.environ.get("ROS_DISTRO")},{"name":"tf2 package.xml","sha256":sha256(package)}],
+        dependencies=[{"name":"ROS_DISTRO","version":os.environ.get("ROS_DISTRO")},
+            {"name":"container image","version":args.runtime_image},*package_versions,*system_versions],
         native_binary=args.executable,
         limitations=["Static same-time BufferCore chain only; no DDS/live network, interpolation or timestamp extrapolation.",
             "Message field conversion is captured, not DDS/CDR wire serialization.","No QuatOps replay."])

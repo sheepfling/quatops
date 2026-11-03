@@ -1,0 +1,33 @@
+{
+  "schema_version": "1.0",
+  "review_state": "QuatOps-generated asset loaded by pinned native GLTFLoader; replay tests passed",
+  "target": {
+    "name": "Three.js GLTFLoader",
+    "package_version": "0.187.0",
+    "revision": "187"
+  },
+  "execution": {
+    "was_run": true,
+    "utc": "2026-11-03T06:01:33.462Z",
+    "node": "v24.21.0",
+    "v8": "13.6.233.17-node.53",
+    "platform": "win32",
+    "architecture": "x64"
+  },
+  "provenance": {
+    "input_sha256": "2ae23b8639265d8daced010784dc4826cb563d069374cf9696b3c6117f030297",
+    "asset_sha256": "f025f3eff21755051d8fb7962756f34db9598b62c70ca1bdadf85e597db2b29e",
+    "native_observations_sha256": "15bf15ae188ec23841fddf10254d56c2422f6e9aa3a1dfbd07b5f55f217630ab",
+    "full_run_manifest_sha256": "56427f152930e12bec6e9295f97d5922b68a5a20ffd36c5c9bcc071098593be6",
+    "full_observation_sha256": "7b39bad5f58e8d7e90df3314922c305d617851e5e1d5a4593580963d6e79545e",
+    "generator_sha256": "db8f63a6ca800b917ebde0abcb1fbcb5678ed1699e4d4c90e1207a9baa01cbde",
+    "native_loader_script_sha256": "ac4c8e4bd923746ffeb6f5df3952fac5ee43836da896f15a76af11a2dd685a79",
+    "package_lock_sha256": "c2ae7e7b309ac57116dfbe977a1227a8701e62d6ef28c3fb814d5dbb96b6d439",
+    "contract_sha256": "09009c5c4d5b832536c96dc98e5b26e16091dcc608e690dabb09508b00242231"
+  },
+  "selection": {
+    "retained_observations": 2,
+    "native_observations": 2,
+    "policy": "one native local/world hierarchy witness per serialized node"
+  }
+}

@@ -15,11 +15,11 @@ As delivered, this bundle contains **399 successful library observations**, six 
 
 The glTF corpus has **six scenarios**, each encoded as both `.gltf` and `.glb`: static hierarchy, STEP, LINEAR, CUBICSPLINE, globally negated cubic keys/tangents, and one locally negated cubic key/tangents. Encoding the same case twice does not create two independent scenarios. Animation times are nonuniform and cubic tangents are nonzero.
 
-In the supplied packet, **ROS/tf2, Cesium, OpenUSD, Three.js, SpiceyPy/CSPICE, and MuJoCo** were not run in its delivery environment. A later local follow-on ran Cesium, Three.js, and the Khronos validator; see [LOCAL_REPLAY.md](LOCAL_REPLAY.md). ROS/tf2, SpiceyPy/CSPICE, and MuJoCo already have separate QuatOps captures; OpenUSD also has a separate transport capture. The packet's own OpenUSD, ROS, SpiceyPy, and MuJoCo exporters remain unrun. The local npm lock and Cesium dependency pins were added after delivery.
+In the supplied packet, **ROS/tf2, Cesium, OpenUSD, Three.js, SpiceyPy/CSPICE, and MuJoCo** were not run in its delivery environment. Later local follow-ons ran Cesium, Three.js, the Khronos validator, and a separate pinned ROS/tf2 capture; see [LOCAL_REPLAY.md](LOCAL_REPLAY.md) and the [ROS/tf2 proof](../../docs/oracles/ros2-tf2.md). The packet's original `runs/` archive remains unchanged. Its OpenUSD, SpiceyPy, and MuJoCo exporters have not been run as part of the local follow-on. The local npm lock and Cesium dependency pins were added after delivery.
 
 ## Delivered work
 
-- `exporters/`: native-library capture scripts, including unrun OpenUSD, ROS wrapper, CSPICE and MuJoCo exporters.
+- `exporters/`: native-library capture scripts; the packet's OpenUSD, CSPICE, and MuJoCo exporters remain unrun, while the separate ROS/tf2 follow-on is recorded in [LOCAL_REPLAY.md](LOCAL_REPLAY.md).
 - `ros2/quatops_ros_capture/`: C++ tf2/BufferCore capture package, CMake build and package metadata.
 - `js/`: Cesium math/geographic capture, Three.js math/GLTFLoader capture, and Khronos validator driver.
 - `assets/`: 12 glTF/GLB files, two text-authored USD stages, sampling times.
@@ -37,7 +37,7 @@ OpenCV forward matrix differences versus SciPy: binary32 `2.979167001981864e-8`;
 
 PROJ analytic point comparisons have maximum absolute error `9.313225746154785e-10 m`; native local-coordinate round-trip residual is at most `6.343396918850885e-10 m`. These are numerical consistency measurements, not real-world geodetic accuracy or a Cesium execution.
 
-The supplied packet reported **179 pytest tests passed** in its original environment. The local Windows replay, after portability fixes and the Cesium/Three.js checks, passes **184 tests**; these mix structural, replay and numerical checks and are not 184 independent native cases. JavaScript numeric serialization checks and source syntax checks also passed. ROS/tf2 and OpenXR remain unrun.
+The supplied packet reported **179 pytest tests passed** in its original environment. Its local Windows replay, after portability fixes and the Cesium/Three.js checks, passed **184 tests**; these mix structural, replay and numerical checks and are not 184 independent native cases. JavaScript numeric serialization checks and source syntax checks also passed. The original packet left ROS/tf2 and OpenXR unrun; a separate local ROS/tf2 capture has since run, while OpenXR remains unrun.
 
 ## Replay
 

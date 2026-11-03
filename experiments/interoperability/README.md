@@ -1,23 +1,18 @@
 # Canonical interoperability inputs
 
-This directory holds shared, versioned canonical inputs for converter captures.
-Engine scripts consume the same hand-authored Hamilton WXYZ orientations and
-mixed vectors, then ask their pinned native API to apply the mapped target
-quaternion. The scripts do not import QuatOps or SciPy.
+[`v1/canonical_inputs.json`](v1/canonical_inputs.json) defines the shared
+right-handed source frame, active Hamilton WXYZ contract, eight unit
+orientations, mixed-vector probe, and both noncommuting product orders. The
+native capture programs use the same hand-authored inputs and call each pinned
+target's own vector action; they do not import QuatOps or SciPy.
 
-Version `v1` is in
-[`canonical_inputs.json`](v1/canonical_inputs.json). It declares the
-right-handed source frame, active column-vector action, unit inputs, two
-noncommuting orientations, and the asymmetric vector used by
-[CAP-300](../../docs/engines/CAP-300.md).
+Full engine discovery exports go to temporary paths. The versioned selected
+native values are in `tests/oracles/<engine>/<version>/witnesses.json`, with
+their contract and provenance in the same directory. The selector copies
+chosen native results without regenerating them. The shared mathematical
+property suite generates all 48 signed-axis maps in memory instead of
+retaining a second map corpus.
 
-Native observations are added to each versioned engine fixture under
-`tests/golden/<engine>/<version>/native_rotation.json`. Keep the target frame
-map, native quaternion order, direct basis actions, mixed-vector action, and
-noncommuting product inside the native capture. The independent package tests
-then check both conversion directions and cross-engine action using the frozen
-native results.
-
-When the common inputs or their meanings change, make a new sibling corpus
-version and retain the previous one. Engine versions should continue to live in
-their own engine/version folders.
+If a selected value changes or a defect is found, retain the minimized input
+and native re-execution under a new contract/witness version; do not silently
+extend the compatibility claim for a previous build.

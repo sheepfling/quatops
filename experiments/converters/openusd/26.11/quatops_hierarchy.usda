@@ -1,0 +1,30 @@
+#usda 1.0
+(
+    defaultPrim = "Scene"
+    metersPerUnit = 1
+    upAxis = "Y"
+)
+
+def Xform "Scene"
+{
+    def Xform "Parent"
+    {
+        quatd xformOp:orient = (0.70710678118654757, 0, 0.70710678118654757, -0)
+        double3 xformOp:translate = (3, 1, 2)
+        uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:orient"]
+
+        def Xform "Child"
+        {
+            quatd xformOp:orient = (0.80000000000000004, 0.20000000000000001, 0.40000000000000002, 0.40000000000000002)
+            double3 xformOp:translate = (1.25, 3.75, 2.5)
+            uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:orient"]
+        }
+
+        def Xform "ResetChild"
+        {
+            quatd xformOp:orient = (0.70710678118654757, 0.70710678118654757, 0, -0)
+            double3 xformOp:translate = (-0.75, 2.25, -1.5)
+            uniform token[] xformOpOrder = ["!resetXformStack!", "xformOp:translate", "xformOp:orient"]
+        }
+    }
+}

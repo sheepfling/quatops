@@ -1,0 +1,94 @@
+{
+  "schema_version": "1.0",
+  "evidence_kind": "native_runtime_selected_witnesses",
+  "review_state": "native tf2 capture retained; QuatOps frame-chain replay passed",
+  "product": {
+    "name": "ROS 2 tf2",
+    "version": "0.36.23",
+    "source_revision": null,
+    "binary_sha256": "020dfc03b71b41af8ab70101801202a06a4456491bda47c993a93003d2bc004f",
+    "binary_identity_note": "/tmp/ros-install/quatops_ros_capture/lib/quatops_ros_capture/capture_ros",
+    "dependencies": [
+      {
+        "name": "ROS_DISTRO",
+        "version": "jazzy"
+      },
+      {
+        "name": "container image",
+        "version": "ros:jazzy-ros-base@sha256:8eed0a4669bbf43ee331878a4c39bd8ebddea8e3312a58b4fae8edb14526b617"
+      },
+      {
+        "name": "tf2",
+        "version": "0.36.23",
+        "package_xml_sha256": "a4aa5ea795e6375f07e1322c191c30e11ce1f85525a1be16643ebe97c8c26eae"
+      },
+      {
+        "name": "tf2_geometry_msgs",
+        "version": "0.36.23",
+        "package_xml_sha256": "e3231888f8ac6bcdaf74ce800497a95b59955201c8107fe311d470b21f7a36db"
+      },
+      {
+        "name": "geometry_msgs",
+        "version": "5.3.8",
+        "package_xml_sha256": "879da7003d6d2952701aa23146f0d78096143d5107dd6e775a23e591c2c376a0"
+      },
+      {
+        "name": "nlohmann-json3-dev",
+        "version": "3.11.3-1"
+      },
+      {
+        "name": "ros-jazzy-tf2-geometry-msgs",
+        "version": "0.36.23-1noble.20260915.174516"
+      }
+    ]
+  },
+  "execution": {
+    "was_run": true,
+    "utc": "2026-11-03T05:56:28.310657+00:00",
+    "argv": [
+      "/usr/bin/python3",
+      "exporters/run_ros.py",
+      "--corpus",
+      "corpus/orientation_inputs_v1.json",
+      "--output",
+      "/captures/full",
+      "--executable",
+      "/tmp/ros-install/quatops_ros_capture/lib/quatops_ros_capture/capture_ros",
+      "--runtime-image",
+      "ros:jazzy-ros-base@sha256:8eed0a4669bbf43ee331878a4c39bd8ebddea8e3312a58b4fae8edb14526b617"
+    ],
+    "exit_code": 0,
+    "platform": "Linux-6.18.33.2-microsoft-standard-WSL2-x86_64-with-glibc2.39",
+    "architecture": "x86_64",
+    "runtime": "3.12.3 (main, Aug 31 2026, 10:18:26) [GCC 13.3.0]",
+    "compiler_flags": [],
+    "compiler_flags_note": "Vendor native flags not inferred from host Python"
+  },
+  "precision": {
+    "input": "native tf2Scalar; geometry_msgs double fields",
+    "arithmetic": "tf2Scalar as measured by compiled executable",
+    "output": "native scalar and message doubles; inspect native_scalar_bytes",
+    "serialized": "JSON plus native scalar IEEE bits"
+  },
+  "native_build": {
+    "native_scalar_bytes": 8,
+    "compiler": "13.3.0",
+    "cpp_standard": 202002,
+    "flags": "CMake: -Wall -Wextra -Wpedantic -fno-fast-math; C++20"
+  },
+  "capture_provenance": {
+    "full_observation_sha256": "471890c3533bf3ddc6017fcbcc90261e0027a5bc270da82c13945914a02f7ddf",
+    "native_stdout_sha256": "06e321a1f97aad01deeeb2a885da19c48bef9ad2fbfdd392c3d88aa635969266",
+    "capture_manifest_sha256": "69b72840d7108a42e6448487c17dc1d43602707e7540f988bc2c1ec4396de39c",
+    "corpus_sha256": "07e4d809f7eb75ad6e5454febf2b725b0b8fb389536743dd7196566d4640135f",
+    "exporter_source_sha256": "3d8374d3e3dede9d14e06ae5fb5667504cc41787ca7451eb989c914a68e2f41d",
+    "runner_sha256": "89631d8ef80638380c87fe45334d28d7092b2ebcc43280bffc7e71a9bb0db61e",
+    "dockerfile_sha256": "ed11408beb834fbb24ac68e7773d08dbb068be8e0b94dffa569d86c1de7edd0c",
+    "selected_witnesses_sha256": "51551dd8aa0bb20fcfc4c027be01d3ffdc733e2b8453ea253d4c80e90c395c4b"
+  },
+  "selection": {
+    "retained_observations": 2,
+    "full_capture_observations": 102,
+    "policy": "retain both directions of the nontrivial named-frame chain; discard other successful sweeps"
+  }
+}

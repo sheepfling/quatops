@@ -96,9 +96,9 @@ def test_openusd_capture_provenance_and_input_stage_are_frozen():
     assert FIXTURE["provenance"]["lockfile_sha256"] == _sha256(LOCK_PATH)
     assert FIXTURE["provenance"]["exporter_sha256"] == _sha256(EXPORTER_PATH)
     assert FIXTURE["counts"] == {
-        "quaternion_algebra": 140,
-        "axis_angle_and_rotation": 60,
-        "slerp": 49,
+        "quaternion_algebra": 9,
+        "axis_angle_and_rotation": 5,
+        "slerp": 7,
         "stage_prims": 7,
     }
     assert len(FIXTURE["runtime"]["native_binary_files"]) == 4

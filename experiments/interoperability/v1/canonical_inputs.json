@@ -21,17 +21,42 @@
   "probe_vector_xyz": [0.25, -1.5, 2.75],
   "orientations": [
     {
+      "case_id": "identity",
+      "canonical_wxyz": [1.0, 0.0, 0.0, 0.0]
+    },
+    {
+      "case_id": "quarter_x",
+      "canonical_wxyz": [0.7071067811865476, 0.7071067811865476, 0.0, 0.0]
+    },
+    {
+      "case_id": "quarter_y",
+      "canonical_wxyz": [0.7071067811865476, 0.0, 0.7071067811865476, 0.0]
+    },
+    {
+      "case_id": "quarter_z",
+      "canonical_wxyz": [0.7071067811865476, 0.0, 0.0, 0.7071067811865476]
+    },
+    {
       "case_id": "mixed_a",
-      "canonical_wxyz": [0.5, 0.5, -0.5, 0.5]
+      "canonical_wxyz": [0.8, 0.2, -0.4, 0.4]
     },
     {
       "case_id": "mixed_b",
-      "canonical_wxyz": [0.5, -0.5, -0.5, -0.5]
+      "canonical_wxyz": [0.7, -0.3, 0.2, 0.6164414002968976]
+    },
+    {
+      "case_id": "antipode_mixed_a",
+      "canonical_wxyz": [-0.8, -0.2, 0.4, -0.4]
+    },
+    {
+      "case_id": "nonprincipal_halfturn",
+      "canonical_wxyz": [0.0, 0.5773502691896258, 0.5773502691896258, 0.5773502691896258]
     }
   ],
   "composition": {
     "left_case_id": "mixed_a",
     "right_case_id": "mixed_b",
-    "product_order": "lhs * rhs; rhs acts first"
+    "product_order": "lhs * rhs; rhs acts first",
+    "reverse_product_order": "rhs * lhs; lhs acts first"
   }
 }

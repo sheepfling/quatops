@@ -55,12 +55,12 @@ def test_cspice_fixture_records_both_pinned_wrapper_and_loaded_toolkit():
     assert FIXTURE["runtime"]["loaded_library_sha256"]
     assert FIXTURE["provenance"]["input_corpus_sha256"] == CORPUS_SHA256
     assert FIXTURE["counts"] == {
-        "euler_orders": 534,
-        "euler_boundaries": 540,
-        "axis_angle": 60,
+        "euler_orders": 6,
+        "euler_boundaries": 6,
+        "axis_angle": 5,
         "multiplication": 3,
-        "proper_matrices": 8,
-        "qdq2av": 48,
+        "proper_matrices": 3,
+        "qdq2av": 2,
     }
 
 

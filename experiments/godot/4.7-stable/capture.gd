@@ -24,7 +24,8 @@ const EULER_RANDOM_SEED := 0x514F5053
 func _initialize() -> void:
 	var fixture := capture_fixture()
 	var user_args := OS.get_cmdline_user_args()
-	var output_path := "res://native_capture.json"
+	var temp_dir := OS.get_environment("TEMP")
+	var output_path := temp_dir.path_join("quatops-godot-full.json") if not temp_dir.is_empty() else "user://quatops-godot-full.json"
 	if not user_args.is_empty():
 		output_path = user_args[0]
 	var file := FileAccess.open(output_path, FileAccess.WRITE)
@@ -658,31 +659,48 @@ func capture_axis_map() -> Dictionary:
 
 
 func capture_canonical_interop() -> Dictionary:
-	var left_wxyz := [0.5, 0.5, -0.5, 0.5]
-	var right_wxyz := [0.5, -0.5, -0.5, -0.5]
+	var orientations := [
+		["identity", [1.0, 0.0, 0.0, 0.0]],
+		["quarter_x", [0.7071067811865476, 0.7071067811865476, 0.0, 0.0]],
+		["quarter_y", [0.7071067811865476, 0.0, 0.7071067811865476, 0.0]],
+		["quarter_z", [0.7071067811865476, 0.0, 0.0, 0.7071067811865476]],
+		["mixed_a", [0.8, 0.2, -0.4, 0.4]],
+		["mixed_b", [0.7, -0.3, 0.2, 0.6164414002968976]],
+		["antipode_mixed_a", [-0.8, -0.2, 0.4, -0.4]],
+		["nonprincipal_halfturn", [0.0, 0.5773502691896258, 0.5773502691896258, 0.5773502691896258]],
+	]
 	var canonical_probe := Vector3(0.25, -1.5, 2.75)
 	var native_probe := map_source_vector(canonical_probe)
-	var left := map_canonical_quaternion(left_wxyz)
-	var right := map_canonical_quaternion(right_wxyz)
-	var product := left * right
+	var native_by_id := {}
+	var cases := []
+	for item in orientations:
+		var native := map_canonical_quaternion(item[1])
+		native_by_id[item[0]] = native
+		cases.append(capture_canonical_interop_orientation(item[0], item[1], native, native_probe))
+	var lhs_rhs: Quaternion = native_by_id["mixed_a"] * native_by_id["mixed_b"]
+	var rhs_lhs: Quaternion = native_by_id["mixed_b"] * native_by_id["mixed_a"]
 	return {
 		"contract_id": "quatops-canonical-hamilton-wxyz-active-rh-v1",
 		"native_quaternion_order": "xyzw",
 		"frame_map_destination_axes_from_source": ["x", "z", "-y"],
 		"probe_vector_canonical_xyz": vector(canonical_probe),
 		"probe_vector_native_xyz": vector(native_probe),
-		"orientation_cases": [
-			capture_canonical_interop_orientation("mixed_a", left_wxyz, left, native_probe),
-			capture_canonical_interop_orientation("mixed_b", right_wxyz, right, native_probe),
-		],
-		"composition": {
-			"left_case_id": "mixed_a",
-			"right_case_id": "mixed_b",
-			"product_order": "lhs * rhs; rhs acts first",
-			"native_product_quaternion": quaternion_xyzw_array(product),
-			"native_rotated_positive_basis_vectors_xyz": rotated_axes(product),
-			"native_rotated_probe_vector_xyz": vector(product * native_probe),
-		},
+		"orientation_cases": cases,
+		"composition": capture_canonical_interop_composition("mixed_a", "mixed_b", lhs_rhs, native_probe),
+		"reverse_composition": capture_canonical_interop_composition("mixed_b", "mixed_a", rhs_lhs, native_probe),
+	}
+
+
+func capture_canonical_interop_composition(
+	left_id: String, right_id: String, product: Quaternion, native_probe: Vector3
+) -> Dictionary:
+	return {
+		"left_case_id": left_id,
+		"right_case_id": right_id,
+		"product_order": "lhs * rhs; rhs acts first",
+		"native_product_quaternion": quaternion_xyzw_array(product),
+		"native_rotated_positive_basis_vectors_xyz": rotated_axes(product),
+		"native_rotated_probe_vector_xyz": vector(product * native_probe),
 	}
 
 

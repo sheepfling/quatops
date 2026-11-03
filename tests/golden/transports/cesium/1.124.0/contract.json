@@ -1,0 +1,41 @@
+{
+  "contract_id": "quatops-cesium-local-enu-ecef-v1",
+  "target": "CesiumJS 1.124.0",
+  "algebra": "Hamilton active quaternion",
+  "storage": "QuatOps WXYZ; Cesium XYZW",
+  "local_frame": {
+    "handedness": "right",
+    "positive_x": "east/right",
+    "positive_y": "north/forward",
+    "positive_z": "up/ellipsoid normal"
+  },
+  "source_map": [
+    "x",
+    "y",
+    "z"
+  ],
+  "native_api": [
+    "Transforms.eastNorthUpToFixedFrame",
+    "Matrix3.fromQuaternion",
+    "Matrix4.fromRotationTranslation",
+    "Matrix4.multiply",
+    "Matrix4.inverseTransformation"
+  ],
+  "forward": "R_ECEF_from_model = R_ECEF_from_ENU * R_ENU_from_model; t_ECEF = t_ECEF_from_ENU + R_ECEF_from_ENU * t_ENU_from_model",
+  "inverse": "R_ENU_from_model = transpose(R_ECEF_from_ENU) * R_ECEF_from_model; t_ENU = transpose(R_ECEF_from_ENU) * (t_ECEF - t_ECEF_from_ENU)",
+  "geodesy": "WGS84; lon/lat input in degrees, height and translations in metres",
+  "normalization": "unit input quaternion; no hidden sign canonicalization in QuatOps input mapping",
+  "scope": [
+    "QuatOps-produced local quaternion to Cesium ECEF transform",
+    "native basis/probe action",
+    "multiple geodetic origins",
+    "inverse point and orientation recovery",
+    "noncommuting composition and antipode"
+  ],
+  "excludes": [
+    "Cesium Model/glTF importer",
+    "asset model-forward defaults",
+    "rendering",
+    "time-dependent EOP/ICRF"
+  ]
+}

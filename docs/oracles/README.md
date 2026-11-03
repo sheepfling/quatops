@@ -18,6 +18,8 @@ For a cross-target summary of measured conventions and evidence status, see the
   Euler, matrix and angular-velocity routines.
 - [MuJoCo 3.17.0](mujoco.md): low-level quaternion, rate-frame, integration,
   and tangent-Jacobian APIs.
+- [ROS 2 Jazzy / tf2 0.36.23](ros2-tf2.md): native named-frame chain,
+  forward and reverse lookup, message fields, and QuatOps replay.
 
 ## Still planned
 
@@ -25,14 +27,13 @@ These remain unverified until a pinned native runtime or named loader is
 executed and its outputs are frozen:
 
 - Mathematical libraries: Eigen, Sophus.
-- Runtime/message contracts: ROS 2/tf2, OpenXR.
+- Runtime/message contracts: OpenXR.
 
-See [transport captures](../transports/README.md) for the completed glTF
-format/loaders and OpenUSD transform-stack proof. Wave 2's delivered OpenCV,
+See [transport captures](../transports/README.md) for glTF and OpenUSD native
+captures and converter round trips. Wave 2's delivered OpenCV,
 PROJ, VTK, and Trimesh captures ran in the packet's Linux environment; the new
 Cesium and expanded Three.js loader captures were run locally on Windows. See
-the linked target pages for the runtime boundaries and the separate SciPy
-checks.
+the linked target pages for runtime boundaries and separate SciPy checks.
 
 Do not count two wrappers around the same implementation family as independent
 mathematical evidence. Format validation, specification-derived expectations,

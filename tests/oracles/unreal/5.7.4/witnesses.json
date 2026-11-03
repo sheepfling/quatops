@@ -1,0 +1,950 @@
+{
+  "schema_version": 1,
+  "target": {
+    "engine": "Unreal Engine",
+    "api": "UE::Math::TQuat<T>(X,Y,Z,W); TQuat::RotateVector",
+    "version": "5.7.4",
+    "build": 51494982,
+    "platform": "WindowsEditor",
+    "native_scalar_profiles": [
+      "float32",
+      "float64"
+    ],
+    "native_quaternion_order": "xyzw",
+    "native_algebra": "Hamilton",
+    "native_vector_action": "active quaternion sandwich / engine vector rotation API"
+  },
+  "contract": {
+    "contract_id": "quatops-canonical-hamilton-wxyz-active-rh-v1",
+    "canonical_algebra": "Hamilton",
+    "canonical_order": "wxyz",
+    "canonical_action": "active",
+    "canonical_frame": {
+      "handedness": "right-handed",
+      "positive_x": "right",
+      "positive_y": "forward",
+      "positive_z": "up"
+    },
+    "native_frame": {
+      "handedness": "left-handed",
+      "positive_x": "forward",
+      "positive_y": "right",
+      "positive_z": "up"
+    },
+    "destination_axes_from_source": [
+      "y",
+      "x",
+      "z"
+    ],
+    "conversion_rule": "native_xyzw=(-y,-x,-z,w)",
+    "inverse_rule": "canonical_wxyz=(W,-Y,-X,-Z)",
+    "world_and_body_map": "same declared signed-axis map",
+    "input_domain": "unit Hamilton quaternion; adapters preserve magnitude and do not normalize",
+    "native_precision_tolerance": {
+      "float32": 2e-06,
+      "float64": 2e-14
+    },
+    "scope": "unit quaternion coefficient and physical-action conversion",
+    "excludes": [
+      "asset model-forward defaults",
+      "scene import",
+      "animation transport",
+      "Euler adapters"
+    ]
+  },
+  "provenance": {
+    "original_capture_sha256": "d345723606afe741f310afb7af46f899849d204880b6c16a3c94ed97a345a034",
+    "capture_source": "experiments/unreal/5.7.4/Source/QuatOpsUnrealCapture/Private/QuatOpsUnrealCaptureTests.cpp",
+    "capture_source_sha256": "40753985e3f57f5a7018dd17d50ff9b1187c2b44f9e357350f850870d1365346",
+    "canonical_input_file": "experiments/interoperability/v1/canonical_inputs.json",
+    "canonical_input_sha256": "a6f0630806b69d3b3b29a036aa10f63bfe214668329c661598951f84f8f41eec",
+    "native_build_record": {
+      "name": "Unreal Engine",
+      "version": "5.7.4-51494982+++UE5+Release-5.7",
+      "major": 5,
+      "minor": 7,
+      "patch": 4,
+      "changelist": 51494982,
+      "branch": "++UE5+Release-5.7",
+      "platform": "WindowsEditor",
+      "build_target": "QuatOpsUnrealCaptureEditor Win64 Development",
+      "platform_architecture": "x64",
+      "precision_types": "FQuat4f and FQuat4d"
+    },
+    "capture_method": "C++ Unreal Editor Automation Test",
+    "retention_method": "selected values copied losslessly from native capture; no values regenerated"
+  },
+  "canonical_interop": {
+    "contract_id": "quatops-canonical-hamilton-wxyz-active-rh-v1",
+    "native_quaternion_order": "xyzw",
+    "frame_map_destination_axes_from_source": [
+      "y",
+      "x",
+      "z"
+    ],
+    "precision_captures": {
+      "float32": {
+        "contract_id": "quatops-canonical-hamilton-wxyz-active-rh-v1",
+        "native_quaternion_order": "xyzw",
+        "frame_map_destination_axes_from_source": [
+          "y",
+          "x",
+          "z"
+        ],
+        "probe_vector_canonical_xyz": [
+          0.25,
+          -1.5,
+          2.75
+        ],
+        "probe_vector_native_xyz": [
+          -1.5,
+          0.25,
+          2.75
+        ],
+        "orientation_cases": [
+          {
+            "case_id": "identity",
+            "canonical_wxyz": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "native_quaternion": [
+              0,
+              0,
+              0,
+              1
+            ],
+            "native_rotated_positive_basis_vectors_xyz": [
+              [
+                1,
+                0,
+                0
+              ],
+              [
+                0,
+                1,
+                0
+              ],
+              [
+                0,
+                0,
+                1
+              ]
+            ],
+            "native_rotated_probe_vector_xyz": [
+              -1.5,
+              0.25,
+              2.75
+            ],
+            "native_input_wxyz": [
+              1,
+              0,
+              0,
+              0
+            ]
+          },
+          {
+            "case_id": "quarter_x",
+            "canonical_wxyz": [
+              0.7071067811865476,
+              0.7071067811865476,
+              0.0,
+              0.0
+            ],
+            "native_quaternion": [
+              0,
+              -0.7071067690849304,
+              0,
+              0.7071067690849304
+            ],
+            "native_rotated_positive_basis_vectors_xyz": [
+              [
+                5.960464477539063e-08,
+                0,
+                0.9999999403953552
+              ],
+              [
+                0,
+                1,
+                0
+              ],
+              [
+                -0.9999999403953552,
+                0,
+                5.960464477539063e-08
+              ]
+            ],
+            "native_rotated_probe_vector_xyz": [
+              -2.75,
+              0.25,
+              -1.4999998807907104
+            ],
+            "native_input_wxyz": [
+              0.7071067811865476,
+              0.7071067811865476,
+              0,
+              0
+            ]
+          },
+          {
+            "case_id": "quarter_y",
+            "canonical_wxyz": [
+              0.7071067811865476,
+              0.0,
+              0.7071067811865476,
+              0.0
+            ],
+            "native_quaternion": [
+              -0.7071067690849304,
+              0,
+              0,
+              0.7071067690849304
+            ],
+            "native_rotated_positive_basis_vectors_xyz": [
+              [
+                1,
+                0,
+                0
+              ],
+              [
+                0,
+                5.960464477539063e-08,
+                -0.9999999403953552
+              ],
+              [
+                0,
+                0.9999999403953552,
+                5.960464477539063e-08
+              ]
+            ],
+            "native_rotated_probe_vector_xyz": [
+              -1.5,
+              2.75,
+              -0.25
+            ],
+            "native_input_wxyz": [
+              0.7071067811865476,
+              0,
+              0.7071067811865476,
+              0
+            ]
+          },
+          {
+            "case_id": "quarter_z",
+            "canonical_wxyz": [
+              0.7071067811865476,
+              0.0,
+              0.0,
+              0.7071067811865476
+            ],
+            "native_quaternion": [
+              0,
+              0,
+              -0.7071067690849304,
+              0.7071067690849304
+            ],
+            "native_rotated_positive_basis_vectors_xyz": [
+              [
+                5.960464477539063e-08,
+                -0.9999999403953552,
+                0
+              ],
+              [
+                0.9999999403953552,
+                5.960464477539063e-08,
+                0
+              ],
+              [
+                0,
+                0,
+                1
+              ]
+            ],
+            "native_rotated_probe_vector_xyz": [
+              0.24999988079071045,
+              1.4999998807907104,
+              2.75
+            ],
+            "native_input_wxyz": [
+              0.7071067811865476,
+              0,
+              0,
+              0.7071067811865476
+            ]
+          },
+          {
+            "case_id": "mixed_a",
+            "canonical_wxyz": [
+              0.8,
+              0.2,
+              -0.4,
+              0.4
+            ],
+            "native_quaternion": [
+              0.4000000059604645,
+              -0.20000000298023224,
+              -0.4000000059604645,
+              0.800000011920929
+            ],
+            "native_rotated_positive_basis_vectors_xyz": [
+              [
+                0.5999999642372131,
+                -0.8000000715255737,
+                0
+              ],
+              [
+                0.48000001907348633,
+                0.35999995470046997,
+                0.8000000715255737
+              ],
+              [
+                -0.64000004529953,
+                -0.48000001907348633,
+                0.5999999642372131
+              ]
+            ],
+            "native_rotated_probe_vector_xyz": [
+              -2.5399999618530273,
+              -0.029999971389770508,
+              1.850000023841858
+            ],
+            "native_input_wxyz": [
+              0.8,
+              0.2,
+              -0.4,
+              0.4
+            ]
+          },
+          {
+            "case_id": "mixed_b",
+            "canonical_wxyz": [
+              0.7,
+              -0.3,
+              0.2,
+              0.6164414002968976
+            ],
+            "native_quaternion": [
+              -0.20000000298023224,
+              0.30000001192092896,
+              -0.6164414286613464,
+              0.699999988079071
+            ],
+            "native_rotated_positive_basis_vectors_xyz": [
+              [
+                0.059999942779541016,
+                -0.9830179810523987,
+                -0.17342343926429749
+              ],
+              [
+                0.7430179715156555,
+                0.15999996662139893,
+                -0.649864912033081
+              ],
+              [
+                0.666576623916626,
+                -0.08986487984657288,
+                0.7400000095367432
+              ]
+            ],
+            "native_rotated_probe_vector_xyz": [
+              1.9288400411605835,
+              1.2673983573913574,
+              2.1326687335968018
+            ],
+            "native_input_wxyz": [
+              0.7,
+              -0.3,
+              0.2,
+              0.6164414002968976
+            ]
+          },
+          {
+            "case_id": "antipode_mixed_a",
+            "canonical_wxyz": [
+              -0.8,
+              -0.2,
+              0.4,
+              -0.4
+            ],
+            "native_quaternion": [
+              -0.4000000059604645,
+              0.20000000298023224,
+              0.4000000059604645,
+              -0.800000011920929
+            ],
+            "native_rotated_positive_basis_vectors_xyz": [
+              [
+                0.5999999642372131,
+                -0.8000000715255737,
+                0
+              ],
+              [
+                0.48000001907348633,
+                0.35999995470046997,
+                0.8000000715255737
+              ],
+              [
+                -0.64000004529953,
+                -0.48000001907348633,
+                0.5999999642372131
+              ]
+            ],
+            "native_rotated_probe_vector_xyz": [
+              -2.5399999618530273,
+              -0.029999971389770508,
+              1.850000023841858
+            ],
+            "native_input_wxyz": [
+              -0.8,
+              -0.2,
+              0.4,
+              -0.4
+            ]
+          },
+          {
+            "case_id": "nonprincipal_halfturn",
+            "canonical_wxyz": [
+              0.0,
+              0.5773502691896258,
+              0.5773502691896258,
+              0.5773502691896258
+            ],
+            "native_quaternion": [
+              -0.5773502588272095,
+              -0.5773502588272095,
+              -0.5773502588272095,
+              0
+            ],
+            "native_rotated_positive_basis_vectors_xyz": [
+              [
+                -0.33333325386047363,
+                0.6666666269302368,
+                0.6666666269302368
+              ],
+              [
+                0.6666666269302368,
+                -0.33333325386047363,
+                0.6666666269302368
+              ],
+              [
+                0.6666666269302368,
+                0.6666666269302368,
+                -0.33333325386047363
+              ]
+            ],
+            "native_rotated_probe_vector_xyz": [
+              2.5,
+              0.75,
+              -1.75
+            ],
+            "native_input_wxyz": [
+              0,
+              0.5773502691896258,
+              0.5773502691896258,
+              0.5773502691896258
+            ]
+          }
+        ],
+        "composition": {
+          "left_case_id": "mixed_a",
+          "right_case_id": "mixed_b",
+          "product_order": "lhs * rhs; rhs acts first",
+          "native_product_quaternion": [
+            0.3632882833480835,
+            0.4265765845775604,
+            -0.6931531429290771,
+            0.453423410654068
+          ],
+          "native_rotated_positive_basis_vectors_xyz": [
+            [
+              -0.3248577117919922,
+              -0.318643182516098,
+              -0.8904684782028198
+            ],
+            [
+              0.9385242462158203,
+              -0.22487926483154297,
+              -0.2619189918041229
+            ],
+            [
+              -0.11678922176361084,
+              -0.9208126068115234,
+              0.3721081018447876
+            ]
+          ],
+          "native_rotated_probe_vector_xyz": [
+            0.40074723958969116,
+            -2.1104896068573,
+            2.293520212173462
+          ]
+        },
+        "reverse_composition": {
+          "left_case_id": "mixed_b",
+          "right_case_id": "mixed_a",
+          "product_order": "lhs * rhs; rhs acts first",
+          "native_product_quaternion": [
+            -0.12328830361366272,
+            -0.226576566696167,
+            -0.8531531691551208,
+            0.453423410654068
+          ],
+          "native_rotated_positive_basis_vectors_xyz": [
+            [
+              -0.5584145784378052,
+              -0.7178107500076294,
+              0.4158378541469574
+            ],
+            [
+              0.8295477628707886,
+              -0.48614072799682617,
+              0.2748054265975952
+            ],
+            [
+              0.004897385835647583,
+              0.4984126091003418,
+              0.8669260740280151
+            ]
+          ],
+          "native_rotated_probe_vector_xyz": [
+            1.058476448059082,
+            2.3258156776428223,
+            1.8289912939071655
+          ]
+        }
+      },
+      "float64": {
+        "contract_id": "quatops-canonical-hamilton-wxyz-active-rh-v1",
+        "native_quaternion_order": "xyzw",
+        "frame_map_destination_axes_from_source": [
+          "y",
+          "x",
+          "z"
+        ],
+        "probe_vector_canonical_xyz": [
+          0.25,
+          -1.5,
+          2.75
+        ],
+        "probe_vector_native_xyz": [
+          -1.5,
+          0.25,
+          2.75
+        ],
+        "orientation_cases": [
+          {
+            "case_id": "identity",
+            "canonical_wxyz": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "native_quaternion": [
+              0,
+              0,
+              0,
+              1
+            ],
+            "native_rotated_positive_basis_vectors_xyz": [
+              [
+                1,
+                0,
+                0
+              ],
+              [
+                0,
+                1,
+                0
+              ],
+              [
+                0,
+                0,
+                1
+              ]
+            ],
+            "native_rotated_probe_vector_xyz": [
+              -1.5,
+              0.25,
+              2.75
+            ],
+            "native_input_wxyz": [
+              1,
+              0,
+              0,
+              0
+            ]
+          },
+          {
+            "case_id": "quarter_x",
+            "canonical_wxyz": [
+              0.7071067811865476,
+              0.7071067811865476,
+              0.0,
+              0.0
+            ],
+            "native_quaternion": [
+              0,
+              -0.7071067811865476,
+              0,
+              0.7071067811865476
+            ],
+            "native_rotated_positive_basis_vectors_xyz": [
+              [
+                -2.220446049250313e-16,
+                0,
+                1.0000000000000002
+              ],
+              [
+                0,
+                1,
+                0
+              ],
+              [
+                -1.0000000000000002,
+                0,
+                -2.220446049250313e-16
+              ]
+            ],
+            "native_rotated_probe_vector_xyz": [
+              -2.75,
+              0.25,
+              -1.5000000000000007
+            ],
+            "native_input_wxyz": [
+              0.7071067811865476,
+              0.7071067811865476,
+              0,
+              0
+            ]
+          },
+          {
+            "case_id": "quarter_y",
+            "canonical_wxyz": [
+              0.7071067811865476,
+              0.0,
+              0.7071067811865476,
+              0.0
+            ],
+            "native_quaternion": [
+              -0.7071067811865476,
+              0,
+              0,
+              0.7071067811865476
+            ],
+            "native_rotated_positive_basis_vectors_xyz": [
+              [
+                1,
+                0,
+                0
+              ],
+              [
+                0,
+                -2.220446049250313e-16,
+                -1.0000000000000002
+              ],
+              [
+                0,
+                1.0000000000000002,
+                -2.220446049250313e-16
+              ]
+            ],
+            "native_rotated_probe_vector_xyz": [
+              -1.5,
+              2.7500000000000004,
+              -0.25000000000000044
+            ],
+            "native_input_wxyz": [
+              0.7071067811865476,
+              0,
+              0.7071067811865476,
+              0
+            ]
+          },
+          {
+            "case_id": "quarter_z",
+            "canonical_wxyz": [
+              0.7071067811865476,
+              0.0,
+              0.0,
+              0.7071067811865476
+            ],
+            "native_quaternion": [
+              0,
+              0,
+              -0.7071067811865476,
+              0.7071067811865476
+            ],
+            "native_rotated_positive_basis_vectors_xyz": [
+              [
+                -2.220446049250313e-16,
+                -1.0000000000000002,
+                0
+              ],
+              [
+                1.0000000000000002,
+                -2.220446049250313e-16,
+                0
+              ],
+              [
+                0,
+                0,
+                1
+              ]
+            ],
+            "native_rotated_probe_vector_xyz": [
+              0.2500000000000002,
+              1.5000000000000002,
+              2.75
+            ],
+            "native_input_wxyz": [
+              0.7071067811865476,
+              0,
+              0,
+              0.7071067811865476
+            ]
+          },
+          {
+            "case_id": "mixed_a",
+            "canonical_wxyz": [
+              0.8,
+              0.2,
+              -0.4,
+              0.4
+            ],
+            "native_quaternion": [
+              0.4,
+              -0.2,
+              -0.4,
+              0.8
+            ],
+            "native_rotated_positive_basis_vectors_xyz": [
+              [
+                0.5999999999999999,
+                -0.8000000000000002,
+                0
+              ],
+              [
+                0.4800000000000001,
+                0.3599999999999999,
+                0.8000000000000002
+              ],
+              [
+                -0.6400000000000001,
+                -0.4800000000000001,
+                0.5999999999999999
+              ]
+            ],
+            "native_rotated_probe_vector_xyz": [
+              -2.54,
+              -0.029999999999999916,
+              1.8499999999999996
+            ],
+            "native_input_wxyz": [
+              0.8,
+              0.2,
+              -0.4,
+              0.4
+            ]
+          },
+          {
+            "case_id": "mixed_b",
+            "canonical_wxyz": [
+              0.7,
+              -0.3,
+              0.2,
+              0.6164414002968976
+            ],
+            "native_quaternion": [
+              -0.2,
+              0.3,
+              -0.6164414002968976,
+              0.7
+            ],
+            "native_rotated_positive_basis_vectors_xyz": [
+              [
+                0.06000000000000005,
+                -0.9830179604156567,
+                -0.17342343988124093
+              ],
+              [
+                0.7430179604156567,
+                0.15999999999999992,
+                -0.6498648401781386
+              ],
+              [
+                0.666576560118759,
+                -0.08986484017813862,
+                0.74
+              ]
+            ],
+            "native_rotated_probe_vector_xyz": [
+              1.9288400304305018,
+              1.267398630133604,
+              2.132668949777327
+            ],
+            "native_input_wxyz": [
+              0.7,
+              -0.3,
+              0.2,
+              0.6164414002968976
+            ]
+          },
+          {
+            "case_id": "antipode_mixed_a",
+            "canonical_wxyz": [
+              -0.8,
+              -0.2,
+              0.4,
+              -0.4
+            ],
+            "native_quaternion": [
+              -0.4,
+              0.2,
+              0.4,
+              -0.8
+            ],
+            "native_rotated_positive_basis_vectors_xyz": [
+              [
+                0.5999999999999999,
+                -0.8000000000000002,
+                0
+              ],
+              [
+                0.4800000000000001,
+                0.3599999999999999,
+                0.8000000000000002
+              ],
+              [
+                -0.6400000000000001,
+                -0.4800000000000001,
+                0.5999999999999999
+              ]
+            ],
+            "native_rotated_probe_vector_xyz": [
+              -2.54,
+              -0.029999999999999916,
+              1.8499999999999996
+            ],
+            "native_input_wxyz": [
+              -0.8,
+              -0.2,
+              0.4,
+              -0.4
+            ]
+          },
+          {
+            "case_id": "nonprincipal_halfturn",
+            "canonical_wxyz": [
+              0.0,
+              0.5773502691896258,
+              0.5773502691896258,
+              0.5773502691896258
+            ],
+            "native_quaternion": [
+              -0.5773502691896258,
+              -0.5773502691896258,
+              -0.5773502691896258,
+              0
+            ],
+            "native_rotated_positive_basis_vectors_xyz": [
+              [
+                -0.3333333333333337,
+                0.6666666666666669,
+                0.6666666666666669
+              ],
+              [
+                0.6666666666666669,
+                -0.3333333333333337,
+                0.6666666666666669
+              ],
+              [
+                0.6666666666666669,
+                0.6666666666666669,
+                -0.3333333333333337
+              ]
+            ],
+            "native_rotated_probe_vector_xyz": [
+              2.5000000000000018,
+              0.7499999999999998,
+              -1.7500000000000018
+            ],
+            "native_input_wxyz": [
+              0,
+              0.5773502691896258,
+              0.5773502691896258,
+              0.5773502691896258
+            ]
+          }
+        ],
+        "composition": {
+          "left_case_id": "mixed_a",
+          "right_case_id": "mixed_b",
+          "product_order": "lhs * rhs; rhs acts first",
+          "native_product_quaternion": [
+            0.36328828005937946,
+            0.42657656011875905,
+            -0.6931531202375181,
+            0.4534234398812409
+          ],
+          "native_rotated_positive_basis_vectors_xyz": [
+            [
+              -0.32485761947552083,
+              -0.3186432146066407,
+              -0.8904684322612697
+            ],
+            [
+              0.9385242739634025,
+              -0.22487924504701873,
+              -0.2619189041068832
+            ],
+            [
+              -0.11678918721425097,
+              -0.9208125905591369,
+              0.37210812785748915
+            ]
+          ],
+          "native_rotated_probe_vector_xyz": [
+            0.4007472328649414,
+            -2.1104896133894204,
+            2.2935202739732796
+          ]
+        },
+        "reverse_composition": {
+          "left_case_id": "mixed_b",
+          "right_case_id": "mixed_a",
+          "product_order": "lhs * rhs; rhs acts first",
+          "native_product_quaternion": [
+            -0.12328828005937958,
+            -0.22657656011875907,
+            -0.8531531202375181,
+            0.4534234398812409
+          ],
+          "native_rotated_positive_basis_vectors_xyz": [
+            [
+              -0.5584143683325253,
+              -0.7178107762493939,
+              0.41583780821376637
+            ],
+            [
+              0.8295477138446437,
+              -0.4861404931420261,
+              0.27480540639287443
+            ],
+            [
+              0.004897315071740321,
+              0.4984125905591372,
+              0.8669261248095007
+            ]
+          ],
+          "native_rotated_probe_vector_xyz": [
+            1.058476097407235,
+            2.325815665126212,
+            1.828991482503696
+          ]
+        }
+      }
+    }
+  }
+}

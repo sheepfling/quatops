@@ -1,0 +1,61 @@
+{
+  "engine": {
+    "engine": "Godot Engine",
+    "api": "Quaternion(x,y,z,w); Quaternion * Vector3",
+    "version": "4.7-stable",
+    "build": "official",
+    "platform": "Windows",
+    "native_scalar_profiles": [
+      "float32"
+    ],
+    "native_quaternion_order": "xyzw",
+    "native_algebra": "Hamilton",
+    "native_vector_action": "active quaternion sandwich / engine vector rotation API"
+  },
+  "conversion": {
+    "contract_id": "quatops-canonical-hamilton-wxyz-active-rh-v1",
+    "canonical_algebra": "Hamilton",
+    "canonical_order": "wxyz",
+    "canonical_action": "active",
+    "canonical_frame": {
+      "handedness": "right-handed",
+      "positive_x": "right",
+      "positive_y": "forward",
+      "positive_z": "up"
+    },
+    "native_frame": {
+      "forward_direction": "negative_z",
+      "handedness": "right-handed",
+      "positive_x": "right",
+      "positive_y": "up",
+      "positive_z": "backward"
+    },
+    "destination_axes_from_source": [
+      "x",
+      "z",
+      "-y"
+    ],
+    "conversion_rule": "native_xyzw=(x,z,-y,w)",
+    "inverse_rule": "canonical_wxyz=(W,X,-Z,Y)",
+    "world_and_body_map": "same declared signed-axis map",
+    "input_domain": "unit Hamilton quaternion; adapters preserve magnitude and do not normalize",
+    "native_precision_tolerance": {
+      "float32": 2e-06
+    },
+    "scope": "unit quaternion coefficient and physical-action conversion",
+    "excludes": [
+      "asset model-forward defaults",
+      "scene import",
+      "animation transport",
+      "Euler adapters"
+    ]
+  },
+  "provenance": {
+    "witness_file": "witnesses.json",
+    "witness_sha256": "8254483652f40248d0a253c757a29ac5d18e2a684b3749148ab2f71a2b172ba0",
+    "capture_source": "experiments/godot/4.7-stable/capture.gd",
+    "capture_source_sha256": "12373c6ffd371e97328b3591528d043eb4c672c6eab0a42b2bdaa053fa2d2dd7",
+    "original_capture_sha256": "8c7e5a71d995ca526f642eb632c51b6009417229e4014896838faf9326c9f8bc",
+    "canonical_input_sha256": "a6f0630806b69d3b3b29a036aa10f63bfe214668329c661598951f84f8f41eec"
+  }
+}

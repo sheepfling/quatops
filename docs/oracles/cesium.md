@@ -58,3 +58,25 @@ rendering, CZML, ion services, ICRF, or time-dependent Earth-orientation data.
 The captured model frame is the explicit local ENU frame in the input corpus.
 SciPy checks are separately replayed from the pinned Cesium runtime output; no
 QuatOps conversion adapter was exercised in this capture.
+
+## QuatOps local-ENU to ECEF converter proof
+
+The auxiliary converter proof is separate from the broad 171-observation
+oracle capture above. Its input generator uses QuatOps to create nine local
+orientations in the explicitly declared canonical/local ENU frame
+`+X east/right, +Y north/forward, +Z up`; it does not infer the model axes from
+Cesium. The exact-pole and high-altitude cases remain because they exercise
+distinct geographic basis behavior.
+
+The pinned CesiumJS `1.124.0` native capture constructs each origin with
+`Cartesian3.fromDegrees`, obtains `eastNorthUpToFixedFrame`, composes the local
+orientation and translation into ECEF, applies native point/direction
+transforms, and recovers the local quaternion through the inverse frame. The
+selected witnesses and exact inputs/contracts are retained under
+[`tests/golden/transports/cesium/1.124.0`](../../tests/golden/transports/cesium/1.124.0/).
+Replay is [test_cesium_converter.py](../../tests/test_cesium_converter.py),
+which checks the native actions with QuatOps and separate SciPy matrices.
+
+This proves the tested local ENU-to-ECEF boundary for the selected WGS84
+origins. It does not test Cesium model/glTF import, asset model axes, browser or
+renderer behavior, or time-dependent Earth orientation.

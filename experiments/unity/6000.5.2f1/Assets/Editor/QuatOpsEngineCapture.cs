@@ -204,6 +204,7 @@ public static class QuatOpsEngineCapture
         public Vec3Record probe_vector_native_xyz;
         public CanonicalInteropOrientation[] orientation_cases;
         public CanonicalInteropComposition composition;
+        public CanonicalInteropComposition reverse_composition;
     }
 
     [Serializable]
@@ -451,7 +452,7 @@ public static class QuatOpsEngineCapture
             if (argument.StartsWith(prefix, StringComparison.Ordinal))
                 return Path.GetFullPath(argument.Substring(prefix.Length));
         }
-        return Path.GetFullPath(Path.Combine(Application.dataPath, "..", "native_capture.json"));
+        return Path.GetFullPath(Path.Combine(Path.GetTempPath(), "quatops-unity-full.json"));
     }
 
     private static EulerCase[] CaptureEulerCases()
@@ -1120,19 +1121,28 @@ public static class QuatOpsEngineCapture
     private static CanonicalInteropInfo CaptureCanonicalInterop()
     {
         const string contractId = "quatops-canonical-hamilton-wxyz-active-rh-v1";
-        var leftWxyz = new[] { 0.5f, 0.5f, -0.5f, 0.5f };
-        var rightWxyz = new[] { 0.5f, -0.5f, -0.5f, -0.5f };
+        var orientations = new (string id, float[] wxyz)[]
+        {
+            ("identity", new[] { 1f, 0f, 0f, 0f }),
+            ("quarter_x", new[] { 0.7071067811865476f, 0.7071067811865476f, 0f, 0f }),
+            ("quarter_y", new[] { 0.7071067811865476f, 0f, 0.7071067811865476f, 0f }),
+            ("quarter_z", new[] { 0.7071067811865476f, 0f, 0f, 0.7071067811865476f }),
+            ("mixed_a", new[] { 0.8f, 0.2f, -0.4f, 0.4f }),
+            ("mixed_b", new[] { 0.7f, -0.3f, 0.2f, 0.6164414002968976f }),
+            ("antipode_mixed_a", new[] { -0.8f, -0.2f, 0.4f, -0.4f }),
+            ("nonprincipal_halfturn", new[] { 0f, 0.5773502691896258f, 0.5773502691896258f, 0.5773502691896258f }),
+        };
         var canonicalProbe = new Vector3(0.25f, -1.5f, 2.75f);
         var nativeProbe = MapSourceVector(canonicalProbe);
-        var left = MapCanonicalQuaternion(leftWxyz);
-        var right = MapCanonicalQuaternion(rightWxyz);
-
-        var cases = new[]
+        var nativeById = new System.Collections.Generic.Dictionary<string, Quaternion>();
+        var cases = new CanonicalInteropOrientation[orientations.Length];
+        for (var index = 0; index < orientations.Length; index++)
         {
-            CaptureCanonicalInteropOrientation("mixed_a", leftWxyz, left, nativeProbe),
-            CaptureCanonicalInteropOrientation("mixed_b", rightWxyz, right, nativeProbe),
-        };
-        var product = left * right;
+            var item = orientations[index];
+            var native = MapCanonicalQuaternion(item.wxyz);
+            nativeById[item.id] = native;
+            cases[index] = CaptureCanonicalInteropOrientation(item.id, item.wxyz, native, nativeProbe);
+        }
         return new CanonicalInteropInfo
         {
             contract_id = contractId,
@@ -1141,17 +1151,23 @@ public static class QuatOpsEngineCapture
             probe_vector_canonical_xyz = new Vec3Record(canonicalProbe),
             probe_vector_native_xyz = new Vec3Record(nativeProbe),
             orientation_cases = cases,
-            composition = new CanonicalInteropComposition
-            {
-                left_case_id = "mixed_a",
-                right_case_id = "mixed_b",
-                product_order = "lhs * rhs; rhs acts first",
-                native_product_quaternion = QuaternionToArray(product),
-                native_rotated_positive_basis_vectors_xyz = RotateBasis(product),
-                native_rotated_probe_vector_xyz = new Vec3Record(product * nativeProbe),
-            },
+            composition = CaptureCanonicalInteropComposition(
+                "mixed_a", "mixed_b", nativeById["mixed_a"] * nativeById["mixed_b"], nativeProbe),
+            reverse_composition = CaptureCanonicalInteropComposition(
+                "mixed_b", "mixed_a", nativeById["mixed_b"] * nativeById["mixed_a"], nativeProbe),
         };
     }
+
+    private static CanonicalInteropComposition CaptureCanonicalInteropComposition(
+        string leftId, string rightId, Quaternion product, Vector3 nativeProbe) => new()
+    {
+        left_case_id = leftId,
+        right_case_id = rightId,
+        product_order = "lhs * rhs; rhs acts first",
+        native_product_quaternion = QuaternionToArray(product),
+        native_rotated_positive_basis_vectors_xyz = RotateBasis(product),
+        native_rotated_probe_vector_xyz = new Vec3Record(product * nativeProbe),
+    };
 
     private static CanonicalInteropOrientation CaptureCanonicalInteropOrientation(
         string caseId, float[] canonicalWxyz, Quaternion native, Vector3 nativeProbe)

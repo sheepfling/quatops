@@ -3,6 +3,7 @@
 import argparse
 import json
 import math
+import tempfile
 import random
 import sys
 from pathlib import Path
@@ -549,13 +550,18 @@ def capture_explicit_source_map():
 
 
 def capture_canonical_interop():
-    left_wxyz = (0.5, 0.5, -0.5, 0.5)
-    right_wxyz = (0.5, -0.5, -0.5, -0.5)
+    orientations = (
+        ("identity", (1.0, 0.0, 0.0, 0.0)),
+        ("quarter_x", (0.7071067811865476, 0.7071067811865476, 0.0, 0.0)),
+        ("quarter_y", (0.7071067811865476, 0.0, 0.7071067811865476, 0.0)),
+        ("quarter_z", (0.7071067811865476, 0.0, 0.0, 0.7071067811865476)),
+        ("mixed_a", (0.8, 0.2, -0.4, 0.4)),
+        ("mixed_b", (0.7, -0.3, 0.2, 0.6164414002968976)),
+        ("antipode_mixed_a", (-0.8, -0.2, 0.4, -0.4)),
+        ("nonprincipal_halfturn", (0.0, 0.5773502691896258, 0.5773502691896258, 0.5773502691896258)),
+    )
     canonical_probe = Vector((0.25, -1.5, 2.75))
     native_probe = Vector(canonical_probe)
-    left = Quaternion(left_wxyz)
-    right = Quaternion(right_wxyz)
-    product = left @ right
 
     def orientation(case_id, canonical_wxyz, native):
         return {
@@ -566,24 +572,29 @@ def capture_canonical_interop():
             "native_rotated_probe_vector_xyz": as_float_list(native @ native_probe),
         }
 
+    native = {case_id: Quaternion(wxyz) for case_id, wxyz in orientations}
+    lhs_rhs = native["mixed_a"] @ native["mixed_b"]
+    rhs_lhs = native["mixed_b"] @ native["mixed_a"]
+
+    def composition(left_id, right_id, product):
+        return {
+            "left_case_id": left_id,
+            "right_case_id": right_id,
+            "product_order": "lhs * rhs; rhs acts first",
+            "native_product_quaternion": as_float_list(product),
+            "native_rotated_positive_basis_vectors_xyz": vector_images(product),
+            "native_rotated_probe_vector_xyz": as_float_list(product @ native_probe),
+        }
+
     return {
         "contract_id": "quatops-canonical-hamilton-wxyz-active-rh-v1",
         "native_quaternion_order": "wxyz",
         "frame_map_destination_axes_from_source": ["x", "y", "z"],
         "probe_vector_canonical_xyz": as_float_list(canonical_probe),
         "probe_vector_native_xyz": as_float_list(native_probe),
-        "orientation_cases": [
-            orientation("mixed_a", left_wxyz, left),
-            orientation("mixed_b", right_wxyz, right),
-        ],
-        "composition": {
-            "left_case_id": "mixed_a",
-            "right_case_id": "mixed_b",
-            "product_order": "lhs * rhs; rhs acts first",
-            "native_product_quaternion": as_float_list(product),
-            "native_rotated_positive_basis_vectors_xyz": vector_images(product),
-            "native_rotated_probe_vector_xyz": as_float_list(product @ native_probe),
-        },
+        "orientation_cases": [orientation(case_id, wxyz, native[case_id]) for case_id, wxyz in orientations],
+        "composition": composition("mixed_a", "mixed_b", lhs_rhs),
+        "reverse_composition": composition("mixed_b", "mixed_a", rhs_lhs),
     }
 
 
@@ -714,14 +725,13 @@ def parse_output_path():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output", type=Path, default=None)
     args = parser.parse_args(script_args)
-    repository_root = Path(__file__).resolve().parents[3]
     version = bpy.app.version_string
     if Path(__file__).resolve().parent.name != version:
         raise RuntimeError(
             "capture directory %r does not match Blender runtime version %r"
             % (Path(__file__).resolve().parent.name, version)
         )
-    return args.output or repository_root / "tests" / "golden" / "blender" / version / "native_rotation.json"
+    return args.output or Path(tempfile.gettempdir()) / "quatops-blender-full.json"
 
 
 def main():

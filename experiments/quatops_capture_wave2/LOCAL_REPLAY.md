@@ -56,8 +56,10 @@ comparison; the test helper now relocates recorded paths independent of the
 host path separator and compares derived numeric reports with an absolute
 `1e-7` tolerance. Raw native values and hashes are still checked exactly.
 
-## Remaining Wave 2 work
+## ROS/tf2 follow-on and remaining work
 
-ROS 2/tf2 was not compiled or run; this workspace has no ROS 2/colcon runtime.
-OpenXR remains planned. The packet's pre-capture source for those routes is
-preserved under `ros2/` and `exporters/` but is not native evidence.
+The packet's original ROS 2 source was not itself a native capture. A separate
+local follow-on now builds and runs a C++20 exporter in the pinned ROS 2 Jazzy
+container. Its selected native `BufferCore` frame-chain observations and
+QuatOps replay are documented in [the ROS/tf2 proof](../../docs/oracles/ros2-tf2.md).
+OpenXR remains planned; it has no pinned runtime capture in this workspace.

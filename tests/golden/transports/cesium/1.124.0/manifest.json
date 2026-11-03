@@ -1,0 +1,36 @@
+{
+  "schema_version": "1.0",
+  "review_state": "native capture retained; QuatOps replay covered by tests/test_cesium_converter.py",
+  "target": {
+    "name": "CesiumJS",
+    "package_version": "1.124.0",
+    "api_version": "1.124",
+    "package_entry_sha256": "7520b29545f5803c1f690650545d84d1bf5c25ce3c47ca65a43059604cdf1f58"
+  },
+  "execution": {
+    "was_run": true,
+    "utc": "2026-11-03T05:59:01.886Z",
+    "node": "v24.21.0",
+    "v8": "13.6.233.17-node.53",
+    "platform": "win32",
+    "architecture": "x64"
+  },
+  "provenance": {
+    "run_manifest_sha256": "24c81767ed43f64fe1cb8641f46c6d30d2ec5a08d29c89b670e5904082cf6ffb",
+    "full_observation_sha256": "bd3e0eef81407661cc533787d40f2fc89b85481bc4107573b77fd77724ebf9ee",
+    "converter_input_sha256": "d09b213ad459f5361dd6e73afd1ab6c39d0d78d4ddcafe2e2edf728b02367de2",
+    "canonical_inputs_sha256": "a6f0630806b69d3b3b29a036aa10f63bfe214668329c661598951f84f8f41eec",
+    "geographic_inputs_sha256": "ca5c70314444c14cead0cc196f319e5d189657bb818eb59751c07e55ec23ff85",
+    "python_input_generator_sha256": "a3d597bde3c059a2f670c88ffb95564e302c029374ea4b6ccb0ceca6e0aa0dca",
+    "native_capture_script_sha256": "c7d2dd5842e17808cf38fa14cf74156cfd78f7ae048e843088ca31dc6b968972",
+    "capture_io_sha256": "806c713f466f011b687442482fab5ed32b0c8ab6e495e562122bb9cb30558536",
+    "package_lock_sha256": "c2ae7e7b309ac57116dfbe977a1227a8701e62d6ef28c3fb814d5dbb96b6d439",
+    "witnesses_sha256": "a864b1c8a8ba4c8d9917533d677647f002bff126d226da3c77113c51231a7a76",
+    "contract_sha256": "c11901bad3e376a96412745dad8dbe0be8527095b19271824eaec0c401c58295"
+  },
+  "selection": {
+    "retained_observations": 9,
+    "native_observations": 9,
+    "policy": "retain identity, principal turns, mixed and antipodal cases, half-turn, composition, and three geographic branches"
+  }
+}
