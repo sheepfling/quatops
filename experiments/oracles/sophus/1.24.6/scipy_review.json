@@ -1,0 +1,33 @@
+{
+  "schema_version": "1.0",
+  "evidence_kind": "derived_reference",
+  "native_capture": "discovery.json",
+  "native_capture_sha256": "98171e1c77e280395c4744fe6285198d0ed764b7d82e90a3b39a0fb7ef876638",
+  "reference_script": "verify_scipy.py",
+  "reference_script_sha256": "cf5026f801fb73c02c7fcb4861cb16733d47d3bef6a358c367ee7356c4379835",
+  "quatops_executed": false,
+  "reference": {
+    "library": "SciPy Rotation",
+    "version": "1.18.1"
+  },
+  "checks": [
+    "SO3 constructor normalization, matrix action, XYZW storage, and quaternion log",
+    "SO3 exp/log including near-zero and greater-than-pi inputs",
+    "noncommuting product orders, inverse, and left/right perturbations"
+  ],
+  "absolute_tolerance": 2e-14,
+  "max_abs_errors": {
+    "quaternion_construction_matrix": 2.220446049250313e-16,
+    "quaternion_construction_action": 1.7763568394002505e-15,
+    "quaternion_storage_xyzw": 0.0,
+    "quaternion_log_rotation": 2.220446049250313e-16,
+    "quaternion_log_rotvec": 4.440892098500626e-16,
+    "exp_matrix": 2.220446049250313e-16,
+    "log_rotvec": 0.0,
+    "composition_matrix": 2.220446049250313e-16,
+    "inverse_matrix": 1.1102230246251565e-16,
+    "perturbation_matrix": 1.1102230246251565e-16
+  },
+  "result": "pass",
+  "generated_utc": "2026-11-03T08:18:18.236658+00:00"
+}

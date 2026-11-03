@@ -21,17 +21,18 @@
     "was_run": true,
     "utc": "2026-11-03T02:53:07.613026+00:00",
     "argv": [
-      "/opt/pyvenv/bin/python",
-      "/mnt/data/quatops_capture_wave2/exporters/capture_proj.py",
+      "python",
+      "<historical PROJ capture exporter; workspace-specific path removed>",
       "--output",
-      "runs/proj-geographic"
+      "<temporary capture directory>"
     ],
     "exit_code": 0,
     "platform": "Linux-6.18.57-x86_64-with-glibc2.41",
     "architecture": "x86_64",
     "runtime": "3.13.5 (main, Jul 15 2026, 20:25:40) [GCC 14.2.0]",
     "compiler_flags": [],
-    "compiler_flags_note": "Vendor native flags not inferred from host Python"
+    "compiler_flags_note": "Vendor native flags not inferred from host Python",
+    "argv_note": "The historical exporter SHA-256 is preserved; the versioned package now contains a portable reproduction exporter."
   },
   "precision": {
     "input": "binary64 geographic degrees/metres",
@@ -40,12 +41,13 @@
     "serialized": "JSON plus IEEE bits"
   },
   "exporter": {
-    "path": "/mnt/data/quatops_capture_wave2/exporters/capture_proj.py",
+    "path": "historical native exporter source not retained; see SHA-256",
     "sha256": "8211253a2d97a9453890b8a695af02f0c79069419deca9ce7e7dc0b4211a48b1",
-    "commit": null
+    "commit": null,
+    "role": "historical native-run exporter; original source path was removed during evidence curation"
   },
   "corpus": {
-    "path": "/mnt/data/quatops_capture_wave2/corpus/cesium_geographic_inputs.json",
+    "path": "experiments/oracles/proj/9.5.1/geographic_inputs.json",
     "sha256": "ca5c70314444c14cead0cc196f319e5d189657bb818eb59751c07e55ec23ff85"
   },
   "artifacts": [
@@ -55,7 +57,7 @@
       "role": "raw_native_observations"
     },
     {
-      "path": "/mnt/data/quatops_capture_wave2/corpus/cesium_geographic_inputs.json",
+      "path": "experiments/oracles/proj/9.5.1/geographic_inputs.json",
       "sha256": "ca5c70314444c14cead0cc196f319e5d189657bb818eb59751c07e55ec23ff85",
       "role": "geographic_input_corpus"
     }
@@ -81,5 +83,15 @@
       "At geographic poles longitude fixes a convention; Cesium may choose a different exact-pole fallback.",
       "Network disabled; WGS84 ellipsoid only, no external datum grids."
     ]
+  },
+  "reproduction": {
+    "exporter_path": "experiments/oracles/proj/9.5.1/capture_proj.py",
+    "exporter_sha256": "34e4f826b89f19ecc3884cbf31107f73db15111e65847b2cb03321bf4f7edd2a",
+    "capture_helper_path": "experiments/oracles/shared/capture_io.py",
+    "capture_helper_sha256": "5f9ee3af35720aed1ae476b07d2465e3ce9b742ce6c538edf32da64f10325347",
+    "input_path": "experiments/oracles/proj/9.5.1/geographic_inputs.json",
+    "input_sha256": "ca5c70314444c14cead0cc196f319e5d189657bb818eb59751c07e55ec23ff85",
+    "requirements_path": "experiments/oracles/proj/9.5.1/requirements.txt",
+    "requirements_sha256": "6ac96b8e4a780288a062b02f6a1c3c3c8039c54452dc39bc07c9d07187433d3a"
   }
 }

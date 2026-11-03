@@ -7,7 +7,9 @@ import numpy as np
 from scipy.spatial.transform import Rotation
 
 ROOT = Path(__file__).parent.parent
-FIXTURE_PATH = ROOT / "tests" / "golden" / "oracles" / "mujoco" / "3.17.0" / "native_rotation.json"
+FIXTURE_PATH = (
+    ROOT / "tests" / "golden" / "oracles" / "mujoco" / "3.17.0" / "native_rotation.json"
+)
 FIXTURE = json.loads(FIXTURE_PATH.read_text(encoding="utf-8"))
 OBS = FIXTURE["observations"]
 CORPUS_SHA256 = "07e4d809f7eb75ad6e5454febf2b725b0b8fb389536743dd7196566d4640135f"
@@ -93,8 +95,13 @@ def test_mujoco_fixture_records_pinned_binary_dtype_and_capture_counts():
     assert FIXTURE["runtime"]["engine_version"] == "3.17.0"
     assert FIXTURE["runtime"]["binding_scalar_dtype"] == "float64"
     assert FIXTURE["runtime"]["python_version"].startswith("3.10.11 ")
-    assert any(row["path"] == "mujoco.dll" for row in FIXTURE["runtime"]["native_binary_files_under_package"])
-    assert all(row["sha256"] for row in FIXTURE["runtime"]["native_binary_files_under_package"])
+    assert any(
+        row["path"] == "mujoco.dll"
+        for row in FIXTURE["runtime"]["native_binary_files_under_package"]
+    )
+    assert all(
+        row["sha256"] for row in FIXTURE["runtime"]["native_binary_files_under_package"]
+    )
     assert FIXTURE["provenance"]["input_corpus_sha256"] == CORPUS_SHA256
     assert FIXTURE["counts"] == {
         "euler_orders": 12,
@@ -109,13 +116,18 @@ def test_mujoco_fixture_records_pinned_binary_dtype_and_capture_counts():
 
 def test_mujoco_euler_case_casing_maps_to_scipy_intrinsic_and_extrinsic_routes():
     for row in OBS["euler_orders"]:
-        scipy_order = row["order_label"].upper() if row["sequence_case"] == "lowercase" else row["order_label"].lower()
+        scipy_order = (
+            row["order_label"].upper()
+            if row["sequence_case"] == "lowercase"
+            else row["order_label"].lower()
+        )
         expected = Rotation.from_euler(
             scipy_order, row["input_angles_in_sequence_order_radians"]
         )
-        assert _rotation_error(row["quaternion_wxyz"], _xyzw_to_wxyz(expected.as_quat())) <= TOLERANCE, (
-            row["case_id"], row["sequence"]
-        )
+        assert (
+            _rotation_error(row["quaternion_wxyz"], _xyzw_to_wxyz(expected.as_quat()))
+            <= TOLERANCE
+        ), (row["case_id"], row["sequence"])
         np.testing.assert_allclose(
             row["matrix_rows"], expected.as_matrix(), rtol=0.0, atol=TOLERANCE
         )
@@ -124,37 +136,73 @@ def test_mujoco_euler_case_casing_maps_to_scipy_intrinsic_and_extrinsic_routes()
         expected = Rotation.from_euler(
             row["order_label"].upper(), row["input_angles_in_sequence_order_radians"]
         )
-        assert _rotation_error(row["quaternion_wxyz"], _xyzw_to_wxyz(expected.as_quat())) <= 3e-7
+        assert (
+            _rotation_error(row["quaternion_wxyz"], _xyzw_to_wxyz(expected.as_quat()))
+            <= 3e-7
+        )
 
 
 def test_mujoco_products_axis_angle_and_matrix_routes_match_independent_formulas():
     for row in OBS["multiplication"]:
         a = np.asarray(row["a_input_wxyz"], dtype=float)
         b = np.asarray(row["b_input_wxyz"], dtype=float)
-        np.testing.assert_allclose(row["mju_mulQuat_a_b_wxyz"], _hamilton(a, b), rtol=0.0, atol=2e-14)
-        np.testing.assert_allclose(row["mju_mulQuat_b_a_wxyz"], _hamilton(b, a), rtol=0.0, atol=2e-14)
-        np.testing.assert_allclose(row["mju_negQuat_a_wxyz"], _conjugate(a), rtol=0.0, atol=0.0)
+        np.testing.assert_allclose(
+            row["mju_mulQuat_a_b_wxyz"], _hamilton(a, b), rtol=0.0, atol=2e-14
+        )
+        np.testing.assert_allclose(
+            row["mju_mulQuat_b_a_wxyz"], _hamilton(b, a), rtol=0.0, atol=2e-14
+        )
+        np.testing.assert_allclose(
+            row["mju_negQuat_a_wxyz"], _conjugate(a), rtol=0.0, atol=0.0
+        )
         w, x, y, z = a
         expected = np.asarray(
             (
-                (w*w+x*x-y*y-z*z, 2*(x*y-w*z), 2*(x*z+w*y)),
-                (2*(x*y+w*z), w*w-x*x+y*y-z*z, 2*(y*z-w*x)),
-                (2*(x*z-w*y), 2*(y*z+w*x), w*w-x*x-y*y+z*z),
+                (
+                    w * w + x * x - y * y - z * z,
+                    2 * (x * y - w * z),
+                    2 * (x * z + w * y),
+                ),
+                (
+                    2 * (x * y + w * z),
+                    w * w - x * x + y * y - z * z,
+                    2 * (y * z - w * x),
+                ),
+                (
+                    2 * (x * z - w * y),
+                    2 * (y * z + w * x),
+                    w * w - x * x - y * y + z * z,
+                ),
             )
         )
-        np.testing.assert_allclose(row["mju_quat2Mat_a_rows"], expected, rtol=0.0, atol=TOLERANCE)
+        np.testing.assert_allclose(
+            row["mju_quat2Mat_a_rows"], expected, rtol=0.0, atol=TOLERANCE
+        )
 
     for row in OBS["axis_angle"]:
         expected = Rotation.from_rotvec(
             np.asarray(row["input_axis_xyz"], dtype=float) * row["input_angle_radians"]
         )
-        assert _rotation_error(row["quaternion_wxyz"], _xyzw_to_wxyz(expected.as_quat())) <= TOLERANCE
-        np.testing.assert_allclose(row["matrix_rows"], expected.as_matrix(), rtol=0.0, atol=TOLERANCE)
+        assert (
+            _rotation_error(row["quaternion_wxyz"], _xyzw_to_wxyz(expected.as_quat()))
+            <= TOLERANCE
+        )
+        np.testing.assert_allclose(
+            row["matrix_rows"], expected.as_matrix(), rtol=0.0, atol=TOLERANCE
+        )
 
     for row in OBS["proper_matrices"]:
         expected = np.asarray(row["input_matrix_rows"], dtype=float)
-        np.testing.assert_allclose(row["mju_quat2Mat_rows"], expected, rtol=0.0, atol=TOLERANCE)
-        assert _rotation_error(row["mju_mat2Quat_wxyz"], _xyzw_to_wxyz(Rotation.from_matrix(expected).as_quat())) <= TOLERANCE
+        np.testing.assert_allclose(
+            row["mju_quat2Mat_rows"], expected, rtol=0.0, atol=TOLERANCE
+        )
+        assert (
+            _rotation_error(
+                row["mju_mat2Quat_wxyz"],
+                _xyzw_to_wxyz(Rotation.from_matrix(expected).as_quat()),
+            )
+            <= TOLERANCE
+        )
 
 
 def test_mujoco_integration_and_derivative_use_explicit_body_and_world_rates():
@@ -195,7 +243,10 @@ def test_mujoco_integration_and_derivative_use_explicit_body_and_world_rates():
         )
         native_quat2vel = row["mju_quat2Vel_from_integrated_relative_quaternion"]
         if dt == 0.0:
-            assert native_quat2vel == {"status": "not_called_zero_scale", "velocity_xyz": None}
+            assert native_quat2vel == {
+                "status": "not_called_zero_scale",
+                "velocity_xyz": None,
+            }
         else:
             assert native_quat2vel["status"] == "captured"
             np.testing.assert_allclose(
@@ -235,7 +286,9 @@ def test_mujoco_quat_integrate_jacobians_match_finite_differences_in_recorded_ch
             with_scaled_velocity_delta, np.zeros(3), epsilon
         )
         np.testing.assert_allclose(native_dvel, finite_dvel, rtol=0.0, atol=3e-7)
-        np.testing.assert_allclose(native_dscale, native_dvel @ vel, rtol=0.0, atol=2e-12)
+        np.testing.assert_allclose(
+            native_dscale, native_dvel @ vel, rtol=0.0, atol=2e-12
+        )
 
 
 def test_mujoco_subquat_derivative_matrices_match_the_native_local_perturbation_chart():

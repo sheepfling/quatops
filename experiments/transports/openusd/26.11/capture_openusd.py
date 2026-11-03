@@ -91,7 +91,9 @@ def create_input_stage(path):
     parent_translate = parent.AddTranslateOp(UsdGeom.XformOp.PrecisionDouble)
     parent_translate.Set(Gf.Vec3d(1.25, -2.0, 0.5))
     parent_orient = parent.AddOrientOp(UsdGeom.XformOp.PrecisionDouble)
-    parent_orient.Set(Gf.Quatd(0.9238795325112867, Gf.Vec3d(0.0, 0.0, 0.3826834323650898)))
+    parent_orient.Set(
+        Gf.Quatd(0.9238795325112867, Gf.Vec3d(0.0, 0.0, 0.3826834323650898))
+    )
 
     child = UsdGeom.Xform.Define(stage, "/World/Parent/Child")
     child_rotate = child.AddRotateXYZOp(UsdGeom.XformOp.PrecisionDouble)
@@ -107,7 +109,11 @@ def create_input_stage(path):
     reset_orient.Set(Gf.Quatd(0.8660254037844386, Gf.Vec3d(0.5, 0.0, 0.0)))
 
     axis_probes = {}
-    for name, axis in (("X", (1.0, 0.0, 0.0)), ("Y", (0.0, 1.0, 0.0)), ("Z", (0.0, 0.0, 1.0))):
+    for name, axis in (
+        ("X", (1.0, 0.0, 0.0)),
+        ("Y", (0.0, 1.0, 0.0)),
+        ("Z", (0.0, 0.0, 1.0)),
+    ):
         probe = UsdGeom.Xform.Define(stage, f"/World/Axis{name}")
         translate = probe.AddTranslateOp(UsdGeom.XformOp.PrecisionDouble)
         translate.Set(vec3(axis))
@@ -156,11 +162,15 @@ def capture_quaternions(corpus):
                         "input_xyz": vector,
                         "transformed_xyz": [
                             float(value)
-                            for value in qd.Transform(Gf.Vec3d(*(float(x) for x in vector)))
+                            for value in qd.Transform(
+                                Gf.Vec3d(*(float(x) for x in vector))
+                            )
                         ],
                         "inverse_transformed_xyz": [
                             float(value)
-                            for value in inverse.Transform(Gf.Vec3d(*(float(x) for x in vector)))
+                            for value in inverse.Transform(
+                                Gf.Vec3d(*(float(x) for x in vector))
+                            )
                         ],
                     }
                     for vector in corpus["vectors_xyz"]
@@ -192,7 +202,7 @@ def capture_axis_angles(corpus):
     rows = []
     for case in corpus["axis_angle_inputs"]:
         axis = vec3(case["axis_xyz"])
-        rotation = Gf.Rotation(axis, float(case["angle_radians"]) * 180.0 / 3.141592653589793)
+        rotation = Gf.Rotation(axis, float(case["angle_radians"]) * 180.0 / math.pi)
         quaternion = rotation.GetQuat()
         matrix = Gf.Matrix4d(1.0).SetRotate(rotation)
         rows.append(
@@ -200,13 +210,14 @@ def capture_axis_angles(corpus):
                 "case_id": case["case_id"],
                 "input_axis_xyz": case["axis_xyz"],
                 "input_angle_radians": case["angle_radians"],
-                "input_angle_degrees": float(case["angle_radians"]) * 180.0 / 3.141592653589793,
+                "input_angle_degrees": float(case["angle_radians"]) * 180.0 / math.pi,
                 "rotation_get_angle_degrees": float(rotation.GetAngle()),
                 "rotation_get_axis_xyz": [float(value) for value in rotation.GetAxis()],
                 "rotation_get_quaternion_wxyz": quat_values(quaternion),
                 "rotation_matrix_rows": matrix_rows(matrix),
                 "rotation_matrix_transform_dir_xyz": [
-                    float(value) for value in matrix.TransformDir(Gf.Vec3d(0.31, -0.47, 0.83))
+                    float(value)
+                    for value in matrix.TransformDir(Gf.Vec3d(0.31, -0.47, 0.83))
                 ],
             }
         )
@@ -217,10 +228,12 @@ def capture_slerp(corpus):
     rows = []
     for pair in corpus["interpolation_pairs"]:
         qa = Gf.Quatd(
-            float(pair["a_wxyz"][0]), Gf.Vec3d(*(float(value) for value in pair["a_wxyz"][1:]))
+            float(pair["a_wxyz"][0]),
+            Gf.Vec3d(*(float(value) for value in pair["a_wxyz"][1:])),
         )
         qb = Gf.Quatd(
-            float(pair["b_wxyz"][0]), Gf.Vec3d(*(float(value) for value in pair["b_wxyz"][1:]))
+            float(pair["b_wxyz"][0]),
+            Gf.Vec3d(*(float(value) for value in pair["b_wxyz"][1:])),
         )
         for amount in corpus["interpolation_weights"]:
             sampled = Gf.Slerp(float(amount), qa, qb)
@@ -253,7 +266,11 @@ def capture_stage(stage, world, parent, child, reset, axis_probes):
             float(value) for value in matrix.ExtractTranslation()
         ]
 
-    for label, prim_schema in (("parent", parent), ("child", child), ("reset_child", reset)):
+    for label, prim_schema in (
+        ("parent", parent),
+        ("child", child),
+        ("reset_child", reset),
+    ):
         prim = prim_schema.GetPrim()
         local = prim_schema.GetLocalTransformation()
         world_matrix = cache.GetLocalToWorldTransform(prim)
@@ -271,7 +288,8 @@ def capture_stage(stage, world, parent, child, reset, axis_probes):
             "local_matrix_rows": matrix_rows(local),
             "world_matrix_rows": matrix_rows(world_matrix),
             "world_transform_point_xyz": [
-                float(value) for value in world_matrix.Transform(Gf.Vec3d(0.31, -0.47, 0.83))
+                float(value)
+                for value in world_matrix.Transform(Gf.Vec3d(0.31, -0.47, 0.83))
             ],
             "world_transform_direction_xyz": [
                 float(value)
@@ -300,7 +318,9 @@ def main():
         if path.exists():
             native_files.append({"path": relative, "sha256": sha256_file(path)})
     if len(native_files) != 4:
-        raise RuntimeError(f"Could not find every expected OpenUSD binary under {package_dir}")
+        raise RuntimeError(
+            f"Could not find every expected OpenUSD binary under {package_dir}"
+        )
 
     lock_path = HERE / "uv.lock"
     output = {
@@ -320,13 +340,18 @@ def main():
             "input_stage_sha256": sha256(stage_bytes),
             "lockfile_sha256": sha256_file(lock_path),
             "exporter_sha256": sha256_file(Path(__file__)),
-            "exact_invocation": "uv run --locked python capture_openusd.py --corpus <orientation_inputs_v1.json> --stage <rotation_stack.usda> --output <native_rotation.json>",
+            "exact_invocation": (
+                "uv run --locked python capture_openusd.py --corpus "
+                "<orientation_inputs_v1.json> --stage <rotation_stack.usda> "
+                "--output <native_rotation.json>"
+            ),
             "captured_at_utc": datetime.now(timezone.utc).isoformat(),
         },
         "counts": {
             "quaternion_algebra": len(corpus["quaternion_inputs"]),
             "axis_angle_and_rotation": len(corpus["axis_angle_inputs"]),
-            "slerp": len(corpus["interpolation_pairs"]) * len(corpus["interpolation_weights"]),
+            "slerp": len(corpus["interpolation_pairs"])
+            * len(corpus["interpolation_weights"]),
             "stage_prims": 7,
         },
         "observations": {

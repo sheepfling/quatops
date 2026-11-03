@@ -16,10 +16,8 @@ has a distinct version directory and frozen observations.
 
 - [Three.js GLTFLoader 0.187.0](threejs/0.187.0/README.md)
 - [Blender glTF importer 5.1.2](blender/5.1.2/README.md)
-- VTK 9.6.2 importer ([capture](vtk/9.6.2/README.md))
-- Trimesh 4.11.1 importer ([capture](trimesh/4.11.1/README.md))
 
-The Three.js and Blender records include the original authored transport
-asset. Wave 2 adds a separate twelve-file asset corpus and captures for
-Three.js, VTK, and Trimesh; see the
-[Wave 2 replay note](../../../quatops_capture_wave2/LOCAL_REPLAY.md).
+The Three.js and Blender records load the retained authored asset. A separate
+QuatOps-generated static hierarchy is captured through Three.js for the
+converter-boundary proof; see
+[`experiments/converters/gltf/2.0.0`](../../../converters/gltf/2.0.0/README.md).

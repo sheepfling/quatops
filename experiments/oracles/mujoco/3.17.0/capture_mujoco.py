@@ -1,5 +1,9 @@
 """Capture MuJoCo's low-level quaternion routines through pinned Python bindings."""
 
+# The core typecheck uses the versioned API stub; the binary module source is
+# available only in this capture's pinned MuJoCo environment.
+# pyright: reportMissingModuleSource=false
+
 import argparse
 import hashlib
 import json
@@ -152,16 +156,16 @@ def main():
                 "numeric_format": case["numeric_format"],
                 "actual_bits_hex": case["actual_bits_hex"],
             }
-            for sequence_case in ("lowercase", "uppercase"):
-                euler_orders.append(
-                    native_euler(
-                        case["case_id"],
-                        case["xyz"],
-                        order,
-                        sequence_case,
-                        source,
-                    )
+            euler_orders.extend(
+                native_euler(
+                    case["case_id"],
+                    case["xyz"],
+                    order,
+                    sequence_case,
+                    source,
                 )
+                for sequence_case in ("lowercase", "uppercase")
+            )
 
     euler_boundaries = []
     for case in corpus["euler_boundaries"]:
@@ -232,7 +236,7 @@ def main():
         )
 
     integration = []
-    for index, case in enumerate(corpus["integration_inputs"]):
+    for case in corpus["integration_inputs"]:
         q = np.asarray(case["initial_wxyz"], dtype=np.float64)
         omega_body = np.asarray(case["omega_xyz"], dtype=np.float64)
         scale = float(case["dt_seconds"])
@@ -292,7 +296,9 @@ def main():
             )
             safe_rotations.append((case["case_id"], q))
     if len(safe_rotations) != 4:
-        raise RuntimeError(f"Expected four positive quarter-turn probes; got {len(safe_rotations)}")
+        raise RuntimeError(
+            f"Expected four positive quarter-turn probes; got {len(safe_rotations)}"
+        )
     for index, (case_id, qa) in enumerate(safe_rotations):
         next_case_id, qb = safe_rotations[(index + 1) % len(safe_rotations)]
         difference = native_sub_quat(qa, qb)
@@ -307,7 +313,9 @@ def main():
                 "qa_wxyz": qa.tolist(),
                 "qb_wxyz": qb.tolist(),
                 "mju_subQuat_qa_qb_rotvec_xyz": difference.tolist(),
-                "mju_quat2Vel_relative_q_dt1_xyz": native_quat2vel(relative_q, 1.0).tolist(),
+                "mju_quat2Vel_relative_q_dt1_xyz": native_quat2vel(
+                    relative_q, 1.0
+                ).tolist(),
                 "mjd_subQuat_Da_flat_row_major": da.tolist(),
                 "mjd_subQuat_Db_flat_row_major": db.tolist(),
             }
@@ -316,10 +324,13 @@ def main():
     package_dir = Path(mujoco.__file__).parent
     binary_files = []
     for pattern in ("*.dll", "*.pyd"):
-        for path in sorted(package_dir.rglob(pattern)):
-            binary_files.append(
-                {"path": path.relative_to(package_dir).as_posix(), "sha256": sha256_file(path)}
-            )
+        binary_files.extend(
+            {
+                "path": path.relative_to(package_dir).as_posix(),
+                "sha256": sha256_file(path),
+            }
+            for path in sorted(package_dir.rglob(pattern))
+        )
     if not binary_files:
         raise RuntimeError(f"No MuJoCo native binary found under {package_dir}")
 
@@ -342,7 +353,10 @@ def main():
             "input_corpus_sha256": sha256(corpus_bytes),
             "lockfile_sha256": sha256_file(lock_path),
             "exporter_sha256": sha256_file(Path(__file__)),
-            "exact_invocation": "uv run --locked python capture_mujoco.py --corpus <orientation_inputs_v1.json> --output <native_rotation.json>",
+            "exact_invocation": (
+                "uv run --locked python capture_mujoco.py --corpus "
+                "<orientation_inputs_v1.json> --output <native_rotation.json>"
+            ),
             "captured_at_utc": datetime.now(timezone.utc).isoformat(),
         },
         "counts": {

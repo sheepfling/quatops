@@ -31,13 +31,13 @@
   "provenance": {
     "gltf_sha256": "fdfb41df6dba25b0af3452b85310887e7e4f0060b017fad025c930a9de7c0bb3",
     "binary_sha256": "335c8c8ca1d09faae363ddab206ec1abd04c94c044889f92c501edbf772f2ed7",
-    "exporter_sha256": "ae954fe2d5d51a41a9b1511f72827816f762efaefc29bd8e1fdc7dd0ade0ff85",
+    "exporter_sha256": "25446bfafca7703fbc7ae8d345b9bce1d225effa90f0b372573ef3b0f4de5635",
     "exact_invocation": "blender --background --factory-startup --python-exit-code 1 --python capture_gltf.py -- --asset <rotation_transport.gltf> --output <native_blender_gltf.json>",
     "operator_arguments": {
       "filepath": "rotation_transport.gltf"
     },
     "other_operator_properties": "Blender 5.1.2 importer defaults",
-    "captured_at_utc": "2026-11-03T03:58:58.943290+00:00"
+    "captured_at_utc": "2026-11-03T07:29:23.834859+00:00"
   },
   "scene": {
     "fps": 30,

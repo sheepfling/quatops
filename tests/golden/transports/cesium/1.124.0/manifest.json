@@ -9,28 +9,35 @@
   },
   "execution": {
     "was_run": true,
-    "utc": "2026-11-03T05:59:01.886Z",
+    "utc": "2026-11-03T07:29:35.547Z",
     "node": "v24.21.0",
     "v8": "13.6.233.17-node.53",
     "platform": "win32",
     "architecture": "x64"
   },
   "provenance": {
-    "run_manifest_sha256": "24c81767ed43f64fe1cb8641f46c6d30d2ec5a08d29c89b670e5904082cf6ffb",
+    "run_manifest_sha256": "e54005f7344783f8021578fdc8aeeb9c06c5e2ee0a141455d8b5a1f41e686cf6",
     "full_observation_sha256": "bd3e0eef81407661cc533787d40f2fc89b85481bc4107573b77fd77724ebf9ee",
     "converter_input_sha256": "d09b213ad459f5361dd6e73afd1ab6c39d0d78d4ddcafe2e2edf728b02367de2",
     "canonical_inputs_sha256": "a6f0630806b69d3b3b29a036aa10f63bfe214668329c661598951f84f8f41eec",
     "geographic_inputs_sha256": "ca5c70314444c14cead0cc196f319e5d189657bb818eb59751c07e55ec23ff85",
-    "python_input_generator_sha256": "a3d597bde3c059a2f670c88ffb95564e302c029374ea4b6ccb0ceca6e0aa0dca",
     "native_capture_script_sha256": "c7d2dd5842e17808cf38fa14cf74156cfd78f7ae048e843088ca31dc6b968972",
-    "capture_io_sha256": "806c713f466f011b687442482fab5ed32b0c8ab6e495e562122bb9cb30558536",
-    "package_lock_sha256": "c2ae7e7b309ac57116dfbe977a1227a8701e62d6ef28c3fb814d5dbb96b6d439",
     "witnesses_sha256": "a864b1c8a8ba4c8d9917533d677647f002bff126d226da3c77113c51231a7a76",
-    "contract_sha256": "c11901bad3e376a96412745dad8dbe0be8527095b19271824eaec0c401c58295"
+    "contract_sha256": "c11901bad3e376a96412745dad8dbe0be8527095b19271824eaec0c401c58295",
+    "native_input_generator_sha256": "7e888dd727417174acf53815f4bd0a1f305828a1302c64d280d82b1d0f5c17c7",
+    "native_numeric_helper_sha256": "806c713f466f011b687442482fab5ed32b0c8ab6e495e562122bb9cb30558536",
+    "native_package_lock_sha256": "c2ae7e7b309ac57116dfbe977a1227a8701e62d6ef28c3fb814d5dbb96b6d439"
   },
   "selection": {
     "retained_observations": 9,
     "native_observations": 9,
     "policy": "retain identity, principal turns, mixed and antipodal cases, half-turn, composition, and three geographic branches"
+  },
+  "reproduction": {
+    "input_generator_sha256": "7405b1485ff598254e4e58e7014597fc0e17f1b3ecc2281a74d4ca7ff697b4a1",
+    "capture_script_sha256": "cc596d22e143b7dac96bbca8eebca8629cf4eb8dec3fe52c75a9fdd691d23b41",
+    "numeric_helper_sha256": "aed1da7b180e76ff0e101a477dd6a941ed0ad076509d9716bf2bf9b6896f5fa4",
+    "package_lock_sha256": "668a68bc25bbfd59ff9ff1b615ec83294b6c9c8f97fa9466f5838dbd169dc791",
+    "geographic_inputs_sha256": "ca5c70314444c14cead0cc196f319e5d189657bb818eb59751c07e55ec23ff85"
   }
 }

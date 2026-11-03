@@ -72,7 +72,7 @@
   "provenance": {
     "original_capture_sha256": "e3f4096ef6a67d7dc1fa3a177c5194f51d8648622564cc1a1f1835ab1bfad5b3",
     "capture_source": "experiments/blender/5.1.2/capture.py",
-    "capture_source_sha256": "072346a3f074fd708ce5f18a42e8b75b83edbd488fd544582e58cde994321cf0",
+    "capture_source_sha256": "c2927e54afbf5f2dc091d8b4bb5f66a15124f1e343bd009c9970bee4cd38e45b",
     "canonical_input_file": "experiments/interoperability/v1/canonical_inputs.json",
     "canonical_input_sha256": "a6f0630806b69d3b3b29a036aa10f63bfe214668329c661598951f84f8f41eec",
     "native_build_record": {

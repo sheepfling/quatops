@@ -35,10 +35,10 @@
     "input_corpus_sha256": "07e4d809f7eb75ad6e5454febf2b725b0b8fb389536743dd7196566d4640135f",
     "input_stage_sha256": "8f0e94e221fff14caf60da5fa4edab30ef6592be7180159047284e6d150ba051",
     "lockfile_sha256": "45efc254d1dad9cf6b7e8087228c67bb7deddd9dfe6651b1869b12fcef8325ae",
-    "exporter_sha256": "1ee8e4f9f6348e544d287a2c634195f79cad2774d3f3cbd402b517b3541e40b4",
+    "exporter_sha256": "e7d9ef9d35669cee78d2d2faa5f5766789d31c00ec85ed0ebbb1480cd5b91c34",
     "exact_invocation": "uv run --locked python capture_openusd.py --corpus <orientation_inputs_v1.json> --stage <rotation_stack.usda> --output <native_rotation.json>",
-    "captured_at_utc": "2026-11-03T04:18:43.320341+00:00",
-    "full_discovery_capture_sha256": "617b337c4be13f57e550c28c452940de0a83e226cea3510daa203c622e48673b",
+    "captured_at_utc": "2026-11-03T07:29:06.557675+00:00",
+    "full_discovery_capture_sha256": "8444f77713acbeba59fbc294bbd9de298c85b7dfb81c075bdd0f0115ecc2e2b9",
     "retention_policy": "selected native witnesses; broad successful sweeps discarded"
   },
   "counts": {

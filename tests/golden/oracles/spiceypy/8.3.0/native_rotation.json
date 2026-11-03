@@ -14,10 +14,10 @@
   "provenance": {
     "input_corpus_sha256": "07e4d809f7eb75ad6e5454febf2b725b0b8fb389536743dd7196566d4640135f",
     "lockfile_sha256": "d6ff7d22431be11b71292b83ac1ef9766b1735ff7ffc4f8955534246081323b5",
-    "exporter_sha256": "0ead207055af5d872ae683fe94eba5a4cfcf9574d4a3b3b61278f5a65880b2be",
+    "exporter_sha256": "e537e40ee5c0978b9a37a4c586a91c0a2e9d4ae4ad5b163fb1ae75c23d808924",
     "exact_invocation": "uv run --locked python capture_spice.py --corpus <orientation_inputs_v1.json> --output <native_rotation.json>",
-    "captured_at_utc": "2026-11-03T04:01:59.845235+00:00",
-    "full_discovery_capture_sha256": "4e0faec9dda778defb27f1c7a578e38a0ec7133665cb65c5b278cd464a541f50",
+    "captured_at_utc": "2026-11-03T07:47:37.167231+00:00",
+    "full_discovery_capture_sha256": "44299a9fe0b826bfb15e9d43e5aebacdd5b9907c75c8aeeb65d997959e7b0bf5",
     "retention_policy": "selected native witnesses; broad successful sweeps discarded"
   },
   "counts": {

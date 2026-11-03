@@ -12,7 +12,11 @@ $unity = 'C:\Program Files\Unity\Hub\Editor\6000.5.2f1\Editor\Unity.exe'
 $project = Join-Path $root 'experiments\unity\6000.5.2f1'
 $output = Join-Path $env:TEMP 'quatops-unity-full.json'
 $log = Join-Path $env:TEMP 'quatops-unity-capture.log'
-$arguments = "-batchmode -quit -projectPath `"$project`" -executeMethod QuatOpsEngineCapture.Capture -QuatOpsCaptureOutput=`"$output`" -logFile `"$log`""
+$arguments = @(
+  '-batchmode', '-quit', '-projectPath', "`"$project`"",
+  '-executeMethod', 'QuatOpsEngineCapture.Capture',
+  "-QuatOpsCaptureOutput=`"$output`"", '-logFile', "`"$log`""
+)
 $capture = Start-Process -FilePath $unity -ArgumentList $arguments -PassThru -Wait -WindowStyle Hidden
 if ($capture.ExitCode -ne 0) { throw "Unity capture failed with exit code $($capture.ExitCode). See $log" }
 .venv\Scripts\python.exe scripts\retain_engine_witnesses.py unity 6000.5.2f1 `
@@ -28,5 +32,10 @@ sweeps remain discovery work rather than permanent converter goldens.
 Run the replay and generated frame-map checks with:
 
 ```powershell
-.venv\Scripts\python.exe -m pytest -q tests\test_canonical_interoperability.py tests\test_engine_basis_oracle.py tests\test_engine_proof_profiles.py
+$proofTests = @(
+  'tests\test_canonical_interoperability.py',
+  'tests\test_engine_basis_oracle.py',
+  'tests\test_engine_proof_profiles.py'
+)
+.venv\Scripts\python.exe -m pytest -q $proofTests
 ```

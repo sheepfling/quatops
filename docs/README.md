@@ -24,12 +24,17 @@
   implementation and validation guidance.
 - [Engine agent guidance](contributing/ENGINE_AGENT_GUIDE.md): required
   convention reasoning and evidence boundaries for code changes.
+- [Math-library oracles](oracles/README.md): native quaternion and coordinate APIs.
+- [Rotation transports](transports/README.md): format and named-loader evidence.
 
-## Open investigation
+## Open evidence work
 
-Work that needs new discovery or native runtime evidence is tracked as GitHub
-issues rather than recorded benchmark reports:
+Unreal, Unity, Godot, and Blender have versioned native convention and
+converter witnesses. Remaining evidence gaps are narrower:
 
 - [Extreme float64 rotation accuracy](https://github.com/sheepfling/quatops/issues/6)
-- [Unreal native fixtures](https://github.com/sheepfling/quatops/issues/4)
-- [Unity and Godot runtime verification](https://github.com/sheepfling/quatops/issues/7)
+- OpenXR runtime behavior, including `xrLocateSpace` and reference-space relations.
+- Broader Sophus scalar, Jacobian, and derivative contracts.
+
+See the [interoperability evidence atlas](INTEROPERABILITY_EVIDENCE.md) for
+the accepted scope and explicit limits of each converter.

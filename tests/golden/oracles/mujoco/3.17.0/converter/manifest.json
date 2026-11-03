@@ -1,0 +1,128 @@
+{
+  "schema_version": "1.0",
+  "review_state": "Pinned native capture only; replay acceptance is recorded by repository tests",
+  "execution": {
+    "was_run": true,
+    "utc": "2026-11-03T07:47:52.925628+00:00",
+    "python": "3.10.11 (tags/v3.10.11:7d4cc5a, Apr  5 2023, 00:38:17) [MSC v.1929 64 bit (AMD64)]",
+    "platform": "Windows-10-10.0.26300-SP0",
+    "architecture": "AMD64"
+  },
+  "target": {
+    "name": "MuJoCo",
+    "package_version": "3.17.0",
+    "engine_version": "3.17.0",
+    "numpy_version": "2.2.6",
+    "native_scalar_dtype": "float64"
+  },
+  "selection": {
+    "retained_orientation_cases": 8,
+    "native_created_orientations": 1,
+    "noncommuting_product_orders": 2,
+    "native_quaternion_actions_per_orientation": 4
+  },
+  "native_binary_files": [
+    {
+      "path": "mujoco.dll",
+      "sha256": "c395db1b3f5110a730c4b0c31b7a4f29881af459c8a74a03e14b7683f022d57f"
+    },
+    {
+      "path": "plugin/actuator.dll",
+      "sha256": "a5b76272bd37e3bbb5d6c7f2fd4ce610682cf3b5c544400931f14e7c377aa5eb"
+    },
+    {
+      "path": "plugin/elasticity.dll",
+      "sha256": "e64db2e5b83c08f6c78c56175cd22f02e89839eb2b0725c1be63b2ba65a81b67"
+    },
+    {
+      "path": "plugin/sdf_plugin.dll",
+      "sha256": "bb684d993f8c5fad2d933c9b6d78b9e7fa3bc170e90a906ccad3e516b273e706"
+    },
+    {
+      "path": "plugin/sensor.dll",
+      "sha256": "883de069b2f62f723f308daf9fcf4ed2ffc9ba3a2d3076aca31c98af0151445c"
+    },
+    {
+      "path": "_batch.cp310-win_amd64.pyd",
+      "sha256": "5bb32311ea0270da2f4aa2cd67cf4faf155208818a02e6b7a69e6922242bd878"
+    },
+    {
+      "path": "_callbacks.cp310-win_amd64.pyd",
+      "sha256": "bc0a38497f57e2195a9b73ae2ef12bae500138d72cb42fcf567dfd0d2fb0096f"
+    },
+    {
+      "path": "_constants.cp310-win_amd64.pyd",
+      "sha256": "ab2289fe8027126ee29113575cf100b0d98b20ef8434661aa43d6d069a398bed"
+    },
+    {
+      "path": "_enums.cp310-win_amd64.pyd",
+      "sha256": "bcc49588464c59da42b823ec181ca71760e8ad4fa7d93d32ccc3279380110f46"
+    },
+    {
+      "path": "_errors.cp310-win_amd64.pyd",
+      "sha256": "f81c67dcf244ce2e5a2731e2236cad7a2154a7e3b3e5791980effc91670bfb15"
+    },
+    {
+      "path": "_functions.cp310-win_amd64.pyd",
+      "sha256": "d59caabeb8067d935eda5d3137b4f4760b8486d75cf15222c7c90a3c3836b9b8"
+    },
+    {
+      "path": "_render.cp310-win_amd64.pyd",
+      "sha256": "d2a2d10b8eb91d490bbf83d7d3e63d86690eac748ac9af616585e067e92063d0"
+    },
+    {
+      "path": "_render_filament.cp310-win_amd64.pyd",
+      "sha256": "17832e7c979d1c9270cb0b96b247986a8b0bb0a9686b01088a0f2c04cba20afe"
+    },
+    {
+      "path": "_rollout.cp310-win_amd64.pyd",
+      "sha256": "95ffe2cbb2eb6c30612c17c5735ac807a9277f8a23973e68a24fd286b467a308"
+    },
+    {
+      "path": "_simulate.cp310-win_amd64.pyd",
+      "sha256": "4480d7a315aeaf13a4457a67ff599679fd42a104ab755bb125e0ae0de5019194"
+    },
+    {
+      "path": "_specs.cp310-win_amd64.pyd",
+      "sha256": "8b61cf115d8ab7c5f9f2ffa8fca2df3e19f23ec9616363cdf7849739d75bcc25"
+    },
+    {
+      "path": "_structs.cp310-win_amd64.pyd",
+      "sha256": "2428886c7eb3e6455b5e3242ae36f8fa4566de2e31333463597d211a698a4b8b"
+    },
+    {
+      "path": "experimental/dear_imgui/dear_imgui.cp310-win_amd64.pyd",
+      "sha256": "66f477db3580a27773185455ea241972bc238e8a1c2214df58f3634d1a8862b3"
+    },
+    {
+      "path": "experimental/implot/implot.cp310-win_amd64.pyd",
+      "sha256": "547233a17d972466bff601bf445525889bf2851728acbf400a76252998da7d1d"
+    },
+    {
+      "path": "experimental/studio/native_viewer_cc.cp310-win_amd64.pyd",
+      "sha256": "e7e2393e3987dfd914ec8469855463587670eaa4dd9556e9f1b6dc509bacc691"
+    },
+    {
+      "path": "experimental/studio/sim.cp310-win_amd64.pyd",
+      "sha256": "abde1230a6acfc966af6fdbf3f2986d81f02dc77c149c17d80c231d3e1215425"
+    },
+    {
+      "path": "experimental/studio/ux.cp310-win_amd64.pyd",
+      "sha256": "734b87e0484a59199b5479d115869ec2393d65f375764a5433bf756aeb5c7a3a"
+    },
+    {
+      "path": "experimental/studio/window.cp310-win_amd64.pyd",
+      "sha256": "98dab342c933be33478d315da0f884eff408dec8bda2bb33ff73c921c620ef7a"
+    }
+  ],
+  "provenance": {
+    "capture_script_sha256": "2e137d0e9135ecd2e3c4c4e3c010fd1abc060f9bcae6a56840fb1bc06f8c733f",
+    "contract_sha256": "0428adfc0eb6e9398e9b602d3a98bb3a08ba871ae785b73e6e21be845a8387b9",
+    "converter_input_spec_sha256": "cfc5dbbc1729c6d22b9f0c2e8f7d3f335ff0b32a65a968f2f48f65a4aaa0eb82",
+    "selected_inputs_sha256": "a6f0630806b69d3b3b29a036aa10f63bfe214668329c661598951f84f8f41eec",
+    "witnesses_sha256": "3e52f12367a83925d3a85b8b04a549fa6522d83f49742ecaefe7752f53da3dc6",
+    "full_oracle_sha256": "2cb1d3333a45ca1581a7121f82c5676de4cbc26b79cc2c9371f402c2d255bdd2",
+    "pinned_lockfile_sha256": "98ee236da812bad9c38b900b4f19290f406969e2a8cfb0cb0e0ae9237d62c556",
+    "exact_invocation": "experiments/oracles/mujoco/3.17.0/.venv/Scripts/python.exe experiments/converters/mujoco/3.17.0/capture_native.py"
+  }
+}

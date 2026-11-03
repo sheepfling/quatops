@@ -1,0 +1,54 @@
+{
+  "schema_version": "1.0",
+  "evidence_kind": "native_discovery_capture",
+  "target": "Khronos OpenXR SDK 1.1.65 headers",
+  "pin": {
+    "schema_version": "1.0",
+    "product": "Khronos OpenXR SDK",
+    "sdk_version": "1.1.65",
+    "specification_version": "1.1.65",
+    "repository": "https://github.com/KhronosGroup/OpenXR-SDK.git",
+    "tag": "release-1.1.65",
+    "commit": "24a1f2b92d212501a2b1b8d30ffd53abf55fcfa8",
+    "compiler_standard": "C++17",
+    "scope": "XrQuaternionf and XrPosef header ABI only; no OpenXR runtime functions are called"
+  },
+  "execution": {
+    "was_run": true,
+    "utc": "2026-11-03T08:09:32.870310+00:00",
+    "platform": "Windows-11-10.0.26300-SP0",
+    "architecture": "AMD64",
+    "compiler": "g++ (GCC) 15.2.0",
+    "command": [
+      "g++",
+      "-std=c++17",
+      "-O2",
+      "-I",
+      "<OpenXR-SDK 1.1.65>/include",
+      "capture_header_abi.cpp",
+      "-o",
+      "<temporary capture executable>"
+    ]
+  },
+  "artifacts": {
+    "capture_sources_sha256": {
+      "capture_header_abi.cpp": "665804fe016e3c17c1ab5c2c83b98c2d5b285da367ab681881a14d86d308e019",
+      "source.json": "08b000bc4857c432325504638a7b1782a09c1b5c195a070c40386b44a2870449"
+    },
+    "input_sha256": null,
+    "native_executable_sha256": "24d5e0beb86eb34ab62509c76d573deee446b61e0ef3c3427d126a650ad29762",
+    "native_output": "header_abi.json",
+    "native_output_sha256": "796009decc7badfc12e194fecabcc213aea2d2dd5247699f655fdf2171d98b0f",
+    "pinned_sdk_headers_sha256": {
+      "openxr.h": "a1882433318c34f7b52995d7f2a1ee5827f4bd56373e0b7fd7c1ef97eec8ad31",
+      "openxr_platform_defines.h": "7dc30ad27f1082a71f84f5f5adf10762558fc9fe57fdc7628d796d22be3b0dbe"
+    }
+  },
+  "review": {
+    "state": "captured_not_reviewed",
+    "limitations": [
+      "Header ABI only; no OpenXR runtime is configured and no xr* function was called.",
+      "This does not establish runtime pose location, tracking, or a universal world frame."
+    ]
+  }
+}

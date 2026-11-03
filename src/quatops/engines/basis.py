@@ -24,8 +24,14 @@ class SignedAxisMap:
     they preserve input magnitude and do not normalize or alter keyframe signs.
     """
 
-    __slots__ = ("destination_axes", "_indices", "_vector_signs",
-                 "_hamilton_signs", "_jpl_signs", "determinant")
+    __slots__ = (
+        "_hamilton_signs",
+        "_indices",
+        "_jpl_signs",
+        "_vector_signs",
+        "destination_axes",
+        "determinant",
+    )
 
     destination_axes: tuple[str, str, str]
     _indices: tuple[int, int, int]
@@ -55,9 +61,7 @@ class SignedAxisMap:
             sign = -1 if token.startswith("-") else 1
             name = token[1:] if token.startswith(("+", "-")) else token
             if name not in _AXIS_INDEX or token not in (name, "+" + name, "-" + name):
-                raise ValueError(
-                    "axes must be x, y, z, -x, -y, or -z"
-                )
+                raise ValueError("axes must be x, y, z, -x, -y, or -z")
             indices.append(_AXIS_INDEX[name])
             signs.append(sign)
             normalized.append(("-" if sign < 0 else "") + name)
@@ -77,9 +81,7 @@ class SignedAxisMap:
         self._indices = tuple(indices)  # type: ignore[assignment]
         self._vector_signs = tuple(signs)  # type: ignore[assignment]
         self._hamilton_signs = hamilton_signs  # type: ignore[assignment]
-        self._jpl_signs = tuple(
-            -sign for sign in hamilton_signs
-        )  # type: ignore[assignment]
+        self._jpl_signs = tuple(-sign for sign in hamilton_signs)  # type: ignore[assignment]
         self.determinant = determinant
 
     @staticmethod
@@ -111,7 +113,7 @@ class SignedAxisMap:
             rows[destination_index][source_index] = sign
         return tuple(tuple(row) for row in rows)  # type: ignore[return-value]
 
-    def inverse(self) -> "SignedAxisMap":
+    def inverse(self) -> SignedAxisMap:
         """Return the destination-to-source signed-axis map ``B.T``."""
         inverse_axes = [""] * 3
         for destination_index, (source_index, sign) in enumerate(
@@ -151,9 +153,7 @@ class SignedAxisMap:
             w,
         )
 
-    def map_jpl_xyzw(
-        self, q: Iterable[float]
-    ) -> tuple[float, float, float, float]:
+    def map_jpl_xyzw(self, q: Iterable[float]) -> tuple[float, float, float, float]:
         """Map active JPL ``xyzw`` values directly to engine Hamilton ``xyzw``."""
         x, y, z, w = self._four(q)
         source = (x, y, z)
@@ -166,9 +166,7 @@ class SignedAxisMap:
             w,
         )
 
-    def map_jpl_wxyz(
-        self, q: Iterable[float]
-    ) -> tuple[float, float, float, float]:
+    def map_jpl_wxyz(self, q: Iterable[float]) -> tuple[float, float, float, float]:
         """Map active JPL ``wxyz`` values directly to engine Hamilton ``xyzw``."""
         w, x, y, z = self._four(q)
         source = (x, y, z)
@@ -196,12 +194,12 @@ class QuaternionFrameMap:
     """
 
     __slots__ = (
-        "world_map",
-        "body_map",
-        "_world_correction",
         "_body_correction",
-        "_shared_map",
         "_shared_inverse_map",
+        "_shared_map",
+        "_world_correction",
+        "body_map",
+        "world_map",
     )
 
     def __setattr__(self, name: str, value: object) -> None:
@@ -283,9 +281,7 @@ class QuaternionFrameMap:
             source_xyzw = self._shared_inverse_map.map_hamilton_xyzw(target_xyzw)
             return (source_xyzw[3], source_xyzw[0], source_xyzw[1], source_xyzw[2])
         return _hamilton.multiply(
-            _hamilton.multiply(
-                _hamilton.inverse(self._world_correction), destination
-            ),
+            _hamilton.multiply(_hamilton.inverse(self._world_correction), destination),
             self._body_correction,
         )
 
@@ -319,14 +315,18 @@ def change_rotation_basis(
 
     world = world_map.matrix
     body = body_map.matrix
-    return tuple(
-        tuple(
+
+    def entry(row: int, column: int) -> float:
+        return float(
             sum(
                 world[row][i] * rows[i][j] * body[column][j]
                 for i in range(3)
                 for j in range(3)
             )
-            for column in range(3)
         )
-        for row in range(3)
+
+    return (
+        (entry(0, 0), entry(0, 1), entry(0, 2)),
+        (entry(1, 0), entry(1, 1), entry(1, 2)),
+        (entry(2, 0), entry(2, 1), entry(2, 2)),
     )

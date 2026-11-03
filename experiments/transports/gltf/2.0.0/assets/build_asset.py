@@ -5,7 +5,6 @@ import math
 import struct
 from pathlib import Path
 
-
 HERE = Path(__file__).parent
 
 
@@ -40,14 +39,22 @@ def main():
     ]
     cubic_values = []
     for index, value in enumerate(rotations):
-        cubic_values.extend((cubic_tangents[index * 2], value, cubic_tangents[index * 2 + 1]))
+        cubic_values.extend(
+            (cubic_tangents[index * 2], value, cubic_tangents[index * 2 + 1])
+        )
 
     binary = bytearray()
     buffer_views = []
     accessors = []
 
-    def accessor(values, count, type_name, min_values=None, max_values=None, target=None):
-        flat = [component for element in values for component in element] if type_name != "SCALAR" else values
+    def accessor(
+        values, count, type_name, min_values=None, max_values=None, target=None
+    ):
+        flat = (
+            [component for element in values for component in element]
+            if type_name != "SCALAR"
+            else values
+        )
         byte_offset, byte_length = append_f32(binary, flat)
         view_index = len(buffer_views)
         view = {"buffer": 0, "byteOffset": byte_offset, "byteLength": byte_length}
@@ -84,10 +91,22 @@ def main():
     cosine = math.cos(matrix_angle)
     sine = math.sin(matrix_angle)
     matrix_node = [
-        2.0, 0.0, 0.0, 0.0,
-        0.0, cosine, sine, 0.0,
-        0.0, -0.5 * sine, 0.5 * cosine, 0.0,
-        2.0, 1.0, -1.0, 1.0,
+        2.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        cosine,
+        sine,
+        0.0,
+        0.0,
+        -0.5 * sine,
+        0.5 * cosine,
+        0.0,
+        2.0,
+        1.0,
+        -1.0,
+        1.0,
     ]
     parent_rotation = axis_quaternion((0.0, 0.0, 1.0), 0.4)
 
@@ -118,21 +137,44 @@ def main():
             {"name": "source_axis_y", "mesh": 0, "translation": [0.0, 1.0, 0.0]},
             {"name": "source_axis_z", "mesh": 0, "translation": [0.0, 0.0, 1.0]},
         ],
-        "meshes": [{"name": "proof_triangle", "primitives": [{"attributes": {"POSITION": position_accessor}}]}],
+        "meshes": [
+            {
+                "name": "proof_triangle",
+                "primitives": [{"attributes": {"POSITION": position_accessor}}],
+            }
+        ],
         "animations": [
             {
                 "name": "rotation_step",
-                "samplers": [{"input": time_accessor, "output": step_accessor, "interpolation": "STEP"}],
+                "samplers": [
+                    {
+                        "input": time_accessor,
+                        "output": step_accessor,
+                        "interpolation": "STEP",
+                    }
+                ],
                 "channels": [{"sampler": 0, "target": {"node": 1, "path": "rotation"}}],
             },
             {
                 "name": "rotation_linear",
-                "samplers": [{"input": time_accessor, "output": linear_accessor, "interpolation": "LINEAR"}],
+                "samplers": [
+                    {
+                        "input": time_accessor,
+                        "output": linear_accessor,
+                        "interpolation": "LINEAR",
+                    }
+                ],
                 "channels": [{"sampler": 0, "target": {"node": 2, "path": "rotation"}}],
             },
             {
                 "name": "rotation_cubic",
-                "samplers": [{"input": time_accessor, "output": cubic_accessor, "interpolation": "CUBICSPLINE"}],
+                "samplers": [
+                    {
+                        "input": time_accessor,
+                        "output": cubic_accessor,
+                        "interpolation": "CUBICSPLINE",
+                    }
+                ],
                 "channels": [{"sampler": 0, "target": {"node": 3, "path": "rotation"}}],
             },
         ],

@@ -3,14 +3,13 @@
 import argparse
 import json
 import math
-import tempfile
 import random
 import sys
+import tempfile
 from pathlib import Path
 
 import bpy
 from mathutils import Euler, Quaternion, Vector
-
 
 ORDERS = ("XYZ", "XZY", "YXZ", "YZX", "ZXY", "ZYX")
 IDENTITY_AXES = ((1.0, 0.0, 0.0), (0.0, 1.0, 0.0), (0.0, 0.0, 1.0))
@@ -56,11 +55,14 @@ def quaternion_from_rotvec(values):
 def same_rotation(lhs, rhs, tolerance=TOLERANCE):
     lhs_matrix = lhs.to_matrix()
     rhs_matrix = rhs.to_matrix()
-    return max(
-        abs(float(lhs_matrix[row][column] - rhs_matrix[row][column]))
-        for row in range(3)
-        for column in range(3)
-    ) <= tolerance
+    return (
+        max(
+            abs(float(lhs_matrix[row][column] - rhs_matrix[row][column]))
+            for row in range(3)
+            for column in range(3)
+        )
+        <= tolerance
+    )
 
 
 def base_euler_cases():
@@ -90,7 +92,7 @@ def euler_order_inputs(order):
     for index in range(64):
         rows.append(
             (
-                "seeded_%02d" % index,
+                f"seeded_{index:02d}",
                 tuple(rng.uniform(-720.0, 720.0) for _ in range(3)),
             )
         )
@@ -100,19 +102,13 @@ def euler_order_inputs(order):
         for neighbor_name, delta in (("below", -1.0e-4), ("above", 1.0e-4)):
             angles = {"x": 17.0, "y": -29.0, "z": 43.0}
             angles[middle_axis] = sign * 90.0 + delta
-            case_id = "%s_middle_gimbal_%s_%s" % (
-                sign_name,
-                neighbor_name,
-                middle_axis,
-            )
+            case_id = f"{sign_name}_middle_gimbal_{neighbor_name}_{middle_axis}"
             rows.append((case_id, tuple(angles[axis] for axis in "xyz")))
         for neighbor_name, direction in (("below", -math.inf), ("above", math.inf)):
             angles = {"x": 17.0, "y": -29.0, "z": 43.0}
             angles[middle_axis] = nextafter_float32(sign * 90.0, direction)
-            case_id = "%s_middle_gimbal_%s_float32_ulp_%s" % (
-                sign_name,
-                neighbor_name,
-                middle_axis,
+            case_id = (
+                f"{sign_name}_middle_gimbal_{neighbor_name}_float32_ulp_{middle_axis}"
             )
             rows.append((case_id, tuple(angles[axis] for axis in "xyz")))
     return rows
@@ -137,7 +133,9 @@ def capture_euler_row(order, case_id, angles_degrees):
     matrix = euler.to_matrix()
     quaternion_readback = quaternion.to_euler(order)
     matrix_readback = matrix.to_euler(order)
-    quaternion_readback_roundtrip = Euler(tuple(quaternion_readback), order).to_quaternion()
+    quaternion_readback_roundtrip = Euler(
+        tuple(quaternion_readback), order
+    ).to_quaternion()
     matrix_readback_roundtrip = Euler(tuple(matrix_readback), order).to_quaternion()
     matrix_quaternion = matrix.to_quaternion()
     quaternion_matrix = quaternion.to_matrix()
@@ -155,7 +153,9 @@ def capture_euler_row(order, case_id, angles_degrees):
         "matrix_rotated_positive_basis_vectors_xyz": matrix_images(matrix),
         "quaternion_to_euler_radians_xyz": xyz(quaternion_readback),
         "matrix_to_euler_radians_xyz": xyz(matrix_readback),
-        "quaternion_readback_roundtrip": quaternion_record(quaternion_readback_roundtrip),
+        "quaternion_readback_roundtrip": quaternion_record(
+            quaternion_readback_roundtrip
+        ),
         "matrix_readback_roundtrip": quaternion_record(matrix_readback_roundtrip),
     }
 
@@ -181,13 +181,17 @@ def capture_base_cases():
                 "case_id": case_id,
                 "order": "XYZ",
                 "input_degrees_xyz": xyz(angles_degrees),
-                "input_radians_xyz": xyz(tuple(math.radians(value) for value in angles_degrees)),
+                "input_radians_xyz": xyz(
+                    tuple(math.radians(value) for value in angles_degrees)
+                ),
                 "euler_quaternion": quaternion_record(quaternion),
                 "euler_matrix_rows": matrix_rows(matrix),
                 "matrix_quaternion": quaternion_record(matrix.to_quaternion()),
                 "quaternion_to_euler_radians_xyz": xyz(readback),
                 "quaternion_readback_roundtrip": quaternion_record(readback_roundtrip),
-                "quaternion_rotated_positive_basis_vectors_xyz": vector_images(quaternion),
+                "quaternion_rotated_positive_basis_vectors_xyz": vector_images(
+                    quaternion
+                ),
             }
         )
     return rows
@@ -258,7 +262,10 @@ def capture_rotation_vectors():
         ("tiny", (1.0e-8, -2.0e-8, 3.0e-8)),
         ("quarter_turn_x", (math.pi / 2.0, 0.0, 0.0)),
         ("near_half_turn_y", (0.0, math.pi - 1.0e-5, 0.0)),
-        ("half_turn_mixed", tuple(value * math.pi / math.sqrt(14.0) for value in (1.0, 2.0, -3.0))),
+        (
+            "half_turn_mixed",
+            tuple(value * math.pi / math.sqrt(14.0) for value in (1.0, 2.0, -3.0)),
+        ),
         ("beyond_half_turn", (0.0, 0.0, math.radians(220.0))),
     )
     for case_id, vector in vectors:
@@ -270,7 +277,9 @@ def capture_rotation_vectors():
                 "input_rotation_vector_xyz": as_float_list(vector),
                 "constructed_quaternion": quaternion_record(quaternion),
                 "readback_rotation_vector_xyz": as_float_list(readback),
-                "readback_quaternion": quaternion_record(quaternion_from_rotvec(readback)),
+                "readback_quaternion": quaternion_record(
+                    quaternion_from_rotvec(readback)
+                ),
             }
         )
     return rows
@@ -292,7 +301,12 @@ def capture_slerp():
         (
             "antipodal_sign_pair",
             quaternion_from_axis_angle((1.0, -2.0, 3.0), 1.3),
-            Quaternion(tuple(-value for value in quaternion_from_axis_angle((1.0, -2.0, 3.0), 1.3))),
+            Quaternion(
+                tuple(
+                    -value
+                    for value in quaternion_from_axis_angle((1.0, -2.0, 3.0), 1.3)
+                )
+            ),
         ),
         (
             "near_half_turn",
@@ -340,11 +354,11 @@ def capture_normalization():
                 "normalized_magnitude": float(normalized.magnitude),
                 "error": None,
             }
-        except Exception as error:  # Capture native API failure as fixture data.
+        except Exception as error:  # noqa: BLE001 - record native API failures as fixture data.
             result = {
                 "normalized_quaternion": None,
                 "normalized_magnitude": None,
-                "error": "%s: %s" % (type(error).__name__, error),
+                "error": f"{type(error).__name__}: {error}",
             }
         rows.append(
             {
@@ -367,7 +381,12 @@ def capture_rotation_difference():
         (
             "same_orientation_sign_pair",
             quaternion_from_axis_angle((1.0, 2.0, -1.0), 1.7),
-            Quaternion(tuple(-value for value in quaternion_from_axis_angle((1.0, 2.0, -1.0), 1.7))),
+            Quaternion(
+                tuple(
+                    -value
+                    for value in quaternion_from_axis_angle((1.0, 2.0, -1.0), 1.7)
+                )
+            ),
         ),
     )
     rows = []
@@ -381,10 +400,18 @@ def capture_rotation_difference():
                 "start_quaternion": quaternion_record(start),
                 "end_quaternion": quaternion_record(end),
                 "difference_quaternion": quaternion_record(difference),
-                "start_inverse_then_end_quaternion": quaternion_record(start_inverse_then_end),
-                "end_then_start_inverse_quaternion": quaternion_record(end_then_start_inverse),
-                "matches_start_inverse_then_end": same_rotation(difference, start_inverse_then_end),
-                "matches_end_then_start_inverse": same_rotation(difference, end_then_start_inverse),
+                "start_inverse_then_end_quaternion": quaternion_record(
+                    start_inverse_then_end
+                ),
+                "end_then_start_inverse_quaternion": quaternion_record(
+                    end_then_start_inverse
+                ),
+                "matches_start_inverse_then_end": same_rotation(
+                    difference, start_inverse_then_end
+                ),
+                "matches_end_then_start_inverse": same_rotation(
+                    difference, end_then_start_inverse
+                ),
             }
         )
     return rows
@@ -414,8 +441,12 @@ def capture_swing_twist():
                     "reconstructed_twist_quaternion": quaternion_record(twist),
                     "swing_then_twist_quaternion": quaternion_record(swing_then_twist),
                     "twist_then_swing_quaternion": quaternion_record(twist_then_swing),
-                    "swing_then_twist_matches": same_rotation(quaternion, swing_then_twist),
-                    "twist_then_swing_matches": same_rotation(quaternion, twist_then_swing),
+                    "swing_then_twist_matches": same_rotation(
+                        quaternion, swing_then_twist
+                    ),
+                    "twist_then_swing_matches": same_rotation(
+                        quaternion, twist_then_swing
+                    ),
                 }
             )
     return rows
@@ -428,7 +459,11 @@ def capture_compat_trajectory(order, trajectory_id, inputs):
         euler = Euler(tuple(math.radians(value) for value in angles_degrees), order)
         quaternion = euler.to_quaternion()
         ordinary = quaternion.to_euler(order)
-        compatible = quaternion.to_euler(order, previous) if previous is not None else ordinary.copy()
+        compatible = (
+            quaternion.to_euler(order, previous)
+            if previous is not None
+            else ordinary.copy()
+        )
         rows.append(
             {
                 "frame": frame,
@@ -446,19 +481,23 @@ def capture_compat_trajectory(order, trajectory_id, inputs):
 def capture_euler_compat_trajectories():
     trajectories = []
     crossing_positive = tuple(
-        ("x_%d" % angle, (float(angle), 24.0, -37.0))
+        (f"x_{angle}", (float(angle), 24.0, -37.0))
         for angle in (170, 175, 179, 181, 185, 190)
     )
     crossing_negative = tuple(
-        ("x_%d" % angle, (float(angle), 24.0, -37.0))
+        (f"x_{angle}", (float(angle), 24.0, -37.0))
         for angle in (-170, -175, -179, -181, -185, -190)
     )
     for order in ORDERS:
         trajectories.append(
-            capture_compat_trajectory(order, "x_crosses_positive_180", crossing_positive)
+            capture_compat_trajectory(
+                order, "x_crosses_positive_180", crossing_positive
+            )
         )
         trajectories.append(
-            capture_compat_trajectory(order, "x_crosses_negative_180", crossing_negative)
+            capture_compat_trajectory(
+                order, "x_crosses_negative_180", crossing_negative
+            )
         )
 
         middle_axis = order[1].lower()
@@ -466,8 +505,11 @@ def capture_euler_compat_trajectories():
         for angle in (88.0, 89.5, 89.9, 90.0, 90.1, 90.5, 92.0):
             values = {"x": 31.0, "y": -22.0, "z": 47.0}
             values[middle_axis] = angle
-            gimbal.append(("%s_%s" % (middle_axis, str(angle).replace(".", "_")), tuple(values[a] for a in "xyz")))
-        trajectories.append(capture_compat_trajectory(order, "middle_axis_gimbal", tuple(gimbal)))
+            case_id = f"{middle_axis}_{str(angle).replace('.', '_')}"
+            gimbal.append((case_id, tuple(values[a] for a in "xyz")))
+        trajectories.append(
+            capture_compat_trajectory(order, "middle_axis_gimbal", tuple(gimbal))
+        )
     return trajectories
 
 
@@ -509,10 +551,14 @@ def capture_scene_object_routes():
 
 
 def capture_cross_products():
-    axes = {"x": Vector((1.0, 0.0, 0.0)), "y": Vector((0.0, 1.0, 0.0)), "z": Vector((0.0, 0.0, 1.0))}
+    axes = {
+        "x": Vector((1.0, 0.0, 0.0)),
+        "y": Vector((0.0, 1.0, 0.0)),
+        "z": Vector((0.0, 0.0, 1.0)),
+    }
     return [
         {
-            "case_id": "%s_cross_%s" % (lhs, rhs),
+            "case_id": f"{lhs}_cross_{rhs}",
             "lhs_xyz": as_float_list(axes[lhs]),
             "rhs_xyz": as_float_list(axes[rhs]),
             "result_xyz": as_float_list(axes[lhs].cross(axes[rhs])),
@@ -537,7 +583,9 @@ def capture_explicit_source_map():
                 "source_rotation_axis": axis_name,
                 "source_quaternion": quaternion_record(source_quaternion),
                 "blender_quaternion": quaternion_record(blender_quaternion),
-                "blender_rotated_positive_basis_vectors_xyz": vector_images(blender_quaternion),
+                "blender_rotated_positive_basis_vectors_xyz": vector_images(
+                    blender_quaternion
+                ),
             }
         )
     return {
@@ -558,7 +606,10 @@ def capture_canonical_interop():
         ("mixed_a", (0.8, 0.2, -0.4, 0.4)),
         ("mixed_b", (0.7, -0.3, 0.2, 0.6164414002968976)),
         ("antipode_mixed_a", (-0.8, -0.2, 0.4, -0.4)),
-        ("nonprincipal_halfturn", (0.0, 0.5773502691896258, 0.5773502691896258, 0.5773502691896258)),
+        (
+            "nonprincipal_halfturn",
+            (0.0, 0.5773502691896258, 0.5773502691896258, 0.5773502691896258),
+        ),
     )
     canonical_probe = Vector((0.25, -1.5, 2.75))
     native_probe = Vector(canonical_probe)
@@ -592,7 +643,10 @@ def capture_canonical_interop():
         "frame_map_destination_axes_from_source": ["x", "y", "z"],
         "probe_vector_canonical_xyz": as_float_list(canonical_probe),
         "probe_vector_native_xyz": as_float_list(native_probe),
-        "orientation_cases": [orientation(case_id, wxyz, native[case_id]) for case_id, wxyz in orientations],
+        "orientation_cases": [
+            orientation(case_id, wxyz, native[case_id])
+            for case_id, wxyz in orientations
+        ],
         "composition": composition("mixed_a", "mixed_b", lhs_rhs),
         "reverse_composition": composition("mixed_b", "mixed_a", rhs_lhs),
     }
@@ -614,8 +668,10 @@ def capture_quaternion_composition():
         "product_rotated_vector_xyz": as_float_list(product_image),
         "rhs_then_lhs_rotated_vector_xyz": as_float_list(rhs_then_lhs),
         "lhs_then_rhs_rotated_vector_xyz": as_float_list(lhs_then_rhs),
-        "product_matches_rhs_then_lhs": (product_image - rhs_then_lhs).length < TOLERANCE,
-        "product_matches_lhs_then_rhs": (product_image - lhs_then_rhs).length < TOLERANCE,
+        "product_matches_rhs_then_lhs": (product_image - rhs_then_lhs).length
+        < TOLERANCE,
+        "product_matches_lhs_then_rhs": (product_image - lhs_then_rhs).length
+        < TOLERANCE,
     }
 
 
@@ -654,20 +710,50 @@ def build_fixture():
         "rotation_action": "active rotation applied to vectors with quaternion @ Vector",
         "matrix_layout": "3x3 matrix rows as returned by mathutils.Matrix indexing; matrices act on column vectors",
         "proof_profile": {
-            "euler_to_quaternion": "native mathutils.Euler.to_quaternion for all six Tait-Bryan orders; 64 seeded cases per order plus fixed and middle-axis gimbal probes",
-            "euler_readback_and_threshold_neighbors": "native Quaternion.to_euler and Matrix.to_euler readbacks, with and without Euler compatibility, across all six orders",
-            "matrix_to_quaternion": "native mathutils.Matrix.to_quaternion, including near-half-turn and negative-trace matrices",
+            "euler_to_quaternion": (
+                "native mathutils.Euler.to_quaternion for all six Tait-Bryan orders; "
+                "64 seeded cases per order plus fixed and middle-axis gimbal probes"
+            ),
+            "euler_readback_and_threshold_neighbors": (
+                "native Quaternion.to_euler and Matrix.to_euler readbacks, with "
+                "and without Euler compatibility, across all six orders"
+            ),
+            "matrix_to_quaternion": (
+                "native mathutils.Matrix.to_quaternion, including near-half-turn "
+                "and negative-trace matrices"
+            ),
             "axis_angle": "native mathutils.Quaternion axis-angle construction and to_axis_angle for q and -q",
-            "rotation_vector": "native mathutils.Quaternion exponential-map constructor and to_exponential_map readback",
-            "slerp_shortest": "native mathutils.Quaternion.slerp including antipodal, near-identical, and greater-than-half-turn endpoints",
+            "rotation_vector": (
+                "native mathutils.Quaternion exponential-map constructor and "
+                "to_exponential_map readback"
+            ),
+            "slerp_shortest": (
+                "native mathutils.Quaternion.slerp including antipodal, "
+                "near-identical, and greater-than-half-turn endpoints"
+            ),
             "slerp_full_path": "not exposed by the captured mathutils.Quaternion.slerp API",
-            "normalization_edges": "native mathutils.Quaternion.normalized for zero, tiny, unit, sign-reversed, and nonunit values",
+            "normalization_edges": (
+                "native mathutils.Quaternion.normalized for zero, tiny, unit, "
+                "sign-reversed, and nonunit values"
+            ),
             "basis_vector_action": "native quaternion @ Vector and mathutils.Matrix action on positive basis vectors",
-            "composition_and_frame_map": "native quaternion composition and cross-product probes; source basis is declared explicitly per fixture",
-            "rotation_difference": "native mathutils.Quaternion.rotation_difference and both relative-product candidates",
+            "composition_and_frame_map": (
+                "native quaternion composition and cross-product probes; source "
+                "basis is declared explicitly per fixture"
+            ),
+            "rotation_difference": (
+                "native mathutils.Quaternion.rotation_difference and both "
+                "relative-product candidates"
+            ),
             "swing_twist": "native Quaternion.to_swing_twist for X, Y, and Z twist axes, with reconstruction products",
-            "euler_continuity": "native Quaternion.to_euler(order, euler_compat) trajectories across 180 degrees and middle-axis gimbal neighborhoods",
-            "scene_object_transform": "native Object.rotation_mode, rotation_euler, rotation_quaternion, and matrix_world rotation readbacks",
+            "euler_continuity": (
+                "native Quaternion.to_euler(order, euler_compat) trajectories "
+                "across 180 degrees and middle-axis gimbal neighborhoods"
+            ),
+            "scene_object_transform": (
+                "native Object.rotation_mode, rotation_euler, "
+                "rotation_quaternion, and matrix_world rotation readbacks"
+            ),
         },
         "engine": {
             "name": "Blender",
@@ -676,7 +762,11 @@ def build_fixture():
             "minor": int(bpy.app.version[1]),
             "patch": int(bpy.app.version[2]),
             "build_hash": build_hash,
-            "build_branch": str(bpy.app.build_branch.decode("ascii") if isinstance(bpy.app.build_branch, bytes) else bpy.app.build_branch),
+            "build_branch": str(
+                bpy.app.build_branch.decode("ascii")
+                if isinstance(bpy.app.build_branch, bytes)
+                else bpy.app.build_branch
+            ),
             "platform": sys.platform,
             "python_version": sys.version.split()[0],
             "precision_probe": capture_precision_probe(),
@@ -692,7 +782,9 @@ def build_fixture():
             "positive_x_image": [1.0, 0.0, 0.0],
             "positive_y_image": [0.0, 1.0, 0.0],
             "positive_z_image": [0.0, 0.0, 1.0],
-            "positive_x_cross_positive_y": as_float_list(Vector((1.0, 0.0, 0.0)).cross(Vector((0.0, 1.0, 0.0)))),
+            "positive_x_cross_positive_y": as_float_list(
+                Vector((1.0, 0.0, 0.0)).cross(Vector((0.0, 1.0, 0.0)))
+            ),
             "declared_probe_semantics": "+X right, +Y forward, +Z up for this fixture",
             "semantic_imported_object_forward_axis": "not assumed",
         },
@@ -728,8 +820,8 @@ def parse_output_path():
     version = bpy.app.version_string
     if Path(__file__).resolve().parent.name != version:
         raise RuntimeError(
-            "capture directory %r does not match Blender runtime version %r"
-            % (Path(__file__).resolve().parent.name, version)
+            f"capture directory {Path(__file__).resolve().parent.name!r} "
+            f"does not match Blender runtime version {version!r}"
         )
     return args.output or Path(tempfile.gettempdir()) / "quatops-blender-full.json"
 

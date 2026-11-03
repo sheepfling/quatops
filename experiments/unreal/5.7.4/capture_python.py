@@ -10,7 +10,6 @@ from pathlib import Path
 
 import unreal
 
-
 CASES = (
     {"case_id": "identity", "pitch": 0.0, "yaw": 0.0, "roll": 0.0},
     {"case_id": "pitch_positive_90", "pitch": 90.0, "yaw": 0.0, "roll": 0.0},
@@ -110,7 +109,7 @@ output_path = output_dir / "quatops_unreal_python_probe.json"
 try:
     result = capture()
     result["status"] = "captured"
-except Exception as error:
+except Exception as error:  # noqa: BLE001 - record binding failures as capture evidence.
     result = {
         "status": "python_binding_unavailable_or_incomplete",
         "capture_method": "Unreal Editor Python commandlet",

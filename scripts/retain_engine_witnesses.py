@@ -7,6 +7,8 @@ import hashlib
 import json
 from pathlib import Path
 
+from evidence_json import parse_evidence_document, read_evidence_document
+
 ROOT = Path(__file__).resolve().parents[1]
 ENGINE_CONFIG = {
     "unreal": {
@@ -59,12 +61,10 @@ def retain(engine: str, version: str, source_path: Path, output_dir: Path) -> No
     config = dict(config)
     config["source"] = config["source"].format(version=version)
     original_bytes = source_path.read_bytes()
-    captured = json.loads(original_bytes)
+    captured = parse_evidence_document(original_bytes)
     canonical_interop = captured["canonical_interop"]
     canonical_inputs = ROOT / "experiments/interoperability/v1/canonical_inputs.json"
-    input_rows = json.loads(canonical_inputs.read_text(encoding="utf-8"))[
-        "orientations"
-    ]
+    input_rows = read_evidence_document(canonical_inputs)["orientations"]
     expected_inputs = {row["case_id"]: row["canonical_wxyz"] for row in input_rows}
     expected_cases = set(expected_inputs)
     precision_capture = (

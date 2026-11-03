@@ -8,7 +8,6 @@ import numpy as np
 import pytest
 from scipy.spatial.transform import Rotation
 
-
 CORPUS_PATH = (
     Path(__file__).parent.parent
     / "experiments"
@@ -53,7 +52,9 @@ def test_corpus_matrix_inputs_label_proper_and_invalid_rotation_domains():
         matrix = np.asarray(case["rows"], dtype=float)
         if case["domain"] == "proper_rotation":
             valid_count += 1
-            np.testing.assert_allclose(matrix @ matrix.T, np.eye(3), rtol=0.0, atol=2e-12)
+            np.testing.assert_allclose(
+                matrix @ matrix.T, np.eye(3), rtol=0.0, atol=2e-12
+            )
             assert np.linalg.det(matrix) == pytest.approx(1.0, abs=2e-12)
             np.testing.assert_allclose(
                 Rotation.from_matrix(matrix).as_matrix(),
@@ -72,7 +73,9 @@ def test_corpus_signed_axis_maps_are_distinct_proper_and_improper_maps():
     rows = CORPUS["signed_axis_maps"]
     matrices = [tuple(np.asarray(row["rows"], dtype=int).ravel()) for row in rows]
     assert len(set(matrices)) == 48
-    determinants = [round(np.linalg.det(np.asarray(row["rows"], dtype=int))) for row in rows]
+    determinants = [
+        round(np.linalg.det(np.asarray(row["rows"], dtype=int))) for row in rows
+    ]
     assert determinants.count(1) == 24
     assert determinants.count(-1) == 24
 

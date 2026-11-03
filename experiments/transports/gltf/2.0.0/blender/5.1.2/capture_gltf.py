@@ -19,7 +19,11 @@ def sha256_file(path):
 
 
 def text_value(value):
-    return value.decode("utf-8", errors="replace") if isinstance(value, bytes) else str(value)
+    return (
+        value.decode("utf-8", errors="replace")
+        if isinstance(value, bytes)
+        else str(value)
+    )
 
 
 def matrix_rows(matrix):
@@ -27,7 +31,12 @@ def matrix_rows(matrix):
 
 
 def quaternion_wxyz(quaternion):
-    return [float(quaternion.w), float(quaternion.x), float(quaternion.y), float(quaternion.z)]
+    return [
+        float(quaternion.w),
+        float(quaternion.x),
+        float(quaternion.y),
+        float(quaternion.z),
+    ]
 
 
 def object_transform(object_):
@@ -53,23 +62,31 @@ def action_curves(action):
                 if bag is None:
                     continue
                 for curve in bag.fcurves:
-                    rows.append({
-                        "slot_identifier": slot.identifier,
-                        "data_path": curve.data_path,
-                        "array_index": curve.array_index,
-                        "keys": [
-                            {
-                                "frame": float(point.co.x),
-                                "value": float(point.co.y),
-                                "interpolation": point.interpolation,
-                                "handle_left_type": point.handle_left_type,
-                                "handle_right_type": point.handle_right_type,
-                                "handle_left": [float(point.handle_left.x), float(point.handle_left.y)],
-                                "handle_right": [float(point.handle_right.x), float(point.handle_right.y)],
-                            }
-                            for point in curve.keyframe_points
-                        ],
-                    })
+                    rows.append(
+                        {
+                            "slot_identifier": slot.identifier,
+                            "data_path": curve.data_path,
+                            "array_index": curve.array_index,
+                            "keys": [
+                                {
+                                    "frame": float(point.co.x),
+                                    "value": float(point.co.y),
+                                    "interpolation": point.interpolation,
+                                    "handle_left_type": point.handle_left_type,
+                                    "handle_right_type": point.handle_right_type,
+                                    "handle_left": [
+                                        float(point.handle_left.x),
+                                        float(point.handle_left.y),
+                                    ],
+                                    "handle_right": [
+                                        float(point.handle_right.x),
+                                        float(point.handle_right.y),
+                                    ],
+                                }
+                                for point in curve.keyframe_points
+                            ],
+                        }
+                    )
     return rows
 
 
@@ -143,16 +160,22 @@ def main():
         object_ = bpy.data.objects.get(node_name)
         action = bpy.data.actions.get(action_name)
         if object_ is None or action is None:
-            raise RuntimeError(f"Missing imported {interpolation} action or target node")
+            raise RuntimeError(
+                f"Missing imported {interpolation} action or target node"
+            )
         install_action(object_, action)
         curves = action_curves(action)
-        time_values = sorted({
-            key["frame"] * scene.render.fps_base / scene.render.fps
-            for curve in curves
-            for key in curve["keys"]
-        })
+        time_values = sorted(
+            {
+                key["frame"] * scene.render.fps_base / scene.render.fps
+                for curve in curves
+                for key in curve["keys"]
+            }
+        )
         if len(time_values) != 3:
-            raise RuntimeError(f"Expected three key times for {interpolation}: {time_values}")
+            raise RuntimeError(
+                f"Expected three key times for {interpolation}: {time_values}"
+            )
         t0, t1, t2 = time_values
         epsilon = min(1e-6, (t1 - t0) / 1000.0, (t2 - t1) / 1000.0)
         boundary_samples = []
@@ -172,23 +195,27 @@ def main():
         for sample_name, sample_time in samples:
             frame_value = set_scene_time(scene, sample_time)
             evaluated = object_.evaluated_get(bpy.context.evaluated_depsgraph_get())
-            sample_rows.append({
-                "sample": sample_name,
-                "time_seconds": sample_time,
-                "frame_value": frame_value,
-                "quaternion_wxyz": quaternion_wxyz(evaluated.rotation_quaternion),
-                "quaternion_length": float(evaluated.rotation_quaternion.magnitude),
-                "matrix_basis_rows": matrix_rows(evaluated.matrix_basis),
-                "matrix_world_rows": matrix_rows(evaluated.matrix_world),
-            })
-        animations.append({
-            "interpolation": interpolation,
-            "action_name": action.name,
-            "target_object": object_.name,
-            "key_times_seconds_from_imported_fcurves": time_values,
-            "fcurves": curves,
-            "samples": sample_rows,
-        })
+            sample_rows.append(
+                {
+                    "sample": sample_name,
+                    "time_seconds": sample_time,
+                    "frame_value": frame_value,
+                    "quaternion_wxyz": quaternion_wxyz(evaluated.rotation_quaternion),
+                    "quaternion_length": float(evaluated.rotation_quaternion.magnitude),
+                    "matrix_basis_rows": matrix_rows(evaluated.matrix_basis),
+                    "matrix_world_rows": matrix_rows(evaluated.matrix_world),
+                }
+            )
+        animations.append(
+            {
+                "interpolation": interpolation,
+                "action_name": action.name,
+                "target_object": object_.name,
+                "key_times_seconds_from_imported_fcurves": time_values,
+                "fcurves": curves,
+                "samples": sample_rows,
+            }
+        )
         object_.animation_data.action = None
 
     executable = Path(bpy.app.binary_path)
@@ -210,7 +237,10 @@ def main():
         "transport": {
             "name": "glTF",
             "version": "2.0",
-            "source_coordinates": "glTF specification right-handed Y-up; target axis conversion measured by explicit translation probes",
+            "source_coordinates": (
+                "glTF specification right-handed Y-up; target axis conversion "
+                "measured by explicit translation probes"
+            ),
         },
         "loader": {
             "name": "Blender glTF importer",
@@ -230,7 +260,11 @@ def main():
             "gltf_sha256": sha256_file(asset_path),
             "binary_sha256": sha256_file(asset_binary),
             "exporter_sha256": sha256_file(Path(__file__)),
-            "exact_invocation": "blender --background --factory-startup --python-exit-code 1 --python capture_gltf.py -- --asset <rotation_transport.gltf> --output <native_blender_gltf.json>",
+            "exact_invocation": (
+                "blender --background --factory-startup --python-exit-code 1 "
+                "--python capture_gltf.py -- --asset <rotation_transport.gltf> "
+                "--output <native_blender_gltf.json>"
+            ),
             "operator_arguments": {"filepath": asset_path.name},
             "other_operator_properties": "Blender 5.1.2 importer defaults",
             "captured_at_utc": datetime.now(timezone.utc).isoformat(),
@@ -253,12 +287,16 @@ def main():
         },
     }
     output_path.write_text(json.dumps(result, indent=2) + "\n", encoding="utf-8")
-    print(json.dumps({
-        "output": str(output_path),
-        "blender": bpy.app.version_string,
-        "animations": len(animations),
-        "axis_images": axis_images,
-    }))
+    print(
+        json.dumps(
+            {
+                "output": str(output_path),
+                "blender": bpy.app.version_string,
+                "animations": len(animations),
+                "axis_images": axis_images,
+            }
+        )
+    )
 
 
 if __name__ == "__main__":

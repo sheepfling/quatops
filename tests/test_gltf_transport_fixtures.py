@@ -16,7 +16,6 @@ from tests.native_engine_support import (
 )
 from tests.oracle_support import BACKENDS
 
-
 ROOT = Path(__file__).parent.parent
 ASSET_DIR = ROOT / "experiments" / "transports" / "gltf" / "2.0.0" / "assets"
 GLTF_PATH = ASSET_DIR / "rotation_transport.gltf"
@@ -63,7 +62,9 @@ def _rotation(xyzw):
 
 
 def _matrix_error(lhs, rhs):
-    return float(np.max(np.abs(np.asarray(lhs, dtype=float) - np.asarray(rhs, dtype=float))))
+    return float(
+        np.max(np.abs(np.asarray(lhs, dtype=float) - np.asarray(rhs, dtype=float)))
+    )
 
 
 def _basis_blender():
@@ -102,7 +103,7 @@ def _cubic_value(times, values, time_seconds):
     index = min(max(index, 0), len(times) - 2)
     duration = times[index + 1] - times[index]
     u = (time_seconds - times[index]) / duration
-    in_tangent, value, out_tangent = values[index]
+    _in_tangent, value, out_tangent = values[index]
     next_in_tangent, next_value, _ = values[index + 1]
     h00 = 2 * u**3 - 3 * u**2 + 1
     h10 = u**3 - 2 * u**2 + u
@@ -126,9 +127,15 @@ def test_gltf_assets_and_loader_versions_are_frozen_and_valid():
     assert BLENDER["evidence_kind"] == "native_blender_gltf_importer_capture"
     assert BLENDER["loader"]["name"] == "Blender glTF importer"
     assert BLENDER["loader"]["version"] == "5.1.2"
-    assert THREE["provenance"]["gltf_sha256"] == hashlib.sha256(GLTF_PATH.read_bytes()).hexdigest()
+    assert (
+        THREE["provenance"]["gltf_sha256"]
+        == hashlib.sha256(GLTF_PATH.read_bytes()).hexdigest()
+    )
     assert THREE["provenance"]["binary_sha256"] == hashlib.sha256(BINARY).hexdigest()
-    assert BLENDER["provenance"]["gltf_sha256"] == hashlib.sha256(GLTF_PATH.read_bytes()).hexdigest()
+    assert (
+        BLENDER["provenance"]["gltf_sha256"]
+        == hashlib.sha256(GLTF_PATH.read_bytes()).hexdigest()
+    )
     assert BLENDER["provenance"]["binary_sha256"] == hashlib.sha256(BINARY).hexdigest()
     validation = THREE["validation"]
     assert validation["evidence_kind"].startswith("Khronos glTF Validator")
@@ -146,7 +153,11 @@ def test_gltf_static_trs_matrix_parent_and_axis_mapping_are_explicit():
     matrix_source = _glTF_node_matrix(nodes["static_matrix"])
     np.testing.assert_allclose(trs_source, matrix_source, rtol=0.0, atol=2e-15)
 
-    for name, source_matrix in (("parent_frame", parent_source), ("static_trs", trs_source), ("static_matrix", matrix_source)):
+    for name, source_matrix in (
+        ("parent_frame", parent_source),
+        ("static_trs", trs_source),
+        ("static_matrix", matrix_source),
+    ):
         np.testing.assert_allclose(
             three_static[name]["local_matrix"]["rows"],
             source_matrix,
@@ -163,8 +174,14 @@ def test_gltf_static_trs_matrix_parent_and_axis_mapping_are_explicit():
     )
 
     basis = _basis_blender()
-    np.testing.assert_allclose(basis, np.array(((1, 0, 0), (0, 0, -1), (0, 1, 0))), atol=1e-8)
-    for name, source_matrix in (("parent_frame", parent_source), ("static_trs", trs_source), ("static_matrix", matrix_source)):
+    np.testing.assert_allclose(
+        basis, np.array(((1, 0, 0), (0, 0, -1), (0, 1, 0))), atol=1e-8
+    )
+    for name, source_matrix in (
+        ("parent_frame", parent_source),
+        ("static_trs", trs_source),
+        ("static_matrix", matrix_source),
+    ):
         mapped = _basis_conjugate_matrix(source_matrix, basis)
         np.testing.assert_allclose(
             blender_static[name]["matrix_basis_rows"],
@@ -181,7 +198,9 @@ def test_gltf_static_trs_matrix_parent_and_axis_mapping_are_explicit():
     )
     for axis in "xyz":
         expected = basis[:, "xyz".index(axis)]
-        actual = BLENDER["observations"]["source_translation_axis_images_in_blender_xyz"][axis]
+        actual = BLENDER["observations"][
+            "source_translation_axis_images_in_blender_xyz"
+        ][axis]
         np.testing.assert_allclose(actual, expected, rtol=0.0, atol=1e-8)
 
 
@@ -196,17 +215,31 @@ def test_threejs_gltf_loader_matches_glTF_step_slerp_and_cubic_contracts():
     assert set(animations) == {"STEP", "LINEAR", "CUBIC"}
 
     for sample in animations["STEP"]["samples"]:
-        index = min(max(int(np.searchsorted(times, sample["time_seconds"], side="right") - 1), 0), 2)
-        assert quaternion_coefficient_error(sample["quaternion_xyzw"], keys[index]) <= TOLERANCE
+        index = min(
+            max(
+                int(np.searchsorted(times, sample["time_seconds"], side="right") - 1), 0
+            ),
+            2,
+        )
+        assert (
+            quaternion_coefficient_error(sample["quaternion_xyzw"], keys[index])
+            <= TOLERANCE
+        )
 
     linear_slerp = Slerp(times, Rotation.from_quat(keys))
     for sample in animations["LINEAR"]["samples"]:
         expected = linear_slerp([sample["time_seconds"]]).as_quat()[0]
-        assert quaternion_coefficient_error(sample["quaternion_xyzw"], expected) <= TOLERANCE
+        assert (
+            quaternion_coefficient_error(sample["quaternion_xyzw"], expected)
+            <= TOLERANCE
+        )
 
     for sample in animations["CUBIC"]["samples"]:
         expected = _cubic_value(times, cubic, sample["time_seconds"])
-        assert quaternion_coefficient_error(sample["quaternion_xyzw"], expected) <= TOLERANCE
+        assert (
+            quaternion_coefficient_error(sample["quaternion_xyzw"], expected)
+            <= TOLERANCE
+        )
         assert sample["quaternion_length"] == pytest.approx(1.0, abs=3e-8)
 
 
@@ -226,57 +259,115 @@ def test_threejs_gltf_linear_rotation_samples_match_quatops_slerp(
     )
     for sample in row["samples"]:
         t = sample["time_seconds"]
-        interval = min(max(int(np.searchsorted(_accessor(0).reshape(-1), t, side="right") - 1), 0), 1)
+        interval = min(
+            max(int(np.searchsorted(_accessor(0).reshape(-1), t, side="right") - 1), 0),
+            1,
+        )
         times = _accessor(0).reshape(-1)
         factor = (t - times[interval]) / (times[interval + 1] - times[interval])
-        start = from_engine_xyzw(module, keys[interval], is_jpl, is_numpy, component_first)
-        end = from_engine_xyzw(module, keys[interval + 1], is_jpl, is_numpy, component_first)
-        actual = module.slerp(start, end, factor, shortest=True)
-        actual_xyzw = to_hamilton_xyzw(module, actual, is_jpl, is_numpy, component_first)
-        assert quaternion_coefficient_error(actual_xyzw, sample["quaternion_xyzw"]) <= TOLERANCE, (
-            f"{backend_name}: glTF LINEAR sample at {t}s"
+        start = from_engine_xyzw(
+            module, keys[interval], is_jpl, is_numpy, component_first
         )
+        end = from_engine_xyzw(
+            module, keys[interval + 1], is_jpl, is_numpy, component_first
+        )
+        actual = module.slerp(start, end, factor, shortest=True)
+        actual_xyzw = to_hamilton_xyzw(
+            module, actual, is_jpl, is_numpy, component_first
+        )
+        assert (
+            quaternion_coefficient_error(actual_xyzw, sample["quaternion_xyzw"])
+            <= TOLERANCE
+        ), f"{backend_name}: glTF LINEAR sample at {t}s"
 
 
 def test_blender_importer_axis_mapping_and_quaternion_animation_profiles_are_frozen():
     basis = _basis_blender()
     source_times = _accessor(0).reshape(-1)
     source_keys = _source_key_values()
-    target_keys_xyzw = np.stack([_map_xyzw_to_blender(key, basis) for key in source_keys])
+    target_keys_xyzw = np.stack(
+        [_map_xyzw_to_blender(key, basis) for key in source_keys]
+    )
     target_keys = target_keys_xyzw[:, (3, 0, 1, 2)]
     rows = {row["interpolation"]: row for row in BLENDER["observations"]["animations"]}
     assert set(rows) == {"STEP", "LINEAR", "CUBICSPLINE"}
-    assert np.max(np.abs(np.asarray(rows["LINEAR"]["key_times_seconds_from_imported_fcurves"]) - source_times)) < 3e-8
+    assert (
+        np.max(
+            np.abs(
+                np.asarray(rows["LINEAR"]["key_times_seconds_from_imported_fcurves"])
+                - source_times
+            )
+        )
+        < 3e-8
+    )
 
     for sample in rows["STEP"]["samples"]:
         if sample["sample"] in {"before-key-1-1e-06", "before-key-1"}:
             continue
-        index = min(max(int(np.searchsorted(source_times, sample["time_seconds"], side="right") - 1), 0), 2)
+        index = min(
+            max(
+                int(
+                    np.searchsorted(source_times, sample["time_seconds"], side="right")
+                    - 1
+                ),
+                0,
+            ),
+            2,
+        )
         actual = sample["quaternion_wxyz"]
         assert quaternion_coefficient_error(actual, target_keys[index]) <= TOLERANCE
     frame_edge = next(
-        sample for sample in rows["STEP"]["samples"]
+        sample
+        for sample in rows["STEP"]["samples"]
         if sample["sample"] == "before-key-1-1e-06"
     )
     assert frame_edge["time_seconds"] < source_times[1]
-    assert quaternion_coefficient_error(frame_edge["quaternion_wxyz"], target_keys[1]) <= TOLERANCE
+    assert (
+        quaternion_coefficient_error(frame_edge["quaternion_wxyz"], target_keys[1])
+        <= TOLERANCE
+    )
 
     linear = rows["LINEAR"]
-    assert {key["interpolation"] for curve in linear["fcurves"] for key in curve["keys"]} == {"LINEAR"}
-    midpoint = next(sample for sample in linear["samples"] if sample["sample"] == "midpoint-0-1")
-    alpha = (midpoint["time_seconds"] - source_times[0]) / (source_times[1] - source_times[0])
+    assert {
+        key["interpolation"] for curve in linear["fcurves"] for key in curve["keys"]
+    } == {"LINEAR"}
+    midpoint = next(
+        sample for sample in linear["samples"] if sample["sample"] == "midpoint-0-1"
+    )
+    alpha = (midpoint["time_seconds"] - source_times[0]) / (
+        source_times[1] - source_times[0]
+    )
     component_linear = (1.0 - alpha) * target_keys[0] + alpha * target_keys[1]
-    np.testing.assert_allclose(midpoint["quaternion_wxyz"], component_linear, rtol=0.0, atol=TOLERANCE)
+    np.testing.assert_allclose(
+        midpoint["quaternion_wxyz"], component_linear, rtol=0.0, atol=TOLERANCE
+    )
     assert midpoint["quaternion_length"] == pytest.approx(0.95203203, abs=2e-8)
 
     cubic = rows["CUBICSPLINE"]
-    assert {key["interpolation"] for curve in cubic["fcurves"] for key in curve["keys"]} == {"BEZIER"}
-    assert all(key["handle_left_type"] if "handle_left_type" in key else True for curve in cubic["fcurves"] for key in curve["keys"])
-    cubic_midpoint = next(sample for sample in cubic["samples"] if sample["sample"] == "midpoint-0-1")
-    expected_source = _cubic_value(source_times, _accessor(3).reshape((3, 3, 4)), cubic_midpoint["time_seconds"])
+    assert {
+        key["interpolation"] for curve in cubic["fcurves"] for key in curve["keys"]
+    } == {"BEZIER"}
+    assert all(
+        key.get("handle_left_type", True)
+        for curve in cubic["fcurves"]
+        for key in curve["keys"]
+    )
+    cubic_midpoint = next(
+        sample for sample in cubic["samples"] if sample["sample"] == "midpoint-0-1"
+    )
+    expected_source = _cubic_value(
+        source_times, _accessor(3).reshape((3, 3, 4)), cubic_midpoint["time_seconds"]
+    )
     expected_target_xyzw = _map_xyzw_to_blender(expected_source, basis)
     expected_target = expected_target_xyzw[[3, 0, 1, 2]]
-    assert quaternion_coefficient_error(cubic_midpoint["quaternion_wxyz"], expected_target) > 0.08
+    assert (
+        quaternion_coefficient_error(cubic_midpoint["quaternion_wxyz"], expected_target)
+        > 0.08
+    )
     assert cubic_midpoint["quaternion_length"] == pytest.approx(0.97526056, abs=2e-8)
-    assert {key["handle_left_type"] for curve in cubic["fcurves"] for key in curve["keys"]} == {"AUTO"}
-    assert {key["handle_right_type"] for curve in cubic["fcurves"] for key in curve["keys"]} == {"AUTO"}
+    assert {
+        key["handle_left_type"] for curve in cubic["fcurves"] for key in curve["keys"]
+    } == {"AUTO"}
+    assert {
+        key["handle_right_type"] for curve in cubic["fcurves"] for key in curve["keys"]
+    } == {"AUTO"}

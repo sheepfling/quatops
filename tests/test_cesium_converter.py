@@ -1,4 +1,5 @@
 """End-to-end QuatOps local-ENU to Cesium WGS84 ECEF converter proof."""
+
 from __future__ import annotations
 
 import hashlib
@@ -9,7 +10,6 @@ import numpy as np
 from scipy.spatial.transform import Rotation
 
 from quatops.python import hamilton
-
 
 ROOT = Path(__file__).resolve().parents[1]
 FIXTURE = ROOT / "tests/golden/transports/cesium/1.124.0"
@@ -41,7 +41,10 @@ def check(actual, expected, message, *, atol=ATOL):
 
 
 def test_cesium_capture_provenance_and_explicit_frame_contract():
-    assert MANIFEST["review_state"] == "native capture retained; QuatOps replay covered by tests/test_cesium_converter.py"
+    assert (
+        MANIFEST["review_state"]
+        == "native capture retained; QuatOps replay covered by tests/test_cesium_converter.py"
+    )
     assert MANIFEST["target"]["name"] == "CesiumJS"
     assert MANIFEST["target"]["package_version"] == "1.124.0"
     assert MANIFEST["target"]["api_version"] == "1.124"
@@ -56,14 +59,28 @@ def test_cesium_capture_provenance_and_explicit_frame_contract():
     provenance = MANIFEST["provenance"]
     hash_paths = {
         "converter_input_sha256": FIXTURE / "inputs.json",
-        "canonical_inputs_sha256": ROOT / "experiments/interoperability/v1/canonical_inputs.json",
-        "geographic_inputs_sha256": ROOT / "experiments/quatops_capture_wave2/corpus/cesium_geographic_inputs.json",
-        "python_input_generator_sha256": ROOT / "experiments/converters/cesium/1.124.0/create_inputs.py",
-        "native_capture_script_sha256": ROOT / "experiments/converters/cesium/1.124.0/capture_native.mjs",
+        "canonical_inputs_sha256": ROOT
+        / "experiments/interoperability/v1/canonical_inputs.json",
         "witnesses_sha256": FIXTURE / "witnesses.json",
     }
     for field, path in hash_paths.items():
         assert hashlib.sha256(path.read_bytes()).hexdigest() == provenance[field]
+
+    reproduction = MANIFEST["reproduction"]
+    reproduction_paths = {
+        "geographic_inputs_sha256": ROOT
+        / "experiments/converters/cesium/1.124.0/geographic_inputs.json",
+        "input_generator_sha256": ROOT
+        / "experiments/converters/cesium/1.124.0/create_inputs.py",
+        "capture_script_sha256": ROOT
+        / "experiments/converters/cesium/1.124.0/capture_native.mjs",
+        "package_lock_sha256": ROOT
+        / "experiments/converters/cesium/1.124.0/package-lock.json",
+        "numeric_helper_sha256": ROOT
+        / "experiments/converters/shared/numeric_evidence.mjs",
+    }
+    for field, path in reproduction_paths.items():
+        assert hashlib.sha256(path.read_bytes()).hexdigest() == reproduction[field]
 
 
 def test_quatops_generated_local_quaternions_match_cesium_native_actions_and_roundtrips():
@@ -79,30 +96,77 @@ def test_quatops_generated_local_quaternions_match_cesium_native_actions_and_rou
 
         local_rotation = rotation_matrix(q)
         local_translation = np.asarray(item["local_translation_xyz_m"], dtype=float)
-        check(values(output["local_rotation_matrix_rows"]), local_rotation, f"Cesium local matrix for {case_id}")
+        check(
+            values(output["local_rotation_matrix_rows"]),
+            local_rotation,
+            f"Cesium local matrix for {case_id}",
+        )
         expected_local_images = (local_rotation @ probes.T).T
-        check(values(output["local_basis_and_probe_images"]), expected_local_images, f"Cesium local vector action for {case_id}")
+        check(
+            values(output["local_basis_and_probe_images"]),
+            expected_local_images,
+            f"Cesium local vector action for {case_id}",
+        )
 
         enu_to_ecef = np.asarray(values(output["enu_to_ecef_matrix_rows"]), dtype=float)
         local_to_model = np.eye(4)
         local_to_model[:3, :3] = local_rotation
         local_to_model[:3, 3] = local_translation
         expected_world = enu_to_ecef @ local_to_model
-        model_to_ecef = np.asarray(values(output["model_to_ecef_matrix_rows"]), dtype=float)
-        check(model_to_ecef, expected_world, f"Cesium ENU-to-ECEF composition for {case_id}")
+        model_to_ecef = np.asarray(
+            values(output["model_to_ecef_matrix_rows"]), dtype=float
+        )
+        check(
+            model_to_ecef,
+            expected_world,
+            f"Cesium ENU-to-ECEF composition for {case_id}",
+        )
 
         local_points = (local_rotation @ probes.T).T + local_translation
-        expected_world_points = (enu_to_ecef[:3, :3] @ local_points.T).T + enu_to_ecef[:3, 3]
-        check(values(output["world_points_xyz_m"]), expected_world_points, f"Cesium ECEF point action for {case_id}", atol=2e-9)
+        expected_world_points = (enu_to_ecef[:3, :3] @ local_points.T).T + enu_to_ecef[
+            :3, 3
+        ]
+        check(
+            values(output["world_points_xyz_m"]),
+            expected_world_points,
+            f"Cesium ECEF point action for {case_id}",
+            atol=2e-9,
+        )
         expected_world_directions = (enu_to_ecef[:3, :3] @ local_rotation @ probes.T).T
-        check(values(output["world_directions_xyz"]), expected_world_directions, f"Cesium ECEF direction action for {case_id}")
-        check(values(output["point_roundtrip_local_xyz_m"]), probes, f"Cesium ECEF/local inverse point for {case_id}", atol=2e-9)
-        check(values(output["ecef_origin_xyz_m"]), enu_to_ecef[:3, 3], f"Cesium ENU origin for {case_id}", atol=2e-9)
+        check(
+            values(output["world_directions_xyz"]),
+            expected_world_directions,
+            f"Cesium ECEF direction action for {case_id}",
+        )
+        check(
+            values(output["point_roundtrip_local_xyz_m"]),
+            probes,
+            f"Cesium ECEF/local inverse point for {case_id}",
+            atol=2e-9,
+        )
+        check(
+            values(output["ecef_origin_xyz_m"]),
+            enu_to_ecef[:3, 3],
+            f"Cesium ENU origin for {case_id}",
+            atol=2e-9,
+        )
 
-        world_q = np.asarray(values(output["model_to_ecef_quaternion_xyzw"]), dtype=float)
-        recovered_local_q = np.asarray(values(output["local_quaternion_recovered_from_ecef_xyzw"]), dtype=float)
-        check(Rotation.from_quat(world_q).as_matrix(), expected_world[:3, :3], f"Cesium ECEF quaternion for {case_id}")
-        check(Rotation.from_quat(recovered_local_q).as_matrix(), local_rotation, f"Cesium recovered local quaternion for {case_id}")
+        world_q = np.asarray(
+            values(output["model_to_ecef_quaternion_xyzw"]), dtype=float
+        )
+        recovered_local_q = np.asarray(
+            values(output["local_quaternion_recovered_from_ecef_xyzw"]), dtype=float
+        )
+        check(
+            Rotation.from_quat(world_q).as_matrix(),
+            expected_world[:3, :3],
+            f"Cesium ECEF quaternion for {case_id}",
+        )
+        check(
+            Rotation.from_quat(recovered_local_q).as_matrix(),
+            local_rotation,
+            f"Cesium recovered local quaternion for {case_id}",
+        )
 
 
 def test_cesium_composition_antipode_and_geographic_branch_witnesses_are_discriminating():
@@ -110,14 +174,35 @@ def test_cesium_composition_antipode_and_geographic_branch_witnesses_are_discrim
         assert "geo-" in case_id
     assert "antipode_mixed_a@geo-09" in OBSERVATIONS
     assert "mixed_a_times_mixed_b@geo-03" in OBSERVATIONS
-    antipode = {row["case_id"]: row for row in INPUTS["cases"]}["antipode_mixed_a@geo-09"]
+    antipode = {row["case_id"]: row for row in INPUTS["cases"]}[
+        "antipode_mixed_a@geo-09"
+    ]
     positive = {row["case_id"]: row for row in INPUTS["cases"]}["mixed_a@geo-03"]
-    check(rotation_matrix(antipode["canonical_wxyz"]), rotation_matrix(positive["canonical_wxyz"]), "q and -q encode the same physical orientation")
+    check(
+        rotation_matrix(antipode["canonical_wxyz"]),
+        rotation_matrix(positive["canonical_wxyz"]),
+        "q and -q encode the same physical orientation",
+    )
 
-    a = {row["case_id"]: row for row in INPUTS["cases"]}["mixed_a@geo-03"]["canonical_wxyz"]
-    b = {row["case_id"]: row for row in INPUTS["cases"]}["mixed_b@geo-04"]["canonical_wxyz"]
+    a = {row["case_id"]: row for row in INPUTS["cases"]}["mixed_a@geo-03"][
+        "canonical_wxyz"
+    ]
+    b = {row["case_id"]: row for row in INPUTS["cases"]}["mixed_b@geo-04"][
+        "canonical_wxyz"
+    ]
     expected_product = np.asarray(hamilton.multiply(a, b))
-    composed = {row["case_id"]: row for row in INPUTS["cases"]}["mixed_a_times_mixed_b@geo-03"]
-    check(composed["canonical_wxyz"], expected_product, "QuatOps noncommuting product is what was serialized")
+    composed = {row["case_id"]: row for row in INPUTS["cases"]}[
+        "mixed_a_times_mixed_b@geo-03"
+    ]
+    check(
+        composed["canonical_wxyz"],
+        expected_product,
+        "QuatOps noncommuting product is what was serialized",
+    )
     wrong_product = np.asarray(hamilton.multiply(b, a))
-    assert np.max(np.abs(rotation_matrix(wrong_product) - rotation_matrix(expected_product))) > 0.1
+    assert (
+        np.max(
+            np.abs(rotation_matrix(wrong_product) - rotation_matrix(expected_product))
+        )
+        > 0.1
+    )

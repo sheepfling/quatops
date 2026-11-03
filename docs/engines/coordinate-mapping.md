@@ -70,7 +70,7 @@ frames; their specific maps are recorded on the [Unity](unity.md),
 universal engine-pair mappings.
 
 The reported SciPy results and their limits are summarized in
-[verification](verification.md). The versioned native game-engine and
+[verification](../contributing/VERIFICATION.md). The versioned native game-engine and
 converter-boundary comparisons are indexed in the
 [proof matrix](proof-matrix.md) and
 [interoperability atlas](../INTEROPERABILITY_EVIDENCE.md). Runtime comparison

@@ -14,30 +14,39 @@ from quatops import scalar
 from quatops.numpy.hamilton import wxyz as nq
 
 
-def frac_rot(q: Iterable[float] | ndarray, v: Iterable[float] | ndarray) -> tuple[float, ...]:
+def frac_rot(
+    q: Iterable[float] | ndarray, v: Iterable[float] | ndarray
+) -> tuple[float, ...]:
     w, x, y, z = map(F.from_float, map(float, q))
     vx, vy, vz = map(F.from_float, map(float, v))
     den = w * w + x * x + y * y + z * z
     return (
         float(
-            ((w * w + x * x - y * y - z * z) * vx
-             + 2 * (x * y - w * z) * vy
-             + 2 * (x * z + w * y) * vz)
+            (
+                (w * w + x * x - y * y - z * z) * vx
+                + 2 * (x * y - w * z) * vy
+                + 2 * (x * z + w * y) * vz
+            )
             / den
         ),
         float(
-            (2 * (x * y + w * z) * vx
-             + (w * w - x * x + y * y - z * z) * vy
-             + 2 * (y * z - w * x) * vz)
+            (
+                2 * (x * y + w * z) * vx
+                + (w * w - x * x + y * y - z * z) * vy
+                + 2 * (y * z - w * x) * vz
+            )
             / den
         ),
         float(
-            (2 * (x * z - w * y) * vx
-             + 2 * (y * z + w * x) * vy
-             + (w * w - x * x - y * y + z * z) * vz)
+            (
+                2 * (x * z - w * y) * vx
+                + 2 * (y * z + w * x) * vy
+                + (w * w - x * x - y * y + z * z) * vz
+            )
             / den
         ),
     )
+
 
 def decimal_rot(q: Iterable[float], v: Iterable[float]) -> tuple[float, ...]:
     with localcontext() as c:
@@ -47,24 +56,31 @@ def decimal_rot(q: Iterable[float], v: Iterable[float]) -> tuple[float, ...]:
         den = w * w + x * x + y * y + z * z
         return (
             float(
-                ((w * w + x * x - y * y - z * z) * vx
-                 + 2 * (x * y - w * z) * vy
-                 + 2 * (x * z + w * y) * vz)
+                (
+                    (w * w + x * x - y * y - z * z) * vx
+                    + 2 * (x * y - w * z) * vy
+                    + 2 * (x * z + w * y) * vz
+                )
                 / den
             ),
             float(
-                (2 * (x * y + w * z) * vx
-                 + (w * w - x * x + y * y - z * z) * vy
-                 + 2 * (y * z - w * x) * vz)
+                (
+                    2 * (x * y + w * z) * vx
+                    + (w * w - x * x + y * y - z * z) * vy
+                    + 2 * (y * z - w * x) * vz
+                )
                 / den
             ),
             float(
-                (2 * (x * z - w * y) * vx
-                 + 2 * (y * z + w * x) * vy
-                 + (w * w - x * x - y * y + z * z) * vz)
+                (
+                    2 * (x * z - w * y) * vx
+                    + 2 * (y * z + w * x) * vy
+                    + (w * w - x * x - y * y + z * z) * vz
+                )
                 / den
             ),
         )
+
 
 def main() -> None:
     cases = [
@@ -100,7 +116,9 @@ def main() -> None:
                 ("decimal1200", decimal_rot),
             ]:
                 loops = 3000
-                timings = timeit.repeat(lambda fn=fn, q=q, v=v: fn(q, v), number=loops, repeat=5)
+                timings = timeit.repeat(
+                    lambda fn=fn, q=q, v=v: fn(q, v), number=loops, repeat=5
+                )
                 print(
                     label,
                     name,
@@ -128,6 +146,7 @@ def main() -> None:
 
     run1()
     run2()
+
 
 if __name__ == "__main__":
     main()

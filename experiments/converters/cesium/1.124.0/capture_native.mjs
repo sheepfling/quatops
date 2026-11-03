@@ -4,10 +4,10 @@ import path from 'node:path';
 import crypto from 'node:crypto';
 import os from 'node:os';
 import { fileURLToPath, pathToFileURL } from 'node:url';
-import { numeric } from '../../../quatops_capture_wave2/js/capture_io.mjs';
+import { numeric } from '../../shared/numeric_evidence.mjs';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
-const packageRoot = path.resolve(here, '../../../quatops_capture_wave2/js');
+const packageRoot = here;
 const C = await import(pathToFileURL(path.join(packageRoot, 'node_modules/cesium/Source/Cesium.js')));
 const inputPath = path.join(here, 'converter_inputs.json');
 const outputPath = process.argv[2];
@@ -75,7 +75,7 @@ const manifest = {
   inputs: { path: path.relative(here, inputPath), sha256: sha(inputPath), kind: 'QuatOps-generated explicit-frame converter inputs' },
   exporter: { path: path.relative(here, exporterPath), sha256: sha(exporterPath) },
   package_lock_sha256: sha(lockPath),
-  capture_io_sha256: sha(path.join(packageRoot, 'capture_io.mjs')),
+  numeric_helper_sha256: sha(path.resolve(here, '../../shared/numeric_evidence.mjs')),
   observations: { path: 'observations.json', sha256: sha(rowsPath), count: observations.length },
   output: path.resolve(outputPath),
 };

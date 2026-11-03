@@ -1,5 +1,9 @@
 """Capture CSPICE rotation routines through the pinned SpiceyPy binding."""
 
+# The core typecheck uses the versioned API stub; the binary module source is
+# available only in this capture's pinned SpiceyPy environment.
+# pyright: reportMissingModuleSource=false
+
 import argparse
 import hashlib
 import json
@@ -10,7 +14,6 @@ from pathlib import Path
 
 import numpy as np
 import spiceypy as spice
-
 
 ORDERS = ("XYZ", "XZY", "YXZ", "YZX", "ZXY", "ZYX")
 AXIS_NUMBER = {"X": 1, "Y": 2, "Z": 3}
@@ -38,7 +41,13 @@ def parse_args():
     )
     parser.add_argument(
         "--output",
-        default=HERE.parents[3] / "tests" / "golden" / "oracles" / "spiceypy" / "8.3.0" / "native_rotation.json",
+        default=HERE.parents[3]
+        / "tests"
+        / "golden"
+        / "oracles"
+        / "spiceypy"
+        / "8.3.0"
+        / "native_rotation.json",
         type=Path,
     )
     return parser.parse_args()
@@ -52,9 +61,7 @@ def euler_call(case_id, xyz, order, source):
         spice.eul2m(angle3, angle2, angle1, axis3, axis2, axis1),
         dtype=float,
     )
-    read_angle3, read_angle2, read_angle1 = spice.m2eul(
-        matrix, axis3, axis2, axis1
-    )
+    read_angle3, read_angle2, read_angle1 = spice.m2eul(matrix, axis3, axis2, axis1)
     readback = {
         order[0]: float(read_angle1),
         order[1]: float(read_angle2),
@@ -103,39 +110,52 @@ def main():
 
     eulers = []
     for case in corpus["euler_inputs"]:
-        for order in ORDERS:
-            eulers.append(euler_call(case["case_id"], case["xyz"], order, {
-                "units": case["units"],
-                "numeric_format": case["numeric_format"],
-                "actual_bits_hex": case["actual_bits_hex"],
-            }))
+        source = {
+            "units": case["units"],
+            "numeric_format": case["numeric_format"],
+            "actual_bits_hex": case["actual_bits_hex"],
+        }
+        eulers.extend(
+            euler_call(case["case_id"], case["xyz"], order, source) for order in ORDERS
+        )
     euler_boundaries = []
     for case in corpus["euler_boundaries"]:
         xyz = np.asarray(case["xyz"], dtype=float)
         if case["units"] == "degrees":
             xyz = np.deg2rad(xyz)
-        euler_boundaries.append(euler_call(case["case_id"], xyz.tolist(), case["order_label"], {
-            "units": case["units"],
-            "input_xyz": case["xyz"],
-            "numeric_format": case["numeric_format"],
-            "actual_bits_hex": case["actual_bits_hex"],
-        }))
+        euler_boundaries.append(
+            euler_call(
+                case["case_id"],
+                xyz.tolist(),
+                case["order_label"],
+                {
+                    "units": case["units"],
+                    "input_xyz": case["xyz"],
+                    "numeric_format": case["numeric_format"],
+                    "actual_bits_hex": case["actual_bits_hex"],
+                },
+            )
+        )
 
     products = []
     for case in corpus["multiplication_pairs"]:
         a = np.asarray(case["a_wxyz"], dtype=float)
         b = np.asarray(case["b_wxyz"], dtype=float)
-        products.append({
-            "case_id": case["case_id"],
-            "a_input_wxyz": a.tolist(),
-            "b_input_wxyz": b.tolist(),
-            "qxq_a_b_wxyz": np.asarray(spice.qxq(a, b), dtype=float).tolist(),
-            "qxq_b_a_wxyz": np.asarray(spice.qxq(b, a), dtype=float).tolist(),
-            "explicit_hamilton_a_b_wxyz": explicit_hamilton_product(a, b),
-            "q2m_a_rows": np.asarray(spice.q2m(a), dtype=float).tolist(),
-            "q2m_b_rows": np.asarray(spice.q2m(b), dtype=float).tolist(),
-            "q2m_product_rows": np.asarray(spice.q2m(spice.qxq(a, b)), dtype=float).tolist(),
-        })
+        products.append(
+            {
+                "case_id": case["case_id"],
+                "a_input_wxyz": a.tolist(),
+                "b_input_wxyz": b.tolist(),
+                "qxq_a_b_wxyz": np.asarray(spice.qxq(a, b), dtype=float).tolist(),
+                "qxq_b_a_wxyz": np.asarray(spice.qxq(b, a), dtype=float).tolist(),
+                "explicit_hamilton_a_b_wxyz": explicit_hamilton_product(a, b),
+                "q2m_a_rows": np.asarray(spice.q2m(a), dtype=float).tolist(),
+                "q2m_b_rows": np.asarray(spice.q2m(b), dtype=float).tolist(),
+                "q2m_product_rows": np.asarray(
+                    spice.q2m(spice.qxq(a, b)), dtype=float
+                ).tolist(),
+            }
+        )
 
     axis_angle = []
     for case in corpus["axis_angle_inputs"]:
@@ -144,16 +164,18 @@ def main():
         )
         q = np.asarray(spice.m2q(matrix), dtype=float)
         axis, angle = spice.raxisa(matrix)
-        axis_angle.append({
-            "case_id": case["case_id"],
-            "input_axis_xyz": case["axis_xyz"],
-            "input_angle_radians": case["angle_radians"],
-            "axisar_matrix_rows": matrix.tolist(),
-            "axisar_wxyz": q.tolist(),
-            "m2q_from_axisar_wxyz": q.tolist(),
-            "raxisa_axis_xyz": np.asarray(axis, dtype=float).tolist(),
-            "raxisa_angle_radians": float(angle),
-        })
+        axis_angle.append(
+            {
+                "case_id": case["case_id"],
+                "input_axis_xyz": case["axis_xyz"],
+                "input_angle_radians": case["angle_radians"],
+                "axisar_matrix_rows": matrix.tolist(),
+                "axisar_wxyz": q.tolist(),
+                "m2q_from_axisar_wxyz": q.tolist(),
+                "raxisa_axis_xyz": np.asarray(axis, dtype=float).tolist(),
+                "raxisa_angle_radians": float(angle),
+            }
+        )
 
     proper_matrices = []
     for case in corpus["matrix_inputs"]:
@@ -162,15 +184,17 @@ def main():
         matrix = np.asarray(case["rows"], dtype=float)
         q = np.asarray(spice.m2q(matrix), dtype=float)
         native_matrix = np.asarray(spice.q2m(q), dtype=float)
-        proper_matrices.append({
-            "case_id": case["case_id"],
-            "input_matrix_rows": matrix.tolist(),
-            "m2q_wxyz": q.tolist(),
-            "q2m_rows": native_matrix.tolist(),
-            "q2m_positive_basis_images_xyz": [
-                (native_matrix @ axis).tolist() for axis in np.eye(3)
-            ],
-        })
+        proper_matrices.append(
+            {
+                "case_id": case["case_id"],
+                "input_matrix_rows": matrix.tolist(),
+                "m2q_wxyz": q.tolist(),
+                "q2m_rows": native_matrix.tolist(),
+                "q2m_positive_basis_images_xyz": [
+                    (native_matrix @ axis).tolist() for axis in np.eye(3)
+                ],
+            }
+        )
 
     derivatives = []
     for case in corpus["integration_inputs"]:
@@ -185,17 +209,27 @@ def main():
         }
         for side in ("q_then_omega", "omega_then_q"):
             qdot = quaternion_derivative(q, case["omega_xyz"], side)
-            native = np.asarray(spice.qdq2av(q, qdot), dtype=float)
-            row["qdq2av_probes"].append({
-                "derivative_construction": side,
-                "input_qdot_wxyz_per_second": qdot,
-                "qdq2av_omega_xyz_per_second": native.tolist(),
-            })
+            native = np.asarray(
+                spice.qdq2av(
+                    np.asarray(q, dtype=np.float64),
+                    np.asarray(qdot, dtype=np.float64),
+                ),
+                dtype=float,
+            )
+            row["qdq2av_probes"].append(
+                {
+                    "derivative_construction": side,
+                    "input_qdot_wxyz_per_second": qdot,
+                    "qdq2av_omega_xyz_per_second": native.tolist(),
+                }
+            )
         derivatives.append(row)
 
     libspice_path = Path(spice.__file__).parent / "utils" / "cspice.dll"
     if not libspice_path.exists():
-        raise FileNotFoundError(f"Could not locate the loaded CSPICE binary: {libspice_path}")
+        raise FileNotFoundError(
+            f"Could not locate the loaded CSPICE binary: {libspice_path}"
+        )
     lock_path = HERE / "uv.lock"
     output = {
         "schema_version": "1.0",
@@ -214,7 +248,10 @@ def main():
             "input_corpus_sha256": sha256(corpus_bytes),
             "lockfile_sha256": sha256_file(lock_path),
             "exporter_sha256": sha256_file(Path(__file__)),
-            "exact_invocation": "uv run --locked python capture_spice.py --corpus <orientation_inputs_v1.json> --output <native_rotation.json>",
+            "exact_invocation": (
+                "uv run --locked python capture_spice.py --corpus "
+                "<orientation_inputs_v1.json> --output <native_rotation.json>"
+            ),
             "captured_at_utc": datetime.now(timezone.utc).isoformat(),
         },
         "counts": {
@@ -236,7 +273,15 @@ def main():
     }
     options.output.parent.mkdir(parents=True, exist_ok=True)
     options.output.write_text(json.dumps(output, indent=2) + "\n", encoding="utf-8")
-    print(json.dumps({"output": str(options.output), "toolkit": output["runtime"]["toolkit_version"], "counts": output["counts"]}))
+    print(
+        json.dumps(
+            {
+                "output": str(options.output),
+                "toolkit": output["runtime"]["toolkit_version"],
+                "counts": output["counts"],
+            }
+        )
+    )
 
 
 if __name__ == "__main__":

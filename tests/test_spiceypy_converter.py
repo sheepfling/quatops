@@ -1,0 +1,209 @@
+"""Replay selected CSPICE direct-quaternion boundary witnesses through QuatOps."""
+
+from __future__ import annotations
+
+import hashlib
+import json
+from pathlib import Path
+
+import numpy as np
+from scipy.spatial.transform import Rotation
+
+from quatops.python import hamilton
+
+ROOT = Path(__file__).resolve().parents[1]
+FIXTURE = ROOT / "tests/golden/oracles/spiceypy/8.3.0/converter"
+CONTRACT = json.loads((FIXTURE / "contract.json").read_text(encoding="utf-8"))
+MANIFEST = json.loads((FIXTURE / "manifest.json").read_text(encoding="utf-8"))
+INPUTS = json.loads((FIXTURE / "inputs.json").read_text(encoding="utf-8"))
+WITNESSES = json.loads((FIXTURE / "witnesses.json").read_text(encoding="utf-8"))
+SHARED_PATH = ROOT / "experiments/interoperability/v1/canonical_inputs.json"
+SHARED = json.loads(SHARED_PATH.read_text(encoding="utf-8"))
+OBS = WITNESSES["observations"]
+CANONICAL = {
+    item["case_id"]: np.asarray(item["canonical_wxyz"], dtype=float)
+    for item in SHARED["orientations"]
+}
+PROBE = np.asarray(SHARED["probe_vector_xyz"], dtype=float)
+PROBES = np.vstack((np.eye(3), PROBE))
+ATOL = 3e-12
+
+
+def matrix(q_wxyz):
+    q = np.asarray(q_wxyz, dtype=float)
+    return Rotation.from_quat(q[[1, 2, 3, 0]]).as_matrix()
+
+
+def check(actual, expected, message):
+    np.testing.assert_allclose(actual, expected, rtol=0.0, atol=ATOL, err_msg=message)
+
+
+def test_spiceypy_boundary_contract_and_capture_provenance_are_explicit():
+    assert (
+        CONTRACT["contract_id"]
+        == "quatops-spiceypy-8.3.0-direct-quaternion-boundary-v1"
+    )
+    assert CONTRACT["canonical"]["frame"] == {
+        "positive_x": "right",
+        "positive_y": "forward",
+        "positive_z": "up",
+    }
+    assert CONTRACT["target_boundary"]["source_to_target_coordinate_map"] == [
+        "x",
+        "y",
+        "z",
+    ]
+    assert CONTRACT["target_boundary"]["probe_frame_assignment"]["meaning"].startswith(
+        "explicit test frame assignment"
+    )
+    assert CONTRACT["target_boundary"]["canonical_to_native"].startswith(
+        "identity on WXYZ"
+    )
+    assert CONTRACT["target"]["entry_points"] == ["q2m", "mxv", "m2q", "qxq", "axisar"]
+    assert "eul2m" in CONTRACT["excludes"][0]
+    assert MANIFEST["execution"]["was_run"] is True
+    assert MANIFEST["target"]["wrapper_version"] == "8.3.0"
+    assert MANIFEST["target"]["toolkit_version"] == "CSPICE_N0067"
+    assert MANIFEST["selection"] == {
+        "retained_orientation_cases": 8,
+        "native_created_orientations": 1,
+        "noncommuting_product_orders": 2,
+        "native_quaternion_actions_per_orientation": 4,
+    }
+    full = json.loads(
+        (ROOT / "tests/golden/oracles/spiceypy/8.3.0/native_rotation.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    paths = {
+        "capture_script_sha256": ROOT
+        / "experiments/converters/spiceypy/8.3.0/capture_native.py",
+        "contract_sha256": FIXTURE / "contract.json",
+        "converter_input_spec_sha256": ROOT
+        / "experiments/converters/spiceypy/8.3.0/converter_inputs.json",
+        "selected_inputs_sha256": SHARED_PATH,
+        "witnesses_sha256": FIXTURE / "witnesses.json",
+        "full_oracle_sha256": ROOT
+        / "tests/golden/oracles/spiceypy/8.3.0/native_rotation.json",
+        "pinned_lockfile_sha256": ROOT / "experiments/oracles/spiceypy/8.3.0/uv.lock",
+    }
+    for field, path in paths.items():
+        assert (
+            hashlib.sha256(path.read_bytes()).hexdigest()
+            == MANIFEST["provenance"][field]
+        ), field
+    capture_source = paths["capture_script_sha256"].read_text(encoding="utf-8")
+    assert (
+        "import quatops" not in capture_source and "from quatops" not in capture_source
+    )
+    assert (
+        MANIFEST["provenance"]["loaded_cspice_binary_sha256"]
+        == full["runtime"]["loaded_library_sha256"]
+    )
+    assert (
+        MANIFEST["provenance"]["loaded_cspice_binary_path"]
+        .lower()
+        .endswith("cspice.dll")
+    )
+    assert (FIXTURE / "inputs.json").read_bytes() == (
+        ROOT / "experiments/converters/spiceypy/8.3.0/converter_inputs.json"
+    ).read_bytes()
+
+
+def test_spiceypy_native_q2m_mxv_and_m2q_preserve_canonical_physical_action():
+    selected_ids = INPUTS["retained_case_ids"]
+    rows = {item["case_id"]: item for item in OBS["canonical_to_native"]}
+    assert set(rows) == set(selected_ids)
+    for case_id in selected_ids:
+        canonical = CANONICAL[case_id]
+        native = rows[case_id]
+        q_native = np.asarray(native["native_input_wxyz"], dtype=float)
+        np.testing.assert_array_equal(q_native, canonical)
+        expected_matrix = matrix(canonical)
+        check(native["native_q2m_rows"], expected_matrix, f"SPICE q2m {case_id}")
+        expected_actions = np.asarray([hamilton.rotate(canonical, p) for p in PROBES])
+        check(
+            native["native_mxv_basis_and_probe_xyz"],
+            expected_actions,
+            f"SPICE mxv {case_id}",
+        )
+        check(
+            native["native_mxv_basis_and_probe_xyz"],
+            (expected_matrix @ PROBES.T).T,
+            f"SPICE basis action {case_id}",
+        )
+        check(
+            matrix(native["native_m2q_roundtrip_wxyz"]),
+            expected_matrix,
+            f"SPICE m2q roundtrip {case_id}",
+        )
+
+    # The antipode is a distinct coefficient input but must have identical physical action.
+    check(
+        rows["antipode_mixed_a"]["native_mxv_basis_and_probe_xyz"],
+        rows["mixed_a"]["native_mxv_basis_and_probe_xyz"],
+        "SPICE q versus -q",
+    )
+
+
+def test_spiceypy_native_created_axisar_m2q_route_converts_back_to_canonical():
+    case = INPUTS["native_constructed_orientation"]
+    native = OBS["native_created"][0]
+    expected_matrix = Rotation.from_rotvec(
+        np.asarray(case["axis_xyz"]) * case["angle_radians"]
+    ).as_matrix()
+    q_native = np.asarray(native["native_m2q_wxyz"], dtype=float)
+    check(
+        native["native_axisar_matrix_rows"],
+        expected_matrix,
+        "SPICE axisar active matrix",
+    )
+    check(native["native_q2m_rows"], expected_matrix, "SPICE m2q to q2m")
+    check(
+        native["native_mxv_basis_and_probe_xyz"],
+        (expected_matrix @ PROBES.T).T,
+        "SPICE native-created mxv",
+    )
+    check(
+        [hamilton.rotate(q_native, p) for p in PROBES],
+        native["native_mxv_basis_and_probe_xyz"],
+        "SPICE native-to-canonical identity map",
+    )
+    check(
+        matrix(native["native_m2q_roundtrip_wxyz"]),
+        expected_matrix,
+        "SPICE native-created reverse matrix roundtrip",
+    )
+
+
+def test_spiceypy_qxq_matches_quatops_noncommuting_composition_both_orders():
+    rows = {item["case_id"]: item for item in OBS["composition"]}
+    for case_id, lhs_id, rhs_id in (
+        ("mixed_a_times_mixed_b", "mixed_a", "mixed_b"),
+        ("mixed_b_times_mixed_a", "mixed_b", "mixed_a"),
+    ):
+        row = rows[case_id]
+        expected = np.asarray(
+            hamilton.multiply(CANONICAL[lhs_id], CANONICAL[rhs_id]), dtype=float
+        )
+        np.testing.assert_allclose(
+            row["native_lhs_wxyz"], CANONICAL[lhs_id], rtol=0.0, atol=0.0
+        )
+        np.testing.assert_allclose(
+            row["native_rhs_wxyz"], CANONICAL[rhs_id], rtol=0.0, atol=0.0
+        )
+        check(row["native_input_wxyz"], expected, f"SPICE qxq coefficients {case_id}")
+        check(row["native_q2m_rows"], matrix(expected), f"SPICE qxq matrix {case_id}")
+        check(
+            row["native_mxv_basis_and_probe_xyz"],
+            [hamilton.rotate(expected, p) for p in PROBES],
+            f"SPICE qxq action {case_id}",
+        )
+
+    forward = np.asarray(
+        rows["mixed_a_times_mixed_b"]["native_mxv_basis_and_probe_xyz"][-1]
+    )
+    reverse = np.asarray(
+        rows["mixed_b_times_mixed_a"]["native_mxv_basis_and_probe_xyz"][-1]
+    )
+    assert np.max(np.abs(forward - reverse)) > 0.1

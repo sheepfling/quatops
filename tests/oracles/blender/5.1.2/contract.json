@@ -70,9 +70,9 @@
   },
   "provenance": {
     "witness_file": "witnesses.json",
-    "witness_sha256": "c7afb2d11f0edb9f7951e5acbc59782dda8fe1d17939f31facc2af439df9671b",
+    "witness_sha256": "03937930862c76fec1f8d82afee5ca107caf9c57654f138aea4430a364301c66",
     "capture_source": "experiments/blender/5.1.2/capture.py",
-    "capture_source_sha256": "072346a3f074fd708ce5f18a42e8b75b83edbd488fd544582e58cde994321cf0",
+    "capture_source_sha256": "c2927e54afbf5f2dc091d8b4bb5f66a15124f1e343bd009c9970bee4cd38e45b",
     "original_capture_sha256": "e3f4096ef6a67d7dc1fa3a177c5194f51d8648622564cc1a1f1835ab1bfad5b3",
     "canonical_input_sha256": "a6f0630806b69d3b3b29a036aa10f63bfe214668329c661598951f84f8f41eec"
   }

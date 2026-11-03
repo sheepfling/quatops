@@ -43,9 +43,24 @@ _COMPONENT_FIRST_BACKENDS = (
 
 _NUMBA_API_PATHS = {
     "algebraic": (
-        "exp", "log", "sin", "cos", "sinh", "cosh", "tan", "tanh",
-        "asin", "acos", "atan", "asinh", "acosh", "atanh", "expm1",
-        "log1p", "log2", "log10",
+        "exp",
+        "log",
+        "sin",
+        "cos",
+        "sinh",
+        "cosh",
+        "tan",
+        "tanh",
+        "asin",
+        "acos",
+        "atan",
+        "asinh",
+        "acosh",
+        "atanh",
+        "expm1",
+        "log1p",
+        "log2",
+        "log10",
     ),
     "multiply": ("multiply",),
     "rotate": ("rotate",),
@@ -63,8 +78,10 @@ _NUMBA_API_PATHS = {
     "from_two_vectors": ("from_two_vectors",),
     "conjugate": ("conjugate",),
     "component_transform": (
-        "from_wxyz", "to_xyzw",
-        "from_hamilton", "to_hamilton",
+        "from_wxyz",
+        "to_xyzw",
+        "from_hamilton",
+        "to_hamilton",
     ),
     "vector_part": ("vector_part",),
     "random_quaternion": ("random_quaternion", "random_rotation"),
@@ -88,50 +105,57 @@ _NUMBA_API_PATHS = {
     "rotation_covariance": ("rotation_covariance",),
     "skew_matrix": ("skew_matrix",),
     "so3_jacobian": (
-        "so3_left_jacobian", "so3_right_jacobian",
-        "so3_left_jacobian_inverse", "so3_right_jacobian_inverse",
+        "so3_left_jacobian",
+        "so3_right_jacobian",
+        "so3_left_jacobian_inverse",
+        "so3_right_jacobian_inverse",
     ),
     "align_vectors": ("align_vectors",),
 }
 
 _COMPOSED_NUMBA_API_PATHS = {
     "shared Numba kernels": (
-        "align_sign", "divide", "from_homogeneous_matrix", "integrate_angular_velocity",
-        "quaternion_derivative", "squad", "swing_twist", "to_homogeneous_matrix",
-        "so3_adjoint", "boxplus", "boxminus",
+        "align_sign",
+        "divide",
+        "from_homogeneous_matrix",
+        "integrate_angular_velocity",
+        "quaternion_derivative",
+        "squad",
+        "swing_twist",
+        "to_homogeneous_matrix",
+        "so3_adjoint",
+        "boxplus",
+        "boxminus",
     ),
 }
 
 _NUMPY_API_PATHS = {
     "component and arithmetic arrays": (
-        "add", "from_xyzw", "negate", "scale", "subtract", "to_wxyz",
+        "add",
+        "from_xyzw",
+        "negate",
+        "scale",
+        "subtract",
+        "to_wxyz",
     ),
     "scalar extraction": ("scalar_part",),
 }
 
 _ENGINE_NUMBA_API_PATHS = {
-    "engine_axis_map": tuple(
-        f"engines.numpy.{name}" for name in engine_numpy.__all__
-    ),
+    "engine_axis_map": tuple(f"engines.numpy.{name}" for name in engine_numpy.__all__),
 }
 
 
 def _api_catalog() -> dict[str, dict[str, list[str]]]:
     """Return the full exported NumPy API route inventory."""
     return {
-        "numba": {
-            route: list(names) for route, names in _NUMBA_API_PATHS.items()
-        },
+        "numba": {route: list(names) for route, names in _NUMBA_API_PATHS.items()},
         "composed": {
-            route: list(names)
-            for route, names in _COMPOSED_NUMBA_API_PATHS.items()
+            route: list(names) for route, names in _COMPOSED_NUMBA_API_PATHS.items()
         },
-        "numpy": {
-            route: list(names) for route, names in _NUMPY_API_PATHS.items()
-        },
+        "numpy": {route: list(names) for route, names in _NUMPY_API_PATHS.items()},
         "engine_numba": {
-            route: list(names)
-            for route, names in _ENGINE_NUMBA_API_PATHS.items()
+            route: list(names) for route, names in _ENGINE_NUMBA_API_PATHS.items()
         },
     }
 
@@ -199,7 +223,12 @@ def _describe_kernel(name: str, kernel: Any) -> dict[str, Any]:
             "signatures": signatures,
         }
 
-    return {"name": name, "state": "unknown", "kind": type(kernel).__name__, "signatures": []}
+    return {
+        "name": name,
+        "state": "unknown",
+        "kind": type(kernel).__name__,
+        "signatures": [],
+    }
 
 
 def _exercise_public_batch_paths() -> None:
@@ -268,9 +297,24 @@ def _exercise_public_batch_paths() -> None:
         backend.scalar_part(q0)
         backend.vector_part(q0)
         for operation in (
-            "exp", "log", "sin", "cos", "sinh", "cosh", "tan", "tanh",
-            "asin", "acos", "atan", "asinh", "acosh", "atanh", "expm1",
-            "log1p", "log2", "log10",
+            "exp",
+            "log",
+            "sin",
+            "cos",
+            "sinh",
+            "cosh",
+            "tan",
+            "tanh",
+            "asin",
+            "acos",
+            "atan",
+            "asinh",
+            "acosh",
+            "atanh",
+            "expm1",
+            "log1p",
+            "log2",
+            "log10",
         ):
             getattr(backend, operation)(q0)
         backend.power(q0, 3)
@@ -324,12 +368,8 @@ def _exercise_public_batch_paths() -> None:
     engine_numpy.map_hamilton_wxyz(
         hamilton_wxyz.from_rotvec(large_rotation_vectors), axis_map
     )
-    engine_numpy.map_jpl_xyzw(
-        jpl_xyzw.from_rotvec(large_rotation_vectors), axis_map
-    )
-    engine_numpy.map_jpl_wxyz(
-        jpl_wxyz.from_rotvec(large_rotation_vectors), axis_map
-    )
+    engine_numpy.map_jpl_xyzw(jpl_xyzw.from_rotvec(large_rotation_vectors), axis_map)
+    engine_numpy.map_jpl_wxyz(jpl_wxyz.from_rotvec(large_rotation_vectors), axis_map)
 
     component_first_angles = np.moveaxis(large_euler_angles, -1, 0)
     component_first_vectors = np.moveaxis(large_rotation_vectors, -1, 0)
@@ -353,9 +393,7 @@ def _exercise_public_batch_paths() -> None:
         backend.random_quaternion(count, rng=np.random.default_rng(73))
         backend.random_rotation(count, rng=np.random.default_rng(74))
         if hasattr(backend, "from_hamilton"):
-            hamilton_values = hamilton_wxyz_first.from_rotvec(
-                component_first_vectors
-            )
+            hamilton_values = hamilton_wxyz_first.from_rotvec(component_first_vectors)
             backend.from_hamilton(hamilton_values)
 
 
@@ -413,9 +451,7 @@ def collect_numba_coverage() -> dict[str, Any]:
         for state in ("compiled", "registered", "missing", "unknown")
     }
     summary["api_routes"] = sum(
-        len(names)
-        for routes in api_catalog.values()
-        for names in routes.values()
+        len(names) for routes in api_catalog.values() for names in routes.values()
     )
     summary["api_expected"] = len(_api_catalog_names()[1])
     return {
@@ -456,10 +492,7 @@ def main() -> int:
     _print_api_catalog(report["api_catalog"])
     for item in report["kernels"]:
         signatures = ", ".join(item["signatures"]) or "no compiled signatures"
-        print(
-            f"[{item['state']}] {item['name']} "
-            f"({item['kind']}): {signatures}"
-        )
+        print(f"[{item['state']}] {item['name']} ({item['kind']}): {signatures}")
     return 0 if report["complete"] else 1
 
 

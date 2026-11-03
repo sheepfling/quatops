@@ -58,3 +58,21 @@ This is one double-precision Python binding and binary on one platform. It does
 not cover single-precision MuJoCo builds, viewer or simulator behavior,
 robot-specific joint frames, or all robotics wrapper conventions. The native
 capture and its SciPy/formula replay are separate evidence types.
+
+## QuatOps direct-quaternion boundary proof
+
+The compact converter capture at
+[`tests/golden/oracles/mujoco/3.17.0/converter`](../../tests/golden/oracles/mujoco/3.17.0/converter/manifest.json)
+assigns MuJoCo's numeric vectors the same explicit right-handed probe frame as
+the canonical QuatOps inputs (`+X right, +Y forward, +Z up`). This assignment
+does not infer a model or simulator world frame. In MuJoCo 3.17.0, native
+`mju_quat2Mat` and `mju_rotVecQuat` matched the active Hamilton WXYZ action on
+eight selected unit inputs; `mju_mat2Quat` reversed the matrix route up to
+quaternion sign. A native `mju_axisAngle2Quat` orientation and both operand
+orders of a noncommuting `mju_mulQuat` pair were also checked. The selected
+native values are replayed by
+[`tests/test_mujoco_converter.py`](../../tests/test_mujoco_converter.py),
+separately from the pinned native capture.
+
+This does not establish model body, joint, camera, or robot-link frames, nor
+simulator, viewer, or rendering behavior.

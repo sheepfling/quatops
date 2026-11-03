@@ -15,9 +15,15 @@ from tests.native_engine_support import (
 )
 from tests.oracle_support import BACKENDS
 
-
 ROOT = Path(__file__).parent.parent
-FIXTURE_PATH = Path(__file__).parent / "golden" / "oracles" / "spiceypy" / "8.3.0" / "native_rotation.json"
+FIXTURE_PATH = (
+    Path(__file__).parent
+    / "golden"
+    / "oracles"
+    / "spiceypy"
+    / "8.3.0"
+    / "native_rotation.json"
+)
 FIXTURE = json.loads(FIXTURE_PATH.read_text(encoding="utf-8"))
 OBS = FIXTURE["observations"]
 ORDERS = ("XYZ", "XZY", "YXZ", "YZX", "ZXY", "ZYX")
@@ -32,18 +38,27 @@ def _ordered(xyz, order):
 def _rotation_error(lhs_wxyz, rhs_wxyz):
     lhs = np.asarray(lhs_wxyz, dtype=float)[[1, 2, 3, 0]]
     rhs = np.asarray(rhs_wxyz, dtype=float)[[1, 2, 3, 0]]
-    return float(np.max(np.abs(Rotation.from_quat(lhs).as_matrix() - Rotation.from_quat(rhs).as_matrix())))
+    return float(
+        np.max(
+            np.abs(
+                Rotation.from_quat(lhs).as_matrix()
+                - Rotation.from_quat(rhs).as_matrix()
+            )
+        )
+    )
 
 
 def _hamilton_product(lhs, rhs):
     aw, ax, ay, az = lhs
     bw, bx, by, bz = rhs
-    return np.asarray((
-        aw * bw - ax * bx - ay * by - az * bz,
-        aw * bx + ax * bw + ay * bz - az * by,
-        aw * by - ax * bz + ay * bw + az * bx,
-        aw * bz + ax * by - ay * bx + az * bw,
-    ))
+    return np.asarray(
+        (
+            aw * bw - ax * bx - ay * by - az * bz,
+            aw * bx + ax * bw + ay * bz - az * by,
+            aw * by - ax * bz + ay * bw + az * bx,
+            aw * bz + ax * by - ay * bx + az * bw,
+        )
+    )
 
 
 def test_cspice_fixture_records_both_pinned_wrapper_and_loaded_toolkit():
@@ -72,12 +87,17 @@ def test_cspice_euler_and_matrix_direction_match_scipy_and_read_back():
             ).as_matrix()
             native_frame_matrix = np.asarray(row["eul2m_matrix_rows"], dtype=float)
             np.testing.assert_allclose(
-                native_frame_matrix, expected_active.T, rtol=0.0, atol=TOLERANCE,
+                native_frame_matrix,
+                expected_active.T,
+                rtol=0.0,
+                atol=TOLERANCE,
                 err_msg=f"CSPICE eul2m {row['case_id']} {row['order']}",
             )
             np.testing.assert_allclose(
-                row["q2m_from_m2q_rows"], native_frame_matrix,
-                rtol=0.0, atol=TOLERANCE,
+                row["q2m_from_m2q_rows"],
+                native_frame_matrix,
+                rtol=0.0,
+                atol=TOLERANCE,
             )
             readback = Rotation.from_euler(
                 row["order"], _ordered(row["m2eul_readback_radians_xyz"], row["order"])
@@ -90,8 +110,13 @@ def test_cspice_euler_and_matrix_direction_match_scipy_and_read_back():
                 err_msg=f"CSPICE m2eul {row['case_id']} {row['order']}",
             )
             native_quaternion = np.asarray(row["m2q_wxyz"], dtype=float)
-            scipy_quaternion = Rotation.from_matrix(native_frame_matrix).as_quat()[[3, 0, 1, 2]]
-            assert quaternion_coefficient_error(native_quaternion, scipy_quaternion) <= 2e-12
+            scipy_quaternion = Rotation.from_matrix(native_frame_matrix).as_quat()[
+                [3, 0, 1, 2]
+            ]
+            assert (
+                quaternion_coefficient_error(native_quaternion, scipy_quaternion)
+                <= 2e-12
+            )
 
 
 @pytest.mark.parametrize(
@@ -165,14 +190,20 @@ def test_cspice_qdq2av_identifies_the_native_frame_and_derivative_side():
         native_passive_matrix = Rotation.from_quat(q[[1, 2, 3, 0]]).as_matrix().T
         qdot_body = 0.5 * _hamilton_product(q, [0.0, *omega])
         qdot_left = 0.5 * _hamilton_product([0.0, *omega], q)
-        probes = {probe["derivative_construction"]: probe for probe in row["qdq2av_probes"]}
+        probes = {
+            probe["derivative_construction"]: probe for probe in row["qdq2av_probes"]
+        }
         np.testing.assert_allclose(
-            probes["q_then_omega"]["input_qdot_wxyz_per_second"], qdot_body,
-            rtol=0.0, atol=2e-14,
+            probes["q_then_omega"]["input_qdot_wxyz_per_second"],
+            qdot_body,
+            rtol=0.0,
+            atol=2e-14,
         )
         np.testing.assert_allclose(
-            probes["omega_then_q"]["input_qdot_wxyz_per_second"], qdot_left,
-            rtol=0.0, atol=2e-14,
+            probes["omega_then_q"]["input_qdot_wxyz_per_second"],
+            qdot_left,
+            rtol=0.0,
+            atol=2e-14,
         )
         np.testing.assert_allclose(
             probes["q_then_omega"]["qdq2av_omega_xyz_per_second"],
@@ -189,7 +220,15 @@ def test_cspice_qdq2av_identifies_the_native_frame_and_derivative_side():
 
 
 def test_spiceypy_capture_script_and_lockfile_hashes_are_frozen():
-    capture_path = ROOT / "experiments" / "oracles" / "spiceypy" / "8.3.0" / "capture_spice.py"
+    capture_path = (
+        ROOT / "experiments" / "oracles" / "spiceypy" / "8.3.0" / "capture_spice.py"
+    )
     lock_path = capture_path.with_name("uv.lock")
-    assert hashlib.sha256(capture_path.read_bytes()).hexdigest() == FIXTURE["provenance"]["exporter_sha256"]
-    assert hashlib.sha256(lock_path.read_bytes()).hexdigest() == FIXTURE["provenance"]["lockfile_sha256"]
+    assert (
+        hashlib.sha256(capture_path.read_bytes()).hexdigest()
+        == FIXTURE["provenance"]["exporter_sha256"]
+    )
+    assert (
+        hashlib.sha256(lock_path.read_bytes()).hexdigest()
+        == FIXTURE["provenance"]["lockfile_sha256"]
+    )

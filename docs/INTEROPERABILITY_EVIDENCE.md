@@ -57,13 +57,28 @@ sets. Their provenance preserves native build details and the SHA-256 digest of
 the full discovery capture used to select them. Capture exporters remain
 available for replay. These witnesses are math or transform-stack oracles;
 they do not imply production adapters under `src/`. Separate auxiliary
-converter proofs now exercise QuatOps-generated values through native Cesium,
-Three.js GLTFLoader, OpenUSD, and ROS 2/tf2 boundaries.
+converter proofs now compare canonical values and frame mappings against
+native Cesium, Three.js GLTFLoader, OpenUSD, ROS 2/tf2, CSPICE direct
+quaternion APIs, MuJoCo direct quaternion APIs, OpenCV Rodrigues, and Eigen's
+native C++ quaternion APIs.
 
 Run the converter acceptance set with:
 
 ```powershell
-.venv\Scripts\python.exe -m pytest -q tests\test_canonical_interoperability.py tests\test_engine_basis_oracle.py tests\test_engine_proof_profiles.py tests\test_ros_tf2_converter.py tests\test_cesium_converter.py tests\test_gltf_converter_roundtrip.py tests\test_openusd_converter_roundtrip.py
+$acceptanceTests = @(
+  'tests\test_canonical_interoperability.py',
+  'tests\test_engine_basis_oracle.py',
+  'tests\test_engine_proof_profiles.py',
+  'tests\test_ros_tf2_converter.py',
+  'tests\test_cesium_converter.py',
+  'tests\test_gltf_converter_roundtrip.py',
+  'tests\test_openusd_converter_roundtrip.py',
+  'tests\test_spiceypy_converter.py',
+  'tests\test_mujoco_converter.py',
+  'tests\test_opencv_converter.py',
+  'tests\test_eigen_converter.py'
+)
+.venv\Scripts\python.exe -m pytest -q $acceptanceTests
 ```
 
 ## Converter-boundary evidence and remaining scope
@@ -74,21 +89,29 @@ Run the converter acceptance set with:
 | [glTF 2.0 / Three.js GLTFLoader 0.187.0](transports/gltf.md) | QuatOps-generated static `.gltf` hierarchy loaded by the pinned native loader; local/world actions, hierarchy composition, inverse, and file hashes | Animation export/import is outside this converter proof; other loaders retain separate behavior evidence |
 | [OpenUSD 26.11](transports/openusd.md) | QuatOps-generated USDA reopened by pinned OpenUSD; orient ops, parent/child composition, reset stack, and native point/direction actions | Time-sampled ops, scale/shear decomposition, renderer/importer behavior, and asset axes |
 | [ROS 2 Jazzy / tf2 0.36.23](oracles/ros2-tf2.md) | Native `BufferCore` three-frame chain, both lookup directions, transformed points, `TransformStamped` fields, and `fromMsg` round trip | DDS/CDR wire transport, live network, time interpolation/extrapolation, and dynamic broadcasters |
-| CSPICE, MuJoCo, OpenCV, PROJ | Independent operation-specific runtime/math captures | No named QuatOps converter is accepted |
-| OpenXR, Eigen, Sophus | No pinned capture in this workspace | Not required for the current converter scope |
+| [SpiceyPy 8.3.0 / CSPICE_N0067](oracles/spiceypy.md) | Eight selected canonical inputs, native `q2m`/`mxv` actions, `m2q` round trip, native `axisar` matrix to `m2q` quaternion route, and both `qxq` product orders | `eul2m`/Euler frame direction, named SPICE frames, kernels, and spacecraft frame semantics |
+| [MuJoCo 3.17.0](oracles/mujoco.md) | Eight selected canonical inputs, native matrix/vector actions, `mju_mat2Quat` round trip, native axis-angle construction, and both `mju_mulQuat` product orders | Model, body, joint, camera, robot link, simulation, and viewer frame assignments |
+| [OpenCV 4.13.0](oracles/opencv.md) | Native `cv2.Rodrigues` plus `cv2.gemm` basis/probe actions, reverse rotvec conversion, noncommuting matrix composition; float32 and float64 | C++ `cv::Quat`, camera/world frames, and Jacobian adapters |
+| [Eigen 5.0.1](oracles/eigen.md) | Native C++ `Quaternionf`/`Quaterniond` WXYZ construction, XYZW coeffs, vector action, matrix conversion, `AngleAxis`, and both product orders | Application-specific frames, Sophus tangent semantics, serialization, and interpolation |
+| PROJ 9.5.1 | 11 native WGS84 probes, second Windows run, analytic ENU/ECEF basis and SciPy matrix review | Supporting frame evidence only; no PROJ quaternion or Cesium runtime claim |
+| Sophus 1.24.6 | Native `SO3d` quaternion, exp/log, action, inverse, composition, and perturbation discovery; separate SciPy comparison | First discovery set only; no float32, Jacobian, or full tangent contract |
+| OpenXR 1.1.65 | Native SDK header ABI probe for `XrQuaternionf` and `XrPosef` | No OpenXR runtime; `xrLocateSpace` and runtime frame behavior remain pending |
 
 These are auxiliary proofs and fixtures, not new runtime APIs under `src/`.
-The native side was executed in each pinned target runtime; Python replay tests
-separately use QuatOps and SciPy formulas to check the captured actions.
-Cesium's existing 171-observation discovery capture, glTF's broader multi-loader
-captures, and OpenCV/PROJ sweeps remain available as discovery evidence; the
-converter acceptance fixtures retain only selected observations.
+Native library/runtime execution, SDK-header ABI capture, and SciPy formula
+checks are recorded as separate evidence kinds. Python replay tests separately
+use QuatOps and SciPy formulas to check accepted captured actions. Retained
+fixtures contain selected native witnesses and distinct known discrepancies;
+passing broad sweeps are not included in the product evidence set.
 
 The compact converter suites are `tests/test_ros_tf2_converter.py`,
 `tests/test_cesium_converter.py`, `tests/test_gltf_converter_roundtrip.py`,
-and `tests/test_openusd_converter_roundtrip.py`. Their native manifests and
-exact selected outputs live under `tests/golden/`; passing sweep outputs are
-not copied into those witness sets.
+`tests/test_openusd_converter_roundtrip.py`, `tests/test_spiceypy_converter.py`,
+`tests/test_mujoco_converter.py`, `tests/test_opencv_converter.py`, and
+`tests/test_eigen_converter.py`. Accepted converter manifests and selected
+outputs live under `tests/golden/`; the first Sophus and OpenXR discovery
+outputs remain under `experiments/oracles/` pending their target-specific
+review gates. Passing sweep outputs are not copied into accepted witness sets.
 
 ## Evidence policy
 

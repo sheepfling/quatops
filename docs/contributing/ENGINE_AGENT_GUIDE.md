@@ -52,7 +52,8 @@ frozen outputs and does not launch the engines. `tests/test_engine_basis_oracle.
 separately checks the shared formula over all 48 signed-axis maps.
 
 The auxiliary converter proofs for CesiumJS, glTF/Three.js, OpenUSD, and
-ROS 2/tf2 are summarized in the
+ROS 2/tf2, plus the direct quaternion API proofs for CSPICE/SpiceyPy and
+MuJoCo, OpenCV Rodrigues, and Eigen, are summarized in the
 [interoperability evidence atlas](../INTEROPERABILITY_EVIDENCE.md). Each proof is
 limited to its versioned frame contract and captured operations. None of these
 captures establishes a universal engine world frame, model-forward axis, or

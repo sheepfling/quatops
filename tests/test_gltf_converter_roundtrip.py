@@ -1,4 +1,5 @@
 """QuatOps-to-glTF file serialization and pinned Three.js GLTFLoader proof."""
+
 from __future__ import annotations
 
 import hashlib
@@ -9,7 +10,6 @@ import numpy as np
 from scipy.spatial.transform import Rotation
 
 from quatops.engines import QuaternionFrameMap, SignedAxisMap
-
 
 ROOT = Path(__file__).resolve().parents[1]
 FIXTURE = ROOT / "tests/golden/transports/gltf/2.0.0/threejs/0.187.0/converter"
@@ -64,16 +64,32 @@ def test_gltf_converter_artifact_loader_and_provenance_are_pinned():
     assert MANIFEST["selection"]["retained_observations"] == 2
     assert set(OBS) == {"QuatOpsParent", "QuatOpsChild"}
 
-    hash_paths = {
+    provenance_paths = {
         "input_sha256": FIXTURE / "inputs.json",
         "asset_sha256": FIXTURE / "quatops_hierarchy.gltf",
         "native_observations_sha256": FIXTURE / "witnesses.json",
-        "generator_sha256": ROOT / "experiments/converters/gltf/2.0.0/create_asset.py",
-        "native_loader_script_sha256": ROOT / "experiments/converters/gltf/2.0.0/capture_threejs.mjs",
         "contract_sha256": FIXTURE / "contract.json",
     }
-    for field, path in hash_paths.items():
-        assert hashlib.sha256(path.read_bytes()).hexdigest() == MANIFEST["provenance"][field]
+    for field, path in provenance_paths.items():
+        assert (
+            hashlib.sha256(path.read_bytes()).hexdigest()
+            == MANIFEST["provenance"][field]
+        )
+
+    reproduction_paths = {
+        "generator_sha256": ROOT / "experiments/converters/gltf/2.0.0/create_asset.py",
+        "loader_script_sha256": ROOT
+        / "experiments/converters/gltf/2.0.0/capture_threejs.mjs",
+        "package_lock_sha256": ROOT
+        / "experiments/transports/gltf/2.0.0/threejs/0.187.0/package-lock.json",
+        "numeric_helper_sha256": ROOT
+        / "experiments/converters/shared/numeric_evidence.mjs",
+    }
+    for field, path in reproduction_paths.items():
+        assert (
+            hashlib.sha256(path.read_bytes()).hexdigest()
+            == MANIFEST["reproduction"][field]
+        )
 
     for source, asset_node in zip(INPUTS["nodes"], ASSET["nodes"]):
         assert asset_node["rotation"] == source["gltf_xyzw"]
@@ -81,7 +97,6 @@ def test_gltf_converter_artifact_loader_and_provenance_are_pinned():
 
 
 def test_loader_local_actions_hierarchy_composition_and_inverse_preserve_physical_pose():
-    probes_canonical = np.asarray(INPUTS["probe_vectors_xyz"], dtype=float)
     probes_gltf = np.asarray(INPUTS["gltf_probe_vectors_xyz"], dtype=float)
     node_inputs = {row["node"]: row for row in INPUTS["nodes"]}
     parent = node_inputs["parent"]
@@ -92,32 +107,72 @@ def test_loader_local_actions_hierarchy_composition_and_inverse_preserve_physica
         q = np.asarray(row["canonical_wxyz"], dtype=float)
         q_dest = TO_GLTF.to_destination_wxyz(q)
         q_dest_xyzw = np.asarray((q_dest[1], q_dest[2], q_dest[3], q_dest[0]))
-        check(q_dest_xyzw, row["gltf_xyzw"], f"QuatOps glTF coefficient map for {node_name}")
+        check(
+            q_dest_xyzw,
+            row["gltf_xyzw"],
+            f"QuatOps glTF coefficient map for {node_name}",
+        )
         translation = MAP @ np.asarray(row["canonical_translation_xyz"], dtype=float)
-        check(translation, row["gltf_translation_xyz"], f"QuatOps glTF translation map for {node_name}")
+        check(
+            translation,
+            row["gltf_translation_xyz"],
+            f"QuatOps glTF translation map for {node_name}",
+        )
         r_target = target_rotation(q)
         expected = trs(r_target, translation)
         expected_local[node_name] = expected
 
         output = OBS[node_name]["outputs"]
-        check(values(output["local_quaternion_xyzw"]), q_dest_xyzw, f"GLTFLoader local quaternion for {node_name}")
-        check(values(output["local_matrix_rows"]), expected, f"GLTFLoader local matrix for {node_name}")
+        check(
+            values(output["local_quaternion_xyzw"]),
+            q_dest_xyzw,
+            f"GLTFLoader local quaternion for {node_name}",
+        )
+        check(
+            values(output["local_matrix_rows"]),
+            expected,
+            f"GLTFLoader local matrix for {node_name}",
+        )
         native_images = (r_target @ probes_gltf.T).T
-        check(values(output["local_basis_and_probe_images"]), native_images, f"GLTFLoader local vector action for {node_name}")
+        check(
+            values(output["local_basis_and_probe_images"]),
+            native_images,
+            f"GLTFLoader local vector action for {node_name}",
+        )
         roundtrip = TO_GLTF.from_destination_wxyz((q_dest_xyzw[3], *q_dest_xyzw[:3]))
         check(roundtrip, q, f"glTF inverse converter for {node_name}")
 
     world_parent = expected_local["QuatOpsParent"]
     world_child = world_parent @ expected_local["QuatOpsChild"]
-    check(values(OBS["QuatOpsParent"]["outputs"]["world_matrix_rows"]), world_parent, "Three.js parent world transform")
-    check(values(OBS["QuatOpsChild"]["outputs"]["world_matrix_rows"]), world_child, "Three.js child world transform")
+    check(
+        values(OBS["QuatOpsParent"]["outputs"]["world_matrix_rows"]),
+        world_parent,
+        "Three.js parent world transform",
+    )
+    check(
+        values(OBS["QuatOpsChild"]["outputs"]["world_matrix_rows"]),
+        world_child,
+        "Three.js child world transform",
+    )
 
     expected_points = (world_child[:3, :3] @ probes_gltf.T).T + world_child[:3, 3]
-    check(values(OBS["QuatOpsChild"]["outputs"]["world_points_xyz"]), expected_points, "Three.js loaded asset physical point action")
+    check(
+        values(OBS["QuatOpsChild"]["outputs"]["world_points_xyz"]),
+        expected_points,
+        "Three.js loaded asset physical point action",
+    )
     expected_directions = (world_child[:3, :3] @ probes_gltf.T).T
     expected_directions /= np.linalg.norm(expected_directions, axis=1)[:, None]
-    check(values(OBS["QuatOpsChild"]["outputs"]["world_unit_directions_xyz"]), expected_directions, "Three.js loaded asset direction action")
-    check(values(OBS["QuatOpsChild"]["outputs"]["world_to_local_point_roundtrip_xyz"]), probes_gltf, "Three.js inverse world matrix point round trip")
+    check(
+        values(OBS["QuatOpsChild"]["outputs"]["world_unit_directions_xyz"]),
+        expected_directions,
+        "Three.js loaded asset direction action",
+    )
+    check(
+        values(OBS["QuatOpsChild"]["outputs"]["world_to_local_point_roundtrip_xyz"]),
+        probes_gltf,
+        "Three.js inverse world matrix point round trip",
+    )
 
     # The parent and child turns are noncommuting; reversing the hierarchy product is exposed.
     wrong = expected_local["QuatOpsChild"] @ expected_local["QuatOpsParent"]

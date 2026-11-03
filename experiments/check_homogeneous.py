@@ -18,6 +18,7 @@ from typing import Callable
 Vec3 = tuple[float, float, float]
 PlainQuat = tuple[float, float, float, float]
 
+
 def exact_rotate(q: Iterable[float], v: Iterable[float]) -> Vec3:
     w, x, y, z = (Fraction.from_float(float(t)) for t in q)
     vx, vy, vz = (Fraction.from_float(float(t)) for t in v)
@@ -33,6 +34,7 @@ def exact_rotate(q: Iterable[float], v: Iterable[float]) -> Vec3:
         float(sum(a * b for a, b in zip(row, (vx, vy, vz))) / denominator)
         for row in rows
     )  # type: ignore[return-value]
+
 
 TINY = math.nextafter(0.0, 1.0)
 CASES = (
@@ -61,8 +63,13 @@ CASES = (
     ("unrepresentable-result", (-2, -1, 0, 1), (1.7e308, -1.7e308, -1.7e308)),
 )
 
-def compare_one(label: str, function: Callable[..., Iterable[float]], q: Iterable[float],
-                v: Iterable[float]) -> bool:
+
+def compare_one(
+    label: str,
+    function: Callable[..., Iterable[float]],
+    q: Iterable[float],
+    v: Iterable[float],
+) -> bool:
     try:
         expected = exact_rotate(q, v)
     except OverflowError:
@@ -103,14 +110,15 @@ def compare_one(label: str, function: Callable[..., Iterable[float]], q: Iterabl
     )
     return passed
 
+
 def extra_checks(module: ModuleType) -> bool:
     print("  API checks:")
     passed = 0
     for q, v in (
-            ((0, 0, 0, 0), (1, 0, 0)),
-            ((1, 0, 0), (1, 0, 0)),
-            ((1, 0, 0, 0), (1, 0)),
-            ((float("nan"), 0, 0, 0), (1, 0, 0)),
+        ((0, 0, 0, 0), (1, 0, 0)),
+        ((1, 0, 0), (1, 0, 0)),
+        ((1, 0, 0, 0), (1, 0)),
+        ((float("nan"), 0, 0, 0), (1, 0, 0)),
     ):
         try:
             module.rotate(q, v)
@@ -122,6 +130,7 @@ def extra_checks(module: ModuleType) -> bool:
         else:
             print("   FAIL accepts", q, v)
     return passed == 4
+
 
 def array_checks(module: ModuleType) -> bool:
     import numpy as np
@@ -147,9 +156,7 @@ def array_checks(module: ModuleType) -> bool:
             batch_ok = all((shape_ok, values_ok, immutable, errstate_ok))
             print(
                 "  broadcast/read-only/seterr:",
-                "PASS"
-                if batch_ok
-                else "FAIL",
+                "PASS" if batch_ok else "FAIL",
                 "shape",
                 shape_ok,
                 "values",
@@ -175,6 +182,7 @@ def array_checks(module: ModuleType) -> bool:
         np.seterr(**old)
     return batch_ok and empty_ok
 
+
 def main(names: Sequence[str] | None = None) -> int:
     names = list(names if names is not None else sys.argv[1:])
     names = names or ["homogeneous_scalar", "homogeneous_numpy"]
@@ -195,6 +203,7 @@ def main(names: Sequence[str] | None = None) -> int:
             array_passed = array_checks(module)
             all_passed = all_passed and array_passed
     return 0 if all_passed else 1
+
 
 if __name__ == "__main__":
     sys.exit(main())

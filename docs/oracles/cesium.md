@@ -1,82 +1,38 @@
-# CesiumJS 1.124.0 rotation oracle
+# CesiumJS 1.124.0 local ENU-to-ECEF converter
 
-## Runtime capture
+## Accepted scope
 
-The capture uses `cesium@1.124.0` with Node.js `v24.21.0` on Windows x64. The
-native calls ran without a browser, renderer, WebGL context, or GPU. The pinned
-package lock and resolved dependency graph are retained with the capture
-project. The exporter, raw 171-observation output, and capture manifest are
-linked from [the versioned fixture](../../tests/golden/oracles/cesium/1.124.0/manifest.json)
-and [capture project](../../experiments/quatops_capture_wave2/LOCAL_REPLAY.md).
+The retained proof validates a QuatOps converter for explicit local right-handed
+frames assigned to Cesium's east-north-up frame: canonical `+X right/east`,
+`+Y forward/north`, and `+Z up` map to Cesium `+X east`, `+Y north`, and `+Z`
+ellipsoid normal. Quaternion coefficients are Hamilton WXYZ in QuatOps and
+active XYZW at the Cesium API boundary. The local quaternion is composed with
+Cesium's native WGS84 ENU-to-ECEF transform; frame placement is not folded into
+the local quaternion conversion.
 
-The manifest records the runtime string `1.124`; npm's lock records the exact
-package version `1.124.0`. It also records the Cesium engine/widgets and
-`@zip.js/zip.js` versions required by that release. These dependency pins are
-part of this capture's identity.
+The native capture ran CesiumJS `1.124.0` with Node.js `v24.21.0` on Windows
+x64. It retains nine selected cases covering identity, principal turns, mixed
+rotations, an antipode, a nonprincipal half-turn, noncommuting composition,
+and distinct geographic branches. Native outputs include the ENU-to-ECEF and
+model-to-ECEF matrices, local basis/probe actions, point and direction actions,
+inverse point transforms, ECEF quaternion, and recovered local quaternion.
 
-## Local heading-pitch-roll
+The selected values, frame contract, and version provenance are in the
+[Cesium converter fixture](../../tests/golden/transports/cesium/1.124.0/manifest.json).
+The versioned [capture project](../../experiments/converters/cesium/1.124.0/README.md)
+contains the pinned package, input generator, and native exporter. Replay is
+covered by [test_cesium_converter.py](../../tests/test_cesium_converter.py).
+SciPy matrix checks are performed during replay and are reported separately
+from execution in the pinned Cesium runtime.
 
-Cesium documents heading about negative Z, pitch about negative Y, and roll
-about positive X, in radians ([Cesium 1.124 HeadingPitchRoll](https://cesium.com/downloads/cesiumjs/releases/1.124/Build/Documentation/HeadingPitchRoll.html)).
-Across 89 cases, `Quaternion.fromHeadingPitchRoll`, matrix construction,
-quaternion readback, and vector action agree with an independent SciPy
-evaluation of `Rz(-heading) Ry(-pitch) Rx(roll)`. The largest matrix residual
-was `9.77e-15`; the direct forward matrix residual was below `5e-16`.
-
-The same run also covers eight proper-matrix-to-quaternion cases, six native
-Hamilton products, and 35 shortest-path SLERP samples. The product coefficients
-matched an explicit Hamilton formula exactly for this corpus; SLERP's maximum
-orientation-matrix residual was `3.34e-16`.
-
-## Geographic placement
-
-For 11 WGS84 locations and three HPR inputs per location, the capture keeps the
-local HPR quaternion separate from the ENU-to-ECEF frame and the final
-model-to-ECEF transform. It records origins, matrices, quaternions, points, and
-directions independently. Cesium documents `eastNorthUpToFixedFrame` as local
-east/north plus the ellipsoid surface normal, and uses that frame by default
-for `headingPitchRollToFixedFrame` and
-`headingPitchRollQuaternion` ([Cesium 1.124 Transforms](https://cesium.com/downloads/cesiumjs/releases/1.124/Build/Documentation/Transforms.html)).
-
-The ECEF origins agree with the separate WGS84 formula within `4.66e-10 m`.
-The captured ENU up axis matches the radius-scaled Cartesian normal within
-`1.12e-16`. At the 400 km altitude case, the resulting ENU matrix differs from
-one computed only from the input geodetic latitude by `1.40e-4` in its largest
-element. That difference is retained as a Cesium frame observation; the tests
-do not substitute a latitude-only basis. Cesium exposes both Cartesian and
-cartographic geodetic-normal routes on its [Ellipsoid API](https://cesium.com/downloads/cesiumjs/releases/1.124/Build/Documentation/Ellipsoid.html).
-
-The model-to-ECEF matrix and quaternion agree within `4.45e-16`; the point
-round-trip residual is at most `9.32e-10 m`. The exact-pole probes record
-Cesium's native fallback at the supplied zero-longitude inputs. They do not
+The captured ECEF origin agrees with the independent WGS84 calculation within
+`4.66e-10 m`; local point round trips are within `9.32e-10 m`. The exact-pole
+case records Cesium's observed fallback for the selected input; it does not
 establish a universal east-axis convention at a pole.
 
 ## Limits
 
-This does not capture Cesium Model/glTF import, asset model-forward axes,
-rendering, CZML, ion services, ICRF, or time-dependent Earth-orientation data.
-The captured model frame is the explicit local ENU frame in the input corpus.
-SciPy checks are separately replayed from the pinned Cesium runtime output; no
-QuatOps conversion adapter was exercised in this capture.
-
-## QuatOps local-ENU to ECEF converter proof
-
-The auxiliary converter proof is separate from the broad 171-observation
-oracle capture above. Its input generator uses QuatOps to create nine local
-orientations in the explicitly declared canonical/local ENU frame
-`+X east/right, +Y north/forward, +Z up`; it does not infer the model axes from
-Cesium. The exact-pole and high-altitude cases remain because they exercise
-distinct geographic basis behavior.
-
-The pinned CesiumJS `1.124.0` native capture constructs each origin with
-`Cartesian3.fromDegrees`, obtains `eastNorthUpToFixedFrame`, composes the local
-orientation and translation into ECEF, applies native point/direction
-transforms, and recovers the local quaternion through the inverse frame. The
-selected witnesses and exact inputs/contracts are retained under
-[`tests/golden/transports/cesium/1.124.0`](../../tests/golden/transports/cesium/1.124.0/).
-Replay is [test_cesium_converter.py](../../tests/test_cesium_converter.py),
-which checks the native actions with QuatOps and separate SciPy matrices.
-
-This proves the tested local ENU-to-ECEF boundary for the selected WGS84
-origins. It does not test Cesium model/glTF import, asset model axes, browser or
-renderer behavior, or time-dependent Earth orientation.
+This proof covers quaternion conversion and static point/direction transforms
+for the declared local ENU frame and selected WGS84 origins. It does not cover
+Cesium Model/glTF import, asset model-forward axes, rendering, CZML, ion
+services, ICRF, or time-dependent Earth orientation.

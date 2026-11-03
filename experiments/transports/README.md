@@ -9,3 +9,4 @@ different evidence types.
   animation assets with named loader runs.
 - [OpenUSD 26.11](openusd/26.11/README.md): `Quatf`/`Quatd` math and saved
   transform-stack evaluation through `UsdGeom`.
+- [OpenUSD capture index](openusd/README.md): directory-level runbook and scope.

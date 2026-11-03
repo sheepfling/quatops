@@ -108,10 +108,10 @@
   "provenance": {
     "input_corpus_sha256": "07e4d809f7eb75ad6e5454febf2b725b0b8fb389536743dd7196566d4640135f",
     "lockfile_sha256": "98ee236da812bad9c38b900b4f19290f406969e2a8cfb0cb0e0ae9237d62c556",
-    "exporter_sha256": "3b4b4523663b9be103f900a840961a82ce0d9c7f94c1a5257001ba162fa2240f",
+    "exporter_sha256": "60169ea32655801cc726a5d539a1377927ac6fc95f74f56b0d7f2a1b7cc7b9b7",
     "exact_invocation": "uv run --locked python capture_mujoco.py --corpus <orientation_inputs_v1.json> --output <native_rotation.json>",
-    "captured_at_utc": "2026-11-03T04:18:43.544107+00:00",
-    "full_discovery_capture_sha256": "f3d238399d252928cf3162ebfc5691144b6ad0303f436cc4f7db1f345cb789dc",
+    "captured_at_utc": "2026-11-03T07:47:37.268264+00:00",
+    "full_discovery_capture_sha256": "ed480a677822a9eee8d05b6d4032f1dff5a67aeb5e876da33e7f9b94ac63bf03",
     "retention_policy": "selected native witnesses; broad successful sweeps discarded"
   },
   "counts": {

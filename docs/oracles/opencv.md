@@ -1,22 +1,29 @@
-# OpenCV 4.13.0 Rodrigues oracle
+# OpenCV 4.13.0 Rodrigues converter boundary
 
-The Wave 2 capture ran OpenCV 4.13.0 through Python 3.13.5 on Linux x64, with
-NumPy 2.3.5. The native build information, pinned exporter, raw observations,
-and their manifests are kept in the [capture packet](../../experiments/quatops_capture_wave2/README.md)
-and copied into [the versioned golden folder](../../tests/golden/oracles/opencv/4.13.0/manifest.json).
+OpenCV's `cv2.Rodrigues` API represents rotations as rotation vectors and
+matrices, rather than exposing its quaternion type as the boundary used by this
+adapter. QuatOps converts canonical active Hamilton WXYZ rotations to
+Rodrigues vectors; the pinned OpenCV runtime converts those vectors to native
+matrices, which are then used for basis and probe actions. The reverse route
+converts native matrices back to rotation vectors and then to QuatOps
+quaternions.
 
-The run contains 264 successful observations from `cv2.Rodrigues`: binary32
-and binary64 rotation-vector/matrix conversions plus six forward Jacobian
-cases. Six selected invalid-matrix probes are explicitly `not_run`, not
-failures or successful calls. The official API documents the vector/matrix
-and Jacobian route in [OpenCV 4.13 calibration documentation](https://docs.opencv.org/4.13.0/d9/d0c/group__calib3d.html).
+The Windows x64 capture used CPython `3.13.14`, NumPy `2.3.5`, and
+`opencv-python-headless==4.13.0.92` (OpenCV `4.13.0`). It retains eight
+canonical orientation witnesses, a native-created axis-angle case, and both
+orders of a noncommuting product, for float32 and float64. The native capture
+uses `cv2.Rodrigues` and `cv2.gemm` and does not import QuatOps.
 
-Forward matrices agree with separate SciPy calculations to maximum element
-errors of `2.98e-8` for binary32 and `4.45e-16` for binary64. The best
-finite-difference Jacobian check is at most `2.64e-11` for the recorded cases.
-The native matrix-to-vector round trip retains 26 binary64 near-zero/near-pi
-diagnostics above `1e-12`, with a maximum element residual near `1e-6`.
+The selected native matrices, basis/probe images, and build identity are in
+the [versioned converter fixture](../../tests/golden/oracles/opencv/4.13.0/converter/manifest.json).
+The [capture project](../../experiments/converters/opencv/4.13.0/README.md)
+contains the pinned requirements and input preparation/native capture tools.
+Replay is covered by [test_opencv_converter.py](../../tests/test_opencv_converter.py).
+SciPy matrix comparisons during replay are formula checks, separate from the
+captured OpenCV execution.
 
-This is Rodrigues evidence only. It does not capture OpenCV's C++ quaternion
-algebra, and the inverse-boundary measurements are not promoted as behavior
-that QuatOps should imitate.
+This accepts the Rodrigues vector/matrix boundary for the explicitly assigned
+numeric probe frame. It does not validate C++ `cv::Quat` algebra,
+camera/world extrinsics, Jacobians as a QuatOps adapter, or application-specific
+frames. The [OpenCV 4.13 Rodrigues API](https://docs.opencv.org/4.13.0/d9/d0c/group__calib3d.html)
+documents the native conversion used here.

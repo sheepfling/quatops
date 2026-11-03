@@ -1,0 +1,10 @@
+{
+  "product": "Eigen",
+  "version": "5.0.1",
+  "official_gitlab_tag": "5.0.1",
+  "official_archive_url": "https://gitlab.com/libeigen/eigen/-/archive/5.0.1/eigen-5.0.1.tar.gz",
+  "archive_sha256": "e9c326dc8c05cd1e044c71f30f1b2e34a6161a3b6ecf445d56b53ff1669e3dec",
+  "version_header_sha256": "3bb04dc80ede841309fc975fd3ff522a58bbdf2d591e06e49d2456676a89e759",
+  "archive_root_directory": "eigen-5.0.1",
+  "required_header": "Eigen/Geometry"
+}

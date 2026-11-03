@@ -4,10 +4,10 @@ import path from 'node:path';
 import crypto from 'node:crypto';
 import os from 'node:os';
 import { fileURLToPath, pathToFileURL } from 'node:url';
-import { numeric } from '../../../quatops_capture_wave2/js/capture_io.mjs';
+import { numeric } from '../../shared/numeric_evidence.mjs';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
-const packageRoot = path.resolve(here, '../../../quatops_capture_wave2/js');
+const packageRoot = path.resolve(here, '../../../transports/gltf/2.0.0/threejs/0.187.0');
 const THREE = await import(pathToFileURL(path.join(packageRoot, 'node_modules/three/build/three.module.js')));
 const { GLTFLoader } = await import(pathToFileURL(path.join(packageRoot, 'node_modules/three/examples/jsm/loaders/GLTFLoader.js')));
 const assetPath = path.join(here, 'quatops_hierarchy.gltf');
@@ -62,7 +62,7 @@ const manifest = {
   asset: { path: path.basename(assetPath), sha256: sha(assetPath), input_sha256: sha(path.join(here, 'converter_inputs.json')) },
   exporter: { path: path.basename(fileURLToPath(import.meta.url)), sha256: sha(fileURLToPath(import.meta.url)) },
   package_lock_sha256: sha(path.join(packageRoot, 'package-lock.json')),
-  capture_io_sha256: sha(path.join(packageRoot, 'capture_io.mjs')),
+  numeric_helper_sha256: sha(path.resolve(here, '../../shared/numeric_evidence.mjs')),
   observations: { path: 'observations.json', sha256: sha(outputFile), count: observations.length },
 };
 fs.writeFileSync(path.join(outputPath, 'manifest.json'), JSON.stringify(manifest, null, 2) + '\n');

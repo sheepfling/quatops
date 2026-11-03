@@ -1,0 +1,11 @@
+{
+  "schema_version": "1.0",
+  "product": "Khronos OpenXR SDK",
+  "sdk_version": "1.1.65",
+  "specification_version": "1.1.65",
+  "repository": "https://github.com/KhronosGroup/OpenXR-SDK.git",
+  "tag": "release-1.1.65",
+  "commit": "24a1f2b92d212501a2b1b8d30ffd53abf55fcfa8",
+  "compiler_standard": "C++17",
+  "scope": "XrQuaternionf and XrPosef header ABI only; no OpenXR runtime functions are called"
+}

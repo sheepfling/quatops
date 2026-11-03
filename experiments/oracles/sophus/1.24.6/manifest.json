@@ -1,0 +1,68 @@
+{
+  "schema_version": "1.0",
+  "evidence_kind": "native_discovery_capture",
+  "target": "Sophus 1.24.6 SO3d / Eigen 5.0.1",
+  "pin": {
+    "schema_version": "1.0",
+    "product": "Sophus",
+    "version": "1.24.6",
+    "repository": "https://github.com/strasdat/Sophus.git",
+    "tag": "1.24.6",
+    "commit": "d0b7315a0d90fc6143defa54596a3a95d9fa10ec",
+    "dependency": {
+      "product": "Eigen",
+      "version": "5.0.1",
+      "repository": "https://gitlab.com/libeigen/eigen.git",
+      "tag": "5.0.1",
+      "commit": "bc3b39870ecb690a623a3f49149a358b95c5781d"
+    },
+    "compiler_standard": "C++17",
+    "scope": "SO3d quaternion construction, exp/log, action, inverse, product order, and perturbation side"
+  },
+  "execution": {
+    "was_run": true,
+    "utc": "2026-11-03T08:14:11.411997+00:00",
+    "platform": "Windows-11-10.0.26300-SP0",
+    "architecture": "AMD64",
+    "compiler": "g++ (GCC) 15.2.0",
+    "compile_command": [
+      "g++",
+      "-std=c++17",
+      "-O2",
+      "-I",
+      "<Eigen 5.0.1 source root>",
+      "-I",
+      "<Sophus 1.24.6 source root>",
+      "capture_native.cpp",
+      "-o",
+      "<temporary capture executable>"
+    ],
+    "capture_command": [
+      "capture_sophus.exe",
+      "capture_inputs.tsv"
+    ]
+  },
+  "artifacts": {
+    "capture_sources_sha256": {
+      "capture_native.cpp": "b8a0d12956cf2f28330b103e44bfc6a36250a9ad5e40729f4e311c0ff2fb135a",
+      "source.json": "a9dfe8c27d43fe6154289b28c69ec19d83bf8f85bc084147cb677394a05a8518"
+    },
+    "input_file": "capture_inputs.tsv",
+    "input_sha256": "30dc873594d449b3d228392898171f090130d54cf2e794aca097f68af72feb97",
+    "native_executable_sha256": "7cd8397a394b8bccce9304fc170542c1a472d9e2884d373808f5a40ead58533c",
+    "native_output": "discovery.json",
+    "native_output_sha256": "98171e1c77e280395c4744fe6285198d0ed764b7d82e90a3b39a0fb7ef876638",
+    "pinned_dependency_headers_sha256": {
+      "Sophus/sophus/so3.hpp": "6fe2514122e4d1b11d73b1d4a97d1d731973da9539663b56cab8d4fc94c6ba53",
+      "Eigen/Eigen/Core": "d3a1c990223d4806cba32702786f499f6e40f9b743fb55eb4be06b9bcde68609",
+      "Eigen/Eigen/Geometry": "de4e37a7a005405a2a04cf93d2687753594a7095e38cff2e0c6ecc94339a6ba2"
+    }
+  },
+  "review": {
+    "state": "captured_not_reviewed",
+    "limitations": [
+      "Discovery capture only; SciPy review is stored separately.",
+      "SO3d only; float32 and other Sophus groups are not captured."
+    ]
+  }
+}

@@ -27,16 +27,26 @@ These are the same checks used by CI:
     tests/typing_tests/consumer.py tests/typing_tests/float32_consumer.py
 .venv/bin/pyright --pythonpath .venv/bin/python
 .venv/bin/ruff check src tests experiments
+.venv/bin/python scripts/validate_evidence_json.py
+.venv/bin/python scripts/validate_converter_evidence.py
+.venv/bin/ruff check --select B,C4,E4,PERF,RUF,SIM,UP \
+    experiments/oracles experiments/converters scripts
+.venv/bin/ruff format --check experiments scripts
 ```
 
 Pytest's default configuration skips opt-in performance cases. The routine
 suite covers API behavior, conventions, numerical edge cases, scalar and NumPy
 surfaces, and independent SciPy and numpy-quaternion references. The detailed
-test map is in [oracle coverage](ORACLE_COVERAGE.md).
+test map is in [oracle coverage](ORACLE_COVERAGE.md). The evidence validators
+parse every maintained capture JSON without rewriting native values, then
+check cross-file identity and a normalized Pydantic view for converter
+packages. Raw target-specific observations remain intact in their fixtures.
 
 CI runs the declared Python compatibility matrix. Check the workflow results
 for the current branch when confirming a change; this page intentionally does
 not preserve old pass counts or environment snapshots.
+The pinned Alphus quality review runs on pushes and pull requests as a separate
+workflow.
 
 ## Run opt-in benchmarks
 
@@ -71,4 +81,5 @@ remain runnable without Numba through the NumPy fallbacks.
 
 ## Interoperability evidence
 
-See the [interoperability evidence atlas](../INTEROPERABILITY_EVIDENCE.md) for the consolidated engine, oracle, transport, and native-capture coverage matrix.
+See the [interoperability evidence atlas](../INTEROPERABILITY_EVIDENCE.md) for
+the consolidated engine, oracle, transport, and native-capture coverage matrix.

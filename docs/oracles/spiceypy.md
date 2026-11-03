@@ -52,3 +52,24 @@ operation profiles. It does not select a universal aerospace convention,
 frame direction, units policy for all consumers, kernel setup, or spacecraft
 attitude model. Keep wrapper and CSPICE version lineage together when adding a
 new release.
+
+## QuatOps direct-quaternion boundary proof
+
+The separate compact converter capture at
+[`tests/golden/oracles/spiceypy/8.3.0/converter`](../../tests/golden/oracles/spiceypy/8.3.0/converter/manifest.json)
+uses the same explicitly declared right-handed probe frame as the canonical
+QuatOps inputs (`+X right, +Y forward, +Z up`). This is an assigned numeric
+frame map for this proof; it is not inferred from SPICE frame names. In
+SpiceyPy 8.3.0 / CSPICE_N0067, the direct `q2m` plus `mxv` action matched the
+active Hamilton WXYZ action for eight selected unit quaternions. `m2q` reversed
+that matrix route up to quaternion sign. The native `axisar` matrix followed by
+`m2q` was also checked, as were both operand orders of a noncommuting `qxq`
+pair.
+The native outputs are retained losslessly and replayed by
+[`tests/test_spiceypy_converter.py`](../../tests/test_spiceypy_converter.py),
+which compares target actions with QuatOps and a separate SciPy formula.
+
+This establishes only the direct quaternion/matrix boundary above. It does not
+extend the rule to `eul2m`/`m2eul`, named SPICE reference frames, kernels, or
+spacecraft attitude models; those routes have separate frame-direction
+contracts.

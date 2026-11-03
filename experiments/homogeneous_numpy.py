@@ -13,15 +13,17 @@ from quatops._numpy import _components, _result, _sum_three
 _SPLIT = 134217729.0  # 2**27 + 1 for Dekker splitting of binary64 values.
 
 
-def _two_sum(a: NDArray[np.float64],
-             b: NDArray[np.float64]) -> tuple[NDArray[np.float64], NDArray[np.float64]]:
+def _two_sum(
+    a: NDArray[np.float64], b: NDArray[np.float64]
+) -> tuple[NDArray[np.float64], NDArray[np.float64]]:
     total = a + b
     tail = total - a
     return total, (a - (total - tail)) + (b - tail)
 
 
-def _two_product(a: NDArray[np.float64],
-                 b: NDArray[np.float64]) -> tuple[NDArray[np.float64], NDArray[np.float64]]:
+def _two_product(
+    a: NDArray[np.float64], b: NDArray[np.float64]
+) -> tuple[NDArray[np.float64], NDArray[np.float64]]:
     # Quaternion inputs have magnitude at most 0.5, so splitting does not
     # overflow. The residual is not exact for underflowed products.
     product = a * b

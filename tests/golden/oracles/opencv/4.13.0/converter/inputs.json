@@ -1,0 +1,152 @@
+{
+  "schema_version": "1.0",
+  "contract_id": "quatops-opencv-4.13.0-rodrigues-boundary-v1",
+  "canonical_input_sha256": "a6f0630806b69d3b3b29a036aa10f63bfe214668329c661598951f84f8f41eec",
+  "preparation_spec_sha256": "9f17f3eafd3186d3460488eff91e0f50771f2ee7c5e6d42409b1e93df5fc084e",
+  "source_frame": {
+    "handedness": "right-handed",
+    "positive_x": "right",
+    "positive_y": "forward",
+    "positive_z": "up"
+  },
+  "probe_vector_xyz": [
+    0.25,
+    -1.5,
+    2.75
+  ],
+  "precision_profiles": [
+    "float32",
+    "float64"
+  ],
+  "orientations": [
+    {
+      "case_id": "identity",
+      "canonical_wxyz": [
+        1.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "quatops_rotation_vector_xyz_radians": [
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "case_id": "quarter_x",
+      "canonical_wxyz": [
+        0.7071067811865476,
+        0.7071067811865476,
+        0.0,
+        0.0
+      ],
+      "quatops_rotation_vector_xyz_radians": [
+        1.5707963267948966,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "case_id": "quarter_y",
+      "canonical_wxyz": [
+        0.7071067811865476,
+        0.0,
+        0.7071067811865476,
+        0.0
+      ],
+      "quatops_rotation_vector_xyz_radians": [
+        0.0,
+        1.5707963267948966,
+        0.0
+      ]
+    },
+    {
+      "case_id": "quarter_z",
+      "canonical_wxyz": [
+        0.7071067811865476,
+        0.0,
+        0.0,
+        0.7071067811865476
+      ],
+      "quatops_rotation_vector_xyz_radians": [
+        0.0,
+        0.0,
+        1.5707963267948966
+      ]
+    },
+    {
+      "case_id": "mixed_a",
+      "canonical_wxyz": [
+        0.8,
+        0.2,
+        -0.4,
+        0.4
+      ],
+      "quatops_rotation_vector_xyz_radians": [
+        0.4290007391955229,
+        -0.8580014783910458,
+        0.8580014783910458
+      ]
+    },
+    {
+      "case_id": "mixed_b",
+      "canonical_wxyz": [
+        0.7,
+        -0.3,
+        0.2,
+        0.6164414002968976
+      ],
+      "quatops_rotation_vector_xyz_radians": [
+        -0.6682686844596198,
+        0.4455124563064133,
+        1.3731616120761791
+      ]
+    },
+    {
+      "case_id": "antipode_mixed_a",
+      "canonical_wxyz": [
+        -0.8,
+        -0.2,
+        0.4,
+        -0.4
+      ],
+      "quatops_rotation_vector_xyz_radians": [
+        0.4290007391955229,
+        -0.8580014783910458,
+        0.8580014783910458
+      ]
+    },
+    {
+      "case_id": "nonprincipal_halfturn",
+      "canonical_wxyz": [
+        0.0,
+        0.5773502691896258,
+        0.5773502691896258,
+        0.5773502691896258
+      ],
+      "quatops_rotation_vector_xyz_radians": [
+        1.813799364234218,
+        1.813799364234218,
+        1.813799364234218
+      ]
+    }
+  ],
+  "native_constructed_orientation": {
+    "case_id": "native_axis_angle_mixed",
+    "axis_xyz": [
+      0.2672612419124244,
+      -0.5345224838248488,
+      0.8017837257372732
+    ],
+    "angle_radians": 1.123
+  },
+  "composition": {
+    "left_case_id": "mixed_a",
+    "right_case_id": "mixed_b",
+    "product_orders": [
+      "left * right; right acts first",
+      "right * left; left acts first"
+    ]
+  }
+}

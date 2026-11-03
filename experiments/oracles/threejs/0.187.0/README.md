@@ -35,9 +35,3 @@ quaternions are stored as XYZW. `Matrix4.elements` is retained in its native
 array order alongside row-labelled matrix values and transformed basis vectors.
 The capture does not establish an asset's model-forward axis or a universal
 world-frame conversion.
-
-The same pinned Three.js package also captured the expanded Wave 2 glTF/GLB
-corpus and animation samples. Its additional output is under
-[`tests/golden/transports/gltf/2.0.0/threejs/0.187.0/wave2`](../../../../tests/golden/transports/gltf/2.0.0/threejs/0.187.0/wave2/manifest.json);
-the shared exporter, lockfile, and SciPy comparison live in
-[`experiments/quatops_capture_wave2`](../../../quatops_capture_wave2/LOCAL_REPLAY.md).

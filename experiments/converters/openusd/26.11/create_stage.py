@@ -1,4 +1,5 @@
 """Create a minimal USDA hierarchy with QuatOps-converted orientations."""
+
 from __future__ import annotations
 
 import hashlib
@@ -6,7 +7,6 @@ import json
 from pathlib import Path
 
 from quatops.engines import QuaternionFrameMap, SignedAxisMap
-
 
 ROOT = Path(__file__).resolve().parents[4]
 CANONICAL_INPUTS = ROOT / "experiments/interoperability/v1/canonical_inputs.json"
@@ -34,31 +34,66 @@ def main() -> None:
     for node, case_id, translation in specs:
         source_q = by_id[case_id]
         target_q = convert.to_destination_wxyz(source_q)
-        rows.append({
-            "node": node,
-            "canonical_case_id": case_id,
-            "canonical_wxyz": list(source_q),
-            "usd_wxyz": list(target_q),
-            "canonical_translation_xyz": list(translation),
-            "usd_translation_xyz": list(frame.vector(translation)),
-        })
+        rows.append(
+            {
+                "node": node,
+                "canonical_case_id": case_id,
+                "canonical_wxyz": list(source_q),
+                "usd_wxyz": list(target_q),
+                "canonical_translation_xyz": list(translation),
+                "usd_translation_xyz": list(frame.vector(translation)),
+            }
+        )
     payload = {
         "schema_version": "1.0",
         "kind": "quatops_generated_openusd_converter_input",
-        "canonical_input_sha256": hashlib.sha256(CANONICAL_INPUTS.read_bytes()).hexdigest(),
+        "canonical_input_sha256": hashlib.sha256(
+            CANONICAL_INPUTS.read_bytes()
+        ).hexdigest(),
         "frame_contract": {
-            "canonical": {"handedness": "right", "positive_x": "right", "positive_y": "forward", "positive_z": "up"},
-            "usd_stage": {"handedness": "right", "upAxis": "Y", "positive_x": "right", "positive_y": "up", "positive_z": "backward", "forward": "-Z"},
+            "canonical": {
+                "handedness": "right",
+                "positive_x": "right",
+                "positive_y": "forward",
+                "positive_z": "up",
+            },
+            "usd_stage": {
+                "handedness": "right",
+                "upAxis": "Y",
+                "positive_x": "right",
+                "positive_y": "up",
+                "positive_z": "backward",
+                "forward": "-Z",
+            },
             "destination_axes_from_source": list(frame.destination_axes),
             "quaternion": "Hamilton active; USDA quatd real-first WXYZ",
             "matrix_action": "OpenUSD Gf/UsdGeom row vectors, captured and compared as row-major arrays",
         },
-        "probe_vectors_xyz": [[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0], corpus["probe_vector_xyz"]],
-        "usd_probe_vectors_xyz": [list(frame.vector(v)) for v in ((1.0, 0.0, 0.0), (0.0, 1.0, 0.0), (0.0, 0.0, 1.0), corpus["probe_vector_xyz"])],
+        "probe_vectors_xyz": [
+            [1.0, 0.0, 0.0],
+            [0.0, 1.0, 0.0],
+            [0.0, 0.0, 1.0],
+            corpus["probe_vector_xyz"],
+        ],
+        "usd_probe_vectors_xyz": [
+            list(frame.vector(v))
+            for v in (
+                (1.0, 0.0, 0.0),
+                (0.0, 1.0, 0.0),
+                (0.0, 0.0, 1.0),
+                corpus["probe_vector_xyz"],
+            )
+        ],
         "nodes": rows,
-        "stack_contract": {"parent_ops": ["xformOp:translate", "xformOp:orient"], "child_ops": ["xformOp:translate", "xformOp:orient"], "reset_ops": ["!resetXformStack!", "xformOp:translate", "xformOp:orient"]},
+        "stack_contract": {
+            "parent_ops": ["xformOp:translate", "xformOp:orient"],
+            "child_ops": ["xformOp:translate", "xformOp:orient"],
+            "reset_ops": ["!resetXformStack!", "xformOp:translate", "xformOp:orient"],
+        },
     }
-    INPUTS_OUT.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8", newline="\n")
+    INPUTS_OUT.write_text(
+        json.dumps(payload, indent=2) + "\n", encoding="utf-8", newline="\n"
+    )
 
     def orient(row):
         return ", ".join(number(v) for v in row["usd_wxyz"])
@@ -67,7 +102,7 @@ def main() -> None:
         return ", ".join(number(v) for v in row["usd_translation_xyz"])
 
     parent, child, reset = rows
-    stage = f'''#usda 1.0
+    stage = f"""#usda 1.0
 (
     defaultPrim = "Scene"
     metersPerUnit = 1
@@ -97,7 +132,7 @@ def Xform "Scene"
         }}
     }}
 }}
-'''
+"""
     STAGE_OUT.write_text(stage, encoding="utf-8", newline="\n")
     print(f"wrote QuatOps converter stage: {STAGE_OUT}")
 

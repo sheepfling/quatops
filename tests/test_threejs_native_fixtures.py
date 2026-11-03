@@ -6,17 +6,15 @@ from pathlib import Path
 
 import numpy as np
 import pytest
-from scipy.spatial.transform import Rotation, Slerp
+from scipy.spatial.transform import Rotation
 
 from tests.native_engine_support import (
     from_engine_xyzw,
     from_euler,
     quaternion_coefficient_error,
-    quaternion_xyzw,
     to_hamilton_xyzw,
 )
 from tests.oracle_support import BACKENDS, orient_matrices, orient_vectors
-
 
 FIXTURE_PATH = (
     Path(__file__).parent
@@ -38,7 +36,9 @@ def _rotation(xyzw):
 
 
 def _orientation_error(lhs, rhs):
-    return float(np.max(np.abs(_rotation(lhs).as_matrix() - _rotation(rhs).as_matrix())))
+    return float(
+        np.max(np.abs(_rotation(lhs).as_matrix() - _rotation(rhs).as_matrix()))
+    )
 
 
 def _shortest_slerp_xyzw(q0, q1, t):
@@ -101,7 +101,9 @@ def test_threejs_native_euler_outputs_match_scipy_intrinsic_order_contract():
         expected = Rotation.from_euler(row["order"], angles).as_matrix()
         native = _rotation(row["euler_quaternion_xyzw"]).as_matrix()
         np.testing.assert_allclose(native, expected, rtol=0.0, atol=TOLERANCE)
-        np.testing.assert_allclose(row["euler_matrix_rows"], expected, rtol=0.0, atol=TOLERANCE)
+        np.testing.assert_allclose(
+            row["euler_matrix_rows"], expected, rtol=0.0, atol=TOLERANCE
+        )
         np.testing.assert_allclose(
             np.asarray(row["quaternion_rotated_positive_basis_vectors_xyz"]),
             expected.T,
@@ -114,13 +116,19 @@ def test_threejs_native_euler_outputs_match_scipy_intrinsic_order_contract():
             rtol=0.0,
             atol=TOLERANCE,
         )
-        assert _orientation_error(
-            row["matrix_quaternion_xyzw"], row["euler_quaternion_xyzw"]
-        ) <= TOLERANCE
+        assert (
+            _orientation_error(
+                row["matrix_quaternion_xyzw"], row["euler_quaternion_xyzw"]
+            )
+            <= TOLERANCE
+        )
         # The shared general inputs are well-conditioned for Three.js readback.
-        assert _orientation_error(
-            row["quaternion_readback_roundtrip_xyzw"], row["euler_quaternion_xyzw"]
-        ) <= 3e-12
+        assert (
+            _orientation_error(
+                row["quaternion_readback_roundtrip_xyzw"], row["euler_quaternion_xyzw"]
+            )
+            <= 3e-12
+        )
 
 
 def test_threejs_native_euler_boundaries_keep_measured_near_lock_readback_behavior():
@@ -136,16 +144,16 @@ def test_threejs_native_euler_boundaries_keep_measured_near_lock_readback_behavi
             rtol=0.0,
             atol=TOLERANCE,
         )
-        np.testing.assert_allclose(row["euler_matrix_rows"], expected, rtol=0.0, atol=TOLERANCE)
+        np.testing.assert_allclose(
+            row["euler_matrix_rows"], expected, rtol=0.0, atol=TOLERANCE
+        )
         assert row["input_source"]["actual_bits_hex"]
 
     # Three.js 0.187.0's Euler readback branch loses a small but observable
     # amount of orientation for selected cases just beyond gimbal lock. Keep
     # this native diagnostic instead of widening every conversion tolerance.
     near_lock = next(
-        row
-        for row in rows
-        if row["case_id"] == "boundary-offset-ZYX-+1-+1e-04"
+        row for row in rows if row["case_id"] == "boundary-offset-ZYX-+1-+1e-04"
     )
     residual = _orientation_error(
         near_lock["quaternion_readback_roundtrip_xyzw"],
@@ -213,11 +221,18 @@ def test_threejs_axis_angle_matrix_and_two_vector_routes_match_quatops(
             # as a precondition; retain these raw diagnostics without making
             # them a conversion guarantee.
             continue
-        expected = Rotation.from_matrix(np.asarray(row["input_matrix_rows"])).as_matrix()
+        expected = Rotation.from_matrix(
+            np.asarray(row["input_matrix_rows"])
+        ).as_matrix()
         native = row["matrix_to_quaternion_xyzw"]
-        np.testing.assert_allclose(_rotation(native).as_matrix(), expected, rtol=0.0, atol=TOLERANCE)
         np.testing.assert_allclose(
-            row["quaternion_reconstructed_matrix_rows"], expected, rtol=0.0, atol=TOLERANCE
+            _rotation(native).as_matrix(), expected, rtol=0.0, atol=TOLERANCE
+        )
+        np.testing.assert_allclose(
+            row["quaternion_reconstructed_matrix_rows"],
+            expected,
+            rtol=0.0,
+            atol=TOLERANCE,
         )
         actual = module.from_rotation_matrix(
             orient_matrices(np.asarray(row["input_matrix_rows"]), component_first),
@@ -238,7 +253,10 @@ def test_threejs_axis_angle_matrix_and_two_vector_routes_match_quatops(
         )
         actual_vector = np.asarray(module.rotate(q, from_vector), dtype=float)
         np.testing.assert_allclose(
-            actual_vector, to_vector, rtol=0.0, atol=TOLERANCE,
+            actual_vector,
+            to_vector,
+            rtol=0.0,
+            atol=TOLERANCE,
             err_msg=f"{backend_name}: Three.js two-vector alignment",
         )
 
@@ -265,16 +283,17 @@ def test_threejs_products_shortest_slerp_and_normalization_match_quatops(
                 module, product, is_jpl, is_numpy, component_first
             )
             np.testing.assert_allclose(
-                actual, expected, rtol=0.0, atol=2e-13,
+                actual,
+                expected,
+                rtol=0.0,
+                atol=2e-13,
                 err_msg=f"{backend_name}: Three.js product {row['case_id']}",
             )
 
     for row in OBS["shortest_slerp"]:
         start_xyzw = np.asarray(row["a_input_wxyz"])[[1, 2, 3, 0]]
         end_xyzw = np.asarray(row["b_input_wxyz"])[[1, 2, 3, 0]]
-        start = from_engine_xyzw(
-            module, start_xyzw, is_jpl, is_numpy, component_first
-        )
+        start = from_engine_xyzw(module, start_xyzw, is_jpl, is_numpy, component_first)
         end = from_engine_xyzw(module, end_xyzw, is_jpl, is_numpy, component_first)
         for sample in row["samples"]:
             native = sample["quaternion_xyzw"]
@@ -298,16 +317,17 @@ def test_threejs_products_shortest_slerp_and_normalization_match_quatops(
             # is recorded as native behavior, not asserted as QuatOps parity.
             assert row["normalized_xyzw"] == [0.0, 0.0, 0.0, 1.0]
             continue
-        value = from_engine_xyzw(
-            module, source, is_jpl, is_numpy, component_first
-        )
+        value = from_engine_xyzw(module, source, is_jpl, is_numpy, component_first)
         normalized = module.normalize(value)
         actual_xyzw = to_hamilton_xyzw(
             module, normalized, is_jpl, is_numpy, component_first
         )
         expected_xyzw = row["normalized_xyzw"]
         np.testing.assert_allclose(
-            actual_xyzw, expected_xyzw, rtol=0.0, atol=TOLERANCE,
+            actual_xyzw,
+            expected_xyzw,
+            rtol=0.0,
+            atol=TOLERANCE,
             err_msg=f"{backend_name}: Three.js normalize {row['case_id']}",
         )
 
@@ -316,9 +336,12 @@ def test_threejs_reorder_discards_turn_count_and_object3d_matrix_layout_is_expli
     reorder = OBS["euler_reorder"]
     assert reorder["source_order"] == "XYZ"
     assert reorder["target_order"] == "ZYX"
-    assert _orientation_error(
-        reorder["source_quaternion_xyzw"], reorder["reordered_quaternion_xyzw"]
-    ) <= TOLERANCE
+    assert (
+        _orientation_error(
+            reorder["source_quaternion_xyzw"], reorder["reordered_quaternion_xyzw"]
+        )
+        <= TOLERANCE
+    )
     assert abs(reorder["input_radians_xyz"][0]) > 2 * np.pi
     assert abs(reorder["reordered_euler_radians_xyz"][0]) < 2 * np.pi
 
@@ -345,5 +368,11 @@ def test_threejs_fixture_hash_fields_match_checked_in_sources():
         / "capture_three.mjs"
     )
     lock_path = script_path.with_name("package-lock.json")
-    assert hashlib.sha256(script_path.read_bytes()).hexdigest() == FIXTURE["provenance"]["exporter_sha256"]
-    assert hashlib.sha256(lock_path.read_bytes()).hexdigest() == FIXTURE["provenance"]["package_lock_sha256"]
+    assert (
+        hashlib.sha256(script_path.read_bytes()).hexdigest()
+        == FIXTURE["provenance"]["exporter_sha256"]
+    )
+    assert (
+        hashlib.sha256(lock_path.read_bytes()).hexdigest()
+        == FIXTURE["provenance"]["package_lock_sha256"]
+    )

@@ -1,4 +1,5 @@
 """Pinned ROS 2 tf2 frame-chain capture replayed through QuatOps maps."""
+
 from __future__ import annotations
 
 import hashlib
@@ -9,7 +10,6 @@ import numpy as np
 
 from quatops.engines import QuaternionFrameMap, SignedAxisMap
 from quatops.python import hamilton
-
 
 ROOT = Path(__file__).resolve().parents[1]
 FIXTURE = ROOT / "tests/golden/oracles/ros2/0.36.23"
@@ -61,8 +61,15 @@ def test_ros_capture_is_native_pinned_and_selected_values_are_lossless():
     assert MANIFEST["product"]["name"] == "ROS 2 tf2"
     assert MANIFEST["product"]["version"] == "0.36.23"
     assert MANIFEST["execution"]["was_run"] is True
-    assert MANIFEST["review_state"] == "native tf2 capture retained; QuatOps frame-chain replay passed"
-    assert {item["version"] for item in MANIFEST["product"]["dependencies"] if item["name"] == "ROS_DISTRO"} == {"jazzy"}
+    assert (
+        MANIFEST["review_state"]
+        == "native tf2 capture retained; QuatOps frame-chain replay passed"
+    )
+    assert {
+        item["version"]
+        for item in MANIFEST["product"]["dependencies"]
+        if item["name"] == "ROS_DISTRO"
+    } == {"jazzy"}
     assert MANIFEST["native_build"]["native_scalar_bytes"] == 8
     assert MANIFEST["native_build"]["cpp_standard"] == 202002
     assert MANIFEST["selection"]["full_capture_observations"] == 102
@@ -71,18 +78,30 @@ def test_ros_capture_is_native_pinned_and_selected_values_are_lossless():
     assert CONTRACT["target"]["native_scalar_dtype"] == "float64"
     assert CONTRACT["frames"]["ros_world_from_canonical_world"] == ["x", "y", "z"]
     assert CONTRACT["frames"]["ros_base_from_canonical_base"] == ["y", "-x", "z"]
-    assert CONTRACT["frames"]["ros_sensor_optical_from_canonical_sensor"] == ["x", "-z", "y"]
+    assert CONTRACT["frames"]["ros_sensor_optical_from_canonical_sensor"] == [
+        "x",
+        "-z",
+        "y",
+    ]
 
     provenance = MANIFEST["capture_provenance"]
+    assert (
+        provenance["selected_witnesses_sha256"]
+        == hashlib.sha256((FIXTURE / "witnesses.json").read_bytes()).hexdigest()
+    )
+    reproduction = provenance["reproduction"]
     file_hashes = {
-        "exporter_source_sha256": ROOT / "experiments/quatops_capture_wave2/ros2/quatops_ros_capture/src/capture_ros.cpp",
-        "runner_sha256": ROOT / "experiments/quatops_capture_wave2/exporters/run_ros.py",
-        "dockerfile_sha256": ROOT / "experiments/quatops_capture_wave2/ros2/Dockerfile.capture",
-        "corpus_sha256": ROOT / "experiments/quatops_capture_wave2/corpus/orientation_inputs_v1.json",
-        "selected_witnesses_sha256": FIXTURE / "witnesses.json",
+        "exporter_source_sha256": ROOT
+        / "experiments/converters/ros2/0.36.23/native/src/capture_ros.cpp",
+        "runner_sha256": ROOT / "experiments/converters/ros2/0.36.23/capture_native.py",
+        "capture_helper_sha256": ROOT / "experiments/oracles/shared/capture_io.py",
+        "dockerfile_sha256": ROOT / "experiments/converters/ros2/0.36.23/Dockerfile",
+        "build_recipe_sha256": ROOT
+        / "experiments/converters/ros2/0.36.23/native/CMakeLists.txt",
+        "corpus_sha256": ROOT / "experiments/oracles/shared/orientation_inputs_v1.json",
     }
     for field, path in file_hashes.items():
-        assert hashlib.sha256(path.read_bytes()).hexdigest() == provenance[field]
+        assert hashlib.sha256(path.read_bytes()).hexdigest() == reproduction[field]
 
 
 def _canonical_chain():
@@ -91,18 +110,31 @@ def _canonical_chain():
     world_from_base = inputs["world_from_base"]
     base_from_sensor = inputs["base_from_sensor"]
 
-    q_world_base = map_native_quaternion(world_from_base["quaternion_xyzw"], WORLD, BASE)
-    q_base_sensor = map_native_quaternion(base_from_sensor["quaternion_xyzw"], BASE, SENSOR)
+    q_world_base = map_native_quaternion(
+        world_from_base["quaternion_xyzw"], WORLD, BASE
+    )
+    q_base_sensor = map_native_quaternion(
+        base_from_sensor["quaternion_xyzw"], BASE, SENSOR
+    )
     t_world_base = map_native_translation(world_from_base["translation_xyz"], WORLD)
     t_base_sensor = map_native_translation(base_from_sensor["translation_xyz"], BASE)
 
     q_world_sensor = np.asarray(hamilton.multiply(q_world_base, q_base_sensor))
-    t_world_sensor = np.asarray(hamilton.rotate(q_world_base, t_base_sensor)) + t_world_base
-    return q_world_base, q_base_sensor, t_world_base, t_base_sensor, q_world_sensor, t_world_sensor
+    t_world_sensor = (
+        np.asarray(hamilton.rotate(q_world_base, t_base_sensor)) + t_world_base
+    )
+    return (
+        q_world_base,
+        q_base_sensor,
+        t_world_base,
+        t_base_sensor,
+        q_world_sensor,
+        t_world_sensor,
+    )
 
 
 def test_native_tf2_lookup_direction_composition_and_point_action_match_quatops():
-    q_wb, q_bs, t_wb, t_bs, q_ws, t_ws = _canonical_chain()
+    q_wb, q_bs, _t_wb, _t_bs, q_ws, t_ws = _canonical_chain()
     assert abs(float(np.dot(q_wb, q_bs))) < 0.999999
 
     forward = ROWS["lookup-world-from-sensor"]
@@ -124,20 +156,40 @@ def test_native_tf2_lookup_direction_composition_and_point_action_match_quatops(
 
     probe_ros = as_array(forward["native_inputs"]["probe_in_source_xyz"])
     probe_sensor = np.asarray(SENSOR.inverse().vector(probe_ros))
-    target_world = np.asarray(WORLD.vector(np.asarray(hamilton.rotate(q_ws, probe_sensor)) + t_ws))
-    close(forward["native_outputs"]["probe_in_target_xyz"]["values"], target_world,
-          "native tf2 forward vector action")
+    target_world = np.asarray(
+        WORLD.vector(np.asarray(hamilton.rotate(q_ws, probe_sensor)) + t_ws)
+    )
+    close(
+        forward["native_outputs"]["probe_in_target_xyz"]["values"],
+        target_world,
+        "native tf2 forward vector action",
+    )
 
     reverse_probe_ros = as_array(reverse["native_inputs"]["probe_in_source_xyz"])
     probe_world = np.asarray(WORLD.inverse().vector(reverse_probe_ros))
-    target_sensor = np.asarray(SENSOR.vector(np.asarray(hamilton.rotate(expected_reverse_q, probe_world)) + expected_reverse_t))
-    close(reverse["native_outputs"]["probe_in_target_xyz"]["values"], target_sensor,
-          "native tf2 reverse vector action")
+    target_sensor = np.asarray(
+        SENSOR.vector(
+            np.asarray(hamilton.rotate(expected_reverse_q, probe_world))
+            + expected_reverse_t
+        )
+    )
+    close(
+        reverse["native_outputs"]["probe_in_target_xyz"]["values"],
+        target_sensor,
+        "native tf2 reverse vector action",
+    )
 
     # The two edge rotations are noncommuting, so reversed composition is exposed.
     wrong_order = np.asarray(hamilton.multiply(q_bs, q_wb))
-    assert np.max(np.abs(np.asarray(hamilton.rotate(wrong_order, probe_sensor)) -
-                          np.asarray(hamilton.rotate(q_ws, probe_sensor)))) > 1e-2
+    assert (
+        np.max(
+            np.abs(
+                np.asarray(hamilton.rotate(wrong_order, probe_sensor))
+                - np.asarray(hamilton.rotate(q_ws, probe_sensor))
+            )
+        )
+        > 1e-2
+    )
 
 
 def test_tf2_message_fields_and_native_from_message_roundtrip_are_captured():
@@ -152,8 +204,28 @@ def test_tf2_message_fields_and_native_from_message_roundtrip_are_captured():
         assert message["parent_frame"] == expected_parent
         assert message["child_frame"] == expected_child
         assert message["stamp_sec"] == 42 and message["stamp_nanosec"] == 0
-        close(values(message["rotation_xyzw"]), values(native_lookup["quaternion_xyzw"]), "message quaternion fields")
-        close(values(message["translation_xyz"]), values(native_lookup["translation_xyz"]), "message translation fields")
-        close(values(roundtrip["quaternion_xyzw"]), values(native_lookup["quaternion_xyzw"]), "tf2::fromMsg quaternion round trip")
-        close(values(roundtrip["translation_xyz"]), values(native_lookup["translation_xyz"]), "message transform translation round trip")
-        close(values(roundtrip["matrix_rows"]), values(native_lookup["matrix_rows"]), "message transform matrix action round trip")
+        close(
+            values(message["rotation_xyzw"]),
+            values(native_lookup["quaternion_xyzw"]),
+            "message quaternion fields",
+        )
+        close(
+            values(message["translation_xyz"]),
+            values(native_lookup["translation_xyz"]),
+            "message translation fields",
+        )
+        close(
+            values(roundtrip["quaternion_xyzw"]),
+            values(native_lookup["quaternion_xyzw"]),
+            "tf2::fromMsg quaternion round trip",
+        )
+        close(
+            values(roundtrip["translation_xyz"]),
+            values(native_lookup["translation_xyz"]),
+            "message transform translation round trip",
+        )
+        close(
+            values(roundtrip["matrix_rows"]),
+            values(native_lookup["matrix_rows"]),
+            "message transform matrix action round trip",
+        )
