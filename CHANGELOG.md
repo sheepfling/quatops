@@ -1,5 +1,10 @@
 # Changelog
 
+## Unreleased
+
+- Clarifies numerical accuracy, singularities, overflow, and convergence
+  behavior across operation families, with additional boundary coverage.
+
 ## 0.1.0a0
 
 Initial alpha release of QuatOps.

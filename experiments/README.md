@@ -32,9 +32,10 @@ Install optional experiment dependencies when needed:
 | `one_off_benchmark.py` | Compare scalar hot/cold paths and optional vectorized backends | `dev` extra |
 | `numba_coverage.py` | Report public API routes and compiled dispatcher signatures | Numba optional |
 
-The homogeneous and high-precision rotation programs are research prototypes,
-not production implementations. Their correctness and future work are tracked
-in [issue #6](https://github.com/sheepfling/quatops/issues/6).
+The homogeneous rotation programs are research prototypes. Their compensated
+coefficients improve some cancellation cases, but scaling, underflow and the
+final dot product still lose components on the adversarial reference set. They
+are not production implementations.
 
 ## Run performance benchmarks
 

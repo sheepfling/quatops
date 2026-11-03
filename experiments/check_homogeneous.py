@@ -39,6 +39,7 @@ CASES = (
     ("identity-mixed", (1, 0, 0, 0), (1e308, 1e-308, TINY)),
     ("signed-permutation", (1, 0, 0, 1), (1e308, 1e-308, TINY)),
     ("numpy-near-diagonal", (1, 1, 1e-8, 0), (0, 1e308, 0)),
+    ("numpy-near-diagonal-subnormal", (1, 1, 1e-8, 0), (0, 1e-300, 0)),
     ("pythagorean", (5, 12, 13, 0), (1e308, 1, 1)),
     (
         "large-pythagorean",
