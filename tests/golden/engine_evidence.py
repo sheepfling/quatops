@@ -29,7 +29,8 @@ class EngineEulerCase(BaseModel):
     expected_matrix_rows: RotationMatrix3
     quaternion_atol: float
     matrix_atol: float
-    upstream_quaternion_tolerance: Optional[float]
+    # Pydantic evaluates this annotation on Python 3.9, so keep typing syntax.
+    upstream_quaternion_tolerance: Optional[float]  # noqa: UP045
     source_urls: tuple[str, ...]
 
 
