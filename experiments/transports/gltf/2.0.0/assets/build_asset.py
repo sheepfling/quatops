@@ -57,20 +57,21 @@ def main():
         )
         byte_offset, byte_length = append_f32(binary, flat)
         view_index = len(buffer_views)
-        view = {"buffer": 0, "byteOffset": byte_offset, "byteLength": byte_length}
-        if target is not None:
-            view["target"] = target
+        view = {
+            "buffer": 0,
+            "byteOffset": byte_offset,
+            "byteLength": byte_length,
+            **({"target": target} if target is not None else {}),
+        }
         buffer_views.append(view)
         item = {
             "bufferView": view_index,
             "componentType": 5126,
             "count": count,
             "type": type_name,
+            **({"min": min_values} if min_values is not None else {}),
+            **({"max": max_values} if max_values is not None else {}),
         }
-        if min_values is not None:
-            item["min"] = min_values
-        if max_values is not None:
-            item["max"] = max_values
         accessors.append(item)
         return len(accessors) - 1
 

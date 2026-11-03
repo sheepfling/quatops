@@ -98,36 +98,44 @@ def _winner_report(data: dict[str, Any]) -> dict[str, Any]:
     for benchmark in data["benchmarks"]:
         grouped[benchmark["group"]].append(benchmark)
 
-    results: dict[str, Any] = {}
-    for group, benchmarks in sorted(grouped.items()):
-        rows = []
-        for benchmark in benchmarks:
-            case = _case_label(benchmark["name"], group)
-            rows.append(
+    def report_group(group: str, benchmarks: list[dict[str, Any]]) -> dict[str, Any]:
+        measured_rows = sorted(
+            [
                 {
-                    "backend": case,
+                    "backend": _case_label(benchmark["name"], group),
                     "min_us": benchmark["stats"]["min"] * 1e6,
                     "median_us": benchmark["stats"]["median"] * 1e6,
                     "mean_us": benchmark["stats"]["mean"] * 1e6,
                     "stddev_us": benchmark["stats"]["stddev"] * 1e6,
                     "rounds": benchmark["stats"]["rounds"],
                 }
-            )
-        rows.sort(key=lambda row: row["median_us"])
-        fastest = rows[0]["median_us"]
-        for row in rows:
-            row["relative_to_winner"] = row["median_us"] / fastest
-            row["within_one_percent_of_winner"] = (
-                row["relative_to_winner"] <= 1.0 + WINNER_TOLERANCE
-            )
-        results[group] = {
+                for benchmark in benchmarks
+            ],
+            key=lambda row: row["median_us"],
+        )
+        fastest = measured_rows[0]["median_us"]
+        rows = [
+            {
+                **row,
+                "relative_to_winner": row["median_us"] / fastest,
+                "within_one_percent_of_winner": (
+                    row["median_us"] / fastest <= 1.0 + WINNER_TOLERANCE
+                ),
+            }
+            for row in measured_rows
+        ]
+        return {
             "winner": rows[0]["backend"],
             "co_winners": [
                 row["backend"] for row in rows if row["within_one_percent_of_winner"]
             ],
             "results": rows,
         }
-    return results
+
+    return {
+        group: report_group(group, benchmarks)
+        for group, benchmarks in sorted(grouped.items())
+    }
 
 
 def _print_report(report: dict[str, Any]) -> None:
