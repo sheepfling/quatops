@@ -4,8 +4,7 @@ name = "Markdown style"
 argv = ["rumdl", "check", "--no-cache", "{files}"]
 fix_argv = ["rumdl", "fmt", "{files}"]
 files = {
-  include = ["**/*.[mM][dD]", "*.[mM][dD]"],
-  exclude = ["experiments/quatops_capture_wave2/**"],
+  include = ["**/*.[mM][dD]", "*.[mM][dD]"]
 }
 
 [[orchestration.steps]]
@@ -20,8 +19,7 @@ fix_argv = [
   "{root}/mdrepo.toml", "fix", "{files}",
 ]
 files = {
-  include = ["**/*.[mM][dD]", "*.[mM][dD]"],
-  exclude = ["experiments/quatops_capture_wave2/**"],
+  include = ["**/*.[mM][dD]", "*.[mM][dD]"]
 }
 
 [[orchestration.profiles]]

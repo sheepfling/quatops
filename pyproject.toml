@@ -110,10 +110,6 @@ include = [
 # modules. The namespace and component-axis tests assert the resulting exports.
 reportUnsupportedDunderAll = "none"
 
-[tool.ruff]
-# The historical wave packet is outside the maintained product/layer indexes.
-extend-exclude = ["experiments/quatops_capture_wave2"]
-
 [tool.ruff.lint]
 # The package intentionally re-exports backend APIs with star imports.
 # Keep their targeted F403 suppressions active in ordinary Ruff runs.

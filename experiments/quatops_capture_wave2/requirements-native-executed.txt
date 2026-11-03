@@ -1,6 +1,0 @@
--r requirements-replay.txt
-# Select one OpenCV distribution; do not install both GUI and headless variants.
-opencv-python-headless==4.13.0.92
-trimesh==4.11.1
-vtk==9.6.2
-pyproj==3.7.2

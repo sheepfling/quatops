@@ -1,6 +1,5 @@
 # Native-capture manifests hash raw source and output bytes. Preserve these
 # auxiliary artifacts exactly across Windows and Unix checkouts.
-experiments/quatops_capture_wave2/** -text
 experiments/oracles/** -text
 experiments/transports/** -text
 tests/golden/oracles/** -text

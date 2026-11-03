@@ -1,5 +1,3 @@
-exclude = ["experiments/quatops_capture_wave2/**"]
-
 [orphans]
 enabled = true
 roots = [

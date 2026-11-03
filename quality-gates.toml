@@ -14,9 +14,6 @@ include = [
   "*.md", "**/*.md", "*.json", "**/*.json", "*.yaml", "**/*.yaml",
   "*.yml", "**/*.yml", "*.toml", "**/*.toml",
 ]
-# Wave-numbered discovery is archival; active experiments use product/layer paths.
-exclude = ["experiments/quatops_capture_wave2/**"]
-
 [checks.json_structure]
 extensions = [".py"]
 # Test decoders consume controlled fixtures; the benchmark reads its own
