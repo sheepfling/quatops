@@ -3,6 +3,8 @@
 This project captures the pinned `UnityEngine` quaternion API on WindowsEditor.
 Its full discovery output is temporary. Selected native converter witnesses
 are retained under [`tests/oracles/unity/6000.5.2f1`](../../../tests/oracles/unity/6000.5.2f1/contract.json).
+Only `ProjectVersion.txt` and the package manifest/lock are retained; Unity
+regenerates editor and player defaults when the project is opened.
 
 From the repository root in PowerShell:
 

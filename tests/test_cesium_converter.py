@@ -78,6 +78,9 @@ def test_cesium_capture_provenance_and_explicit_frame_contract():
         / "experiments/converters/cesium/1.124.0/package-lock.json",
         "numeric_helper_sha256": ROOT
         / "experiments/converters/shared/numeric_evidence.mjs",
+        "retention_script_sha256": ROOT
+        / "scripts/retain_cesium_converter_witnesses.py",
+        "retention_helper_sha256": ROOT / "scripts/evidence_json.py",
     }
     for field, path in reproduction_paths.items():
         assert hashlib.sha256(path.read_bytes()).hexdigest() == reproduction[field]

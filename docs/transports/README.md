@@ -11,6 +11,5 @@ in the [interoperability evidence atlas](../INTEROPERABILITY_EVIDENCE.md).
   loaded by Three.js 0.187.0, Blender 5.1.2, VTK 9.6.2, and Trimesh 4.11.1;
   also includes a QuatOps-generated static hierarchy loaded by native Three.js
   GLTFLoader. Khronos validation is recorded separately.
-- [OpenUSD 26.11](openusd.md): `Gf` quaternion behavior, a saved `UsdGeom`
-  transform stack, and a QuatOps-generated USDA stage reopened and evaluated by
-  native OpenUSD.
+- [OpenUSD 26.11](openusd.md): a QuatOps-generated USDA stage reopened and
+  evaluated by native OpenUSD.

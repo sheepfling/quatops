@@ -12,7 +12,7 @@ runtime package. For the user-facing documentation, start with the
 - [Godot captures](godot/README.md): versioned native runtime evidence.
 - [Shared orientation inputs](interoperability/README.md): stable discovery and witness inputs.
 - [Math-library captures](oracles/README.md): independently implemented rotation APIs.
-- [Transport captures](transports/README.md): glTF, loaders, and OpenUSD stages.
+- [Transport captures](transports/README.md): glTF assets and loader runs.
 - [Unity captures](unity/README.md): versioned native runtime evidence.
 - [Unreal captures](unreal/README.md): versioned native runtime evidence.
 

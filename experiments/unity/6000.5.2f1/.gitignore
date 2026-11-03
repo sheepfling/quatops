@@ -8,3 +8,4 @@ MemoryCaptures/
 Recordings/
 capture.log
 native_capture.json
+/ProjectSettings/*.asset

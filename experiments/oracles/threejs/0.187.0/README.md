@@ -14,6 +14,12 @@ npm ci
 node capture_three.mjs --corpus ..\..\shared\orientation_inputs_v1.json --output ..\..\..\..\tests\golden\oracles\threejs\0.187.0\native_rotation.json
 ```
 
+From the repository root, select the retained native witnesses:
+
+```powershell
+.venv\Scripts\python.exe scripts\compact_oracle_witnesses.py
+```
+
 The checked-in manifest records Node/V8/platform, `THREE.REVISION`, corpus,
 lockfile and exporter SHA-256 values, plus the observed operation counts.
 Install `three@0.187.0` from the lockfile; do not regenerate it from a floating
@@ -21,17 +27,17 @@ version range.
 
 ## Captured API surface
 
-The exporter records all six Euler orders over the shared 89 input cases and
-all 540 unit-boundary probes, Euler and matrix readback, raw column-major
-`Matrix4.elements`, explicit matrix rows, vector action, axis-angle, all shared
-quaternion normalization inputs, both multiplication operand orders, shortest
-SLERP at the shared weights, independent proper matrices, `setFromUnitVectors`,
-Euler `reorder`, and a clean unit-scale `Object3D` parent/child hierarchy.
+The discovery exporter records all six Euler orders over 89 inputs and 540
+unit-boundary probes, matrix readback, vector action, axis-angle, normalization,
+multiplication, SLERP, matrix constructors, `setFromUnitVectors`, Euler
+`reorder`, and an `Object3D` hierarchy. Retained witnesses keep selected
+quaternion API cases plus one minimized Euler readback regression. They omit
+the broader Euler sweep and duplicate hierarchy, which is covered by the glTF
+loader proof.
 
 Three.js Euler inputs are stored as axis-labelled XYZ. The capture preserves
 the order string separately; comparing that string with a QuatOps/SciPy order
 requires measured order semantics, not spelling by itself. Three.js
-quaternions are stored as XYZW. `Matrix4.elements` is retained in its native
-array order alongside row-labelled matrix values and transformed basis vectors.
-The capture does not establish an asset's model-forward axis or a universal
+quaternions are stored as XYZW. Retained matrices use row-labelled values. The
+capture does not establish an asset's model-forward axis or a universal
 world-frame conversion.

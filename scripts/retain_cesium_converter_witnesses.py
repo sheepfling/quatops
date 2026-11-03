@@ -7,7 +7,11 @@ import hashlib
 import json
 from pathlib import Path
 
-from evidence_json import read_evidence_document, read_evidence_rows
+from evidence_json import (
+    compact_numeric_evidence,
+    read_evidence_document,
+    read_evidence_rows,
+)
 
 ROOT = Path(__file__).resolve().parents[1]
 HERE = ROOT / "experiments/converters/cesium/1.124.0"
@@ -33,12 +37,19 @@ def main() -> None:
     inputs_path = DESTINATION / "inputs.json"
     inputs_path.write_bytes((HERE / "converter_inputs.json").read_bytes())
     witnesses_path = DESTINATION / "witnesses.json"
+    retained = [
+        {
+            "case_id": row["case_id"],
+            "outputs": compact_numeric_evidence(row["outputs"]),
+        }
+        for row in observations
+    ]
     witnesses_path.write_text(
         json.dumps(
             {
                 "schema_version": "1.0",
                 "evidence_kind": "native_cesium_quatops_converter_capture",
-                "observations": observations,
+                "observations": retained,
             },
             indent=2,
         )
@@ -59,6 +70,7 @@ def main() -> None:
         },
         "source_map": ["x", "y", "z"],
         "native_api": [
+            "Cartesian3.fromDegrees",
             "Transforms.eastNorthUpToFixedFrame",
             "Matrix3.fromQuaternion",
             "Matrix4.fromRotationTranslation",
@@ -118,6 +130,8 @@ def main() -> None:
             "numeric_helper_sha256": sha256(
                 ROOT / "experiments/converters/shared/numeric_evidence.mjs"
             ),
+            "retention_script_sha256": sha256(Path(__file__)),
+            "retention_helper_sha256": sha256(ROOT / "scripts/evidence_json.py"),
             "package_lock_sha256": sha256(HERE / "package-lock.json"),
             "geographic_inputs_sha256": sha256(geo_inputs),
         },
@@ -127,6 +141,10 @@ def main() -> None:
             "policy": (
                 "retain identity, mixed orientations, an antipode, a "
                 "noncommuting composition, and four WGS84 origins"
+            ),
+            "numeric_values": (
+                "round-trippable decimals and dtype; exact bits only for "
+                "signed-zero or nonfinite values"
             ),
         },
     }

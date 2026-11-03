@@ -95,6 +95,8 @@ def test_ros_capture_is_native_pinned_and_selected_values_are_lossless():
         / "experiments/converters/ros2/0.36.23/native/src/capture_ros.cpp",
         "runner_sha256": ROOT / "experiments/converters/ros2/0.36.23/capture_native.py",
         "capture_helper_sha256": ROOT / "experiments/oracles/shared/capture_io.py",
+        "retention_script_sha256": ROOT / "scripts/retain_ros_tf2_witnesses.py",
+        "retention_helper_sha256": ROOT / "scripts/evidence_json.py",
         "dockerfile_sha256": ROOT / "experiments/converters/ros2/0.36.23/Dockerfile",
         "build_recipe_sha256": ROOT
         / "experiments/converters/ros2/0.36.23/native/CMakeLists.txt",

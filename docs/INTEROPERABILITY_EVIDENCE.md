@@ -51,12 +51,12 @@ determinant parities, noncommuting composition, inverse conversion, and
 distinct world/body corrections. Passing generated outputs are not stored as
 native goldens.
 
-The Three.js, MuJoCo, CSPICE/SpiceyPy, and OpenUSD files under
-[`tests/golden`](../tests/golden/) now retain small operation-specific witness
+The Three.js, MuJoCo, and CSPICE/SpiceyPy files under
+[`tests/golden`](../tests/golden/) retain small operation-specific witness
 sets. Their provenance preserves native build details and the SHA-256 digest of
 the full discovery capture used to select them. Capture exporters remain
-available for replay. These witnesses are math or transform-stack oracles;
-they do not imply production adapters under `src/`. Separate auxiliary
+available for replay. OpenUSD evidence is limited to its converter stage proof.
+These witnesses do not imply production adapters under `src/`. Separate auxiliary
 converter proofs now compare canonical values and frame mappings against
 native Cesium, Three.js GLTFLoader, OpenUSD, ROS 2/tf2, CSPICE direct
 quaternion APIs, MuJoCo direct quaternion APIs, OpenCV Rodrigues, and Eigen's
@@ -118,6 +118,8 @@ review gates. Passing sweep outputs are not copied into accepted witness sets.
 - Contracts specify API, algebra, storage, action, frames, conversion and
   inverse, precision/input domain, and exclusions.
 - Native witnesses store only selected exact values and native basis actions.
+- Numeric goldens store round-trippable decimal values and native dtype; exact
+  IEEE bits remain only where signed zero or nonfinite values require them.
 - Capture exporters and environment/build records make selected values
   reproducible; hashes identify inputs but never replace the values.
 - Random and broad boundary tests stay generated. Promote a minimized native

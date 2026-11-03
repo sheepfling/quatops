@@ -13,19 +13,15 @@ This is a JavaScript `Number` capture, not float32 engine evidence.
 ## Observed behavior
 
 The discovery sweep compared the six uppercase Euler orders with SciPy across
-89 general inputs and 540 boundary probes. The retained native witness file
-keeps one mixed input per order, one boundary per order, and the minimized
-near-lock readback regression. Quaternions are recorded as
-`[x, y, z, w]`; Euler matrix witnesses retain row-labelled 3x3 values, while
-the hierarchy witness retains native `Matrix4.elements` in column-major order.
-`Matrix4.set` accepts row-major arguments, as described by the
-[Three.js Matrix4 documentation](https://threejs.org/docs/pages/Matrix4.html).
+89 general inputs and 540 boundary probes. The retained file keeps the
+minimized near-lock readback discrepancy as a regression; it does not retain
+the broader Euler-order sweep. Quaternions are recorded as `[x, y, z, w]`.
 
-The capture exercises `Quaternion.setFromEuler`, `Euler.setFromQuaternion`,
-`Quaternion.setFromRotationMatrix`, `Quaternion.setFromAxisAngle`,
+The retained quaternion witnesses cover `Quaternion.setFromRotationMatrix`,
+`Quaternion.setFromAxisAngle`,
 `Quaternion.multiply`/`premultiply` semantics, `Quaternion.slerp`,
-`Quaternion.setFromUnitVectors`, vector action, Euler `reorder`, and a clean
-unit-scale Object3D hierarchy. The public API documents those quaternion
+`Quaternion.setFromUnitVectors`, and vector action. One
+`Euler.setFromQuaternion` readback regression is retained separately. The public API documents those quaternion
 operations and states its rotation-matrix precondition at the
 [Quaternion API page](https://threejs.org/docs/pages/Quaternion.html).
 
@@ -40,5 +36,5 @@ Euler conversions and does not widen the QuatOps comparison tolerance.
 
 This proves the pinned Node math implementation only. It does not exercise a
 browser, WebGL/WebGPU renderer, GPU arithmetic, imported asset-axis defaults,
-or an application-specific world/body frame. The separate glTF target must
-identify its exact loader and animation sampling policy.
+or an application-specific world/body frame. The separate glTF capture retains
+the native loader hierarchy and selected animation samples.

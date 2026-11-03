@@ -46,23 +46,17 @@ function sha256(data) {
 }
 
 function matrix4(m) {
-  return {
-    elements_column_major: [...m.elements],
-    rows: Array.from({ length: 4 }, (_, r) =>
-      Array.from({ length: 4 }, (_, c) => m.elements[c * 4 + r]),
-    ),
-  };
+  return Array.from({ length: 4 }, (_, r) =>
+    Array.from({ length: 4 }, (_, c) => m.elements[c * 4 + r]),
+  );
 }
 
 function objectTransform(object) {
   object.updateMatrix();
   object.updateWorldMatrix(true, false);
   return {
-    position_xyz: object.position.toArray(),
-    rotation_xyzw: object.quaternion.toArray(),
-    scale_xyz: object.scale.toArray(),
-    local_matrix: matrix4(object.matrix),
-    world_matrix: matrix4(object.matrixWorld),
+    local_matrix_rows: matrix4(object.matrix),
+    world_matrix_rows: matrix4(object.matrixWorld),
   };
 }
 
@@ -71,15 +65,19 @@ function animationSamples(gltf, clip) {
   const keyTimes = Array.from(track.times);
   const [t0, t1, t2] = keyTimes;
   const epsilon = Math.min(1e-6, (t1 - t0) / 1000, (t2 - t1) / 1000);
-  const samples = [
-    { sample: 'key-0', time_seconds: t0 },
-    { sample: 'midpoint-0-1', time_seconds: (t0 + t1) / 2 },
-    { sample: 'before-key-1', time_seconds: t1 - epsilon },
-    { sample: 'key-1', time_seconds: t1 },
-    { sample: 'after-key-1', time_seconds: t1 + epsilon },
-    { sample: 'midpoint-1-2', time_seconds: (t1 + t2) / 2 },
-    { sample: 'key-2', time_seconds: t2 },
-  ];
+  const samples = clip.name === 'rotation_step'
+    ? [
+      { sample: 'key-0', time_seconds: t0 },
+      { sample: 'before-key-1', time_seconds: t1 - epsilon },
+      { sample: 'key-1', time_seconds: t1 },
+      { sample: 'key-2', time_seconds: t2 },
+    ]
+    : [
+      { sample: 'key-0', time_seconds: t0 },
+      { sample: 'midpoint-0-1', time_seconds: (t0 + t1) / 2 },
+      { sample: 'key-1', time_seconds: t1 },
+      { sample: 'key-2', time_seconds: t2 },
+    ];
   const mixer = new THREE.AnimationMixer(gltf.scene);
   const action = mixer.clipAction(clip);
   action.setLoop(THREE.LoopOnce, 0);
@@ -100,7 +98,6 @@ function animationSamples(gltf, clip) {
     animation_name: clip.name,
     track_name: track.name,
     key_times_seconds: keyTimes,
-    track_values_xyzw: Array.from(track.values),
     samples: rows,
   };
 }
@@ -136,11 +133,6 @@ async function main() {
   for (const name of ['parent_frame', 'static_trs', 'static_matrix']) {
     const object = gltf.scene.getObjectByName(name);
     if (!object) throw new Error(`Missing static node ${name}`);
-    staticTransforms[name] = objectTransform(object);
-  }
-  for (const name of ['source_axis_origin', 'source_axis_x', 'source_axis_y', 'source_axis_z']) {
-    const object = gltf.scene.getObjectByName(name);
-    if (!object) throw new Error(`Missing axis probe ${name}`);
     staticTransforms[name] = objectTransform(object);
   }
   const animationRows = gltf.animations.map((clip) => animationSamples(gltf, clip));

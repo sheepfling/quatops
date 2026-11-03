@@ -140,7 +140,7 @@ def main() -> None:
         },
         "exporter": {"path": str(Path(__file__).name), "sha256": sha(Path(__file__))},
         "generator_sha256": sha(HERE / "create_stage.py"),
-        "lockfile_sha256": sha(HERE.parents[2] / "transports/openusd/26.11/uv.lock"),
+        "lockfile_sha256": sha(HERE / "uv.lock"),
         "canonical_inputs_sha256": inputs["canonical_input_sha256"],
         "observations": {
             "path": "observations.json",

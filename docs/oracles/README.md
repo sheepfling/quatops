@@ -38,8 +38,9 @@ executed:
 - OpenXR `xrLocateSpace`, reference-space relations, and native pose transfer.
 - Broader Sophus scalar, Jacobian, and derivative contracts.
 
-See [transport captures](../transports/README.md) for glTF and OpenUSD native
-captures and converter round trips. The retained evidence atlas distinguishes
+See [transport captures](../transports/README.md) for glTF captures and
+[converter evidence](../transports/openusd.md) for the OpenUSD stage round trip.
+The retained evidence atlas distinguishes
 captured target behavior, selected converter witnesses, and separately run
 SciPy formula checks. Broader successful discovery sweeps are not shipped as
 permanent goldens.

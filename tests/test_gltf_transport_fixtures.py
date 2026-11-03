@@ -159,13 +159,13 @@ def test_gltf_static_trs_matrix_parent_and_axis_mapping_are_explicit():
         ("static_matrix", matrix_source),
     ):
         np.testing.assert_allclose(
-            three_static[name]["local_matrix"]["rows"],
+            three_static[name]["local_matrix_rows"],
             source_matrix,
             rtol=0.0,
             atol=2e-14,
         )
-    parent_three = np.asarray(three_static["parent_frame"]["world_matrix"]["rows"])
-    child_three = np.asarray(three_static["static_trs"]["world_matrix"]["rows"])
+    parent_three = np.asarray(three_static["parent_frame"]["world_matrix_rows"])
+    child_three = np.asarray(three_static["static_trs"]["world_matrix_rows"])
     np.testing.assert_allclose(
         child_three,
         parent_three @ trs_source,
@@ -176,6 +176,13 @@ def test_gltf_static_trs_matrix_parent_and_axis_mapping_are_explicit():
     basis = _basis_blender()
     np.testing.assert_allclose(
         basis, np.array(((1, 0, 0), (0, 0, -1), (0, 1, 0))), atol=1e-8
+    )
+    parent_blender = _basis_conjugate_matrix(parent_source, basis)
+    np.testing.assert_allclose(
+        blender_static["parent_frame"]["matrix_world_rows"],
+        parent_blender,
+        rtol=0.0,
+        atol=TOLERANCE,
     )
     for name, source_matrix in (
         ("parent_frame", parent_source),
@@ -190,12 +197,18 @@ def test_gltf_static_trs_matrix_parent_and_axis_mapping_are_explicit():
             atol=TOLERANCE,
             err_msg=f"Blender glTF {name} local transform basis mapping",
         )
-    np.testing.assert_allclose(
-        blender_static["static_trs"]["matrix_world_rows"],
-        blender_static["static_matrix"]["matrix_world_rows"],
-        rtol=0.0,
-        atol=TOLERANCE,
+    world_cases = (
+        ("static_trs", trs_source),
+        ("static_matrix", matrix_source),
     )
+    for name, source_matrix in world_cases:
+        expected_world = parent_blender @ _basis_conjugate_matrix(source_matrix, basis)
+        np.testing.assert_allclose(
+            blender_static[name]["matrix_world_rows"],
+            expected_world,
+            rtol=0.0,
+            atol=TOLERANCE,
+        )
     for axis in "xyz":
         expected = basis[:, "xyz".index(axis)]
         actual = BLENDER["observations"][
@@ -330,8 +343,13 @@ def test_blender_importer_axis_mapping_and_quaternion_animation_profiles_are_fro
     )
 
     linear = rows["LINEAR"]
+    assert linear["fcurves"]["data_path"] == "rotation_quaternion"
+    assert linear["fcurves"]["array_indices"] == [0, 1, 2, 3]
+    assert linear["fcurves"]["key_count"] == 3
     assert {
-        key["interpolation"] for curve in linear["fcurves"] for key in curve["keys"]
+        kind
+        for component in linear["fcurves"]["interpolations_by_component"]
+        for kind in component
     } == {"LINEAR"}
     midpoint = next(
         sample for sample in linear["samples"] if sample["sample"] == "midpoint-0-1"
@@ -349,12 +367,14 @@ def test_blender_importer_axis_mapping_and_quaternion_animation_profiles_are_fro
 
     cubic = rows["CUBICSPLINE"]
     assert {
-        key["interpolation"] for curve in cubic["fcurves"] for key in curve["keys"]
+        kind
+        for component in cubic["fcurves"]["interpolations_by_component"]
+        for kind in component
     } == {"BEZIER"}
     assert all(
-        key.get("handle_left_type", True)
-        for curve in cubic["fcurves"]
-        for key in curve["keys"]
+        handle == "AUTO"
+        for component in cubic["fcurves"]["left_handle_types_by_component"]
+        for handle in component
     )
     cubic_midpoint = next(
         sample for sample in cubic["samples"] if sample["sample"] == "midpoint-0-1"
@@ -372,8 +392,7 @@ def test_blender_importer_axis_mapping_and_quaternion_animation_profiles_are_fro
         0.97526056, abs=2e-8
     )
     assert {
-        key["handle_left_type"] for curve in cubic["fcurves"] for key in curve["keys"]
-    } == {"AUTO"}
-    assert {
-        key["handle_right_type"] for curve in cubic["fcurves"] for key in curve["keys"]
+        handle
+        for component in cubic["fcurves"]["right_handle_types_by_component"]
+        for handle in component
     } == {"AUTO"}

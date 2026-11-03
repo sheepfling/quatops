@@ -4,39 +4,6 @@
   "observations": [
     {
       "case_id": "identity@geo-00",
-      "native_entry_points": [
-        "Cartesian3.fromDegrees",
-        "Transforms.eastNorthUpToFixedFrame",
-        "Matrix3.fromQuaternion",
-        "Matrix4.fromRotationTranslation",
-        "Matrix4.multiply",
-        "Matrix4.inverseTransformation"
-      ],
-      "inputs": {
-        "case_id": "identity@geo-00",
-        "canonical_orientation_case": "identity",
-        "location_case": "geo-00",
-        "canonical_wxyz": [
-          1,
-          0,
-          0,
-          0
-        ],
-        "quatops_cesium_local_xyzw": [
-          0,
-          0,
-          0,
-          1
-        ],
-        "local_translation_xyz_m": [
-          0,
-          0,
-          0
-        ],
-        "longitude_degrees": 0,
-        "latitude_degrees": 0,
-        "height_m": 0
-      },
       "outputs": {
         "enu_to_ecef_matrix_rows": {
           "values": [
@@ -66,10 +33,6 @@
             ]
           ],
           "dtype": "binary64",
-          "shape": [
-            4,
-            4
-          ],
           "ieee754_hex_be": [
             "8000000000000000",
             "0000000000000000",
@@ -107,22 +70,7 @@
               1
             ]
           ],
-          "dtype": "binary64",
-          "shape": [
-            3,
-            3
-          ],
-          "ieee754_hex_be": [
-            "3ff0000000000000",
-            "0000000000000000",
-            "0000000000000000",
-            "0000000000000000",
-            "3ff0000000000000",
-            "0000000000000000",
-            "0000000000000000",
-            "0000000000000000",
-            "3ff0000000000000"
-          ]
+          "dtype": "binary64"
         },
         "local_basis_and_probe_images": {
           "values": [
@@ -147,25 +95,7 @@
               2.75
             ]
           ],
-          "dtype": "binary64",
-          "shape": [
-            4,
-            3
-          ],
-          "ieee754_hex_be": [
-            "3ff0000000000000",
-            "0000000000000000",
-            "0000000000000000",
-            "0000000000000000",
-            "3ff0000000000000",
-            "0000000000000000",
-            "0000000000000000",
-            "0000000000000000",
-            "3ff0000000000000",
-            "3fd0000000000000",
-            "bff8000000000000",
-            "4006000000000000"
-          ]
+          "dtype": "binary64"
         },
         "model_to_ecef_matrix_rows": {
           "values": [
@@ -194,29 +124,7 @@
               1
             ]
           ],
-          "dtype": "binary64",
-          "shape": [
-            4,
-            4
-          ],
-          "ieee754_hex_be": [
-            "0000000000000000",
-            "0000000000000000",
-            "3ff0000000000000",
-            "415854a640000000",
-            "3ff0000000000000",
-            "0000000000000000",
-            "0000000000000000",
-            "0000000000000000",
-            "0000000000000000",
-            "3ff0000000000000",
-            "0000000000000000",
-            "0000000000000000",
-            "0000000000000000",
-            "0000000000000000",
-            "0000000000000000",
-            "3ff0000000000000"
-          ]
+          "dtype": "binary64"
         },
         "model_to_ecef_quaternion_xyzw": {
           "values": [
@@ -225,16 +133,7 @@
             -0.5,
             -0.5
           ],
-          "dtype": "binary64",
-          "shape": [
-            4
-          ],
-          "ieee754_hex_be": [
-            "bfe0000000000000",
-            "bfe0000000000000",
-            "bfe0000000000000",
-            "bfe0000000000000"
-          ]
+          "dtype": "binary64"
         },
         "local_quaternion_recovered_from_ecef_xyzw": {
           "values": [
@@ -243,16 +142,7 @@
             0,
             1
           ],
-          "dtype": "binary64",
-          "shape": [
-            4
-          ],
-          "ieee754_hex_be": [
-            "0000000000000000",
-            "0000000000000000",
-            "0000000000000000",
-            "3ff0000000000000"
-          ]
+          "dtype": "binary64"
         },
         "world_points_xyz_m": {
           "values": [
@@ -277,25 +167,7 @@
               -1.5
             ]
           ],
-          "dtype": "binary64",
-          "shape": [
-            4,
-            3
-          ],
-          "ieee754_hex_be": [
-            "415854a640000000",
-            "3ff0000000000000",
-            "0000000000000000",
-            "415854a640000000",
-            "0000000000000000",
-            "3ff0000000000000",
-            "415854a680000000",
-            "0000000000000000",
-            "0000000000000000",
-            "415854a6f0000000",
-            "3fd0000000000000",
-            "bff8000000000000"
-          ]
+          "dtype": "binary64"
         },
         "world_directions_xyz": {
           "values": [
@@ -320,25 +192,7 @@
               -1.5
             ]
           ],
-          "dtype": "binary64",
-          "shape": [
-            4,
-            3
-          ],
-          "ieee754_hex_be": [
-            "0000000000000000",
-            "3ff0000000000000",
-            "0000000000000000",
-            "0000000000000000",
-            "0000000000000000",
-            "3ff0000000000000",
-            "3ff0000000000000",
-            "0000000000000000",
-            "0000000000000000",
-            "4006000000000000",
-            "3fd0000000000000",
-            "bff8000000000000"
-          ]
+          "dtype": "binary64"
         },
         "point_roundtrip_local_xyz_m": {
           "values": [
@@ -363,25 +217,7 @@
               2.75
             ]
           ],
-          "dtype": "binary64",
-          "shape": [
-            4,
-            3
-          ],
-          "ieee754_hex_be": [
-            "3ff0000000000000",
-            "0000000000000000",
-            "0000000000000000",
-            "0000000000000000",
-            "3ff0000000000000",
-            "0000000000000000",
-            "0000000000000000",
-            "0000000000000000",
-            "3ff0000000000000",
-            "3fd0000000000000",
-            "bff8000000000000",
-            "4006000000000000"
-          ]
+          "dtype": "binary64"
         },
         "ecef_origin_xyz_m": {
           "values": [
@@ -389,53 +225,12 @@
             0,
             0
           ],
-          "dtype": "binary64",
-          "shape": [
-            3
-          ],
-          "ieee754_hex_be": [
-            "415854a640000000",
-            "0000000000000000",
-            "0000000000000000"
-          ]
+          "dtype": "binary64"
         }
       }
     },
     {
       "case_id": "mixed_a@geo-03",
-      "native_entry_points": [
-        "Cartesian3.fromDegrees",
-        "Transforms.eastNorthUpToFixedFrame",
-        "Matrix3.fromQuaternion",
-        "Matrix4.fromRotationTranslation",
-        "Matrix4.multiply",
-        "Matrix4.inverseTransformation"
-      ],
-      "inputs": {
-        "case_id": "mixed_a@geo-03",
-        "canonical_orientation_case": "mixed_a",
-        "location_case": "geo-03",
-        "canonical_wxyz": [
-          0.8,
-          0.2,
-          -0.4,
-          0.4
-        ],
-        "quatops_cesium_local_xyzw": [
-          0.2,
-          -0.4,
-          0.4,
-          0.8
-        ],
-        "local_translation_xyz_m": [
-          12.5,
-          -8.25,
-          4
-        ],
-        "longitude_degrees": -75,
-        "latitude_degrees": 40,
-        "height_m": 1000
-      },
       "outputs": {
         "enu_to_ecef_matrix_rows": {
           "values": [
@@ -464,29 +259,7 @@
               1
             ]
           ],
-          "dtype": "binary64",
-          "shape": [
-            4,
-            4
-          ],
-          "ieee754_hex_be": [
-            "3feee8dd4748bf15",
-            "bfc54b794c93bd80",
-            "3fc960ce8159babc",
-            "4133535c2d084d69",
-            "3fd0907dc1930690",
-            "3fe3de4b58b829ce",
-            "bfe7ad9a672a25fc",
-            "c15207f324b444ba",
-            "0000000000000000",
-            "3fe8836eef889279",
-            "3fe491b827e347be",
-            "414f1e122e0e4192",
-            "0000000000000000",
-            "0000000000000000",
-            "0000000000000000",
-            "3ff0000000000000"
-          ]
+          "dtype": "binary64"
         },
         "local_rotation_matrix_rows": {
           "values": [
@@ -506,22 +279,7 @@
               0.6000000000000001
             ]
           ],
-          "dtype": "binary64",
-          "shape": [
-            3,
-            3
-          ],
-          "ieee754_hex_be": [
-            "3fd70a3d70a3d70c",
-            "bfe999999999999b",
-            "bfdeb851eb851eba",
-            "3fdeb851eb851eba",
-            "3fe3333333333334",
-            "bfe47ae147ae147c",
-            "3fe999999999999b",
-            "0000000000000000",
-            "3fe3333333333334"
-          ]
+          "dtype": "binary64"
         },
         "local_basis_and_probe_images": {
           "values": [
@@ -546,25 +304,7 @@
               1.8500000000000003
             ]
           ],
-          "dtype": "binary64",
-          "shape": [
-            4,
-            3
-          ],
-          "ieee754_hex_be": [
-            "3fd70a3d70a3d70c",
-            "3fdeb851eb851eba",
-            "3fe999999999999b",
-            "bfe999999999999b",
-            "3fe3333333333334",
-            "0000000000000000",
-            "bfdeb851eb851eba",
-            "bfe47ae147ae147c",
-            "3fe3333333333334",
-            "bf9eb851eb851ec0",
-            "c00451eb851eb853",
-            "3ffd99999999999b"
-          ]
+          "dtype": "binary64"
         },
         "model_to_ecef_matrix_rows": {
           "values": [
@@ -593,29 +333,7 @@
               1
             ]
           ],
-          "dtype": "binary64",
-          "shape": [
-            4,
-            4
-          ],
-          "ieee754_hex_be": [
-            "3fdb4ba19c5dc585",
-            "bfebec0337b6c219",
-            "bfce7dac1eb9d77d",
-            "4133536a6a6282bc",
-            "bfc9b24a8f4ac868",
-            "3fc52e52059b8d09",
-            "bfeee5e87c2d51d9",
-            "c15207f45ae6cf38",
-            "3fec38c892e2e61c",
-            "3fdd6a851f70afc6",
-            "bfbac6c40af32f30",
-            "414f1e104e387730",
-            "0000000000000000",
-            "0000000000000000",
-            "0000000000000000",
-            "3ff0000000000000"
-          ]
+          "dtype": "binary64"
         },
         "model_to_ecef_quaternion_xyzw": {
           "values": [
@@ -624,16 +342,7 @@
             0.27542572528795173,
             0.6097892727840412
           ],
-          "dtype": "binary64",
-          "shape": [
-            4
-          ],
-          "ieee754_hex_be": [
-            "3fe2b28efb02069a",
-            "bfdd64137007f1c3",
-            "3fd1a09338a5af70",
-            "3fe38364cb01e3fb"
-          ]
+          "dtype": "binary64"
         },
         "local_quaternion_recovered_from_ecef_xyzw": {
           "values": [
@@ -642,16 +351,7 @@
             0.4000000000000001,
             0.8
           ],
-          "dtype": "binary64",
-          "shape": [
-            4
-          ],
-          "ieee754_hex_be": [
-            "3fc9999999999997",
-            "bfd999999999999b",
-            "3fd999999999999b",
-            "3fe999999999999a"
-          ]
+          "dtype": "binary64"
         },
         "world_points_xyz_m": {
           "values": [
@@ -676,25 +376,7 @@
               4078623.8545039697
             ]
           ],
-          "dtype": "binary64",
-          "shape": [
-            4,
-            3
-          ],
-          "ieee754_hex_be": [
-            "4133536ad791092d",
-            "c15207f467bff480",
-            "414f1e10bf1b997c",
-            "413353698b0268fe",
-            "c15207f4504fa635",
-            "414f1e10890d816f",
-            "4133536a2d672a7f",
-            "c15207f498b2a030",
-            "414f1e1040d5152b",
-            "4133536b2d0b184c",
-            "c15207f517f054b9",
-            "414f1e0fed6062d6"
-          ]
+          "dtype": "binary64"
         },
         "world_directions_xyz": {
           "values": [
@@ -719,25 +401,7 @@
               -0.7565942231986618
             ]
           ],
-          "dtype": "binary64",
-          "shape": [
-            4,
-            3
-          ],
-          "ieee754_hex_be": [
-            "3fdb4ba19c5dc585",
-            "bfc9b24a8f4ac868",
-            "3fec38c892e2e61c",
-            "bfebec0337b6c219",
-            "3fc52e52059b8d09",
-            "3fdd6a851f70afc6",
-            "bfce7dac1eb9d77d",
-            "bfeee5e87c2d51d9",
-            "bfbac6c40af32f30",
-            "3fe85512b1fe17b0",
-            "c007a130b022e8a0",
-            "bfe83605169f6286"
-          ]
+          "dtype": "binary64"
         },
         "point_roundtrip_local_xyz_m": {
           "values": [
@@ -762,25 +426,7 @@
               2.7499999990686774
             ]
           ],
-          "dtype": "binary64",
-          "shape": [
-            4,
-            3
-          ],
-          "ieee754_hex_be": [
-            "3ff0000000000000",
-            "0000000000000000",
-            "3e00000000000000",
-            "0000000000000000",
-            "3ff0000000000000",
-            "0000000000000000",
-            "0000000000000000",
-            "0000000000000000",
-            "3fefffffff400000",
-            "3fd0000000000000",
-            "bff7fffffff00000",
-            "4005ffffffe00000"
-          ]
+          "dtype": "binary64"
         },
         "ecef_origin_xyz_m": {
           "values": [
@@ -788,53 +434,12 @@
             -4726732.573502714,
             4078628.3598100627
           ],
-          "dtype": "binary64",
-          "shape": [
-            3
-          ],
-          "ieee754_hex_be": [
-            "4133535c2d084d69",
-            "c15207f324b444ba",
-            "414f1e122e0e4192"
-          ]
+          "dtype": "binary64"
         }
       }
     },
     {
       "case_id": "mixed_b@geo-04",
-      "native_entry_points": [
-        "Cartesian3.fromDegrees",
-        "Transforms.eastNorthUpToFixedFrame",
-        "Matrix3.fromQuaternion",
-        "Matrix4.fromRotationTranslation",
-        "Matrix4.multiply",
-        "Matrix4.inverseTransformation"
-      ],
-      "inputs": {
-        "case_id": "mixed_b@geo-04",
-        "canonical_orientation_case": "mixed_b",
-        "location_case": "geo-04",
-        "canonical_wxyz": [
-          0.7,
-          -0.3,
-          0.2,
-          0.6164414002968976
-        ],
-        "quatops_cesium_local_xyzw": [
-          -0.3,
-          0.2,
-          0.6164414002968976,
-          0.7
-        ],
-        "local_translation_xyz_m": [
-          -3,
-          6,
-          9
-        ],
-        "longitude_degrees": 45,
-        "latitude_degrees": -45,
-        "height_m": 400000
-      },
       "outputs": {
         "enu_to_ecef_matrix_rows": {
           "values": [
@@ -863,29 +468,7 @@
               1
             ]
           ],
-          "dtype": "binary64",
-          "shape": [
-            4,
-            4
-          ],
-          "ieee754_hex_be": [
-            "bfe6a09e667f3bcc",
-            "3fe000d02105859b",
-            "3fdffe5fa8cd2bee",
-            "4149e5b99291584d",
-            "3fe6a09e667f3bce",
-            "3fe000d02105859a",
-            "3fdffe5fa8cd2beb",
-            "4149e5b99291584b",
-            "0000000000000000",
-            "3fe69f7800cb67c3",
-            "bfe6a1c4bd3d8619",
-            "c1523263c7c40b1c",
-            "0000000000000000",
-            "0000000000000000",
-            "0000000000000000",
-            "3ff0000000000000"
-          ]
+          "dtype": "binary64"
         },
         "local_rotation_matrix_rows": {
           "values": [
@@ -905,22 +488,7 @@
               0.74
             ]
           ],
-          "dtype": "binary64",
-          "shape": [
-            3,
-            3
-          ],
-          "ieee754_hex_be": [
-            "3fc47ae147ae1478",
-            "bfef74e214ebb531",
-            "bfb70161d5a01864",
-            "3fe7c6cd9a0a6d83",
-            "3faeb851eb851eb0",
-            "3fe554985dbfb01c",
-            "bfe4cbb1596c54f8",
-            "bfc632bd41532b12",
-            "3fe7ae147ae147ae"
-          ]
+          "dtype": "binary64"
         },
         "local_basis_and_probe_images": {
           "values": [
@@ -945,25 +513,7 @@
               2.132668949777327
             ]
           ],
-          "dtype": "binary64",
-          "shape": [
-            4,
-            3
-          ],
-          "ieee754_hex_be": [
-            "3fc47ae147ae1478",
-            "3fe7c6cd9a0a6d83",
-            "bfe4cbb1596c54f8",
-            "bfef74e214ebb531",
-            "3faeb851eb851eb0",
-            "bfc632bd41532b12",
-            "bfb70161d5a01864",
-            "3fe554985dbfb01c",
-            "3fe7ae147ae147ae",
-            "3ff44743c936b458",
-            "3ffedc875d1ea266",
-            "40010fb4bd03e802"
-          ]
+          "dtype": "binary64"
         },
         "model_to_ecef_matrix_rows": {
           "values": [
@@ -992,29 +542,7 @@
               1
             ]
           ],
-          "dtype": "binary64",
-          "shape": [
-            4,
-            4
-          ],
-          "ieee754_hex_be": [
-            "bfb1010ce4c8f2a4",
-            "3fe46ddb0cba03d2",
-            "3fe889d49dfadbaf",
-            "4149e5be620f0212",
-            "3fc47606dd9a8b8a",
-            "bfe80ea410971f96",
-            "3fe478b99ad79396",
-            "4149e5bc43002874",
-            "3fef8454edf46517",
-            "3fc5210db662725b",
-            "bfaaaee6e83b07e0",
-            "c15232644faa4061",
-            "0000000000000000",
-            "0000000000000000",
-            "0000000000000000",
-            "3ff0000000000000"
-          ]
+          "dtype": "binary64"
         },
         "model_to_ecef_quaternion_xyzw": {
           "values": [
@@ -1023,16 +551,7 @@
             -0.6644723183974629,
             0.18005197853566615
           ],
-          "dtype": "binary64",
-          "shape": [
-            4
-          ],
-          "ieee754_hex_be": [
-            "bfe5171501cf4324",
-            "bfd361121ed7f1e5",
-            "bfe5435b7393a92f",
-            "3fc70bf177b20515"
-          ]
+          "dtype": "binary64"
         },
         "local_quaternion_recovered_from_ecef_xyzw": {
           "values": [
@@ -1041,16 +560,7 @@
             0.6164414002968978,
             0.7
           ],
-          "dtype": "binary64",
-          "shape": [
-            4
-          ],
-          "ieee754_hex_be": [
-            "bfd3333333333335",
-            "3fc9999999999998",
-            "3fe3b9e350c59eaf",
-            "3fe6666666666666"
-          ]
+          "dtype": "binary64"
         },
         "world_points_xyz_m": {
           "values": [
@@ -1075,25 +585,7 @@
               -4770193.3894652305
             ]
           ],
-          "dtype": "binary64",
-          "shape": [
-            4,
-            3
-          ],
-          "ieee754_hex_be": [
-            "4149e5be598e7ba0",
-            "4149e5bc57762f52",
-            "c152326410a19685",
-            "4149e5beb3c66e45",
-            "4149e5bbe2c59832",
-            "c15232644519b986",
-            "4149e5bec436548a",
-            "4149e5bc94e30edf",
-            "c152326453001d3e",
-            "4149e5bef347e0f3",
-            "4149e5bdb9a57c36",
-            "c152326458ecff93"
-          ]
+          "dtype": "binary64"
         },
         "world_directions_xyz": {
           "values": [
@@ -1118,25 +610,7 @@
               -0.14469890449228626
             ]
           ],
-          "dtype": "binary64",
-          "shape": [
-            4,
-            3
-          ],
-          "ieee754_hex_be": [
-            "bfb1010ce4c8f2a4",
-            "3fc47606dd9a8b8a",
-            "3fef8454edf46517",
-            "3fe46ddb0cba03d2",
-            "bfe80ea410971f96",
-            "3fc5210db662725b",
-            "3fe889d49dfadbaf",
-            "3fe478b99ad79396",
-            "bfaaaee6e83b07e0",
-            "3ff2271bdc1a4768",
-            "40076a553c234b7d",
-            "bfc2857e6347dbdb"
-          ]
+          "dtype": "binary64"
         },
         "point_roundtrip_local_xyz_m": {
           "values": [
@@ -1161,25 +635,7 @@
               2.75
             ]
           ],
-          "dtype": "binary64",
-          "shape": [
-            4,
-            3
-          ],
-          "ieee754_hex_be": [
-            "3ff0000000000000",
-            "3df0000000000000",
-            "0000000000000000",
-            "0000000000000000",
-            "3fefffffffc00000",
-            "3e10000000000000",
-            "be10000000000000",
-            "bdf0000000000000",
-            "3ff0000000000000",
-            "3fcffffffe000000",
-            "bff7fffffff00000",
-            "4006000000000000"
-          ]
+          "dtype": "binary64"
         },
         "ecef_origin_xyz_m": {
           "values": [
@@ -1187,53 +643,12 @@
             3394419.145060574,
             -4770191.121340539
           ],
-          "dtype": "binary64",
-          "shape": [
-            3
-          ],
-          "ieee754_hex_be": [
-            "4149e5b99291584d",
-            "4149e5b99291584b",
-            "c1523263c7c40b1c"
-          ]
+          "dtype": "binary64"
         }
       }
     },
     {
       "case_id": "antipode_mixed_a@geo-09",
-      "native_entry_points": [
-        "Cartesian3.fromDegrees",
-        "Transforms.eastNorthUpToFixedFrame",
-        "Matrix3.fromQuaternion",
-        "Matrix4.fromRotationTranslation",
-        "Matrix4.multiply",
-        "Matrix4.inverseTransformation"
-      ],
-      "inputs": {
-        "case_id": "antipode_mixed_a@geo-09",
-        "canonical_orientation_case": "antipode_mixed_a",
-        "location_case": "geo-09",
-        "canonical_wxyz": [
-          -0.8,
-          -0.2,
-          0.4,
-          -0.4
-        ],
-        "quatops_cesium_local_xyzw": [
-          -0.2,
-          0.4,
-          -0.4,
-          -0.8
-        ],
-        "local_translation_xyz_m": [
-          0.5,
-          1,
-          -2
-        ],
-        "longitude_degrees": 0,
-        "latitude_degrees": 90,
-        "height_m": 0
-      },
       "outputs": {
         "enu_to_ecef_matrix_rows": {
           "values": [
@@ -1263,10 +678,6 @@
             ]
           ],
           "dtype": "binary64",
-          "shape": [
-            4,
-            4
-          ],
           "ieee754_hex_be": [
             "8000000000000000",
             "bff0000000000000",
@@ -1304,22 +715,7 @@
               0.6000000000000001
             ]
           ],
-          "dtype": "binary64",
-          "shape": [
-            3,
-            3
-          ],
-          "ieee754_hex_be": [
-            "3fd70a3d70a3d70c",
-            "bfe999999999999b",
-            "bfdeb851eb851eba",
-            "3fdeb851eb851eba",
-            "3fe3333333333334",
-            "bfe47ae147ae147c",
-            "3fe999999999999b",
-            "0000000000000000",
-            "3fe3333333333334"
-          ]
+          "dtype": "binary64"
         },
         "local_basis_and_probe_images": {
           "values": [
@@ -1344,25 +740,7 @@
               1.8500000000000003
             ]
           ],
-          "dtype": "binary64",
-          "shape": [
-            4,
-            3
-          ],
-          "ieee754_hex_be": [
-            "3fd70a3d70a3d70c",
-            "3fdeb851eb851eba",
-            "3fe999999999999b",
-            "bfe999999999999b",
-            "3fe3333333333334",
-            "0000000000000000",
-            "bfdeb851eb851eba",
-            "bfe47ae147ae147c",
-            "3fe3333333333334",
-            "bf9eb851eb851ec0",
-            "c00451eb851eb853",
-            "3ffd99999999999b"
-          ]
+          "dtype": "binary64"
         },
         "model_to_ecef_matrix_rows": {
           "values": [
@@ -1391,29 +769,7 @@
               1
             ]
           ],
-          "dtype": "binary64",
-          "shape": [
-            4,
-            4
-          ],
-          "ieee754_hex_be": [
-            "bfdeb851eb851eb9",
-            "bfe3333333333334",
-            "3fe47ae147ae147c",
-            "bfefffffffca2496",
-            "3fd70a3d70a3d70c",
-            "bfe999999999999b",
-            "bfdeb851eb851eba",
-            "3fe0000000000000",
-            "3fe999999999999b",
-            "3c852dc7707ed4d6",
-            "3fe3333333333334",
-            "41583fc3941c97d0",
-            "0000000000000000",
-            "0000000000000000",
-            "0000000000000000",
-            "3ff0000000000000"
-          ]
+          "dtype": "binary64"
         },
         "model_to_ecef_quaternion_xyzw": {
           "values": [
@@ -1422,16 +778,7 @@
             -0.8485281374238571,
             -0.282842712474619
           ],
-          "dtype": "binary64",
-          "shape": [
-            4
-          ],
-          "ieee754_hex_be": [
-            "bfdb27247aff1490",
-            "3fc21a1851ff630a",
-            "bfeb27247aff1490",
-            "bfd21a1851ff630a"
-          ]
+          "dtype": "binary64"
         },
         "local_quaternion_recovered_from_ecef_xyzw": {
           "values": [
@@ -1440,16 +787,7 @@
             -0.40000000000000013,
             -0.8
           ],
-          "dtype": "binary64",
-          "shape": [
-            4
-          ],
-          "ieee754_hex_be": [
-            "bfc999999999999c",
-            "3fd9999999999999",
-            "bfd999999999999c",
-            "bfe999999999999a"
-          ]
+          "dtype": "binary64"
         },
         "world_points_xyz_m": {
           "values": [
@@ -1474,25 +812,7 @@
               6356752.164245179
             ]
           ],
-          "dtype": "binary64",
-          "shape": [
-            4,
-            3
-          ],
-          "ieee754_hex_be": [
-            "bff7ae147ac659f9",
-            "3feb851eb851eb86",
-            "41583fc3c74fcb03",
-            "bff99999997eabe5",
-            "bfd3333333333336",
-            "41583fc3941c97d0",
-            "bfd70a3d70382034",
-            "3f947ae147ae1460",
-            "41583fc3ba82fe36",
-            "3ff8a3d70a585e5b",
-            "3fde147ae147ae14",
-            "41583fc40a82fe36"
-          ]
+          "dtype": "binary64"
         },
         "world_directions_xyz": {
           "values": [
@@ -1517,25 +837,7 @@
               1.8500000000000003
             ]
           ],
-          "dtype": "binary64",
-          "shape": [
-            4,
-            3
-          ],
-          "ieee754_hex_be": [
-            "bfdeb851eb851eb9",
-            "3fd70a3d70a3d70c",
-            "3fe999999999999b",
-            "bfe3333333333334",
-            "bfe999999999999b",
-            "3c852dc7707ed4d6",
-            "3fe47ae147ae147c",
-            "bfdeb851eb851eba",
-            "3fe3333333333334",
-            "400451eb851eb853",
-            "bf9eb851eb851ec0",
-            "3ffd99999999999b"
-          ]
+          "dtype": "binary64"
         },
         "point_roundtrip_local_xyz_m": {
           "values": [
@@ -1560,25 +862,7 @@
               2.7499999995343387
             ]
           ],
-          "dtype": "binary64",
-          "shape": [
-            4,
-            3
-          ],
-          "ieee754_hex_be": [
-            "3fefffffff800000",
-            "bc80000000000000",
-            "be00000000000000",
-            "0000000000000000",
-            "3ff0000000000001",
-            "0000000000000000",
-            "be10000000000000",
-            "3c90000000000000",
-            "3fefffffffc00000",
-            "3fcffffffe000000",
-            "bff8000000000002",
-            "4005fffffff00000"
-          ]
+          "dtype": "binary64"
         },
         "ecef_origin_xyz_m": {
           "values": [
@@ -1586,53 +870,12 @@
             0,
             6356752.314245179
           ],
-          "dtype": "binary64",
-          "shape": [
-            3
-          ],
-          "ieee754_hex_be": [
-            "3dfaedb5f94318d2",
-            "0000000000000000",
-            "41583fc4141c97d0"
-          ]
+          "dtype": "binary64"
         }
       }
     },
     {
       "case_id": "mixed_a_times_mixed_b@geo-03",
-      "native_entry_points": [
-        "Cartesian3.fromDegrees",
-        "Transforms.eastNorthUpToFixedFrame",
-        "Matrix3.fromQuaternion",
-        "Matrix4.fromRotationTranslation",
-        "Matrix4.multiply",
-        "Matrix4.inverseTransformation"
-      ],
-      "inputs": {
-        "case_id": "mixed_a_times_mixed_b@geo-03",
-        "canonical_orientation_case": "mixed_a * mixed_b",
-        "location_case": "geo-03",
-        "canonical_wxyz": [
-          0.4534234398812409,
-          -0.42657656011875905,
-          -0.36328828005937946,
-          0.6931531202375181
-        ],
-        "quatops_cesium_local_xyzw": [
-          -0.42657656011875905,
-          -0.36328828005937946,
-          0.6931531202375181,
-          0.4534234398812409
-        ],
-        "local_translation_xyz_m": [
-          0,
-          0,
-          0
-        ],
-        "longitude_degrees": -75,
-        "latitude_degrees": 40,
-        "height_m": 1000
-      },
       "outputs": {
         "enu_to_ecef_matrix_rows": {
           "values": [
@@ -1661,29 +904,7 @@
               1
             ]
           ],
-          "dtype": "binary64",
-          "shape": [
-            4,
-            4
-          ],
-          "ieee754_hex_be": [
-            "3feee8dd4748bf15",
-            "bfc54b794c93bd80",
-            "3fc960ce8159babc",
-            "4133535c2d084d69",
-            "3fd0907dc1930690",
-            "3fe3de4b58b829ce",
-            "bfe7ad9a672a25fc",
-            "c15207f324b444ba",
-            "0000000000000000",
-            "3fe8836eef889279",
-            "3fe491b827e347be",
-            "414f1e122e0e4192",
-            "0000000000000000",
-            "0000000000000000",
-            "0000000000000000",
-            "3ff0000000000000"
-          ]
+          "dtype": "binary64"
         },
         "local_rotation_matrix_rows": {
           "values": [
@@ -1703,22 +924,7 @@
               0.37210812785748903
             ]
           ],
-          "dtype": "binary64",
-          "shape": [
-            3,
-            3
-          ],
-          "ieee754_hex_be": [
-            "bfccc8d7d58357c2",
-            "bfd464a68274fb30",
-            "bfed774bf74649fc",
-            "3fee08640ee59942",
-            "bfd4ca779ce03ddb",
-            "bfbde5e56b9c93bc",
-            "bfd0c34781d5f75f",
-            "bfec7eb7a755d768",
-            "3fd7d09e9bee5122"
-          ]
+          "dtype": "binary64"
         },
         "local_basis_and_probe_images": {
           "values": [
@@ -1743,25 +949,7 @@
               2.2935202739732787
             ]
           ],
-          "dtype": "binary64",
-          "shape": [
-            4,
-            3
-          ],
-          "ieee754_hex_be": [
-            "bfccc8d7d58357c2",
-            "3fee08640ee59942",
-            "bfd0c34781d5f75f",
-            "bfd464a68274fb30",
-            "bfd4ca779ce03ddb",
-            "bfec7eb7a755d768",
-            "bfed774bf74649fc",
-            "bfbde5e56b9c93bc",
-            "3fd7d09e9bee5122",
-            "c000e24860e07123",
-            "3fd9a5d7b8c783d7",
-            "40025921284b6cf0"
-          ]
+          "dtype": "binary64"
         },
         "model_to_ecef_matrix_rows": {
           "values": [
@@ -1790,29 +978,7 @@
               1
             ]
           ],
-          "dtype": "binary64",
-          "shape": [
-            4,
-            4
-          ],
-          "ieee754_hex_be": [
-            "bfdb37ddce3a7271",
-            "bfdb89e2a2b22924",
-            "bfe97ab7dbd4c5ff",
-            "4133535c2d084d69",
-            "3fe6fc75bc35b0de",
-            "3fd7fb7c5d069264",
-            "bfe2c1f1e0acacd8",
-            "c15207f324b444ba",
-            "3fe19e747ffad82a",
-            "bfea4794465ff4b7",
-            "3fc32a0e8dd23500",
-            "414f1e122e0e4192",
-            "0000000000000000",
-            "0000000000000000",
-            "0000000000000000",
-            "3ff0000000000000"
-          ]
+          "dtype": "binary64"
         },
         "model_to_ecef_quaternion_xyzw": {
           "values": [
@@ -1821,16 +987,7 @@
             0.5477867547361048,
             0.5242043093695827
           ],
-          "dtype": "binary64",
-          "shape": [
-            4
-          ],
-          "ieee754_hex_be": [
-            "bfbcb2e289427504",
-            "bfe48dddeefe215d",
-            "3fe187781698c0de",
-            "3fe0c6481da5449a"
-          ]
+          "dtype": "binary64"
         },
         "local_quaternion_recovered_from_ecef_xyzw": {
           "values": [
@@ -1839,16 +996,7 @@
             0.6931531202375179,
             0.45342343988124084
           ],
-          "dtype": "binary64",
-          "shape": [
-            4
-          ],
-          "ieee754_hex_be": [
-            "bfdb4d07c5bcd0dd",
-            "bfd7401d7c780204",
-            "3fe62e4f73d14bbc",
-            "3fdd04e3bf61e773"
-          ]
+          "dtype": "binary64"
         },
         "world_points_xyz_m": {
           "values": [
@@ -1873,25 +1021,7 @@
               4078630.141047447
             ]
           ],
-          "dtype": "binary64",
-          "shape": [
-            4,
-            3
-          ],
-          "ieee754_hex_be": [
-            "4133535bc028d630",
-            "c15207f2f6bb5942",
-            "414f1e1274881392",
-            "4133535bbee0c2de",
-            "c15207f30cb8c85d",
-            "414f1e11c4eff079",
-            "4133535b61328e8a",
-            "c15207f34a38287b",
-            "414f1e1241385020",
-            "4133535a867ff287",
-            "c15207f3a459f6bb",
-            "414f1e13120dd7be"
-          ]
+          "dtype": "binary64"
         },
         "world_directions_xyz": {
           "values": [
@@ -1916,25 +1046,7 @@
               1.7812373844147245
             ]
           ],
-          "dtype": "binary64",
-          "shape": [
-            4,
-            3
-          ],
-          "ieee754_hex_be": [
-            "bfdb37ddce3a7271",
-            "3fe6fc75bc35b0de",
-            "3fe19e747ffad82a",
-            "bfdb89e2a2b22924",
-            "3fd7fb7c5d069264",
-            "bfea4794465ff4b7",
-            "bfe97ab7dbd4c5ff",
-            "bfe2c1f1e0acacd8",
-            "3fc32a0e8dd23500",
-            "bffa6885ae2567f8",
-            "bfffe96c80492e73",
-            "3ffc7ff2c58794c6"
-          ]
+          "dtype": "binary64"
         },
         "point_roundtrip_local_xyz_m": {
           "values": [
@@ -1959,25 +1071,7 @@
               2.75
             ]
           ],
-          "dtype": "binary64",
-          "shape": [
-            4,
-            3
-          ],
-          "ieee754_hex_be": [
-            "3fefffffffc00000",
-            "be10000000000000",
-            "0000000000000000",
-            "0000000000000000",
-            "3ff0000000000000",
-            "0000000000000000",
-            "0000000000000000",
-            "0000000000000000",
-            "3fefffffffc00000",
-            "3fd0000000000000",
-            "bff8000000000000",
-            "4006000000000000"
-          ]
+          "dtype": "binary64"
         },
         "ecef_origin_xyz_m": {
           "values": [
@@ -1985,15 +1079,7 @@
             -4726732.573502714,
             4078628.3598100627
           ],
-          "dtype": "binary64",
-          "shape": [
-            3
-          ],
-          "ieee754_hex_be": [
-            "4133535c2d084d69",
-            "c15207f324b444ba",
-            "414f1e122e0e4192"
-          ]
+          "dtype": "binary64"
         }
       }
     }

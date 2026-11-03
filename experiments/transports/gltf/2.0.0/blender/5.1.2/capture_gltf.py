@@ -43,12 +43,7 @@ def object_transform(object_):
     bpy.context.view_layer.update()
     evaluated = object_.evaluated_get(bpy.context.evaluated_depsgraph_get())
     return {
-        "rotation_mode": object_.rotation_mode,
-        "location_xyz": [float(x) for x in evaluated.location],
-        "rotation_quaternion_wxyz": quaternion_wxyz(evaluated.rotation_quaternion),
-        "scale_xyz": [float(x) for x in evaluated.scale],
         "matrix_basis_rows": matrix_rows(evaluated.matrix_basis),
-        "matrix_local_rows": matrix_rows(evaluated.matrix_local),
         "matrix_world_rows": matrix_rows(evaluated.matrix_world),
     }
 
@@ -69,25 +64,38 @@ def action_curves(action):
                             "array_index": curve.array_index,
                             "keys": [
                                 {
-                                    "frame": float(point.co.x),
-                                    "value": float(point.co.y),
                                     "interpolation": point.interpolation,
                                     "handle_left_type": point.handle_left_type,
                                     "handle_right_type": point.handle_right_type,
-                                    "handle_left": [
-                                        float(point.handle_left.x),
-                                        float(point.handle_left.y),
-                                    ],
-                                    "handle_right": [
-                                        float(point.handle_right.x),
-                                        float(point.handle_right.y),
-                                    ],
                                 }
                                 for point in curve.keyframe_points
                             ],
+                            "key_frames": [
+                                float(point.co.x) for point in curve.keyframe_points
+                            ],
                         }
                     )
-    return rows
+    if not rows:
+        raise RuntimeError(f"No F-curves in action {action.name!r}")
+    key_frames = rows[0]["key_frames"]
+    if any(row["key_frames"] != key_frames for row in rows[1:]):
+        raise RuntimeError(f"Quaternion F-curve key times differ in {action.name!r}")
+    return {
+        "slot_identifiers": sorted({row["slot_identifier"] for row in rows}),
+        "data_path": rows[0]["data_path"],
+        "array_indices": [row["array_index"] for row in rows],
+        "key_count": len(key_frames),
+        "interpolations_by_component": [
+            [key["interpolation"] for key in row["keys"]] for row in rows
+        ],
+        "left_handle_types_by_component": [
+            [key["handle_left_type"] for key in row["keys"]] for row in rows
+        ],
+        "right_handle_types_by_component": [
+            [key["handle_right_type"] for key in row["keys"]] for row in rows
+        ],
+        "key_frames": key_frames,
+    }
 
 
 def install_action(object_, action):
@@ -143,7 +151,8 @@ def main():
         if object_ is None:
             raise RuntimeError(f"Blender importer did not create object {name!r}")
         objects[name] = object_
-        static[name] = object_transform(object_)
+        if name in {"parent_frame", "static_trs", "static_matrix"}:
+            static[name] = object_transform(object_)
 
     origin = objects["source_axis_origin"].matrix_world.translation.copy()
     axis_images = {}
@@ -165,12 +174,9 @@ def main():
             )
         install_action(object_, action)
         curves = action_curves(action)
+        curve_frames = curves.pop("key_frames")
         time_values = sorted(
-            {
-                key["frame"] * scene.render.fps_base / scene.render.fps
-                for curve in curves
-                for key in curve["keys"]
-            }
+            {frame * scene.render.fps_base / scene.render.fps for frame in curve_frames}
         )
         if len(time_values) != 3:
             raise RuntimeError(
@@ -179,26 +185,33 @@ def main():
         t0, t1, t2 = time_values
         epsilon = min(1e-6, (t1 - t0) / 1000.0, (t2 - t1) / 1000.0)
         boundary_samples = []
-        for offset in (1e-3, 1e-4, 1e-5, epsilon):
+        for offset in (1e-5, epsilon):
+            if offset == epsilon == 1e-5:
+                continue
             boundary_samples.append((f"before-key-1-{offset:.0e}", t1 - offset))
-        samples = [
-            ("key-0", t0),
-            ("midpoint-0-1", (t0 + t1) / 2.0),
-            *boundary_samples,
-            ("key-1", t1),
-            ("after-key-1", t1 + epsilon),
-            ("midpoint-1-2", (t1 + t2) / 2.0),
-            ("key-2", t2),
-        ]
+        if interpolation == "STEP":
+            samples = [
+                ("key-0", t0),
+                *boundary_samples,
+                ("key-1", t1),
+                ("after-key-1", t1 + epsilon),
+                ("key-2", t2),
+            ]
+        else:
+            samples = [
+                ("key-0", t0),
+                ("midpoint-0-1", (t0 + t1) / 2.0),
+                ("key-1", t1),
+                ("key-2", t2),
+            ]
         sample_rows = []
         for sample_name, sample_time in samples:
-            frame_value = set_scene_time(scene, sample_time)
+            set_scene_time(scene, sample_time)
             evaluated = object_.evaluated_get(bpy.context.evaluated_depsgraph_get())
             sample_rows.append(
                 {
                     "sample": sample_name,
                     "time_seconds": sample_time,
-                    "frame_value": frame_value,
                     "quaternion_wxyz": quaternion_wxyz(evaluated.rotation_quaternion),
                 }
             )
@@ -282,7 +295,9 @@ def main():
             "animations": animations,
         },
     }
-    output_path.write_text(json.dumps(result, indent=2) + "\n", encoding="utf-8")
+    output_path.write_text(
+        json.dumps(result, indent=2) + "\n", encoding="utf-8", newline="\n"
+    )
     print(
         json.dumps(
             {

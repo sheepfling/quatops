@@ -83,7 +83,7 @@ def test_openusd_converter_stage_provenance_and_frame_declarations():
     assert (
         provenance["lockfile_sha256"]
         == hashlib.sha256(
-            (ROOT / "experiments/transports/openusd/26.11/uv.lock").read_bytes()
+            (ROOT / "experiments/converters/openusd/26.11/uv.lock").read_bytes()
         ).hexdigest()
     )
 

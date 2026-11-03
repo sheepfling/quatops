@@ -7,7 +7,11 @@ import hashlib
 import json
 from pathlib import Path
 
-from evidence_json import parse_evidence_document, read_evidence_document
+from evidence_json import (
+    compact_numeric_evidence,
+    parse_evidence_document,
+    read_evidence_document,
+)
 
 ROOT = Path(__file__).resolve().parents[1]
 HERE = ROOT / "experiments/converters/ros2/0.36.23"
@@ -16,6 +20,7 @@ RUNNER = HERE / "capture_native.py"
 DOCKERFILE = HERE / "Dockerfile"
 CMAKE = HERE / "native/CMakeLists.txt"
 CAPTURE_HELPER = ROOT / "experiments/oracles/shared/capture_io.py"
+RETENTION_HELPER = ROOT / "scripts/evidence_json.py"
 CORPUS = ROOT / "experiments/oracles/shared/orientation_inputs_v1.json"
 DESTINATION = ROOT / "tests/golden/oracles/ros2/0.36.23"
 
@@ -48,6 +53,7 @@ def main() -> None:
     for row in selected:
         if row["case_id"] != "world-base-sensor":
             raise ValueError("unexpected frame-chain witness")
+    selected = compact_numeric_evidence(selected)
 
     DESTINATION.mkdir(parents=True, exist_ok=True)
     witnesses_path = DESTINATION / "witnesses.json"
@@ -58,7 +64,9 @@ def main() -> None:
         "observations": selected,
     }
     witnesses_path.write_text(
-        json.dumps(witnesses, indent=2, allow_nan=False) + "\n", encoding="utf-8"
+        json.dumps(witnesses, indent=2, allow_nan=False) + "\n",
+        encoding="utf-8",
+        newline="\n",
     )
 
     maps = {
@@ -139,7 +147,7 @@ def main() -> None:
         "native_witnesses": "witnesses.json",
     }
     (DESTINATION / "contract.json").write_text(
-        json.dumps(contract, indent=2) + "\n", encoding="utf-8"
+        json.dumps(contract, indent=2) + "\n", encoding="utf-8", newline="\n"
     )
     (DESTINATION / "manifest.json").write_text(
         json.dumps(
@@ -176,6 +184,8 @@ def main() -> None:
                         "exporter_source_sha256": sha256(SOURCE),
                         "runner_sha256": sha256(RUNNER),
                         "capture_helper_sha256": sha256(CAPTURE_HELPER),
+                        "retention_script_sha256": sha256(Path(__file__)),
+                        "retention_helper_sha256": sha256(RETENTION_HELPER),
                         "dockerfile_sha256": sha256(DOCKERFILE),
                         "build_recipe_sha256": sha256(CMAKE),
                         "corpus_sha256": sha256(CORPUS),
@@ -188,12 +198,17 @@ def main() -> None:
                         "retain both directions of the nontrivial named-frame "
                         "chain; discard other successful sweeps"
                     ),
+                    "numeric_values": (
+                        "round-trippable decimals and dtype; exact bits only for "
+                        "signed-zero or nonfinite values"
+                    ),
                 },
             },
             indent=2,
         )
         + "\n",
         encoding="utf-8",
+        newline="\n",
     )
     print(f"retained {len(selected)} native ROS/tf2 witnesses at {DESTINATION}")
 

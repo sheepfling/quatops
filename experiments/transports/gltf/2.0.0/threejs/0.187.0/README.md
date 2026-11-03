@@ -21,6 +21,8 @@ browser constructor; no rendering or GPU route is used.
 
 The validator reports zero errors, warnings, infos, or hints for this asset.
 That is format/schema validation only. It does not prove animation sampling.
-The named loader output separately records node matrices, Three.js column
-layout, `STEP`/`LINEAR`/`CUBICSPLINE` samples, key times, quaternion norms, and
-runtime/package/source hashes.
+The named loader output separately records local/world row matrices, key
+times, one discriminating midpoint per smooth interpolation, a STEP boundary
+sample, and runtime/package/source hashes. Sampled key quaternions are retained
+at the three authored key times; track values and duplicate matrix storage
+views are omitted.

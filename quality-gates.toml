@@ -38,7 +38,6 @@ exclude = [
   "experiments/oracles/mujoco/3.17.0/capture_mujoco.py",
   "experiments/oracles/proj/9.5.1/capture_proj.py",
   "experiments/oracles/spiceypy/8.3.0/capture_spice.py",
-  "experiments/transports/openusd/26.11/capture_openusd.py",
 ]
 
 [checks.output_escaping]

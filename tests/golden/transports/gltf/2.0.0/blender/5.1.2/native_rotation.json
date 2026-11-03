@@ -31,13 +31,13 @@
   "provenance": {
     "gltf_sha256": "fdfb41df6dba25b0af3452b85310887e7e4f0060b017fad025c930a9de7c0bb3",
     "binary_sha256": "335c8c8ca1d09faae363ddab206ec1abd04c94c044889f92c501edbf772f2ed7",
-    "exporter_sha256": "d4a6d5c3e9223ded43e1214620557afe857b7bb642fe7eec6bd17d0a519f31e3",
+    "exporter_sha256": "7f8b6d01f59dce58e75bce25447541c630888f894dae9ac6d7559674f52b4926",
     "exact_invocation": "blender --background --factory-startup --python-exit-code 1 --python capture_gltf.py -- --asset <rotation_transport.gltf> --output <native_blender_gltf.json>",
     "operator_arguments": {
       "filepath": "rotation_transport.gltf"
     },
     "other_operator_properties": "Blender 5.1.2 importer defaults",
-    "captured_at_utc": "2026-11-03T07:29:23.834859+00:00"
+    "captured_at_utc": "2026-11-03T15:38:56.639052+00:00"
   },
   "scene": {
     "fps": 30,
@@ -53,50 +53,7 @@
   "observations": {
     "static_transforms": {
       "parent_frame": {
-        "rotation_mode": "QUATERNION",
-        "location_xyz": [
-          1.25,
-          -0.75,
-          -2.5
-        ],
-        "rotation_quaternion_wxyz": [
-          0.9800665974617004,
-          0.0,
-          -0.19866932928562164,
-          0.0
-        ],
-        "scale_xyz": [
-          1.0,
-          1.0,
-          1.0
-        ],
         "matrix_basis_rows": [
-          [
-            0.9210609793663025,
-            0.0,
-            -0.3894183337688446,
-            1.25
-          ],
-          [
-            0.0,
-            1.0,
-            0.0,
-            -0.75
-          ],
-          [
-            0.3894183337688446,
-            0.0,
-            0.9210609793663025,
-            -2.5
-          ],
-          [
-            0.0,
-            0.0,
-            0.0,
-            1.0
-          ]
-        ],
-        "matrix_local_rows": [
           [
             0.9210609793663025,
             0.0,
@@ -150,23 +107,6 @@
         ]
       },
       "static_trs": {
-        "rotation_mode": "QUATERNION",
-        "location_xyz": [
-          2.0,
-          1.0,
-          1.0
-        ],
-        "rotation_quaternion_wxyz": [
-          0.8660253882408142,
-          0.5,
-          0.0,
-          0.0
-        ],
-        "scale_xyz": [
-          2.0,
-          0.5,
-          1.0
-        ],
         "matrix_basis_rows": [
           [
             2.0,
@@ -185,32 +125,6 @@
             0.4330126941204071,
             0.5,
             1.0
-          ],
-          [
-            0.0,
-            0.0,
-            0.0,
-            1.0
-          ]
-        ],
-        "matrix_local_rows": [
-          [
-            2.0,
-            0.0,
-            0.0,
-            1.999999761581421
-          ],
-          [
-            0.0,
-            0.25,
-            -0.8660253882408142,
-            0.9999999403953552
-          ],
-          [
-            0.0,
-            0.4330126941204071,
-            0.5,
-            1.0000001192092896
           ],
           [
             0.0,
@@ -247,23 +161,6 @@
         ]
       },
       "static_matrix": {
-        "rotation_mode": "QUATERNION",
-        "location_xyz": [
-          2.0,
-          1.0,
-          1.0
-        ],
-        "rotation_quaternion_wxyz": [
-          0.8660253882408142,
-          0.4999999701976776,
-          0.0,
-          0.0
-        ],
-        "scale_xyz": [
-          2.0,
-          0.5,
-          1.0
-        ],
         "matrix_basis_rows": [
           [
             2.0,
@@ -290,32 +187,6 @@
             1.0
           ]
         ],
-        "matrix_local_rows": [
-          [
-            2.0,
-            0.0,
-            0.0,
-            1.999999761581421
-          ],
-          [
-            0.0,
-            0.2500000298023224,
-            -0.8660253286361694,
-            0.9999999403953552
-          ],
-          [
-            0.0,
-            0.4330126643180847,
-            0.5000000596046448,
-            1.0000001192092896
-          ],
-          [
-            0.0,
-            0.0,
-            0.0,
-            1.0
-          ]
-        ],
         "matrix_world_rows": [
           [
             1.842121958732605,
@@ -334,394 +205,6 @@
             0.3988310694694519,
             0.460530549287796,
             -0.8001022934913635
-          ],
-          [
-            0.0,
-            0.0,
-            0.0,
-            1.0
-          ]
-        ]
-      },
-      "source_axis_origin": {
-        "rotation_mode": "QUATERNION",
-        "location_xyz": [
-          0.0,
-          0.0,
-          0.0
-        ],
-        "rotation_quaternion_wxyz": [
-          1.0,
-          0.0,
-          0.0,
-          0.0
-        ],
-        "scale_xyz": [
-          1.0,
-          1.0,
-          1.0
-        ],
-        "matrix_basis_rows": [
-          [
-            1.0,
-            0.0,
-            0.0,
-            0.0
-          ],
-          [
-            0.0,
-            1.0,
-            0.0,
-            0.0
-          ],
-          [
-            0.0,
-            0.0,
-            1.0,
-            0.0
-          ],
-          [
-            0.0,
-            0.0,
-            0.0,
-            1.0
-          ]
-        ],
-        "matrix_local_rows": [
-          [
-            1.0,
-            0.0,
-            0.0,
-            0.0
-          ],
-          [
-            0.0,
-            1.0,
-            0.0,
-            0.0
-          ],
-          [
-            0.0,
-            0.0,
-            1.0,
-            0.0
-          ],
-          [
-            0.0,
-            0.0,
-            0.0,
-            1.0
-          ]
-        ],
-        "matrix_world_rows": [
-          [
-            1.0,
-            0.0,
-            0.0,
-            0.0
-          ],
-          [
-            0.0,
-            1.0,
-            0.0,
-            0.0
-          ],
-          [
-            0.0,
-            0.0,
-            1.0,
-            0.0
-          ],
-          [
-            0.0,
-            0.0,
-            0.0,
-            1.0
-          ]
-        ]
-      },
-      "source_axis_x": {
-        "rotation_mode": "QUATERNION",
-        "location_xyz": [
-          1.0,
-          0.0,
-          0.0
-        ],
-        "rotation_quaternion_wxyz": [
-          1.0,
-          0.0,
-          0.0,
-          0.0
-        ],
-        "scale_xyz": [
-          1.0,
-          1.0,
-          1.0
-        ],
-        "matrix_basis_rows": [
-          [
-            1.0,
-            0.0,
-            0.0,
-            1.0
-          ],
-          [
-            0.0,
-            1.0,
-            0.0,
-            0.0
-          ],
-          [
-            0.0,
-            0.0,
-            1.0,
-            0.0
-          ],
-          [
-            0.0,
-            0.0,
-            0.0,
-            1.0
-          ]
-        ],
-        "matrix_local_rows": [
-          [
-            1.0,
-            0.0,
-            0.0,
-            1.0
-          ],
-          [
-            0.0,
-            1.0,
-            0.0,
-            0.0
-          ],
-          [
-            0.0,
-            0.0,
-            1.0,
-            0.0
-          ],
-          [
-            0.0,
-            0.0,
-            0.0,
-            1.0
-          ]
-        ],
-        "matrix_world_rows": [
-          [
-            1.0,
-            0.0,
-            0.0,
-            1.0
-          ],
-          [
-            0.0,
-            1.0,
-            0.0,
-            0.0
-          ],
-          [
-            0.0,
-            0.0,
-            1.0,
-            0.0
-          ],
-          [
-            0.0,
-            0.0,
-            0.0,
-            1.0
-          ]
-        ]
-      },
-      "source_axis_y": {
-        "rotation_mode": "QUATERNION",
-        "location_xyz": [
-          0.0,
-          0.0,
-          1.0
-        ],
-        "rotation_quaternion_wxyz": [
-          1.0,
-          0.0,
-          0.0,
-          0.0
-        ],
-        "scale_xyz": [
-          1.0,
-          1.0,
-          1.0
-        ],
-        "matrix_basis_rows": [
-          [
-            1.0,
-            0.0,
-            0.0,
-            0.0
-          ],
-          [
-            0.0,
-            1.0,
-            0.0,
-            0.0
-          ],
-          [
-            0.0,
-            0.0,
-            1.0,
-            1.0
-          ],
-          [
-            0.0,
-            0.0,
-            0.0,
-            1.0
-          ]
-        ],
-        "matrix_local_rows": [
-          [
-            1.0,
-            0.0,
-            0.0,
-            0.0
-          ],
-          [
-            0.0,
-            1.0,
-            0.0,
-            0.0
-          ],
-          [
-            0.0,
-            0.0,
-            1.0,
-            1.0
-          ],
-          [
-            0.0,
-            0.0,
-            0.0,
-            1.0
-          ]
-        ],
-        "matrix_world_rows": [
-          [
-            1.0,
-            0.0,
-            0.0,
-            0.0
-          ],
-          [
-            0.0,
-            1.0,
-            0.0,
-            0.0
-          ],
-          [
-            0.0,
-            0.0,
-            1.0,
-            1.0
-          ],
-          [
-            0.0,
-            0.0,
-            0.0,
-            1.0
-          ]
-        ]
-      },
-      "source_axis_z": {
-        "rotation_mode": "QUATERNION",
-        "location_xyz": [
-          0.0,
-          -1.0,
-          0.0
-        ],
-        "rotation_quaternion_wxyz": [
-          1.0,
-          0.0,
-          0.0,
-          0.0
-        ],
-        "scale_xyz": [
-          1.0,
-          1.0,
-          1.0
-        ],
-        "matrix_basis_rows": [
-          [
-            1.0,
-            0.0,
-            0.0,
-            0.0
-          ],
-          [
-            0.0,
-            1.0,
-            0.0,
-            -1.0
-          ],
-          [
-            0.0,
-            0.0,
-            1.0,
-            0.0
-          ],
-          [
-            0.0,
-            0.0,
-            0.0,
-            1.0
-          ]
-        ],
-        "matrix_local_rows": [
-          [
-            1.0,
-            0.0,
-            0.0,
-            0.0
-          ],
-          [
-            0.0,
-            1.0,
-            0.0,
-            -1.0
-          ],
-          [
-            0.0,
-            0.0,
-            1.0,
-            0.0
-          ],
-          [
-            0.0,
-            0.0,
-            0.0,
-            1.0
-          ]
-        ],
-        "matrix_world_rows": [
-          [
-            1.0,
-            0.0,
-            0.0,
-            0.0
-          ],
-          [
-            0.0,
-            1.0,
-            0.0,
-            -1.0
-          ],
-          [
-            0.0,
-            0.0,
-            1.0,
-            0.0
           ],
           [
             0.0,
@@ -759,254 +242,89 @@
           0.7,
           1.9
         ],
-        "fcurves": [
-          {
-            "slot_identifier": "OBanimated_step",
-            "data_path": "rotation_quaternion",
-            "array_index": 0,
-            "keys": [
-              {
-                "frame": 0.0,
-                "value": 0.9847265481948853,
-                "interpolation": "CONSTANT",
-                "handle_left_type": "AUTO_CLAMPED",
-                "handle_right_type": "AUTO_CLAMPED",
-                "handle_left": [
-                  -7.0,
-                  0.9847265481948853
-                ],
-                "handle_right": [
-                  7.0,
-                  0.9847265481948853
-                ]
-              },
-              {
-                "frame": 21.0,
-                "value": 0.8253356218338013,
-                "interpolation": "CONSTANT",
-                "handle_left_type": "AUTO_CLAMPED",
-                "handle_right_type": "AUTO_CLAMPED",
-                "handle_left": [
-                  14.0,
-                  0.9156152606010437
-                ],
-                "handle_right": [
-                  33.0,
-                  0.6705704927444458
-                ]
-              },
-              {
-                "frame": 57.0,
-                "value": 0.4535961151123047,
-                "interpolation": "CONSTANT",
-                "handle_left_type": "AUTO_CLAMPED",
-                "handle_right_type": "AUTO_CLAMPED",
-                "handle_left": [
-                  45.0,
-                  0.4535961151123047
-                ],
-                "handle_right": [
-                  69.0,
-                  0.4535961151123047
-                ]
-              }
+        "fcurves": {
+          "slot_identifiers": [
+            "OBanimated_step"
+          ],
+          "data_path": "rotation_quaternion",
+          "array_indices": [
+            0,
+            1,
+            2,
+            3
+          ],
+          "key_count": 3,
+          "interpolations_by_component": [
+            [
+              "CONSTANT",
+              "CONSTANT",
+              "CONSTANT"
+            ],
+            [
+              "CONSTANT",
+              "CONSTANT",
+              "CONSTANT"
+            ],
+            [
+              "CONSTANT",
+              "CONSTANT",
+              "CONSTANT"
+            ],
+            [
+              "CONSTANT",
+              "CONSTANT",
+              "CONSTANT"
             ]
-          },
-          {
-            "slot_identifier": "OBanimated_step",
-            "data_path": "rotation_quaternion",
-            "array_index": 1,
-            "keys": [
-              {
-                "frame": 0.0,
-                "value": 0.1741081327199936,
-                "interpolation": "CONSTANT",
-                "handle_left_type": "AUTO_CLAMPED",
-                "handle_right_type": "AUTO_CLAMPED",
-                "handle_left": [
-                  -7.0,
-                  0.1741081327199936
-                ],
-                "handle_right": [
-                  7.0,
-                  0.1741081327199936
-                ]
-              },
-              {
-                "frame": 21.0,
-                "value": 0.0,
-                "interpolation": "CONSTANT",
-                "handle_left_type": "AUTO_CLAMPED",
-                "handle_right_type": "AUTO_CLAMPED",
-                "handle_left": [
-                  14.0,
-                  0.0
-                ],
-                "handle_right": [
-                  33.0,
-                  0.0
-                ]
-              },
-              {
-                "frame": 57.0,
-                "value": 0.0,
-                "interpolation": "CONSTANT",
-                "handle_left_type": "AUTO_CLAMPED",
-                "handle_right_type": "AUTO_CLAMPED",
-                "handle_left": [
-                  45.0,
-                  0.0
-                ],
-                "handle_right": [
-                  69.0,
-                  0.0
-                ]
-              }
+          ],
+          "left_handle_types_by_component": [
+            [
+              "AUTO_CLAMPED",
+              "AUTO_CLAMPED",
+              "AUTO_CLAMPED"
+            ],
+            [
+              "AUTO_CLAMPED",
+              "AUTO_CLAMPED",
+              "AUTO_CLAMPED"
+            ],
+            [
+              "AUTO_CLAMPED",
+              "AUTO_CLAMPED",
+              "AUTO_CLAMPED"
+            ],
+            [
+              "AUTO_CLAMPED",
+              "AUTO_CLAMPED",
+              "AUTO_CLAMPED"
             ]
-          },
-          {
-            "slot_identifier": "OBanimated_step",
-            "data_path": "rotation_quaternion",
-            "array_index": 2,
-            "keys": [
-              {
-                "frame": 0.0,
-                "value": 0.0,
-                "interpolation": "CONSTANT",
-                "handle_left_type": "AUTO_CLAMPED",
-                "handle_right_type": "AUTO_CLAMPED",
-                "handle_left": [
-                  -7.0,
-                  0.0
-                ],
-                "handle_right": [
-                  7.0,
-                  0.0
-                ]
-              },
-              {
-                "frame": 21.0,
-                "value": 0.0,
-                "interpolation": "CONSTANT",
-                "handle_left_type": "AUTO_CLAMPED",
-                "handle_right_type": "AUTO_CLAMPED",
-                "handle_left": [
-                  14.0,
-                  0.0
-                ],
-                "handle_right": [
-                  33.0,
-                  0.0
-                ]
-              },
-              {
-                "frame": 57.0,
-                "value": -0.8912073373794556,
-                "interpolation": "CONSTANT",
-                "handle_left_type": "AUTO_CLAMPED",
-                "handle_right_type": "AUTO_CLAMPED",
-                "handle_left": [
-                  45.0,
-                  -0.8912073373794556
-                ],
-                "handle_right": [
-                  69.0,
-                  -0.8912073373794556
-                ]
-              }
+          ],
+          "right_handle_types_by_component": [
+            [
+              "AUTO_CLAMPED",
+              "AUTO_CLAMPED",
+              "AUTO_CLAMPED"
+            ],
+            [
+              "AUTO_CLAMPED",
+              "AUTO_CLAMPED",
+              "AUTO_CLAMPED"
+            ],
+            [
+              "AUTO_CLAMPED",
+              "AUTO_CLAMPED",
+              "AUTO_CLAMPED"
+            ],
+            [
+              "AUTO_CLAMPED",
+              "AUTO_CLAMPED",
+              "AUTO_CLAMPED"
             ]
-          },
-          {
-            "slot_identifier": "OBanimated_step",
-            "data_path": "rotation_quaternion",
-            "array_index": 3,
-            "keys": [
-              {
-                "frame": 0.0,
-                "value": 0.0,
-                "interpolation": "CONSTANT",
-                "handle_left_type": "AUTO_CLAMPED",
-                "handle_right_type": "AUTO_CLAMPED",
-                "handle_left": [
-                  -7.0,
-                  0.0
-                ],
-                "handle_right": [
-                  7.0,
-                  0.0
-                ]
-              },
-              {
-                "frame": 21.0,
-                "value": 0.5646424889564514,
-                "interpolation": "CONSTANT",
-                "handle_left_type": "AUTO_CLAMPED",
-                "handle_right_type": "AUTO_CLAMPED",
-                "handle_left": [
-                  14.0,
-                  0.5646424889564514
-                ],
-                "handle_right": [
-                  33.0,
-                  0.5646424889564514
-                ]
-              },
-              {
-                "frame": 57.0,
-                "value": 0.0,
-                "interpolation": "CONSTANT",
-                "handle_left_type": "AUTO_CLAMPED",
-                "handle_right_type": "AUTO_CLAMPED",
-                "handle_left": [
-                  45.0,
-                  0.0
-                ],
-                "handle_right": [
-                  69.0,
-                  0.0
-                ]
-              }
-            ]
-          }
-        ],
+          ]
+        },
         "samples": [
           {
             "sample": "key-0",
             "time_seconds": 0.0,
-            "frame_value": 0.0,
-            "quaternion_wxyz": [
-              0.9847265481948853,
-              0.1741081327199936,
-              0.0,
-              0.0
-            ]
-          },
-          {
-            "sample": "midpoint-0-1",
-            "time_seconds": 0.35,
-            "frame_value": 10.5,
-            "quaternion_wxyz": [
-              0.9847265481948853,
-              0.1741081327199936,
-              0.0,
-              0.0
-            ]
-          },
-          {
-            "sample": "before-key-1-1e-03",
-            "time_seconds": 0.699,
-            "frame_value": 20.97,
-            "quaternion_wxyz": [
-              0.9847265481948853,
-              0.1741081327199936,
-              0.0,
-              0.0
-            ]
-          },
-          {
-            "sample": "before-key-1-1e-04",
-            "time_seconds": 0.6999,
-            "frame_value": 20.997,
             "quaternion_wxyz": [
               0.9847265481948853,
               0.1741081327199936,
@@ -1017,7 +335,6 @@
           {
             "sample": "before-key-1-1e-05",
             "time_seconds": 0.69999,
-            "frame_value": 20.9997,
             "quaternion_wxyz": [
               0.9847265481948853,
               0.1741081327199936,
@@ -1028,7 +345,6 @@
           {
             "sample": "before-key-1-1e-06",
             "time_seconds": 0.6999989999999999,
-            "frame_value": 20.999969999999998,
             "quaternion_wxyz": [
               0.8253356218338013,
               0.0,
@@ -1039,7 +355,6 @@
           {
             "sample": "key-1",
             "time_seconds": 0.7,
-            "frame_value": 21.0,
             "quaternion_wxyz": [
               0.8253356218338013,
               0.0,
@@ -1050,18 +365,6 @@
           {
             "sample": "after-key-1",
             "time_seconds": 0.700001,
-            "frame_value": 21.00003,
-            "quaternion_wxyz": [
-              0.8253356218338013,
-              0.0,
-              0.0,
-              0.5646424889564514
-            ]
-          },
-          {
-            "sample": "midpoint-1-2",
-            "time_seconds": 1.2999999999999998,
-            "frame_value": 38.99999999999999,
             "quaternion_wxyz": [
               0.8253356218338013,
               0.0,
@@ -1072,7 +375,6 @@
           {
             "sample": "key-2",
             "time_seconds": 1.9,
-            "frame_value": 57.0,
             "quaternion_wxyz": [
               0.4535961151123047,
               0.0,
@@ -1091,221 +393,89 @@
           0.7,
           1.9
         ],
-        "fcurves": [
-          {
-            "slot_identifier": "OBanimated_linear",
-            "data_path": "rotation_quaternion",
-            "array_index": 0,
-            "keys": [
-              {
-                "frame": 0.0,
-                "value": 0.9847265481948853,
-                "interpolation": "LINEAR",
-                "handle_left_type": "AUTO_CLAMPED",
-                "handle_right_type": "AUTO_CLAMPED",
-                "handle_left": [
-                  -7.0,
-                  0.9847265481948853
-                ],
-                "handle_right": [
-                  7.0,
-                  0.9847265481948853
-                ]
-              },
-              {
-                "frame": 21.0,
-                "value": 0.8253356218338013,
-                "interpolation": "LINEAR",
-                "handle_left_type": "AUTO_CLAMPED",
-                "handle_right_type": "AUTO_CLAMPED",
-                "handle_left": [
-                  14.0,
-                  0.9156152606010437
-                ],
-                "handle_right": [
-                  33.0,
-                  0.6705704927444458
-                ]
-              },
-              {
-                "frame": 57.0,
-                "value": 0.4535961151123047,
-                "interpolation": "LINEAR",
-                "handle_left_type": "AUTO_CLAMPED",
-                "handle_right_type": "AUTO_CLAMPED",
-                "handle_left": [
-                  45.0,
-                  0.4535961151123047
-                ],
-                "handle_right": [
-                  69.0,
-                  0.4535961151123047
-                ]
-              }
+        "fcurves": {
+          "slot_identifiers": [
+            "OBanimated_linear"
+          ],
+          "data_path": "rotation_quaternion",
+          "array_indices": [
+            0,
+            1,
+            2,
+            3
+          ],
+          "key_count": 3,
+          "interpolations_by_component": [
+            [
+              "LINEAR",
+              "LINEAR",
+              "LINEAR"
+            ],
+            [
+              "LINEAR",
+              "LINEAR",
+              "LINEAR"
+            ],
+            [
+              "LINEAR",
+              "LINEAR",
+              "LINEAR"
+            ],
+            [
+              "LINEAR",
+              "LINEAR",
+              "LINEAR"
             ]
-          },
-          {
-            "slot_identifier": "OBanimated_linear",
-            "data_path": "rotation_quaternion",
-            "array_index": 1,
-            "keys": [
-              {
-                "frame": 0.0,
-                "value": 0.1741081327199936,
-                "interpolation": "LINEAR",
-                "handle_left_type": "AUTO_CLAMPED",
-                "handle_right_type": "AUTO_CLAMPED",
-                "handle_left": [
-                  -7.0,
-                  0.1741081327199936
-                ],
-                "handle_right": [
-                  7.0,
-                  0.1741081327199936
-                ]
-              },
-              {
-                "frame": 21.0,
-                "value": 0.0,
-                "interpolation": "LINEAR",
-                "handle_left_type": "AUTO_CLAMPED",
-                "handle_right_type": "AUTO_CLAMPED",
-                "handle_left": [
-                  14.0,
-                  0.0
-                ],
-                "handle_right": [
-                  33.0,
-                  0.0
-                ]
-              },
-              {
-                "frame": 57.0,
-                "value": 0.0,
-                "interpolation": "LINEAR",
-                "handle_left_type": "AUTO_CLAMPED",
-                "handle_right_type": "AUTO_CLAMPED",
-                "handle_left": [
-                  45.0,
-                  0.0
-                ],
-                "handle_right": [
-                  69.0,
-                  0.0
-                ]
-              }
+          ],
+          "left_handle_types_by_component": [
+            [
+              "AUTO_CLAMPED",
+              "AUTO_CLAMPED",
+              "AUTO_CLAMPED"
+            ],
+            [
+              "AUTO_CLAMPED",
+              "AUTO_CLAMPED",
+              "AUTO_CLAMPED"
+            ],
+            [
+              "AUTO_CLAMPED",
+              "AUTO_CLAMPED",
+              "AUTO_CLAMPED"
+            ],
+            [
+              "AUTO_CLAMPED",
+              "AUTO_CLAMPED",
+              "AUTO_CLAMPED"
             ]
-          },
-          {
-            "slot_identifier": "OBanimated_linear",
-            "data_path": "rotation_quaternion",
-            "array_index": 2,
-            "keys": [
-              {
-                "frame": 0.0,
-                "value": 0.0,
-                "interpolation": "LINEAR",
-                "handle_left_type": "AUTO_CLAMPED",
-                "handle_right_type": "AUTO_CLAMPED",
-                "handle_left": [
-                  -7.0,
-                  0.0
-                ],
-                "handle_right": [
-                  7.0,
-                  0.0
-                ]
-              },
-              {
-                "frame": 21.0,
-                "value": 0.0,
-                "interpolation": "LINEAR",
-                "handle_left_type": "AUTO_CLAMPED",
-                "handle_right_type": "AUTO_CLAMPED",
-                "handle_left": [
-                  14.0,
-                  0.0
-                ],
-                "handle_right": [
-                  33.0,
-                  0.0
-                ]
-              },
-              {
-                "frame": 57.0,
-                "value": -0.8912073373794556,
-                "interpolation": "LINEAR",
-                "handle_left_type": "AUTO_CLAMPED",
-                "handle_right_type": "AUTO_CLAMPED",
-                "handle_left": [
-                  45.0,
-                  -0.8912073373794556
-                ],
-                "handle_right": [
-                  69.0,
-                  -0.8912073373794556
-                ]
-              }
+          ],
+          "right_handle_types_by_component": [
+            [
+              "AUTO_CLAMPED",
+              "AUTO_CLAMPED",
+              "AUTO_CLAMPED"
+            ],
+            [
+              "AUTO_CLAMPED",
+              "AUTO_CLAMPED",
+              "AUTO_CLAMPED"
+            ],
+            [
+              "AUTO_CLAMPED",
+              "AUTO_CLAMPED",
+              "AUTO_CLAMPED"
+            ],
+            [
+              "AUTO_CLAMPED",
+              "AUTO_CLAMPED",
+              "AUTO_CLAMPED"
             ]
-          },
-          {
-            "slot_identifier": "OBanimated_linear",
-            "data_path": "rotation_quaternion",
-            "array_index": 3,
-            "keys": [
-              {
-                "frame": 0.0,
-                "value": 0.0,
-                "interpolation": "LINEAR",
-                "handle_left_type": "AUTO_CLAMPED",
-                "handle_right_type": "AUTO_CLAMPED",
-                "handle_left": [
-                  -7.0,
-                  0.0
-                ],
-                "handle_right": [
-                  7.0,
-                  0.0
-                ]
-              },
-              {
-                "frame": 21.0,
-                "value": 0.5646424889564514,
-                "interpolation": "LINEAR",
-                "handle_left_type": "AUTO_CLAMPED",
-                "handle_right_type": "AUTO_CLAMPED",
-                "handle_left": [
-                  14.0,
-                  0.5646424889564514
-                ],
-                "handle_right": [
-                  33.0,
-                  0.5646424889564514
-                ]
-              },
-              {
-                "frame": 57.0,
-                "value": 0.0,
-                "interpolation": "LINEAR",
-                "handle_left_type": "AUTO_CLAMPED",
-                "handle_right_type": "AUTO_CLAMPED",
-                "handle_left": [
-                  45.0,
-                  0.0
-                ],
-                "handle_right": [
-                  69.0,
-                  0.0
-                ]
-              }
-            ]
-          }
-        ],
+          ]
+        },
         "samples": [
           {
             "sample": "key-0",
             "time_seconds": 0.0,
-            "frame_value": 0.0,
             "quaternion_wxyz": [
               0.9847265481948853,
               0.1741081327199936,
@@ -1316,7 +486,6 @@
           {
             "sample": "midpoint-0-1",
             "time_seconds": 0.35,
-            "frame_value": 10.5,
             "quaternion_wxyz": [
               0.9050310850143433,
               0.0870540663599968,
@@ -1325,86 +494,18 @@
             ]
           },
           {
-            "sample": "before-key-1-1e-03",
-            "time_seconds": 0.699,
-            "frame_value": 20.97,
-            "quaternion_wxyz": [
-              0.8255633115768433,
-              0.0002487301826477051,
-              0.0,
-              0.5638357996940613
-            ]
-          },
-          {
-            "sample": "before-key-1-1e-04",
-            "time_seconds": 0.6999,
-            "frame_value": 20.997,
-            "quaternion_wxyz": [
-              0.8253583908081055,
-              2.4870038032531738e-05,
-              0.0,
-              0.5645617842674255
-            ]
-          },
-          {
-            "sample": "before-key-1-1e-05",
-            "time_seconds": 0.69999,
-            "frame_value": 20.9997,
-            "quaternion_wxyz": [
-              0.8253378868103027,
-              2.473592758178711e-06,
-              0.0,
-              0.5646344423294067
-            ]
-          },
-          {
-            "sample": "before-key-1-1e-06",
-            "time_seconds": 0.6999989999999999,
-            "frame_value": 20.999969999999998,
-            "quaternion_wxyz": [
-              0.8253356218338013,
-              0.0,
-              0.0,
-              0.5646424889564514
-            ]
-          },
-          {
             "sample": "key-1",
             "time_seconds": 0.7,
-            "frame_value": 21.0,
             "quaternion_wxyz": [
               0.8253356218338013,
               0.0,
               0.0,
               0.5646424889564514
-            ]
-          },
-          {
-            "sample": "after-key-1",
-            "time_seconds": 0.700001,
-            "frame_value": 21.00003,
-            "quaternion_wxyz": [
-              0.8253356218338013,
-              0.0,
-              0.0,
-              0.5646424889564514
-            ]
-          },
-          {
-            "sample": "midpoint-1-2",
-            "time_seconds": 1.2999999999999998,
-            "frame_value": 38.99999999999999,
-            "quaternion_wxyz": [
-              0.639465868473053,
-              0.0,
-              -0.44560369849205017,
-              0.2823212444782257
             ]
           },
           {
             "sample": "key-2",
             "time_seconds": 1.9,
-            "frame_value": 57.0,
             "quaternion_wxyz": [
               0.4535961151123047,
               0.0,
@@ -1423,221 +524,89 @@
           0.7,
           1.9
         ],
-        "fcurves": [
-          {
-            "slot_identifier": "OBanimated_cubic",
-            "data_path": "rotation_quaternion",
-            "array_index": 0,
-            "keys": [
-              {
-                "frame": 0.0,
-                "value": 0.9847265481948853,
-                "interpolation": "BEZIER",
-                "handle_left_type": "AUTO",
-                "handle_right_type": "AUTO",
-                "handle_left": [
-                  -7.0,
-                  0.9847265481948853
-                ],
-                "handle_right": [
-                  7.0,
-                  0.9847265481948853
-                ]
-              },
-              {
-                "frame": 21.0,
-                "value": 0.8253356218338013,
-                "interpolation": "BEZIER",
-                "handle_left_type": "AUTO",
-                "handle_right_type": "AUTO",
-                "handle_left": [
-                  14.0,
-                  0.9156152606010437
-                ],
-                "handle_right": [
-                  33.0,
-                  0.6705704927444458
-                ]
-              },
-              {
-                "frame": 57.0,
-                "value": 0.4535961151123047,
-                "interpolation": "BEZIER",
-                "handle_left_type": "AUTO",
-                "handle_right_type": "AUTO",
-                "handle_left": [
-                  45.0,
-                  0.4535961151123047
-                ],
-                "handle_right": [
-                  69.0,
-                  0.4535961151123047
-                ]
-              }
+        "fcurves": {
+          "slot_identifiers": [
+            "OBanimated_cubic"
+          ],
+          "data_path": "rotation_quaternion",
+          "array_indices": [
+            0,
+            1,
+            2,
+            3
+          ],
+          "key_count": 3,
+          "interpolations_by_component": [
+            [
+              "BEZIER",
+              "BEZIER",
+              "BEZIER"
+            ],
+            [
+              "BEZIER",
+              "BEZIER",
+              "BEZIER"
+            ],
+            [
+              "BEZIER",
+              "BEZIER",
+              "BEZIER"
+            ],
+            [
+              "BEZIER",
+              "BEZIER",
+              "BEZIER"
             ]
-          },
-          {
-            "slot_identifier": "OBanimated_cubic",
-            "data_path": "rotation_quaternion",
-            "array_index": 1,
-            "keys": [
-              {
-                "frame": 0.0,
-                "value": 0.1741081327199936,
-                "interpolation": "BEZIER",
-                "handle_left_type": "AUTO",
-                "handle_right_type": "AUTO",
-                "handle_left": [
-                  -7.0,
-                  0.1741081327199936
-                ],
-                "handle_right": [
-                  7.0,
-                  0.1741081327199936
-                ]
-              },
-              {
-                "frame": 21.0,
-                "value": 0.0,
-                "interpolation": "BEZIER",
-                "handle_left_type": "AUTO",
-                "handle_right_type": "AUTO",
-                "handle_left": [
-                  14.0,
-                  0.05498151481151581
-                ],
-                "handle_right": [
-                  33.0,
-                  -0.0942540243268013
-                ]
-              },
-              {
-                "frame": 57.0,
-                "value": 0.0,
-                "interpolation": "BEZIER",
-                "handle_left_type": "AUTO",
-                "handle_right_type": "AUTO",
-                "handle_left": [
-                  45.0,
-                  0.0
-                ],
-                "handle_right": [
-                  69.0,
-                  0.0
-                ]
-              }
+          ],
+          "left_handle_types_by_component": [
+            [
+              "AUTO",
+              "AUTO",
+              "AUTO"
+            ],
+            [
+              "AUTO",
+              "AUTO",
+              "AUTO"
+            ],
+            [
+              "AUTO",
+              "AUTO",
+              "AUTO"
+            ],
+            [
+              "AUTO",
+              "AUTO",
+              "AUTO"
             ]
-          },
-          {
-            "slot_identifier": "OBanimated_cubic",
-            "data_path": "rotation_quaternion",
-            "array_index": 2,
-            "keys": [
-              {
-                "frame": 0.0,
-                "value": 0.0,
-                "interpolation": "BEZIER",
-                "handle_left_type": "AUTO",
-                "handle_right_type": "AUTO",
-                "handle_left": [
-                  -7.0,
-                  0.0
-                ],
-                "handle_right": [
-                  7.0,
-                  0.0
-                ]
-              },
-              {
-                "frame": 21.0,
-                "value": 0.0,
-                "interpolation": "BEZIER",
-                "handle_left_type": "AUTO",
-                "handle_right_type": "AUTO",
-                "handle_left": [
-                  14.0,
-                  0.09576569497585297
-                ],
-                "handle_right": [
-                  33.0,
-                  -0.16416975855827332
-                ]
-              },
-              {
-                "frame": 57.0,
-                "value": -0.8912073373794556,
-                "interpolation": "BEZIER",
-                "handle_left_type": "AUTO",
-                "handle_right_type": "AUTO",
-                "handle_left": [
-                  45.0,
-                  -0.8912073373794556
-                ],
-                "handle_right": [
-                  69.0,
-                  -0.8912073373794556
-                ]
-              }
+          ],
+          "right_handle_types_by_component": [
+            [
+              "AUTO",
+              "AUTO",
+              "AUTO"
+            ],
+            [
+              "AUTO",
+              "AUTO",
+              "AUTO"
+            ],
+            [
+              "AUTO",
+              "AUTO",
+              "AUTO"
+            ],
+            [
+              "AUTO",
+              "AUTO",
+              "AUTO"
             ]
-          },
-          {
-            "slot_identifier": "OBanimated_cubic",
-            "data_path": "rotation_quaternion",
-            "array_index": 3,
-            "keys": [
-              {
-                "frame": 0.0,
-                "value": 0.0,
-                "interpolation": "BEZIER",
-                "handle_left_type": "AUTO",
-                "handle_right_type": "AUTO",
-                "handle_left": [
-                  -7.0,
-                  0.0
-                ],
-                "handle_right": [
-                  7.0,
-                  0.0
-                ]
-              },
-              {
-                "frame": 21.0,
-                "value": 0.5646424889564514,
-                "interpolation": "BEZIER",
-                "handle_left_type": "AUTO",
-                "handle_right_type": "AUTO",
-                "handle_left": [
-                  14.0,
-                  0.4470086395740509
-                ],
-                "handle_right": [
-                  33.0,
-                  0.7663005590438843
-                ]
-              },
-              {
-                "frame": 57.0,
-                "value": 0.0,
-                "interpolation": "BEZIER",
-                "handle_left_type": "AUTO",
-                "handle_right_type": "AUTO",
-                "handle_left": [
-                  45.0,
-                  0.0
-                ],
-                "handle_right": [
-                  69.0,
-                  0.0
-                ]
-              }
-            ]
-          }
-        ],
+          ]
+        },
         "samples": [
           {
             "sample": "key-0",
             "time_seconds": 0.0,
-            "frame_value": 0.0,
             "quaternion_wxyz": [
               0.9847265481948853,
               0.1741081327199936,
@@ -1648,7 +617,6 @@
           {
             "sample": "midpoint-0-1",
             "time_seconds": 0.35,
-            "frame_value": 10.5,
             "quaternion_wxyz": [
               0.9388859868049622,
               0.10767213255167007,
@@ -1657,86 +625,18 @@
             ]
           },
           {
-            "sample": "before-key-1-1e-03",
-            "time_seconds": 0.699,
-            "frame_value": 20.97,
-            "quaternion_wxyz": [
-              0.8257224559783936,
-              0.00023601949214935303,
-              0.0004092752933502197,
-              0.5641363263130188
-            ]
-          },
-          {
-            "sample": "before-key-1-1e-04",
-            "time_seconds": 0.6999,
-            "frame_value": 20.997,
-            "quaternion_wxyz": [
-              0.8253743052482605,
-              2.358853816986084e-05,
-              4.100799560546875e-05,
-              0.5645920634269714
-            ]
-          },
-          {
-            "sample": "before-key-1-1e-05",
-            "time_seconds": 0.69999,
-            "frame_value": 20.9997,
-            "quaternion_wxyz": [
-              0.8253394961357117,
-              2.3543834686279297e-06,
-              4.082918167114258e-06,
-              0.5646374225616455
-            ]
-          },
-          {
-            "sample": "before-key-1-1e-06",
-            "time_seconds": 0.6999989999999999,
-            "frame_value": 20.999969999999998,
-            "quaternion_wxyz": [
-              0.8253356218338013,
-              0.0,
-              0.0,
-              0.5646424889564514
-            ]
-          },
-          {
             "sample": "key-1",
             "time_seconds": 0.7,
-            "frame_value": 21.0,
             "quaternion_wxyz": [
               0.8253356218338013,
               0.0,
               0.0,
               0.5646424889564514
-            ]
-          },
-          {
-            "sample": "after-key-1",
-            "time_seconds": 0.700001,
-            "frame_value": 21.00003,
-            "quaternion_wxyz": [
-              0.8253356218338013,
-              0.0,
-              0.0,
-              0.5646424889564514
-            ]
-          },
-          {
-            "sample": "midpoint-1-2",
-            "time_seconds": 1.2999999999999998,
-            "frame_value": 38.99999999999999,
-            "quaternion_wxyz": [
-              0.5814288854598999,
-              -0.03534526005387306,
-              -0.5071672797203064,
-              0.35794299840927124
             ]
           },
           {
             "sample": "key-2",
             "time_seconds": 1.9,
-            "frame_value": 57.0,
             "quaternion_wxyz": [
               0.4535961151123047,
               0.0,

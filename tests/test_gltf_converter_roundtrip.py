@@ -84,6 +84,9 @@ def test_gltf_converter_artifact_loader_and_provenance_are_pinned():
         / "experiments/transports/gltf/2.0.0/threejs/0.187.0/package-lock.json",
         "numeric_helper_sha256": ROOT
         / "experiments/converters/shared/numeric_evidence.mjs",
+        "retention_script_sha256": ROOT
+        / "scripts/retain_gltf_converter_witnesses.py",
+        "retention_helper_sha256": ROOT / "scripts/evidence_json.py",
     }
     for field, path in reproduction_paths.items():
         assert (

@@ -31,7 +31,7 @@ ENGINE_CONFIG = {
     },
     "godot": {
         "version": None,
-        "source": "experiments/godot/{version}/capture.gd",
+        "source": "experiments/godot/capture.gd",
         "map_key": "source_to_godot_axis_map",
         "frame_key": "godot_world_frame",
         "api": "Quaternion(x,y,z,w); Quaternion * Vector3",
@@ -161,7 +161,9 @@ def retain(engine: str, version: str, source_path: Path, output_dir: Path) -> No
     output_dir.mkdir(parents=True, exist_ok=True)
     output_path = output_dir / "witnesses.json"
     output_path.write_text(
-        json.dumps(witness, indent=2, ensure_ascii=False) + "\n", encoding="utf-8"
+        json.dumps(witness, indent=2, ensure_ascii=False) + "\n",
+        encoding="utf-8",
+        newline="\n",
     )
 
     contract = {
@@ -177,7 +179,9 @@ def retain(engine: str, version: str, source_path: Path, output_dir: Path) -> No
         },
     }
     (output_dir / "contract.json").write_text(
-        json.dumps(contract, indent=2, ensure_ascii=False) + "\n", encoding="utf-8"
+        json.dumps(contract, indent=2, ensure_ascii=False) + "\n",
+        encoding="utf-8",
+        newline="\n",
     )
 
 

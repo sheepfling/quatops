@@ -8,7 +8,11 @@ import json
 import shutil
 from pathlib import Path
 
-from evidence_json import read_evidence_document, read_evidence_rows
+from evidence_json import (
+    compact_numeric_evidence,
+    read_evidence_document,
+    read_evidence_rows,
+)
 
 ROOT = Path(__file__).resolve().parents[1]
 HERE = ROOT / "experiments/converters/gltf/2.0.0"
@@ -28,7 +32,9 @@ def main() -> None:
     args = parser.parse_args()
     capture = args.capture_dir.resolve()
     native_manifest = read_evidence_document(capture / "manifest.json")
-    observations = read_evidence_rows(capture / "observations.json")
+    observations = compact_numeric_evidence(
+        read_evidence_rows(capture / "observations.json")
+    )
     if len(observations) != 2 or {row["node"] for row in observations} != {
         "QuatOpsParent",
         "QuatOpsChild",
@@ -126,11 +132,19 @@ def main() -> None:
                     "numeric_helper_sha256": sha256(
                         ROOT / "experiments/converters/shared/numeric_evidence.mjs"
                     ),
+                    "retention_script_sha256": sha256(Path(__file__)),
+                    "retention_helper_sha256": sha256(
+                        ROOT / "scripts/evidence_json.py"
+                    ),
                 },
                 "selection": {
                     "retained_observations": len(observations),
                     "native_observations": native_manifest["observations"]["count"],
                     "policy": "one native local/world hierarchy witness per serialized node",
+                    "numeric_values": (
+                        "round-trippable decimals and dtype; exact bits only for "
+                        "signed-zero or nonfinite values"
+                    ),
                 },
             },
             indent=2,

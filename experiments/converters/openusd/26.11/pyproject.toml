@@ -1,7 +1,7 @@
 [project]
-name = "quatops-openusd-transport-oracle"
+name = "quatops-openusd-converter-capture"
 version = "0.1.0"
-description = "Pinned OpenUSD quaternion and transform-stack capture"
+description = "Pinned OpenUSD QuatOps converter capture"
 requires-python = ">=3.14,<3.15"
 dependencies = ["usd-core==26.11"]
 

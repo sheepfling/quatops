@@ -53,7 +53,7 @@
   },
   "provenance": {
     "original_capture_sha256": "55e352f6c5c235ae212034ff39f3282b808370f1e857cffbea332c76d27ed722",
-    "capture_source": "experiments/godot/4.8-dev1/capture.gd",
+    "capture_source": "experiments/godot/capture.gd",
     "capture_source_sha256": "12373c6ffd371e97328b3591528d043eb4c672c6eab0a42b2bdaa053fa2d2dd7",
     "canonical_input_file": "experiments/interoperability/v1/canonical_inputs.json",
     "canonical_input_sha256": "a6f0630806b69d3b3b29a036aa10f63bfe214668329c661598951f84f8f41eec",

@@ -10,7 +10,6 @@ from scipy.spatial.transform import Rotation
 
 from tests.native_engine_support import (
     from_engine_xyzw,
-    from_euler,
     quaternion_coefficient_error,
     to_hamilton_xyzw,
 )
@@ -26,7 +25,6 @@ FIXTURE_PATH = (
 )
 FIXTURE = json.loads(FIXTURE_PATH.read_text(encoding="utf-8"))
 OBS = FIXTURE["observations"]
-ORDERS = ("XYZ", "XZY", "YXZ", "YZX", "ZXY", "ZYX")
 CORPUS_SHA256 = "07e4d809f7eb75ad6e5454febf2b725b0b8fb389536743dd7196566d4640135f"
 TOLERANCE = 3e-12
 
@@ -62,10 +60,6 @@ def _shortest_slerp_xyzw(q0, q1, t):
     return result / np.linalg.norm(result)
 
 
-def _matrix4_from_column_major(values):
-    return np.asarray(values, dtype=float).reshape((4, 4), order="F")
-
-
 def _ordered_angles(xyz, order):
     return tuple(float(xyz["XYZ".index(axis)]) for axis in order)
 
@@ -81,112 +75,34 @@ def test_threejs_fixture_has_pinned_runtime_and_input_provenance():
     assert FIXTURE["provenance"]["exporter_sha256"]
     assert FIXTURE["target"]["node_version"] == "v24.21.0"
     assert FIXTURE["counts"] == {
-        "euler_orders": 6,
-        "euler_boundaries": 6,
+        "euler_regressions": 1,
         "axis_angle": 5,
         "quaternion_normalization": 9,
         "multiplication": 3,
         "shortest_slerp": 7,
-        "independent_matrices": 4,
+        "independent_matrices": 3,
         "two_vector_alignment": 2,
     }
 
 
-def test_threejs_native_euler_outputs_match_scipy_intrinsic_order_contract():
-    rows = OBS["euler_orders"]
-    assert len(rows) == 6
-    assert {row["order"] for row in rows} == set(ORDERS)
-    for row in rows:
-        angles = _ordered_angles(row["input_radians_xyz"], row["order"])
-        expected = Rotation.from_euler(row["order"], angles).as_matrix()
-        native = _rotation(row["euler_quaternion_xyzw"]).as_matrix()
-        np.testing.assert_allclose(native, expected, rtol=0.0, atol=TOLERANCE)
-        np.testing.assert_allclose(
-            row["euler_matrix_rows"], expected, rtol=0.0, atol=TOLERANCE
-        )
-        np.testing.assert_allclose(
-            np.asarray(row["quaternion_rotated_positive_basis_vectors_xyz"]),
-            expected.T,
-            rtol=0.0,
-            atol=TOLERANCE,
-        )
-        np.testing.assert_allclose(
-            np.asarray(row["matrix_rotated_positive_basis_vectors_xyz"]),
-            expected.T,
-            rtol=0.0,
-            atol=TOLERANCE,
-        )
-        assert (
-            _orientation_error(
-                row["matrix_quaternion_xyzw"], row["euler_quaternion_xyzw"]
-            )
-            <= TOLERANCE
-        )
-        # The shared general inputs are well-conditioned for Three.js readback.
-        assert (
-            _orientation_error(
-                row["quaternion_readback_roundtrip_xyzw"], row["euler_quaternion_xyzw"]
-            )
-            <= 3e-12
-        )
-
-
-def test_threejs_native_euler_boundaries_keep_measured_near_lock_readback_behavior():
-    rows = OBS["euler_boundaries"]
-    assert len(rows) == 6
-    for row in rows:
-        expected = Rotation.from_euler(
-            row["order"], _ordered_angles(row["input_radians_xyz"], row["order"])
-        ).as_matrix()
-        np.testing.assert_allclose(
-            _rotation(row["euler_quaternion_xyzw"]).as_matrix(),
-            expected,
-            rtol=0.0,
-            atol=TOLERANCE,
-        )
-        np.testing.assert_allclose(
-            row["euler_matrix_rows"], expected, rtol=0.0, atol=TOLERANCE
-        )
-        assert row["input_source"]["actual_bits_hex"]
-
-    # Three.js 0.187.0's Euler readback branch loses a small but observable
-    # amount of orientation for selected cases just beyond gimbal lock. Keep
-    # this native diagnostic instead of widening every conversion tolerance.
-    near_lock = next(
-        row for row in rows if row["case_id"] == "boundary-offset-ZYX-+1-+1e-04"
+def test_threejs_near_lock_readback_regression_is_retained():
+    row = OBS["euler_regressions"][0]
+    assert row["case_id"] == "boundary-offset-ZYX-+1-+1e-04"
+    assert row["input_source"]["actual_bits_hex"]
+    expected = Rotation.from_euler(
+        row["order"], _ordered_angles(row["input_radians_xyz"], row["order"])
+    ).as_matrix()
+    np.testing.assert_allclose(
+        _rotation(row["euler_quaternion_xyzw"]).as_matrix(),
+        expected,
+        rtol=0.0,
+        atol=TOLERANCE,
     )
     residual = _orientation_error(
-        near_lock["quaternion_readback_roundtrip_xyzw"],
-        near_lock["euler_quaternion_xyzw"],
+        row["quaternion_readback_roundtrip_xyzw"],
+        row["euler_quaternion_xyzw"],
     )
     assert residual > 1e-4
-
-
-@pytest.mark.parametrize(
-    "backend_name,module,is_jpl,is_numpy,component_first",
-    BACKENDS,
-    ids=[backend[0] for backend in BACKENDS],
-)
-def test_threejs_euler_orders_and_boundaries_match_all_quatops_backends(
-    backend_name, module, is_jpl, is_numpy, component_first
-):
-    for row in (*OBS["euler_orders"], *OBS["euler_boundaries"]):
-        order = row["order"]
-        xyz = row["input_radians_xyz"]
-        expected = row["euler_quaternion_xyzw"]
-        actual = from_euler(
-            module,
-            _ordered_angles(xyz, order),
-            order,
-            False,
-            component_first,
-        )
-        actual_xyzw = to_hamilton_xyzw(
-            module, actual, is_jpl, is_numpy, component_first
-        )
-        assert quaternion_coefficient_error(actual_xyzw, expected) <= 2e-11, (
-            f"{backend_name}: Three.js {order} {row['case_id']}"
-        )
 
 
 @pytest.mark.parametrize(
@@ -311,8 +227,8 @@ def test_threejs_products_shortest_slerp_and_normalization_match_quatops(
             )
 
     for row in OBS["quaternion_normalization"]:
-        source = np.asarray(row["input_xyzw"], dtype=float)
-        if row["length"] == 0.0:
+        source = np.asarray(row["input_wxyz"], dtype=float)[[1, 2, 3, 0]]
+        if np.linalg.norm(source) == 0.0:
             # Three.js maps a zero quaternion to identity in normalize(); this
             # is recorded as native behavior, not asserted as QuatOps parity.
             assert row["normalized_xyzw"] == [0.0, 0.0, 0.0, 1.0]
@@ -330,32 +246,6 @@ def test_threejs_products_shortest_slerp_and_normalization_match_quatops(
             atol=TOLERANCE,
             err_msg=f"{backend_name}: Three.js normalize {row['case_id']}",
         )
-
-
-def test_threejs_reorder_discards_turn_count_and_object3d_matrix_layout_is_explicit():
-    reorder = OBS["euler_reorder"]
-    assert reorder["source_order"] == "XYZ"
-    assert reorder["target_order"] == "ZYX"
-    assert (
-        _orientation_error(
-            reorder["source_quaternion_xyzw"], reorder["reordered_quaternion_xyzw"]
-        )
-        <= TOLERANCE
-    )
-    assert abs(reorder["input_radians_xyz"][0]) > 2 * np.pi
-    assert abs(reorder["reordered_euler_radians_xyz"][0]) < 2 * np.pi
-
-    hierarchy = OBS["object3d_hierarchy"]
-    parent = _matrix4_from_column_major(
-        hierarchy["parent_local_matrix4_elements_column_major"]
-    )
-    child = _matrix4_from_column_major(
-        hierarchy["child_local_matrix4_elements_column_major"]
-    )
-    world = _matrix4_from_column_major(
-        hierarchy["child_world_matrix4_elements_column_major"]
-    )
-    np.testing.assert_allclose(world, parent @ child, rtol=0.0, atol=2e-14)
 
 
 def test_threejs_fixture_hash_fields_match_checked_in_sources():

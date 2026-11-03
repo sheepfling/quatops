@@ -23,7 +23,7 @@ tests/test_<target>_converter*.py
 - [OpenCV 4.13.0](opencv/4.13.0/README.md)
 - [ROS 2 Jazzy / tf2 0.36.23](ros2/0.36.23/README.md)
 - [SpiceyPy 8.3.0](spiceypy/8.3.0/README.md)
-- [OpenUSD 26.11](../transports/openusd/26.11/README.md)
+- [OpenUSD 26.11](openusd/26.11/README.md)
 - [PROJ 9.5.1 supporting capture](../oracles/proj/9.5.1/README.md)
 
 Transport evidence may include a loader version below the format version,

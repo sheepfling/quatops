@@ -33,20 +33,20 @@ matrix difference about `6e-8`).
 
 The animation records show important importer-specific differences from the
 glTF contract. `STEP` channels use constant F-curves. `LINEAR` quaternion
-channels use component-linear F-curves: the sampled quaternion norm is about
-`0.9520` at the first interval midpoint and `0.8290` at the second. The glTF
+channels use component-linear F-curves: the retained first-interval midpoint
+has quaternion norm about `0.9520`. The glTF
 spec says rotational `LINEAR` interpolation should use SLERP and that sampled
 rotation quaternions must be normalized before application. The
 `CUBICSPLINE` input is captured as Bezier F-curves with automatic handles; the
-native midpoints differ from the glTF time-scaled Hermite result. Blender's
+retained native midpoint differs from the glTF time-scaled Hermite result. Blender's
 installed importer source hashes are stored in the capture for this exact
 release.
 
 Subframe sampling also exposed a tiny boundary quirk: the sample 1e-5 seconds
 before the second key keeps the previous `STEP` value, while the sample 1e-6
-seconds before it evaluates to the next key. The capture records the evaluated
-frame value and both outcomes. This is a pinned Blender sampler observation,
-not a change to the source asset's key time.
+seconds before it evaluates to the next key. The capture retains those two
+native quaternion outputs and key values. This is a pinned Blender sampler
+observation, not a change to the source asset's key time.
 
 The format contract is described by the
 [Khronos glTF 2.0 specification](https://registry.khronos.org/glTF/specs/2.0/glTF-2.0.html).

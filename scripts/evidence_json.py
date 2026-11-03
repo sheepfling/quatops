@@ -83,3 +83,33 @@ def read_evidence_rows(path: Path) -> list[dict[str, Any]]:
     """Read and validate a JSON array of native observation objects."""
     parsed = EvidenceRows.model_validate(_decode_json(path.read_bytes()), strict=True)
     return cast(list[dict[str, Any]], parsed.root)
+
+
+def _contains_nonfinite_marker(value: Any) -> bool:
+    if isinstance(value, dict):
+        return "nonfinite" in value or any(
+            _contains_nonfinite_marker(item) for item in value.values()
+        )
+    if isinstance(value, list):
+        return any(_contains_nonfinite_marker(item) for item in value)
+    return False
+
+
+def compact_numeric_evidence(value: Any) -> Any:
+    """Drop inferable shape and duplicate bits, keeping signed-zero/nonfinite bits."""
+    if isinstance(value, dict):
+        if "values" in value and "dtype" in value:
+            result = {
+                "values": compact_numeric_evidence(value["values"]),
+                "dtype": value["dtype"],
+            }
+            bits = value.get("ieee754_hex_be", [])
+            if any(
+                bit in {"80000000", "8000000000000000"} for bit in bits
+            ) or _contains_nonfinite_marker(value["values"]):
+                result["ieee754_hex_be"] = bits
+            return result
+        return {key: compact_numeric_evidence(item) for key, item in value.items()}
+    if isinstance(value, list):
+        return [compact_numeric_evidence(item) for item in value]
+    return value

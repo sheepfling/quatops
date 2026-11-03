@@ -12,16 +12,17 @@ format validity, while the named loader runs establish implementation behavior.
 
 Three.js `GLTFLoader` `0.187.0` loads this asset in Node.js without a browser,
 renderer, or GPU. Its retained capture records node matrices, matrix layout,
-animation samples, quaternion norms, and runtime/package/source identity. The
-asset is also imported by Blender `5.1.2`, whose frozen capture records the
-importer build, source hashes, scene matrices, F-curves, and axis probes.
+animation samples, and runtime/package/source identity. The asset is also
+imported by Blender `5.1.2`, whose frozen capture records the importer build,
+source hashes, scene matrices, F-curve profiles, selected samples, and axis
+probes.
 
 The Blender importer maps the tested glTF axes to Blender as `+X -> +X`,
 `+Y -> +Z`, and `+Z -> -Y`, a proper rotation. In this pinned version,
 `LINEAR` quaternion curves use component-linear F-curves, and `CUBICSPLINE`
-inputs are represented by automatic Bezier curves; their sampled values differ
-from the glTF reference interpolation. A step-key probe also records a narrow
-subframe boundary behavior. These are Blender `5.1.2` observations and do not
+inputs are represented by automatic Bezier curves; selected native midpoint
+values differ from the glTF reference interpolation. Two step-key samples
+retain a narrow subframe boundary behavior. These are Blender `5.1.2` observations and do not
 change the format contract or Three.js results. Details and native values are
 in the [Blender capture notes](../../experiments/transports/gltf/2.0.0/blender/5.1.2/README.md)
 and [frozen output](../../tests/golden/transports/gltf/2.0.0/blender/5.1.2/native_rotation.json).

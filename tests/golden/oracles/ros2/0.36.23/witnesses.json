@@ -33,22 +33,7 @@
                 0.7044663052755917
               ]
             ],
-            "dtype": "binary64",
-            "shape": [
-              3,
-              3
-            ],
-            "ieee754_hex_be": [
-              "3fed53a2ed454385",
-              "bfd4dcc0bcdade72",
-              "3fcdb3863810b4f0",
-              "3fb78a35bd209776",
-              "3fe78d1d672fbc32",
-              "3fe576a73331829a",
-              "bfd8ec3ae92b676a",
-              "bfe2fcd60b856028",
-              "3fe68afcebc95d22"
-            ]
+            "dtype": "binary64"
           },
           "quaternion_xyzw": {
             "values": [
@@ -57,16 +42,7 @@
               0.11405135381457045,
               0.9160924851404795
             ],
-            "dtype": "binary64",
-            "shape": [
-              4
-            ],
-            "ieee754_hex_be": [
-              "bfd613fd2cf70fac",
-              "3fc5b54b8145febb",
-              "3fbd327832b2b701",
-              "3fed50a12ff9456e"
-            ]
+            "dtype": "binary64"
           },
           "translation_xyz": {
             "values": [
@@ -74,15 +50,7 @@
               -2.5,
               3.75
             ],
-            "dtype": "binary64",
-            "shape": [
-              3
-            ],
-            "ieee754_hex_be": [
-              "3ff4000000000000",
-              "c004000000000000",
-              "400e000000000000"
-            ]
+            "dtype": "binary64"
           }
         },
         "probe_in_source_xyz": {
@@ -91,15 +59,7 @@
             -3.0,
             5.0
           ],
-          "dtype": "binary64",
-          "shape": [
-            3
-          ],
-          "ieee754_hex_be": [
-            "4000000000000000",
-            "c008000000000000",
-            "4014000000000000"
-          ]
+          "dtype": "binary64"
         },
         "source_frame": "sensor",
         "stamp_sec": 42,
@@ -123,22 +83,7 @@
                 0.9362933635841992
               ]
             ],
-            "dtype": "binary64",
-            "shape": [
-              3,
-              3
-            ],
-            "ieee754_hex_be": [
-              "3fead41039f47d70",
-              "bfe0af3f5f2d794a",
-              "bfc457b52ef9c242",
-              "3fdd50148b8f737d",
-              "3fea9f44941ad99e",
-              "bfd40b8aec57dd4a",
-              "3fd2e9cd95baba34",
-              "3fc84b3cc1681324",
-              "3fedf61d8001ca88"
-            ]
+            "dtype": "binary64"
           },
           "quaternion_xyzw": {
             "values": [
@@ -147,16 +92,7 @@
               0.25785889528426975,
               0.9495554075012557
             ],
-            "dtype": "binary64",
-            "shape": [
-              4
-            ],
-            "ieee754_hex_be": [
-              "3fc0f37bf30475fd",
-              "bfbea13407ae82e5",
-              "3fd080c2988ea1d4",
-              "3fee62c2059ea6ad"
-            ]
+            "dtype": "binary64"
           },
           "translation_xyz": {
             "values": [
@@ -164,15 +100,7 @@
               5.0,
               -7.0
             ],
-            "dtype": "binary64",
-            "shape": [
-              3
-            ],
-            "ieee754_hex_be": [
-              "4008000000000000",
-              "4014000000000000",
-              "c01c000000000000"
-            ]
+            "dtype": "binary64"
           }
         }
       },
@@ -196,22 +124,7 @@
                 0.8554626498325311
               ]
             ],
-            "dtype": "binary64",
-            "shape": [
-              3,
-              3
-            ],
-            "ieee754_hex_be": [
-              "3fe9088b329dba8b",
-              "3fe3c86ef25fae7e",
-              "bfb38a0d2964dfe8",
-              "bfe201d3b9ba307e",
-              "3fe4c33e1a01252f",
-              "bfe064043c0b58ac",
-              "bfd118b90ac87e6f",
-              "3fdc64b87886d324",
-              "3feb5ff334ff5df8"
-            ]
+            "dtype": "binary64"
           },
           "quaternion_xyzw": {
             "values": [
@@ -220,16 +133,7 @@
               -0.32570553779803973,
               0.9064475867715437
             ],
-            "dtype": "binary64",
-            "shape": [
-              4
-            ],
-            "ieee754_hex_be": [
-              "3fd0df442544abbb",
-              "3faaf1b7d6106f8c",
-              "bfd4d85c0a3dfebb",
-              "3fed019e5e9719d3"
-            ]
+            "dtype": "binary64"
           },
           "translation_xyz": {
             "values": [
@@ -237,15 +141,7 @@
               -0.6689397505418533,
               3.3164379300628837
             ],
-            "dtype": "binary64",
-            "shape": [
-              3
-            ],
-            "ieee754_hex_be": [
-              "c015b5e088075be6",
-              "bfe567f455f24b06",
-              "400a88109c06ac13"
-            ]
+            "dtype": "binary64"
           }
         },
         "direct_world_from_sensor": {
@@ -267,22 +163,7 @@
                 0.8554626498325311
               ]
             ],
-            "dtype": "binary64",
-            "shape": [
-              3,
-              3
-            ],
-            "ieee754_hex_be": [
-              "3fe9088b329dba8b",
-              "bfe201d3b9ba307e",
-              "bfd118b90ac87e6f",
-              "3fe3c86ef25fae7e",
-              "3fe4c33e1a01252f",
-              "3fdc64b87886d324",
-              "bfb38a0d2964dfe8",
-              "bfe064043c0b58ac",
-              "3feb5ff334ff5df8"
-            ]
+            "dtype": "binary64"
           },
           "quaternion_xyzw": {
             "values": [
@@ -291,16 +172,7 @@
               0.32570553779803973,
               0.9064475867715437
             ],
-            "dtype": "binary64",
-            "shape": [
-              4
-            ],
-            "ieee754_hex_be": [
-              "bfd0df442544abbb",
-              "bfaaf1b7d6106f8c",
-              "3fd4d85c0a3dfebb",
-              "3fed019e5e9719d3"
-            ]
+            "dtype": "binary64"
           },
           "translation_xyz": {
             "values": [
@@ -308,15 +180,7 @@
               2.318144280127206,
               -3.593989780679297
             ],
-            "dtype": "binary64",
-            "shape": [
-              3
-            ],
-            "ieee754_hex_be": [
-              "4013059f1b4b24bd",
-              "40028b8f3a74724e",
-              "c00cc07db6d16806"
-            ]
+            "dtype": "binary64"
           }
         },
         "lookup": {
@@ -338,22 +202,7 @@
                 0.8554626498325312
               ]
             ],
-            "dtype": "binary64",
-            "shape": [
-              3,
-              3
-            ],
-            "ieee754_hex_be": [
-              "3fe9088b329dba89",
-              "bfe201d3b9ba3080",
-              "bfd118b90ac87e70",
-              "3fe3c86ef25fae80",
-              "3fe4c33e1a01252d",
-              "3fdc64b87886d321",
-              "bfb38a0d2964dfee",
-              "bfe064043c0b58aa",
-              "3feb5ff334ff5df9"
-            ]
+            "dtype": "binary64"
           },
           "quaternion_xyzw": {
             "values": [
@@ -362,16 +211,7 @@
               0.32570553779803985,
               0.9064475867715437
             ],
-            "dtype": "binary64",
-            "shape": [
-              4
-            ],
-            "ieee754_hex_be": [
-              "bfd0df442544abb9",
-              "bfaaf1b7d6106f8b",
-              "3fd4d85c0a3dfebd",
-              "3fed019e5e9719d3"
-            ]
+            "dtype": "binary64"
           },
           "translation_xyz": {
             "values": [
@@ -379,15 +219,7 @@
               2.3181442801272065,
               -3.593989780679297
             ],
-            "dtype": "binary64",
-            "shape": [
-              3
-            ],
-            "ieee754_hex_be": [
-              "4013059f1b4b24be",
-              "40028b8f3a74724f",
-              "c00cc07db6d16806"
-            ]
+            "dtype": "binary64"
           }
         },
         "lookup_message": {
@@ -400,16 +232,7 @@
               0.32570553779803985,
               0.9064475867715437
             ],
-            "dtype": "binary64",
-            "shape": [
-              4
-            ],
-            "ieee754_hex_be": [
-              "bfd0df442544abba",
-              "bfaaf1b7d6106f8c",
-              "3fd4d85c0a3dfebd",
-              "3fed019e5e9719d3"
-            ]
+            "dtype": "binary64"
           },
           "stamp_nanosec": 0,
           "stamp_sec": 42,
@@ -419,15 +242,7 @@
               2.3181442801272065,
               -3.593989780679297
             ],
-            "dtype": "binary64",
-            "shape": [
-              3
-            ],
-            "ieee754_hex_be": [
-              "4013059f1b4b24be",
-              "40028b8f3a74724f",
-              "c00cc07db6d16806"
-            ]
+            "dtype": "binary64"
           }
         },
         "message_roundtrip": {
@@ -449,22 +264,7 @@
                 0.8554626498325312
               ]
             ],
-            "dtype": "binary64",
-            "shape": [
-              3,
-              3
-            ],
-            "ieee754_hex_be": [
-              "3fe9088b329dba89",
-              "bfe201d3b9ba3080",
-              "bfd118b90ac87e70",
-              "3fe3c86ef25fae80",
-              "3fe4c33e1a01252d",
-              "3fdc64b87886d321",
-              "bfb38a0d2964dfee",
-              "bfe064043c0b58aa",
-              "3feb5ff334ff5df9"
-            ]
+            "dtype": "binary64"
           },
           "quaternion_xyzw": {
             "values": [
@@ -473,16 +273,7 @@
               0.32570553779803985,
               0.9064475867715437
             ],
-            "dtype": "binary64",
-            "shape": [
-              4
-            ],
-            "ieee754_hex_be": [
-              "bfd0df442544abb9",
-              "bfaaf1b7d6106f8b",
-              "3fd4d85c0a3dfebd",
-              "3fed019e5e9719d3"
-            ]
+            "dtype": "binary64"
           },
           "translation_xyz": {
             "values": [
@@ -490,15 +281,7 @@
               2.3181442801272065,
               -3.593989780679297
             ],
-            "dtype": "binary64",
-            "shape": [
-              3
-            ],
-            "ieee754_hex_be": [
-              "4013059f1b4b24be",
-              "40028b8f3a74724f",
-              "c00cc07db6d16806"
-            ]
+            "dtype": "binary64"
           }
         },
         "probe_in_target_xyz": {
@@ -507,15 +290,7 @@
             3.826315726843135,
             2.067300125025434
           ],
-          "dtype": "binary64",
-          "shape": [
-            3
-          ],
-          "ieee754_hex_be": [
-            "401ab0b77a39be0d",
-            "400e9c4b6b77b1a2",
-            "400089d4a5e001f2"
-          ]
+          "dtype": "binary64"
         },
         "world_probe_sequential": {
           "values": [
@@ -523,15 +298,7 @@
             3.826315726843134,
             2.067300125025435
           ],
-          "dtype": "binary64",
-          "shape": [
-            3
-          ],
-          "ieee754_hex_be": [
-            "401ab0b77a39be0d",
-            "400e9c4b6b77b19f",
-            "400089d4a5e001f4"
-          ]
+          "dtype": "binary64"
         }
       },
       "status": "ok",
@@ -568,22 +335,7 @@
                 0.7044663052755917
               ]
             ],
-            "dtype": "binary64",
-            "shape": [
-              3,
-              3
-            ],
-            "ieee754_hex_be": [
-              "3fed53a2ed454385",
-              "bfd4dcc0bcdade72",
-              "3fcdb3863810b4f0",
-              "3fb78a35bd209776",
-              "3fe78d1d672fbc32",
-              "3fe576a73331829a",
-              "bfd8ec3ae92b676a",
-              "bfe2fcd60b856028",
-              "3fe68afcebc95d22"
-            ]
+            "dtype": "binary64"
           },
           "quaternion_xyzw": {
             "values": [
@@ -592,16 +344,7 @@
               0.11405135381457045,
               0.9160924851404795
             ],
-            "dtype": "binary64",
-            "shape": [
-              4
-            ],
-            "ieee754_hex_be": [
-              "bfd613fd2cf70fac",
-              "3fc5b54b8145febb",
-              "3fbd327832b2b701",
-              "3fed50a12ff9456e"
-            ]
+            "dtype": "binary64"
           },
           "translation_xyz": {
             "values": [
@@ -609,15 +352,7 @@
               -2.5,
               3.75
             ],
-            "dtype": "binary64",
-            "shape": [
-              3
-            ],
-            "ieee754_hex_be": [
-              "3ff4000000000000",
-              "c004000000000000",
-              "400e000000000000"
-            ]
+            "dtype": "binary64"
           }
         },
         "probe_in_source_xyz": {
@@ -626,15 +361,7 @@
             -3.0,
             5.0
           ],
-          "dtype": "binary64",
-          "shape": [
-            3
-          ],
-          "ieee754_hex_be": [
-            "4000000000000000",
-            "c008000000000000",
-            "4014000000000000"
-          ]
+          "dtype": "binary64"
         },
         "source_frame": "world",
         "stamp_sec": 42,
@@ -658,22 +385,7 @@
                 0.9362933635841992
               ]
             ],
-            "dtype": "binary64",
-            "shape": [
-              3,
-              3
-            ],
-            "ieee754_hex_be": [
-              "3fead41039f47d70",
-              "bfe0af3f5f2d794a",
-              "bfc457b52ef9c242",
-              "3fdd50148b8f737d",
-              "3fea9f44941ad99e",
-              "bfd40b8aec57dd4a",
-              "3fd2e9cd95baba34",
-              "3fc84b3cc1681324",
-              "3fedf61d8001ca88"
-            ]
+            "dtype": "binary64"
           },
           "quaternion_xyzw": {
             "values": [
@@ -682,16 +394,7 @@
               0.25785889528426975,
               0.9495554075012557
             ],
-            "dtype": "binary64",
-            "shape": [
-              4
-            ],
-            "ieee754_hex_be": [
-              "3fc0f37bf30475fd",
-              "bfbea13407ae82e5",
-              "3fd080c2988ea1d4",
-              "3fee62c2059ea6ad"
-            ]
+            "dtype": "binary64"
           },
           "translation_xyz": {
             "values": [
@@ -699,15 +402,7 @@
               5.0,
               -7.0
             ],
-            "dtype": "binary64",
-            "shape": [
-              3
-            ],
-            "ieee754_hex_be": [
-              "4008000000000000",
-              "4014000000000000",
-              "c01c000000000000"
-            ]
+            "dtype": "binary64"
           }
         }
       },
@@ -731,22 +426,7 @@
                 0.8554626498325311
               ]
             ],
-            "dtype": "binary64",
-            "shape": [
-              3,
-              3
-            ],
-            "ieee754_hex_be": [
-              "3fe9088b329dba8b",
-              "3fe3c86ef25fae7e",
-              "bfb38a0d2964dfe8",
-              "bfe201d3b9ba307e",
-              "3fe4c33e1a01252f",
-              "bfe064043c0b58ac",
-              "bfd118b90ac87e6f",
-              "3fdc64b87886d324",
-              "3feb5ff334ff5df8"
-            ]
+            "dtype": "binary64"
           },
           "quaternion_xyzw": {
             "values": [
@@ -755,16 +435,7 @@
               -0.32570553779803973,
               0.9064475867715437
             ],
-            "dtype": "binary64",
-            "shape": [
-              4
-            ],
-            "ieee754_hex_be": [
-              "3fd0df442544abbb",
-              "3faaf1b7d6106f8c",
-              "bfd4d85c0a3dfebb",
-              "3fed019e5e9719d3"
-            ]
+            "dtype": "binary64"
           },
           "translation_xyz": {
             "values": [
@@ -772,15 +443,7 @@
               -0.6689397505418533,
               3.3164379300628837
             ],
-            "dtype": "binary64",
-            "shape": [
-              3
-            ],
-            "ieee754_hex_be": [
-              "c015b5e088075be6",
-              "bfe567f455f24b06",
-              "400a88109c06ac13"
-            ]
+            "dtype": "binary64"
           }
         },
         "direct_world_from_sensor": {
@@ -802,22 +465,7 @@
                 0.8554626498325311
               ]
             ],
-            "dtype": "binary64",
-            "shape": [
-              3,
-              3
-            ],
-            "ieee754_hex_be": [
-              "3fe9088b329dba8b",
-              "bfe201d3b9ba307e",
-              "bfd118b90ac87e6f",
-              "3fe3c86ef25fae7e",
-              "3fe4c33e1a01252f",
-              "3fdc64b87886d324",
-              "bfb38a0d2964dfe8",
-              "bfe064043c0b58ac",
-              "3feb5ff334ff5df8"
-            ]
+            "dtype": "binary64"
           },
           "quaternion_xyzw": {
             "values": [
@@ -826,16 +474,7 @@
               0.32570553779803973,
               0.9064475867715437
             ],
-            "dtype": "binary64",
-            "shape": [
-              4
-            ],
-            "ieee754_hex_be": [
-              "bfd0df442544abbb",
-              "bfaaf1b7d6106f8c",
-              "3fd4d85c0a3dfebb",
-              "3fed019e5e9719d3"
-            ]
+            "dtype": "binary64"
           },
           "translation_xyz": {
             "values": [
@@ -843,15 +482,7 @@
               2.318144280127206,
               -3.593989780679297
             ],
-            "dtype": "binary64",
-            "shape": [
-              3
-            ],
-            "ieee754_hex_be": [
-              "4013059f1b4b24bd",
-              "40028b8f3a74724e",
-              "c00cc07db6d16806"
-            ]
+            "dtype": "binary64"
           }
         },
         "lookup": {
@@ -873,22 +504,7 @@
                 0.8554626498325312
               ]
             ],
-            "dtype": "binary64",
-            "shape": [
-              3,
-              3
-            ],
-            "ieee754_hex_be": [
-              "3fe9088b329dba89",
-              "3fe3c86ef25fae80",
-              "bfb38a0d2964dfee",
-              "bfe201d3b9ba3080",
-              "3fe4c33e1a01252d",
-              "bfe064043c0b58aa",
-              "bfd118b90ac87e70",
-              "3fdc64b87886d321",
-              "3feb5ff334ff5df9"
-            ]
+            "dtype": "binary64"
           },
           "quaternion_xyzw": {
             "values": [
@@ -897,16 +513,7 @@
               -0.32570553779803985,
               0.9064475867715437
             ],
-            "dtype": "binary64",
-            "shape": [
-              4
-            ],
-            "ieee754_hex_be": [
-              "3fd0df442544abb9",
-              "3faaf1b7d6106f8b",
-              "bfd4d85c0a3dfebd",
-              "3fed019e5e9719d3"
-            ]
+            "dtype": "binary64"
           },
           "translation_xyz": {
             "values": [
@@ -914,15 +521,7 @@
               -0.6689397505418517,
               3.3164379300628855
             ],
-            "dtype": "binary64",
-            "shape": [
-              3
-            ],
-            "ieee754_hex_be": [
-              "c015b5e088075be8",
-              "bfe567f455f24af8",
-              "400a88109c06ac17"
-            ]
+            "dtype": "binary64"
           }
         },
         "lookup_message": {
@@ -935,16 +534,7 @@
               -0.32570553779803985,
               0.9064475867715437
             ],
-            "dtype": "binary64",
-            "shape": [
-              4
-            ],
-            "ieee754_hex_be": [
-              "3fd0df442544abba",
-              "3faaf1b7d6106f8c",
-              "bfd4d85c0a3dfebd",
-              "3fed019e5e9719d3"
-            ]
+            "dtype": "binary64"
           },
           "stamp_nanosec": 0,
           "stamp_sec": 42,
@@ -954,15 +544,7 @@
               -0.6689397505418517,
               3.3164379300628855
             ],
-            "dtype": "binary64",
-            "shape": [
-              3
-            ],
-            "ieee754_hex_be": [
-              "c015b5e088075be8",
-              "bfe567f455f24af8",
-              "400a88109c06ac17"
-            ]
+            "dtype": "binary64"
           }
         },
         "message_roundtrip": {
@@ -984,22 +566,7 @@
                 0.8554626498325312
               ]
             ],
-            "dtype": "binary64",
-            "shape": [
-              3,
-              3
-            ],
-            "ieee754_hex_be": [
-              "3fe9088b329dba89",
-              "3fe3c86ef25fae80",
-              "bfb38a0d2964dfee",
-              "bfe201d3b9ba3080",
-              "3fe4c33e1a01252d",
-              "bfe064043c0b58aa",
-              "bfd118b90ac87e70",
-              "3fdc64b87886d321",
-              "3feb5ff334ff5df9"
-            ]
+            "dtype": "binary64"
           },
           "quaternion_xyzw": {
             "values": [
@@ -1008,16 +575,7 @@
               -0.32570553779803985,
               0.9064475867715437
             ],
-            "dtype": "binary64",
-            "shape": [
-              4
-            ],
-            "ieee754_hex_be": [
-              "3fd0df442544abb9",
-              "3faaf1b7d6106f8b",
-              "bfd4d85c0a3dfebd",
-              "3fed019e5e9719d3"
-            ]
+            "dtype": "binary64"
           },
           "translation_xyz": {
             "values": [
@@ -1025,15 +583,7 @@
               -0.6689397505418517,
               3.3164379300628855
             ],
-            "dtype": "binary64",
-            "shape": [
-              3
-            ],
-            "ieee754_hex_be": [
-              "c015b5e088075be8",
-              "bfe567f455f24af8",
-              "400a88109c06ac17"
-            ]
+            "dtype": "binary64"
           }
         },
         "probe_in_target_xyz": {
@@ -1042,15 +592,7 @@
             -6.301931030370463,
             5.728540766087779
           ],
-          "dtype": "binary64",
-          "shape": [
-            3
-          ],
-          "ieee754_hex_be": [
-            "c01865b05d7fb034",
-            "c019352d68745ada",
-            "4016ea0697309964"
-          ]
+          "dtype": "binary64"
         },
         "world_probe_sequential": {
           "values": [
@@ -1058,15 +600,7 @@
             3.826315726843134,
             2.067300125025435
           ],
-          "dtype": "binary64",
-          "shape": [
-            3
-          ],
-          "ieee754_hex_be": [
-            "401ab0b77a39be0d",
-            "400e9c4b6b77b19f",
-            "400089d4a5e001f4"
-          ]
+          "dtype": "binary64"
         }
       },
       "status": "ok",
