@@ -1,0 +1,7 @@
+/Binaries/
+/Config/DefaultEngine.ini
+/Config/DefaultInput.ini
+/Intermediate/
+/Saved/
+*.sln
+*.log

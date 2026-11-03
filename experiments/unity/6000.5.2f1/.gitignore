@@ -1,0 +1,10 @@
+Library/
+Temp/
+Logs/
+obj/
+Build/
+UserSettings/
+MemoryCaptures/
+Recordings/
+capture.log
+native_capture.json

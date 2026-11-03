@@ -1,0 +1,5 @@
+# Versions actually used for validation; no native target installation required.
+numpy==2.3.5
+scipy==1.17.0
+pytest==9.0.2
+jsonschema==4.26.0

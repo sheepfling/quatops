@@ -21,6 +21,12 @@ q_D.w = q_S.w
 Here quaternions are written in XYZW order. The quaternion formula holds for
 orthogonal `B`, including a reflection. It changes the coordinate components
 of the same physical rotation; it does not switch Hamilton to JPL algebra.
+The cross product is an axial vector under the same basis change:
+`(B u) × (B v) = det(B) B (u × v)`. This is the same determinant factor that
+appears on the quaternion vector part. Native cross-product signs have been
+captured separately for [Unreal](unreal.md), [Unity](unity.md), [Godot](godot.md),
+and [Blender](blender.md); check them for any other target API because its
+coordinate conventions may differ.
 
 ## Mappings from the research bundle
 
@@ -40,8 +46,29 @@ its engine uses a familiar handedness.
 Do not treat these as universal engine constants: choose a map for the actual
 source axes and target scene/model axes.
 
-The conversion math is covered by the
-[SciPy basis oracle](../../tests/test_engine_basis_oracle.py). Native-runtime
-comparison is still needed for the engine and asset pipeline actually
-targeted; see [issue #4](https://github.com/sheepfling/quatops/issues/4) and
-[issue #7](https://github.com/sheepfling/quatops/issues/7).
+`quatops.engines.SignedAxisMap.matrix` exposes the row-major matrix for a
+caller-declared signed permutation. `.inverse()` returns its transpose and
+reverses vector or quaternion conversion. Use
+`quatops.engines.change_rotation_basis(rotation, world_map, body_map)` for the
+two-map matrix expression; omitting `body_map` uses the same map on both sides.
+For quaternion-valued two-frame changes, compile a
+`quatops.engines.QuaternionFrameMap` once and pass it to the named target
+boundary (`to_unreal`/`from_unreal`, `to_unity`/`from_unity`,
+`to_godot`/`from_godot`, or `to_blender`/`from_blender`). Unreal, Unity, and
+Godot boundaries use Hamilton XYZW storage; Blender uses Hamilton WXYZ. These
+functions only apply the supplied map and storage conversion; they do not
+select world axes, model-forward axes, or an active/passive interpretation.
+`change_rotation_basis` returns a matrix even if the maps have different
+determinants, because such a result is useful to inspect but is not a proper
+quaternion orientation. The scalar/frame primitive checks cover all 48 signed
+maps and all 48-by-48 world/body map pairs in
+[`test_engine_basis_oracle.py`](../../tests/test_engine_basis_oracle.py).
+
+The native Unity, Godot, and Blender examples use separately declared source
+frames; their specific maps are recorded on the [Unity](unity.md),
+[Godot](godot.md), and [Blender](blender.md) pages rather than added here as
+universal engine-pair mappings.
+
+The reported SciPy results and their limits are summarized in
+[verification](verification.md). Runtime comparison is still needed for the
+engine and asset pipeline actually targeted.

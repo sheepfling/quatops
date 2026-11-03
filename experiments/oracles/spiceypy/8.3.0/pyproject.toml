@@ -1,0 +1,9 @@
+[project]
+name = "quatops-spiceypy-oracle"
+version = "0.1.0"
+description = "Pinned CSPICE/SpiceyPy rotation convention capture"
+requires-python = ">=3.10,<3.14"
+dependencies = ["spiceypy==8.3.0"]
+
+[tool.uv]
+package = false

@@ -1,0 +1,6 @@
+# Ignore editor output left at the version-index root after project versioning.
+/Library/
+/Logs/
+/Temp/
+/UserSettings/
+/capture.log

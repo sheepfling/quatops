@@ -1,0 +1,22 @@
+{
+  "name": "quatops-oracle-wave2",
+  "private": true,
+  "type": "module",
+  "version": "0.1.0",
+  "engines": {"node": ">=22.0.0"},
+  "scripts": {
+    "capture:cesium": "node capture_cesium.mjs",
+    "capture:three": "node capture_three.mjs",
+    "validate:gltf": "node validate_gltf.mjs"
+  },
+  "dependencies": {
+    "cesium": "1.124.0",
+    "three": "0.187.0",
+    "gltf-validator": "2.0.0-dev.3.10"
+  },
+  "overrides": {
+    "@cesium/engine": "13.0.0",
+    "@cesium/widgets": "10.0.0",
+    "@zip.js/zip.js": "2.7.34"
+  }
+}

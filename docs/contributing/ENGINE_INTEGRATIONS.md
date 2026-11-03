@@ -20,7 +20,7 @@ Record these facts for the actual data and API being connected:
 Handedness describes the coordinate basis; it does not decide Hamilton versus
 JPL algebra. A passive transform must be inverted before applying the active
 rotation formula. Reordering four coefficients does not convert Hamilton to
-JPL. The [trajectory guide](../engines/trajectory.md) explains these boundaries.
+JPL. The [trajectory guide](trajectory.md) explains these boundaries.
 
 ## Implement the lowest-cost boundary
 
@@ -62,15 +62,14 @@ choice explicit.
 Run the focused and complete suites when changing implementation code:
 
 ```sh
-.venv/bin/python -m pytest -q tests/test_engine_basis_oracle.py
-.venv/bin/python -m pytest -q
+.venv/bin/pytest -q tests/test_engine_basis_oracle.py
+.venv/bin/pytest -q
 ```
 
-For the repository's current test commands and dependency setup, see the
-[contributor verification guide](VERIFICATION.md). Native runtime checks for
-Unreal are tracked in [issue #4](https://github.com/sheepfling/quatops/issues/4);
-Unity and Godot runtime checks are tracked in
-[issue #7](https://github.com/sheepfling/quatops/issues/7).
+The SciPy basis oracle and upstream Euler fixture suites cover the shared math
+separately from the native engine captures. The latest complete QuatOps run,
+including the Unreal, Unity, Godot, and Blender fixture suites, is recorded in
+[verification](verification.md) with its interpreter and dependency versions.
 
 ## Establish engine-runtime correctness
 
@@ -91,7 +90,18 @@ engine integration is runtime-verified:
 6. Exercise one real imported asset and confirm its model-forward and up axes
    after import. Record importer settings separately from the world-basis map.
 
-Keep this runtime evidence distinct from the SciPy oracle evidence. The current
-checkout has no Unreal, Unity, or Godot runtime test result; see issues
-[#4](https://github.com/sheepfling/quatops/issues/4) and
-[#7](https://github.com/sheepfling/quatops/issues/7).
+Keep this runtime evidence distinct from the SciPy oracle evidence. This
+checkout records versioned native captures for Unreal 5.7.4 Rotator/FQuat,
+Unity 6000.5.2f1, Godot 4.7 stable and 4.8-dev1, and Blender 5.1.2. Their
+shared proof categories include Euler branch samples, matrix conversion,
+axis-angle, rotation vectors, native shortest-path SLERP, normalization edges,
+basis action, composition, and explicit source-frame probes. Unreal and Godot
+also expose a captured full-path route; the selected Unity and Blender APIs do
+not. Unity rotation vectors are reconstructed through axis-angle APIs. Both
+Godot captures cover all six `Basis` Euler orders; Blender adds all six
+`mathutils.Euler` orders, animation continuity trajectories, and swing-twist
+decomposition. Supplementary Godot from-to behavior is recorded on the Godot
+page. These fixtures do not test imported assets, so they establish pinned
+conversion/API behavior rather than complete engine integration validation.
+See the [proof matrix](proof-matrix.md) and
+[verification](verification.md).

@@ -1,0 +1,97 @@
+{
+  "schema_version": "1.0",
+  "capture_id": "1.124.0",
+  "oracle_id": "cesium",
+  "oracle_family": "cesium",
+  "evidence_kind": "native_runtime",
+  "product": {
+    "name": "cesium",
+    "version": "1.124",
+    "source_revision": null,
+    "binary_sha256": "b3f6cdc71976a3ee80bd91d8941ecd9630b9cdc1035fe31dfb5c445e0d7f177a",
+    "binary_identity_note": "Hash is resolved JavaScript entry; dependency graph and npm integrity are recorded separately",
+    "dependencies": [
+      {
+        "name": "npm lock",
+        "sha256": "c2ae7e7b309ac57116dfbe977a1227a8701e62d6ef28c3fb814d5dbb96b6d439"
+      },
+      {
+        "name": "Node",
+        "version": "v24.21.0"
+      },
+      {
+        "name": "V8",
+        "version": "13.6.233.17-node.53"
+      }
+    ]
+  },
+  "execution": {
+    "was_run": true,
+    "utc": "2026-11-03T04:26:14.662Z",
+    "argv": [
+      "C:\\Users\\peanu\\scoop\\apps\\nodejs-lts\\current\\node.exe",
+      "C:\\Users\\peanu\\GIT\\sheepfling\\quatops\\experiments\\quatops_capture_wave2\\js\\capture_cesium.mjs",
+      "--output",
+      "C:\\Users\\peanu\\GIT\\sheepfling\\quatops\\tests\\golden\\oracles\\cesium\\1.124.0"
+    ],
+    "exit_code": 0,
+    "platform": "win32",
+    "architecture": "x64",
+    "runtime": "v24.21.0",
+    "compiler_flags": []
+  },
+  "precision": {
+    "input": "binary64 JavaScript Number; format buffers separately labelled",
+    "arithmetic": "JavaScript Number; no GPU",
+    "output": "binary64 API values; internal buffer types not inferred",
+    "serialized": "JSON plus IEEE bits"
+  },
+  "exporter": {
+    "path": "C:\\Users\\peanu\\GIT\\sheepfling\\quatops\\experiments\\quatops_capture_wave2\\js\\capture_cesium.mjs",
+    "sha256": "5fa77fa70c798fa18a7c891a03b290c96b08edc3af5f2d044b6cb1f7a4f10acd",
+    "commit": null
+  },
+  "corpus": {
+    "path": "C:\\Users\\peanu\\GIT\\sheepfling\\quatops\\experiments\\quatops_capture_wave2\\corpus\\orientation_inputs_v1.json",
+    "sha256": "07e4d809f7eb75ad6e5454febf2b725b0b8fb389536743dd7196566d4640135f"
+  },
+  "artifacts": [
+    {
+      "path": "observations.jsonl",
+      "sha256": "559fec631c9cfb7bd7bf17303ebd6a9e154354d1d41c925086e17c4fabe93a48",
+      "role": "raw_native_observations"
+    },
+    {
+      "path": "npm-resolved.json",
+      "sha256": "6b38ce0e02cb3db89ebcb372f42f4576b7e05f1ce64afbf2e9a6034499bab980",
+      "role": "resolved_dependencies"
+    },
+    {
+      "path": "C:\\Users\\peanu\\GIT\\sheepfling\\quatops\\experiments\\quatops_capture_wave2\\corpus\\cesium_geographic_inputs.json",
+      "sha256": "ca5c70314444c14cead0cc196f319e5d189657bb818eb59751c07e55ec23ff85",
+      "role": "input_asset"
+    }
+  ],
+  "coverage": {
+    "profiles": [
+      "EULER",
+      "ALGEBRA",
+      "MATRIX",
+      "ACTION",
+      "INTERPOLATION",
+      "FRAME"
+    ],
+    "independent_input_count": 118,
+    "native_observation_count": 171,
+    "quatops_replay_count": 0
+  },
+  "review": {
+    "state": "captured_not_reviewed",
+    "reviewer": null,
+    "limitations": [
+      "No Model/glTF import, rendering, CZML, ICRF or time-dependent EOP transforms.",
+      "Exact-pole ENU values are native fallback evidence, not a universal geographic east direction.",
+      "This exporter was syntax-checked only in the delivery environment; new manifest proves actual execution."
+    ]
+  }
+}

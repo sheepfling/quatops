@@ -1,0 +1,12 @@
+{
+  "name": "quatops-gltf-threejs-oracle-0-187-0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "capture": "node capture_loader.mjs"
+  },
+  "dependencies": {
+    "gltf-validator": "2.0.0-dev.3.10",
+    "three": "0.187.0"
+  }
+}

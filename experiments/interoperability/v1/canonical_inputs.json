@@ -1,0 +1,37 @@
+{
+  "schema_version": 1,
+  "contract_id": "quatops-canonical-hamilton-wxyz-active-rh-v1",
+  "contract": {
+    "algebra": "Hamilton",
+    "coefficient_order": "wxyz",
+    "rotation_action": "active",
+    "vector_action": "q * (0, v) * conjugate(q)",
+    "matrix_action": "column vectors",
+    "coordinate_system": "right-handed",
+    "construction_angle_units": "radians",
+    "normalization": "unit quaternion",
+    "frame_mapping": "source and destination frames are explicit"
+  },
+  "source_frame": {
+    "handedness": "right-handed",
+    "positive_x": "right",
+    "positive_y": "forward",
+    "positive_z": "up"
+  },
+  "probe_vector_xyz": [0.25, -1.5, 2.75],
+  "orientations": [
+    {
+      "case_id": "mixed_a",
+      "canonical_wxyz": [0.5, 0.5, -0.5, 0.5]
+    },
+    {
+      "case_id": "mixed_b",
+      "canonical_wxyz": [0.5, -0.5, -0.5, -0.5]
+    }
+  ],
+  "composition": {
+    "left_case_id": "mixed_a",
+    "right_case_id": "mixed_b",
+    "product_order": "lhs * rhs; rhs acts first"
+  }
+}

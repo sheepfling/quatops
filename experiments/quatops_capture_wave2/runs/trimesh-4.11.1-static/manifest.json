@@ -1,0 +1,145 @@
+{
+  "schema_version": "1.0",
+  "capture_id": "trimesh-4.11.1-static",
+  "oracle_id": "gltf_trimesh",
+  "oracle_family": "trimesh",
+  "evidence_kind": "native_runtime",
+  "product": {
+    "name": "Trimesh glTF loader",
+    "version": "4.11.1",
+    "source_revision": null,
+    "binary_sha256": null,
+    "binary_identity_note": "Not exposed; see dependency identities and limitations",
+    "dependencies": [
+      {
+        "name": "numpy",
+        "version": "2.3.5"
+      },
+      {
+        "name": "trimesh.exchange.gltf source",
+        "sha256": "5edd4d6987e15fe1ae0874faca835affd15eb61814930781969df00a6bcbb109"
+      }
+    ]
+  },
+  "execution": {
+    "was_run": true,
+    "utc": "2026-11-03T02:47:59.287292+00:00",
+    "argv": [
+      "/opt/pyvenv/bin/python",
+      "/mnt/data/quatops_capture_wave2/exporters/capture_gltf_trimesh.py",
+      "--output",
+      "runs/trimesh-4.11.1-static"
+    ],
+    "exit_code": 0,
+    "platform": "Linux-6.18.57-x86_64-with-glibc2.41",
+    "architecture": "x86_64",
+    "runtime": "3.13.5 (main, Jul 15 2026, 20:25:40) [GCC 14.2.0]",
+    "compiler_flags": [],
+    "compiler_flags_note": "Vendor native flags not inferred from host Python"
+  },
+  "precision": {
+    "input": "JSON binary64 values and buffer binary32",
+    "arithmetic": "NumPy/native library implementation",
+    "output": "NumPy array dtype per field",
+    "serialized": "JSON plus explicit IEEE bits"
+  },
+  "exporter": {
+    "path": "/mnt/data/quatops_capture_wave2/exporters/capture_gltf_trimesh.py",
+    "sha256": "efb906392eed88684c0ccc4cde49705cfa75b36208f74cace50d2e6a91eb8584",
+    "commit": null
+  },
+  "corpus": {
+    "path": "/mnt/data/quatops_capture_wave2/corpus/orientation_inputs_v1.json",
+    "sha256": "07e4d809f7eb75ad6e5454febf2b725b0b8fb389536743dd7196566d4640135f"
+  },
+  "artifacts": [
+    {
+      "path": "observations.jsonl",
+      "sha256": "f1790153e0acc9f2b188e6aae04f1f252c32ce9de96ff4450eb82abd4c154482",
+      "role": "raw_native_observations"
+    },
+    {
+      "path": "/mnt/data/quatops_capture_wave2/assets/gltf/cubic.glb",
+      "sha256": "5f13a69aef29673a6d19f32fdae32b1928f38b64abd93953f523b2f23dfe5a86",
+      "role": "input_asset"
+    },
+    {
+      "path": "/mnt/data/quatops_capture_wave2/assets/gltf/cubic.gltf",
+      "sha256": "223a5e991e67f11b372011dfd528c2c9cf5fe422ecd3b3632d63e28f8bb8415d",
+      "role": "input_asset"
+    },
+    {
+      "path": "/mnt/data/quatops_capture_wave2/assets/gltf/cubic_all_negated.glb",
+      "sha256": "b4de43c9b3b0ae7ff967832b75de5f104550672541b934ac9d2d8b8f14791d39",
+      "role": "input_asset"
+    },
+    {
+      "path": "/mnt/data/quatops_capture_wave2/assets/gltf/cubic_all_negated.gltf",
+      "sha256": "49e4c2ad267eaadd03e57a8d49de0dec6e022f5632268d291cc899d827e84574",
+      "role": "input_asset"
+    },
+    {
+      "path": "/mnt/data/quatops_capture_wave2/assets/gltf/cubic_middle_negated.glb",
+      "sha256": "50636fe851a27fae350c1b723d815c18f00e7d0b9e8fd6fe697a3702102ba32c",
+      "role": "input_asset"
+    },
+    {
+      "path": "/mnt/data/quatops_capture_wave2/assets/gltf/cubic_middle_negated.gltf",
+      "sha256": "9ba375d630b74e545f70fd8eeef113a09b08463829a61ee4b69f753db90a29a7",
+      "role": "input_asset"
+    },
+    {
+      "path": "/mnt/data/quatops_capture_wave2/assets/gltf/linear.glb",
+      "sha256": "81e0da0de6c9f4e7f39d81d975d8c578182382ae0cce73599e1fc347da6d7019",
+      "role": "input_asset"
+    },
+    {
+      "path": "/mnt/data/quatops_capture_wave2/assets/gltf/linear.gltf",
+      "sha256": "3a123a0c6317134b8d5b92785bcd4cb18101fece0ba4ce436d8df0b6b47c5adc",
+      "role": "input_asset"
+    },
+    {
+      "path": "/mnt/data/quatops_capture_wave2/assets/gltf/static_hierarchy.glb",
+      "sha256": "56c2e0f2069039bcacc7082c0ec11c85a435d79c9498a60f2feffd31c274bec1",
+      "role": "input_asset"
+    },
+    {
+      "path": "/mnt/data/quatops_capture_wave2/assets/gltf/static_hierarchy.gltf",
+      "sha256": "8c2045301f786ab1e06c5d35421405385a9204713b917a914c3c1f8da7ee3a40",
+      "role": "input_asset"
+    },
+    {
+      "path": "/mnt/data/quatops_capture_wave2/assets/gltf/step.glb",
+      "sha256": "10cd2062a979191fbf7a42ca741eb14ae91b4f36541a40a71978af29bb935d6d",
+      "role": "input_asset"
+    },
+    {
+      "path": "/mnt/data/quatops_capture_wave2/assets/gltf/step.gltf",
+      "sha256": "db267453fef530742cb2acdd8a45dda5b54dc89bd46e46c9892f447ee3547111",
+      "role": "input_asset"
+    }
+  ],
+  "coverage": {
+    "profiles": [
+      "FORMAT",
+      "MATRIX",
+      "FRAME"
+    ],
+    "independent_input_count": 12,
+    "native_observation_count": 12,
+    "quatops_replay_count": 0,
+    "status_counts": {
+      "ok": 12
+    },
+    "record_count": 12
+  },
+  "review": {
+    "state": "captured_not_reviewed",
+    "reviewer": null,
+    "limitations": [
+      "Static pose only. No Trimesh animation sampling claim.",
+      "Trimesh bundled JSON-schema validation is not execution of Khronos glTF-Validator.",
+      "No QuatOps adapter replay; interpreted scene graph is raw consumer evidence."
+    ]
+  }
+}

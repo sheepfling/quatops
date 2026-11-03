@@ -1,0 +1,42 @@
+{
+  "asset_sha256": "50636fe851a27fae350c1b723d815c18f00e7d0b9e8fd6fe697a3702102ba32c",
+  "validator_version": "2.0.0-dev.3.10",
+  "report": {
+    "uri": "cubic_middle_negated.glb",
+    "mimeType": "model/gltf-binary",
+    "validatorVersion": "2.0.0-dev.3.10",
+    "validatedAt": "2026-11-03T04:24:43.857Z",
+    "issues": {
+      "numErrors": 0,
+      "numWarnings": 0,
+      "numInfos": 0,
+      "numHints": 0,
+      "messages": [],
+      "truncated": false
+    },
+    "info": {
+      "version": "2.0",
+      "generator": "QuatOps orientation capture inputs v2 (spec-derived, not native)",
+      "resources": [
+        {
+          "pointer": "/buffers/0",
+          "mimeType": "application/gltf-buffer",
+          "storage": "glb",
+          "byteLength": 228
+        }
+      ],
+      "animationCount": 1,
+      "materialCount": 0,
+      "hasMorphTargets": false,
+      "hasSkins": false,
+      "hasTextures": false,
+      "hasDefaultScene": true,
+      "drawCallCount": 1,
+      "totalVertexCount": 4,
+      "totalTriangleCount": 4,
+      "maxUVs": 0,
+      "maxInfluences": 0,
+      "maxAttributes": 1
+    }
+  }
+}

@@ -67,3 +67,7 @@ The report distinguishes direct Numba paths, compositions that reuse compiled
 kernels, and ordinary NumPy vectorization. The compatibility tests also check
 that registered dispatchers compile when Numba is installed. Correctness tests
 remain runnable without Numba through the NumPy fallbacks.
+
+## Interoperability evidence index
+
+The consolidated engine, oracle, transport, and layer-capture inventory is in [INTEROPERABILITY_EVIDENCE.md](../INTEROPERABILITY_EVIDENCE.md). Canonical converter acceptance details are in [CAP-300](../engines/CAP-300.md).

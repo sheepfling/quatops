@@ -1,0 +1,135 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.invalid/quatops/observation.schema.json",
+  "title": "Native observation envelope; add operation-specific schemas in the repository",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "case_id",
+    "operation_id",
+    "native_entry_point",
+    "status",
+    "contract",
+    "native_inputs",
+    "native_outputs",
+    "diagnostic"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "1.0"
+    },
+    "case_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "operation_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "native_entry_point": {
+      "type": "string",
+      "minLength": 1
+    },
+    "status": {
+      "enum": [
+        "ok",
+        "rejected",
+        "nonfinite",
+        "unsupported",
+        "process_failed",
+        "not_run"
+      ]
+    },
+    "contract": {
+      "type": "object",
+      "required": [
+        "units",
+        "quaternion_order",
+        "matrix_action",
+        "frame_direction"
+      ],
+      "properties": {
+        "units": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "quaternion_order": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "matrix_action": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "frame_direction": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      }
+    },
+    "native_inputs": {
+      "type": "object",
+      "description": "Actual post-binding input values, labelled by argument, with dtype and bit patterns."
+    },
+    "native_outputs": {
+      "type": "object",
+      "description": "Unmodified native outputs; tagged nonfinite values; no QuatOps-derived expected values."
+    },
+    "diagnostic": {
+      "type": [
+        "string",
+        "null"
+      ]
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "status": {
+            "const": "ok"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "native_outputs": {
+            "minProperties": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "status": {
+            "enum": [
+              "rejected",
+              "nonfinite",
+              "unsupported",
+              "process_failed",
+              "not_run"
+            ]
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "diagnostic": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    }
+  ]
+}

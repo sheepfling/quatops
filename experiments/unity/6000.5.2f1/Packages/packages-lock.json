@@ -1,0 +1,10 @@
+{
+  "dependencies": {
+    "com.unity.mathematics": {
+      "version": "1.4.0",
+      "depth": 0,
+      "source": "builtin",
+      "dependencies": {}
+    }
+  }
+}

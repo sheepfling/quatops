@@ -1,0 +1,25 @@
+version = 1
+revision = 3
+requires-python = "==3.14.*"
+
+[[package]]
+name = "quatops-openusd-transport-oracle"
+version = "0.1.0"
+source = { virtual = "." }
+dependencies = [
+    { name = "usd-core" },
+]
+
+[package.metadata]
+requires-dist = [{ name = "usd-core", specifier = "==26.11" }]
+
+[[package]]
+name = "usd-core"
+version = "26.11"
+source = { registry = "https://pypi.org/simple" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/90/72/7b25d64f3e61594e1a1365720f0383942a43c755a36ff4cee722ccc96c3f/usd_core-26.11-cp314-none-macosx_10_15_universal2.whl", hash = "sha256:24d8bdedc4696cdde55b31f7dcb934dcc2deab33f6f7aaa35db221cc4787cb4b", size = 41184150, upload-time = "2026-10-21T05:54:32.647Z" },
+    { url = "https://files.pythonhosted.org/packages/52/d9/e35aa71ce55987db5a22e144f9acbc5ac134d094bfc574c05f86716c6b51/usd_core-26.11-cp314-none-manylinux_2_27_aarch64.manylinux_2_28_aarch64.whl", hash = "sha256:543ea11f24416aa98e3d956374c6c443b8d621348708ef4711c02b7fb452e8db", size = 27804713, upload-time = "2026-10-21T05:54:35.544Z" },
+    { url = "https://files.pythonhosted.org/packages/d3/62/9eab0e48278156c375c13a96592732981779603ac0a9080f42546a288441/usd_core-26.11-cp314-none-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:c3684b90075c56f986e96860142ee586092ba202a12a2b70512c5a05b0ea1af1", size = 28805780, upload-time = "2026-10-21T05:54:38.839Z" },
+    { url = "https://files.pythonhosted.org/packages/39/dd/d8e391d9a7a08e73334e69822e86d2e20181fcc4d698c74a098a171afdd2/usd_core-26.11-cp314-none-win_amd64.whl", hash = "sha256:9f31e6a1a6b81242b9856660efe3a5f37d5df02c8c065cfbd8a376a1d51f5911", size = 13652934, upload-time = "2026-10-21T05:54:41.467Z" },
+]

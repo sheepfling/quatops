@@ -7,7 +7,8 @@ import numpy as np
 import pytest
 from scipy.spatial.transform import Rotation, Slerp
 
-from quatops.engines import SignedAxisMap
+from quatops.engines import QuaternionFrameMap, SignedAxisMap, change_rotation_basis
+from quatops.engines import blender, godot, unity, unreal
 from quatops.engines import numpy as engine_numpy
 from quatops.numpy.hamilton import xyzw as hamilton_xyzw
 from quatops.types.hamilton_dataclass import Quaternion as HamiltonDataclass
@@ -37,6 +38,36 @@ def _matrix_from_axes(axes):
     return matrix
 
 
+@pytest.mark.parametrize(
+    "engine,adapter,native_order",
+    (
+        ("unreal", unreal, "xyzw"),
+        ("unity", unity, "xyzw"),
+        ("godot", godot, "xyzw"),
+        ("blender", blender, "wxyz"),
+    ),
+)
+@pytest.mark.parametrize("axes", tuple(_all_signed_axes()))
+def test_named_engine_adapters_roundtrip_every_signed_axis_map(
+    engine, adapter, native_order, axes
+):
+    axis_map = SignedAxisMap(axes)
+    frame_map = QuaternionFrameMap(axis_map, axis_map)
+    source_xyzw = Rotation.from_rotvec((0.7, -0.4, 1.1)).as_quat()
+    source_wxyz = source_xyzw[[3, 0, 1, 2]]
+    expected_xyzw = axis_map.map_hamilton_wxyz(source_wxyz)
+    expected_native = (
+        expected_xyzw
+        if native_order == "xyzw"
+        else (expected_xyzw[3], expected_xyzw[0], expected_xyzw[1], expected_xyzw[2])
+    )
+
+    native = getattr(adapter, f"to_{engine}")(source_wxyz, frame_map)
+    np.testing.assert_array_equal(native, expected_native)
+    recovered = getattr(adapter, f"from_{engine}")(native, frame_map)
+    np.testing.assert_array_equal(recovered, source_wxyz)
+
+
 @pytest.mark.parametrize("axes", tuple(_all_signed_axes()))
 def test_scalar_maps_match_scipy_rotation_matrix_for_all_signed_axis_maps(axes):
     rng = np.random.default_rng(0xE113 + sum(map(ord, "".join(axes))))
@@ -59,9 +90,102 @@ def test_scalar_maps_match_scipy_rotation_matrix_for_all_signed_axis_maps(axes):
         np.stack([axis_map.map_jpl_xyzw(q) for q in source_jpl_xyzw]),
         np.stack([axis_map.map_jpl_wxyz(q) for q in source_jpl_wxyz]),
     )
+    np.testing.assert_array_equal(mapped_values[0], mapped_values[1])
+    np.testing.assert_array_equal(mapped_values[0], mapped_values[2])
+    np.testing.assert_array_equal(mapped_values[0], mapped_values[3])
     for mapped in mapped_values:
         actual = Rotation.from_quat(mapped).as_matrix()
         np.testing.assert_allclose(actual, expected, rtol=0.0, atol=2e-14)
+
+
+@pytest.mark.parametrize("axes", tuple(_all_signed_axes()))
+def test_signed_axis_map_inverse_roundtrips_vectors_and_orientations(axes):
+    forward = SignedAxisMap(axes)
+    reverse = forward.inverse()
+    vector = np.asarray((0.25, -1.5, 2.75))
+    quaternion_xyzw = Rotation.from_rotvec((0.7, -0.4, 1.1)).as_quat()
+
+    np.testing.assert_array_equal(reverse.vector(forward.vector(vector)), vector)
+    assert reverse.determinant == forward.determinant
+    np.testing.assert_array_equal(
+        np.asarray(reverse.matrix), np.asarray(forward.matrix).T
+    )
+
+    target_xyzw = forward.map_hamilton_xyzw(quaternion_xyzw)
+    source_roundtrip = reverse.map_hamilton_xyzw(target_xyzw)
+    np.testing.assert_allclose(
+        Rotation.from_quat(source_roundtrip).as_matrix(),
+        Rotation.from_quat(quaternion_xyzw).as_matrix(),
+        rtol=0.0,
+        atol=2e-14,
+    )
+
+
+def test_separate_world_and_body_maps_transform_rotation_matrices():
+    maps = tuple(SignedAxisMap(axes) for axes in _all_signed_axes())
+    rotation = Rotation.from_rotvec((0.7, -0.4, 1.1)).as_matrix()
+
+    for world_map in maps:
+        world = _matrix_from_axes(world_map.destination_axes)
+        for body_map in maps:
+            body = _matrix_from_axes(body_map.destination_axes)
+            actual = np.asarray(
+                change_rotation_basis(rotation, world_map, body_map)
+            )
+            expected = world @ rotation @ body.T
+            np.testing.assert_allclose(actual, expected, rtol=0.0, atol=2e-15)
+            expected_determinant = world_map.determinant * body_map.determinant
+            assert np.linalg.det(actual) == pytest.approx(expected_determinant, abs=2e-15)
+
+
+def test_rotation_matrix_basis_change_defaults_body_map_to_world_map():
+    axis_map = SignedAxisMap(("y", "-z", "x"))
+    rotation = Rotation.from_rotvec((0.7, -0.4, 1.1)).as_matrix()
+    expected = _matrix_from_axes(axis_map.destination_axes) @ rotation @ _matrix_from_axes(
+        axis_map.destination_axes
+    ).T
+    np.testing.assert_allclose(
+        change_rotation_basis(rotation, axis_map), expected, rtol=0.0, atol=2e-15
+    )
+
+
+def test_quaternion_frame_map_handles_separate_world_and_body_frames():
+    maps = tuple(SignedAxisMap(axes) for axes in _all_signed_axes())
+    source_xyzw = Rotation.from_rotvec((0.7, -0.4, 1.1)).as_quat()
+    source_wxyz = source_xyzw[[3, 0, 1, 2]]
+    source_matrix = Rotation.from_quat(source_xyzw).as_matrix()
+
+    for world_map in maps:
+        world = _matrix_from_axes(world_map.destination_axes)
+        for body_map in maps:
+            body = _matrix_from_axes(body_map.destination_axes)
+            if world_map.determinant != body_map.determinant:
+                with pytest.raises(ValueError, match="same determinant"):
+                    QuaternionFrameMap(world_map, body_map)
+                continue
+
+            frame_map = QuaternionFrameMap(world_map, body_map)
+            destination_wxyz = frame_map.to_destination_wxyz(source_wxyz)
+            destination_xyzw = np.asarray(destination_wxyz)[[1, 2, 3, 0]]
+            expected_matrix = world @ source_matrix @ body.T
+            np.testing.assert_allclose(
+                Rotation.from_quat(destination_xyzw).as_matrix(),
+                expected_matrix,
+                rtol=0.0,
+                atol=3e-14,
+            )
+
+            source_roundtrip = frame_map.from_destination_wxyz(destination_wxyz)
+            np.testing.assert_allclose(
+                Rotation.from_quat(np.asarray(source_roundtrip)[[1, 2, 3, 0]]).as_matrix(),
+                source_matrix,
+                rtol=0.0,
+                atol=3e-14,
+            )
+            negative_result = frame_map.to_destination_wxyz(-source_wxyz)
+            np.testing.assert_allclose(
+                negative_result, -np.asarray(destination_wxyz), rtol=0.0, atol=3e-14
+            )
 
 
 def test_numpy_maps_preserve_layout_dtype_and_match_scipy():

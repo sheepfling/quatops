@@ -1,0 +1,12 @@
+import assert from 'node:assert/strict';
+import { numeric } from './capture_io.mjs';
+const f32=numeric([0,-0,1.25,Infinity,NaN],'binary32');
+assert.equal(f32.ieee754_hex_be[1],'80000000');
+assert.equal(f32.ieee754_hex_be[2],'3fa00000');
+assert.deepEqual(f32.values[3],{nonfinite:'+inf'});
+assert.deepEqual(f32.values[4],{nonfinite:'nan'});
+assert.deepEqual(f32.shape,[5]);
+const f64=numeric([[1,-0],[2,3]]);
+assert.deepEqual(f64.shape,[2,2]);
+assert.equal(f64.ieee754_hex_be[1],'8000000000000000');
+console.log('JavaScript numeric serialization checks passed; no external target runtime was executed.');

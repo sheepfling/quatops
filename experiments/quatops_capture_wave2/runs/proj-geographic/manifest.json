@@ -1,0 +1,85 @@
+{
+  "schema_version": "1.0",
+  "capture_id": "proj-geographic",
+  "oracle_id": "proj_geographic",
+  "oracle_family": "proj",
+  "evidence_kind": "native_runtime",
+  "product": {
+    "name": "PROJ via pyproj",
+    "version": "9.5.1",
+    "source_revision": null,
+    "binary_sha256": "49dd659f375b93cf4916d7612ca47dca960d6d5d7347bfc53b4ab673d78e29c3",
+    "binary_identity_note": "/opt/pyvenv/lib/python3.13/site-packages/pyproj/_transformer.cpython-313-x86_64-linux-gnu.so",
+    "dependencies": [
+      {
+        "name": "pyproj",
+        "version": "3.7.2"
+      }
+    ]
+  },
+  "execution": {
+    "was_run": true,
+    "utc": "2026-11-03T02:53:07.613026+00:00",
+    "argv": [
+      "/opt/pyvenv/bin/python",
+      "/mnt/data/quatops_capture_wave2/exporters/capture_proj.py",
+      "--output",
+      "runs/proj-geographic"
+    ],
+    "exit_code": 0,
+    "platform": "Linux-6.18.57-x86_64-with-glibc2.41",
+    "architecture": "x86_64",
+    "runtime": "3.13.5 (main, Jul 15 2026, 20:25:40) [GCC 14.2.0]",
+    "compiler_flags": [],
+    "compiler_flags_note": "Vendor native flags not inferred from host Python"
+  },
+  "precision": {
+    "input": "binary64 geographic degrees/metres",
+    "arithmetic": "native PROJ double",
+    "output": "binary64",
+    "serialized": "JSON plus IEEE bits"
+  },
+  "exporter": {
+    "path": "/mnt/data/quatops_capture_wave2/exporters/capture_proj.py",
+    "sha256": "8211253a2d97a9453890b8a695af02f0c79069419deca9ce7e7dc0b4211a48b1",
+    "commit": null
+  },
+  "corpus": {
+    "path": "/mnt/data/quatops_capture_wave2/corpus/cesium_geographic_inputs.json",
+    "sha256": "ca5c70314444c14cead0cc196f319e5d189657bb818eb59751c07e55ec23ff85"
+  },
+  "artifacts": [
+    {
+      "path": "observations.jsonl",
+      "sha256": "d908e22625445f11e0167b136587cfe511161885f22f35fddea53b5e6069e20d",
+      "role": "raw_native_observations"
+    },
+    {
+      "path": "/mnt/data/quatops_capture_wave2/corpus/cesium_geographic_inputs.json",
+      "sha256": "ca5c70314444c14cead0cc196f319e5d189657bb818eb59751c07e55ec23ff85",
+      "role": "geographic_input_corpus"
+    }
+  ],
+  "coverage": {
+    "profiles": [
+      "FRAME"
+    ],
+    "independent_input_count": 11,
+    "native_observation_count": 11,
+    "quatops_replay_count": 0,
+    "status_counts": {
+      "ok": 11
+    },
+    "record_count": 11
+  },
+  "review": {
+    "state": "captured_not_reviewed",
+    "reviewer": null,
+    "limitations": [
+      "This is PROJ execution, NOT Cesium execution.",
+      "Local Cartesian point transforms only; no quaternion/HPR function is inferred from these outputs.",
+      "At geographic poles longitude fixes a convention; Cesium may choose a different exact-pole fallback.",
+      "Network disabled; WGS84 ellipsoid only, no external datum grids."
+    ]
+  }
+}

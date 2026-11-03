@@ -1,0 +1,11 @@
+{
+  "name": "quatops-threejs-oracle-0-187-0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "capture": "node capture_three.mjs"
+  },
+  "dependencies": {
+    "three": "0.187.0"
+  }
+}

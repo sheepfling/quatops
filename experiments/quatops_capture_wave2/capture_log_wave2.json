@@ -1,0 +1,73 @@
+{
+  "schema_version": "1.0",
+  "quatops_executed": false,
+  "repository_modified": false,
+  "success_observations": 399,
+  "not_run_observations": 6,
+  "pytest_tests_passed": 179,
+  "targets": [
+    {
+      "id": "CAP-100",
+      "target": "ROS2_tf2",
+      "state": "exporter_written_compile_pending",
+      "native_executed": false,
+      "scope": "C++ BufferCore/math/message exporter; runtime and compile pending"
+    },
+    {
+      "id": "CAP-095",
+      "target": "Cesium",
+      "state": "syntax_checked_runtime_pending",
+      "native_executed": false,
+      "scope": "Local HPR and geographic ENU/ECEF; npm lockfile pending"
+    },
+    {
+      "id": "CAP-120",
+      "target": "OpenUSD",
+      "state": "syntax_checked_runtime_pending",
+      "native_executed": false,
+      "scope": "Gf f32/f64 and UsdGeom stages; native stage validation pending"
+    },
+    {
+      "id": "CAP-110",
+      "target": "glTF_VTK_Trimesh",
+      "state": "native_captured_reference_checked",
+      "native_executed": true,
+      "scope": "124 observations; Khronos and Three.js pending"
+    },
+    {
+      "id": "CAP-080",
+      "target": "OpenCV_Rodrigues",
+      "state": "native_captured_reference_checked_with_diagnostics",
+      "native_executed": true,
+      "scope": "264 observations; 26 inverse-boundary diagnostics retained"
+    },
+    {
+      "id": "CAP-096",
+      "target": "PROJ_support",
+      "state": "native_captured_reference_checked",
+      "native_executed": true,
+      "scope": "11 geographic records; not a Cesium runtime"
+    },
+    {
+      "id": "CAP-090",
+      "target": "ThreeJS",
+      "state": "syntax_checked_runtime_pending",
+      "native_executed": false,
+      "scope": "Math and GLTFLoader exporter; npm lockfile pending"
+    },
+    {
+      "id": "CAP-050",
+      "target": "CSPICE",
+      "state": "syntax_checked_runtime_pending",
+      "native_executed": false,
+      "scope": "Subset exporter; qdq2av and Euler pending"
+    },
+    {
+      "id": "CAP-070",
+      "target": "MuJoCo",
+      "state": "syntax_checked_runtime_pending",
+      "native_executed": false,
+      "scope": "Derivative/integration subset exporter"
+    }
+  ]
+}

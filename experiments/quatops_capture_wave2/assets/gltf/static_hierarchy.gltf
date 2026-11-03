@@ -1,0 +1,128 @@
+{
+  "asset": {
+    "version": "2.0",
+    "generator": "QuatOps orientation capture inputs v2 (spec-derived, not native)"
+  },
+  "scene": 0,
+  "scenes": [
+    {
+      "nodes": [
+        0
+      ]
+    }
+  ],
+  "nodes": [
+    {
+      "name": "Parent",
+      "translation": [
+        3.0,
+        5.0,
+        -7.0
+      ],
+      "rotation": [
+        0,
+        0,
+        0.7071067811865476,
+        0.7071067811865476
+      ],
+      "children": [
+        1,
+        2
+      ]
+    },
+    {
+      "name": "Probe",
+      "translation": [
+        1.25,
+        -2.5,
+        3.75
+      ],
+      "rotation": [
+        0.3651483716701107,
+        0.5477225575051661,
+        0.7302967433402214,
+        0.18257418583505536
+      ],
+      "mesh": 0
+    },
+    {
+      "name": "ProbeMatrix",
+      "matrix": [
+        -0.6666666666666666,
+        0.6666666666666666,
+        0.3333333333333333,
+        0,
+        0.13333333333333333,
+        -0.3333333333333333,
+        0.9333333333333333,
+        0,
+        0.7333333333333333,
+        0.6666666666666666,
+        0.13333333333333333,
+        0,
+        1.25,
+        -2.5,
+        3.75,
+        1
+      ],
+      "mesh": 0
+    }
+  ],
+  "bufferViews": [
+    {
+      "buffer": 0,
+      "byteOffset": 0,
+      "byteLength": 48,
+      "target": 34962
+    },
+    {
+      "buffer": 0,
+      "byteOffset": 48,
+      "byteLength": 24,
+      "target": 34963
+    }
+  ],
+  "accessors": [
+    {
+      "bufferView": 0,
+      "componentType": 5126,
+      "count": 4,
+      "type": "VEC3",
+      "min": [
+        0,
+        0,
+        0
+      ],
+      "max": [
+        1,
+        2,
+        3
+      ]
+    },
+    {
+      "bufferView": 1,
+      "componentType": 5123,
+      "count": 12,
+      "type": "SCALAR"
+    }
+  ],
+  "meshes": [
+    {
+      "name": "AsymmetricProbe",
+      "primitives": [
+        {
+          "attributes": {
+            "POSITION": 0
+          },
+          "indices": 1
+        }
+      ]
+    }
+  ],
+  "buffers": [
+    {
+      "byteLength": 72,
+      "uri": "data:application/octet-stream;base64,AAAAAAAAAAAAAAAAAACAPwAAAAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAEBAAAACAAEAAAABAAMAAAADAAIAAQACAAMA"
+    }
+  ]
+}
