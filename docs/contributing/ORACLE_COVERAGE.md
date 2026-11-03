@@ -111,6 +111,13 @@ branch-policy exception next to the tests. Run the full suite with the local
   [`test_oracle_edge_contracts.py`](../../tests/test_oracle_edge_contracts.py),
   [`test_numpy_layouts.py`](../../tests/test_numpy_layouts.py), and
   [`test_numpy_component_axes.py`](../../tests/test_numpy_component_axes.py).
+- Accuracy and failure examples for algebra, analytic functions, and attitude
+  operations: [`test_algebra_numeric_contract.py`](../../tests/test_algebra_numeric_contract.py),
+  [`test_analytic_numeric_contract.py`](../../tests/test_analytic_numeric_contract.py), and
+  [`test_attitude_numeric_contract.py`](../../tests/test_attitude_numeric_contract.py).
+  These examples do not establish a uniform error bound for all inputs.
+- Exact binary64 component rounding for `rotate(..., accurate=True)`:
+  [`test_rotation_componentwise_accuracy.py`](../../tests/test_rotation_componentwise_accuracy.py).
 
 The logarithm of a negative real uses the positive first coefficient axis in
 both Hamilton and JPL algebraic representations. At this singular input, a

@@ -43,7 +43,10 @@ class HamiltonNamespaceTests:
     def test_convention_is_chosen_by_module_without_a_parameter(self):
         for legacy, explicit in ALL_PAIRS:
             assert tuple(inspect.signature(explicit.multiply).parameters) == ('lhs', 'rhs')
-            assert tuple(inspect.signature(explicit.rotate).parameters) == ('q', 'v')
+            parameters = inspect.signature(explicit.rotate).parameters
+            assert tuple(parameters) == ('q', 'v', 'accurate')
+            assert parameters['accurate'].kind is inspect.Parameter.KEYWORD_ONLY
+            assert parameters['accurate'].default is False
             assert tuple(explicit.from_wxyz((2, 3, 4, 5))) == (2, 3, 4, 5)
             assert tuple(explicit.to_wxyz((2, 3, 4, 5))) == (2, 3, 4, 5)
             for fn in (explicit.from_wxyz, explicit.to_wxyz):
@@ -56,7 +59,10 @@ class HamiltonNamespaceTests:
     def test_explicit_jpl_conversions_change_convention_not_only_storage(self):
         for backend in JPL_MODULES:
             assert tuple(inspect.signature(backend.multiply).parameters) == ('lhs', 'rhs')
-            assert tuple(inspect.signature(backend.rotate).parameters) == ('q', 'v')
+            parameters = inspect.signature(backend.rotate).parameters
+            assert tuple(parameters) == ('q', 'v', 'accurate')
+            assert parameters['accurate'].kind is inspect.Parameter.KEYWORD_ONLY
+            assert parameters['accurate'].default is False
             for fn in (backend.from_hamilton, backend.to_hamilton):
                 hints = get_type_hints(fn)
                 assert 'q' in hints

@@ -59,6 +59,8 @@ rotated = jpl_xyzw.rotate(q, (1, 0, 0))
 ```
 
 The NumPy modules also provide vectorized operations over arrays and batches.
+For extreme inputs, `rotate(q, v, accurate=True)` rounds each exact binary64
+component once; see the [accuracy contract](docs/API.md#componentwise-rotation-accuracy).
 
 ## Choose an API
 

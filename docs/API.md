@@ -125,8 +125,8 @@ scalar results remain built-in floats. The component-input annotations use a
 these APIs intentionally do not preserve input precision or type. Complex
 values, strings, and values that cannot convert to a finite float are rejected.
 
-NumPy operations do not select a convention or layout at runtime and do not
-convert inputs on each call.
+NumPy operations do not select or convert conventions or layouts at runtime.
+They validate inputs and cast them to float64 as needed.
 
 The standard NumPy modules store the four quaternion coefficients on the last
 axis: quaternions have shape `(..., 4)` and vectors have shape `(..., 3)`. The
@@ -207,7 +207,7 @@ algebra specified above; their names and composition order are shared.
 | `norm_squared(q)` | Squared Euclidean coefficient norm | Real scalar or array of scalars |
 | `normalize(q)` | Divide by the norm; `q` must be nonzero | Unit quaternion |
 | `inverse(q)` | Multiplicative inverse; `q` must be nonzero | Quaternion |
-| `rotate(q, v)` | Active quaternion action; `q` must be nonzero | Three-component vector |
+| `rotate(q, v, *, accurate=False)` | Active quaternion action; `q` must be nonzero | Three-component vector |
 | `to_rotation_matrix(q)` | Norm-aware active 3×3 rotation matrix; `q` must be nonzero | Matrix |
 | `to_left_matrix(q)` | Matrix `L(q)` such that `L(q) r = multiply(q, r)` | Matrix |
 | `to_right_matrix(q)` | Matrix `P(q)` such that `P(q) r = multiply(r, q)` | Matrix |
@@ -301,8 +301,12 @@ definition; it raises `ValueError` when `cosh(q)` is zero.
 complex function to the slice `w + r*i`, then map its imaginary part back onto
 the input vector direction. This is independent of the Hamilton/JPL product
 sign. For a real input outside the real function's domain, the selected slice
-uses +X as its imaginary direction. The usual complex branch cuts apply;
-singularities whose result is not finite raise `OverflowError`.
+uses +X as its imaginary direction. The usual complex branch cuts apply.
+For singular arguments such as the real quaternions `+1` and `-1` passed to
+`atanh`, scalar and NumPy scalar-fallback calls raise `ValueError`. An
+accelerated NumPy batch can instead produce a non-finite intermediate and raise
+`OverflowError`. An evaluated result that is non-finite also raises
+`OverflowError`.
 
 `expm1(q)` computes `exp(q) - 1` with a power series near zero, preserving
 small results that direct subtraction would round away. `log1p(q)` similarly
@@ -547,8 +551,9 @@ active, right-handed attitude and `omega` is a physical angular-velocity
 vector in radians per second, constant over `dt`. It forms the rotation vector
 `omega * dt`, then right-composes its increment for `frame='body'` and
 left-composes it for `frame='world'`. Inputs are normalized and the result is
-unit length. This is exact for constant angular velocity; it is not a
-time-varying numerical integrator. `dt` may be negative. NumPy broadcasts
+unit length. The method is exact in real arithmetic for constant angular
+velocity; its floating-point result is rounded, and it is not a time-varying
+numerical integrator. `dt` may be negative. NumPy broadcasts
 quaternion and angular-velocity leading dimensions.
 
 The exponential and logarithm follow the algebraic formulas in Joan Solà's
@@ -597,6 +602,40 @@ positive cross-product term and JPL the negative term, independently of
 `wxyz` or `xyzw` storage. The resulting matrix maps column vectors, so
 `R @ v` agrees with `rotate(q, v)`; a passive coordinate transform is its
 transpose.
+
+### Componentwise rotation accuracy
+
+`rotate(q, v, accurate=True)` computes the exact active rotation of the
+finite binary64 values obtained after input conversion, then rounds each
+component once to binary64 using round to nearest, ties to even. This includes
+subnormal results and cancellation across components. An exact zero is returned
+as positive zero; a nonzero result that rounds to zero retains its sign. If a
+component rounds to infinity, the operation raises `OverflowError`.
+
+This option is available for the Hamilton and JPL scalar and typed modules,
+and for all NumPy coefficient orders and component-axis layouts. NumPy
+broadcasts normally and rejects the whole call if any result overflows. The
+accurate path uses integer arithmetic per vector, so it is slower and does not
+use the optional Numba rotation kernel. It guarantees results for the values
+*after* conversion to binary64; it cannot recover precision lost when inputs
+were converted from another type. Other operations, including
+`to_rotation_matrix`, do not have this guarantee.
+
+For example, Hamilton `rotate((5, 12, 13, 0), (1e308, 1, 1),
+accurate=True)` returns `17/13` rounded to binary64 for the first component.
+The corresponding JPL quaternion is `(-12, -13, 0, 5)` in `xyzw` or
+`(5, -12, -13, 0)` in `wxyz`.
+
+For Hamilton `q=(1, 1, 1e-8, 0)` and `v=(0, 1e-300, 0)`, the accurate
+middle component is `5e-317` after rounding. The default NumPy calculation
+can lose that subnormal component.
+
+The default `accurate=False` uses the existing floating-point rotation
+kernels. They reduce avoidable overflow but do not guarantee a componentwise
+error bound: quaternion ratios and products can underflow, and cancellation
+can lose accuracy. In the example above the first component can be near
+`1.11e292`. Choose `accurate=True` when small components matter at extreme
+scales.
 
 The multiplication 4×4 matrices act on quaternion coefficient vectors, not
 on 3D points. `to_left_matrix(q)` satisfies `L(q) @ r == multiply(q, r)`, while
@@ -662,6 +701,43 @@ For example, if `u` is the smallest positive binary64 subnormal, the current
 `3*u`; the exact magnitudes are just below `2.5*u` and round to `2*u`. This is
 a documented double-rounding limit, not a correctly-rounded conversion guarantee.
 
+## Numerical accuracy and failures
+
+Unless an operation states a stronger guarantee, its mathematical formula
+describes the intended result after the inputs are converted to binary64.
+Intermediate products, sums, and function evaluations are rounded, and no
+library-wide relative, absolute, or ULP error bound is promised. In
+particular, cancellation and underflow can lose an output component even when
+its exact value is representable. Scalar, NumPy, and optional accelerated
+paths need not return bit-identical results. Test tolerances are checks for
+the tested inputs, not an error bound for every input.
+
+| Operation family | Numerical behavior and limits |
+| --- | --- |
+| Component reordering, sign, and convention conversions | Validate and reorder or negate converted components; they do not recover information lost during input conversion. Canonicalization also chooses a sign and normalizes signed zeros as documented. |
+| Algebra, products, quotients, and `dot` | Intermediate multiplication and summation can round, underflow, or overflow. `dot` uses compensated or exact fallback calculations for some cases; that is not a correct-rounding guarantee for every input. |
+| `norm`, `norm_squared`, `normalize`, and `inverse` | The norm, normalization, and inverse use scaling to handle many extreme magnitudes. `norm_squared` can underflow even when `norm` is nonzero; a finite nonzero quaternion can have an inverse outside the float range. |
+| Algebraic and inverse analytic functions | Principal branches and singularities are defined above. Results depend on floating-point and platform/NumPy mathematical functions, with no general correctly rounded guarantee. |
+| Rotation, matrix, Euler, axis-angle, rotation-vector, and SO(3) conversions | Normalization, trigonometric functions, and branch or tolerance choices can lose precision near extreme scales or singularities. Only `rotate(..., accurate=True)` has the componentwise rounding guarantee described above. |
+| Interpolation, local updates, and angular-velocity integration | Unit results and formulas are computed in finite precision; branch selection, extrapolation, and nearly singular endpoints affect conditioning. Constant-rate integration is exact as a mathematical method, subject to arithmetic rounding. |
+| Alignment, rotation statistics, and random sampling | Estimator tolerances, convergence limits, ambiguous samples, and finite-precision eigenvalue calculations affect the result. Sampling behavior also depends on the supplied random generator. |
+
+For example, let `u = math.nextafter(0.0, 1.0)`. The exact coefficient dot
+product of `(u, u, 0, 0)` and `(0.5, 0.5, 0, 0)` is `u`. A small NumPy call
+can return zero because both products underflow before summation, while a
+scalar or another NumPy execution path can preserve the result. Likewise,
+`divide((u, 0, 0, 0), (u, 0, 0, 0))` can raise `OverflowError` while forming
+the inverse, even though the exact quotient is the identity. The latter example
+uses Hamilton `wxyz`; JPL scalar inputs place the scalar coefficient last.
+
+`ValueError` reports invalid inputs or an undefined operation, such as a zero
+quaternion passed to `normalize`. Scalar and NumPy paths can report a complex
+function singularity differently, as described above. `OverflowError`
+reports a result or intermediate calculation outside the floating-point range;
+it does not always imply that the exact mathematical result is unrepresentable.
+`RuntimeError` reports nonconvergence of the intrinsic rotation mean. Specific
+domain, tolerance, and branch rules are documented with each operation above.
+
 ## Conventions and errors
 
 - Hamilton and JPL quaternion storage and products differ as defined above.
@@ -678,19 +754,11 @@ a documented double-rounding limit, not a correctly-rounded conversion guarantee
 - Arithmetic that produces a non-finite result raises `OverflowError`. Norm,
   normalization, and inverse use scaled calculations to reduce avoidable
   overflow or underflow; finite underflow and rounding follow floating-point
-  arithmetic. Rotation scales the quaternion and forms each output component
-  separately, combining opposite-signed terms to reduce avoidable overflow.
-  Coefficients and individual products are rounded to float64; extreme
-  quaternion ratios and tiny products can underflow, and cancellation can lose
-  relative accuracy. In particular, Hamilton rotation of vector
-  `(1e308, 1, 1)` by `(5, 12, 13, 0)` currently returns a first component
-  near `1.11e292` instead of `17/13`; the corresponding JPL quaternion is
-  `(-12, -13, 0, 5)` in `xyzw` or `(5, -12, -13, 0)` in `wxyz`. Further
-  accuracy work and regression criteria are tracked in
-  [issue #6](https://github.com/sheepfling/quatops/issues/6). Other operations
-  can overflow in intermediate calculations even when their exact result is representable.
-  NumPy suppresses floating-point warnings locally, checks results, and preserves
-  the caller's `numpy.seterr` configuration. Inputs are not mutated.
+  arithmetic. The `accurate=True` rotation option has the stronger contract
+  described in [componentwise rotation accuracy](#componentwise-rotation-accuracy).
+  Other operations can overflow in intermediate calculations even when their
+  exact result is representable. NumPy preserves the caller's `numpy.seterr`
+  configuration. Inputs are not mutated.
 
 ## Current scope
 

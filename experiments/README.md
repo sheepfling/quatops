@@ -27,14 +27,29 @@ Install optional experiment dependencies when needed:
 | `homogeneous-numpy` | Run a batched NumPy rotation prototype example | NumPy |
 | `homogeneous-benchmark` | Time experimental and current rotation kernels | NumPy |
 | `rotation-benchmark` | Compare rotation formulas with Fraction and Decimal references | NumPy, SciPy |
+| `rotation_accuracy_comparison.py` | Compare componentwise accuracy and benchmark certified candidates | NumPy |
 | `numpy-layout-benchmark` | Compare NumPy convention and layout paths | NumPy |
 | `convention-benchmark` | Compare matched Hamilton/JPL operations across representations | NumPy |
 | `one_off_benchmark.py` | Compare scalar hot/cold paths and optional vectorized backends | `dev` extra |
 | `numba_coverage.py` | Report public API routes and compiled dispatcher signatures | Numba optional |
 
-The homogeneous and high-precision rotation programs are research prototypes,
-not production implementations. Their correctness and future work are tracked
-in [issue #6](https://github.com/sheepfling/quatops/issues/6).
+The homogeneous rotation programs are research prototypes. Their compensated
+coefficients improve some cancellation cases, but scaling, underflow and the
+final dot product still lose components on the adversarial reference set. They
+are not production implementations.
+
+`rotation_accuracy_comparison.py` compares those prototypes, a small-integer
+fast path with exact fallback, and the explicit `accurate=True` path. The
+integer candidate has a zero-error bound on its documented input domain and
+uses the exact path elsewhere. It remains an experiment because that domain
+is narrow; no general inexpensive error detector has been established. The
+comparison checks accuracy before timing either candidate and saves run
+details outside the repository:
+
+```sh
+PYTHONPATH=src .venv/bin/python experiments/rotation_accuracy_comparison.py \
+    --json /tmp/quatops-rotation-accuracy.json
+```
 
 ## Run performance benchmarks
 

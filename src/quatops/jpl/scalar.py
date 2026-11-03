@@ -404,8 +404,18 @@ def canonicalize(q: Iterable[FloatT]) -> Quaternion:
     return _canonical(_quaternion(q))
 
 
-def rotate(q: Iterable[FloatT], v: Iterable[FloatT]) -> Vector:
-    """Return the active right-handed rotation ``q ⊙ (v,0) ⊙ inverse(q)``."""
+def rotate(q: Iterable[FloatT], v: Iterable[FloatT], *, accurate: bool = False) -> Vector:
+    """Return the active right-handed rotation ``q ⊙ (v,0) ⊙ inverse(q)``.
+
+    Set ``accurate=True`` to round each exact binary64 result once.
+    """
+    if accurate is True:
+        from .._rotation_accurate import rotate_accurate
+
+        x, y, z, w = _quaternion(q)
+        return rotate_accurate((w, -x, -y, -z), _vector(v))
+    if accurate is not False:
+        raise ValueError("accurate must be a bool")
     _, (x, y, z, w) = _scaled(_quaternion(q))
     vx, vy, vz = _vector(v)
     w2, x2, y2, z2 = w*w, x*x, y*y, z*z
