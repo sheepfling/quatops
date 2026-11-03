@@ -63,57 +63,10 @@ The NumPy modules also provide vectorized operations over arrays and batches.
 
 ## Choose an API
 
-Select the convention and representation at import time. QuatOps does not need
-to dispatch on those choices or convert conventions on every call.
-
-### Convention
-
-Choose the convention used by the system that provides or consumes your
-quaternions. Hamilton uses the positive vector cross term; JPL uses the negative
-one. In QuatOps, both backends expose active, right-handed rotations.
-
-Coefficient order is a separate choice: `wxyz` and `xyzw` specify where the
-scalar coefficient `w` appears. They do **not** select Hamilton or JPL.
-Use a JPL module's `from_hamilton` or `to_hamilton` to convert conventions;
-reordering components alone does not perform that conversion.
-
-If the source system does not state its convention, verify its multiplication
-rule rather than inferring it from coefficient order.
-
-### Representation
-
-| Representation | Pick it when |
-| --- | --- |
-| Plain Python tuple | You want ordinary values, minimal representation overhead, and no third-party runtime dependency. |
-| `NamedTuple` | You want named immutable fields and tuple-style unpacking. |
-| Frozen slotted dataclass | You want named immutable attributes and do not need tuple indexing. |
-| NumPy array | You want vectorized operations over arrays or batches and already use NumPy. |
-
-Use these fully specified module paths for new code:
-
-| Representation | Hamilton | JPL |
-| --- | --- | --- |
-| Plain Python tuple | `quatops.python.hamilton` | `quatops.python.jpl` |
-| `NamedTuple` | `quatops.types.hamilton_namedtuple` | `quatops.types.jpl_namedtuple` |
-| Frozen slotted dataclass | `quatops.types.hamilton_dataclass` | `quatops.types.jpl_dataclass` |
-| NumPy, `wxyz` coefficient order | `quatops.numpy.hamilton.wxyz` | `quatops.numpy.jpl.wxyz` |
-| NumPy, `xyzw` coefficient order | `quatops.numpy.hamilton.xyzw` | `quatops.numpy.jpl.xyzw` |
-
-Call operations through the selected module so the convention stays visible at
-each call site. Plain tuples and NumPy arrays carry no convention tag; explicitly
-convert values before passing them to another convention.
-
-### NumPy layout
-
-Choose `wxyz` or `xyzw` to match the coefficient order expected by the
-surrounding code. The standard modules place the quaternion component axis
-last: `(..., 4)`.
-
-Use a `components_first` module when that axis belongs at axis 0: `(4, ...)`.
-For example, `quatops.numpy.jpl.components_first.xyzw` accepts arrays with shape
-`(4, ...)`, with components ordered `x, y, z, w` along axis 0.
-
-Coefficient order and component-axis placement are independent choices.
+Select Hamilton or JPL convention, value representation, and component layout
+at import time. The canonical module paths, compatibility aliases, conversion
+rules, and representation tradeoffs are documented in the
+[API contract](docs/API.md).
 
 ## How QuatOps fits
 
@@ -153,11 +106,5 @@ validation behavior, and numerical limits. The
 [documentation map](docs/README.md) collects contributor setup, verification,
 performance timing, and research experiments.
 
-The package retains alternative import paths for compatibility. In particular,
-`quatops.scalar` is the historical Hamilton tuple backend and stores
-coefficients in `wxyz` order. Here, `scalar` names that historical API;
-the scalar coefficient is the real component `w`.
-
-See [alternative import paths](docs/API.md#alternative-import-paths) for the
-full list. These paths do not auto-detect or convert conventions. Use the
-fully specified module paths above for new code.
+The package retains alternative import paths for compatibility. Use the
+canonical paths in the API contract for new code.

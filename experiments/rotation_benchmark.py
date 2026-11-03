@@ -15,13 +15,25 @@ def frac_rot(q: Iterable[float] | ndarray, v: Iterable[float] | ndarray) -> tupl
     w, x, y, z = map(F.from_float, map(float, q))
     vx, vy, vz = map(F.from_float, map(float, v))
     den = w * w + x * x + y * y + z * z
-    return tuple(
-        float((a * vx + b * vy + c * vz) / den)
-        for a, b, c in (
-            (w * w + x * x - y * y - z * z, 2 * (x * y - w * z), 2 * (x * z + w * y)),
-            (2 * (x * y + w * z), w * w - x * x + y * y - z * z, 2 * (y * z - w * x)),
-            (2 * (x * z - w * y), 2 * (y * z + w * x), w * w - x * x - y * y + z * z),
-        )
+    return (
+        float(
+            ((w * w + x * x - y * y - z * z) * vx
+             + 2 * (x * y - w * z) * vy
+             + 2 * (x * z + w * y) * vz)
+            / den
+        ),
+        float(
+            (2 * (x * y + w * z) * vx
+             + (w * w - x * x + y * y - z * z) * vy
+             + 2 * (y * z - w * x) * vz)
+            / den
+        ),
+        float(
+            (2 * (x * z - w * y) * vx
+             + 2 * (y * z + w * x) * vy
+             + (w * w - x * x - y * y + z * z) * vz)
+            / den
+        ),
     )
 
 def decimal_rot(q: Iterable[float], v: Iterable[float]) -> tuple[float, ...]:
@@ -30,25 +42,25 @@ def decimal_rot(q: Iterable[float], v: Iterable[float]) -> tuple[float, ...]:
         w, x, y, z = map(Decimal.from_float, map(float, q))
         vx, vy, vz = map(Decimal.from_float, map(float, v))
         den = w * w + x * x + y * y + z * z
-        return tuple(
-            float((a * vx + b * vy + c * vz) / den)
-            for a, b, c in (
-                (
-                    w * w + x * x - y * y - z * z,
-                    2 * (x * y - w * z),
-                    2 * (x * z + w * y),
-                ),
-                (
-                    2 * (x * y + w * z),
-                    w * w - x * x + y * y - z * z,
-                    2 * (y * z - w * x),
-                ),
-                (
-                    2 * (x * z - w * y),
-                    2 * (y * z + w * x),
-                    w * w - x * x - y * y + z * z,
-                ),
-            )
+        return (
+            float(
+                ((w * w + x * x - y * y - z * z) * vx
+                 + 2 * (x * y - w * z) * vy
+                 + 2 * (x * z + w * y) * vz)
+                / den
+            ),
+            float(
+                (2 * (x * y + w * z) * vx
+                 + (w * w - x * x + y * y - z * z) * vy
+                 + 2 * (y * z - w * x) * vz)
+                / den
+            ),
+            float(
+                (2 * (x * z - w * y) * vx
+                 + 2 * (y * z + w * x) * vy
+                 + (w * w - x * x - y * y + z * z) * vz)
+                / den
+            ),
         )
 
 def main() -> None:

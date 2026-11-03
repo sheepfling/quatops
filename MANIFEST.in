@@ -4,5 +4,4 @@ graft src
 graft tests
 prune docs
 prune experiments
-exclude .gitignore
 global-exclude *.py[cod]
