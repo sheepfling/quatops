@@ -5,3 +5,9 @@ experiments/oracles/** -text
 experiments/transports/** -text
 tests/golden/oracles/** -text
 tests/golden/transports/** -text
+experiments/blender/** -text
+experiments/godot/** -text
+experiments/interoperability/** -text
+experiments/unity/** -text
+experiments/unreal/** -text
+tests/oracles/** -text
