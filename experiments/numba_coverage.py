@@ -447,13 +447,15 @@ def collect_numba_coverage() -> dict[str, Any]:
         )
     kernels.append(_describe_kernel("rotate", _numpy._NUMBA_ROTATE))
     summary = {
-        state: sum(item["state"] == state for item in kernels)
-        for state in ("compiled", "registered", "missing", "unknown")
+        **{
+            state: sum(item["state"] == state for item in kernels)
+            for state in ("compiled", "registered", "missing", "unknown")
+        },
+        "api_routes": sum(
+            len(names) for routes in api_catalog.values() for names in routes.values()
+        ),
+        "api_expected": len(_api_catalog_names()[1]),
     }
-    summary["api_routes"] = sum(
-        len(names) for routes in api_catalog.values() for names in routes.values()
-    )
-    summary["api_expected"] = len(_api_catalog_names()[1])
     return {
         "numba_available": True,
         "python": platform.python_version(),

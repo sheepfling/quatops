@@ -56,25 +56,25 @@ def action_curves(action):
                 bag = strip.channelbag(slot)
                 if bag is None:
                     continue
-                for curve in bag.fcurves:
-                    rows.append(
-                        {
-                            "slot_identifier": slot.identifier,
-                            "data_path": curve.data_path,
-                            "array_index": curve.array_index,
-                            "keys": [
-                                {
-                                    "interpolation": point.interpolation,
-                                    "handle_left_type": point.handle_left_type,
-                                    "handle_right_type": point.handle_right_type,
-                                }
-                                for point in curve.keyframe_points
-                            ],
-                            "key_frames": [
-                                float(point.co.x) for point in curve.keyframe_points
-                            ],
-                        }
-                    )
+                rows.extend(
+                    {
+                        "slot_identifier": slot.identifier,
+                        "data_path": curve.data_path,
+                        "array_index": curve.array_index,
+                        "keys": [
+                            {
+                                "interpolation": point.interpolation,
+                                "handle_left_type": point.handle_left_type,
+                                "handle_right_type": point.handle_right_type,
+                            }
+                            for point in curve.keyframe_points
+                        ],
+                        "key_frames": [
+                            float(point.co.x) for point in curve.keyframe_points
+                        ],
+                    }
+                    for curve in bag.fcurves
+                )
     if not rows:
         raise RuntimeError(f"No F-curves in action {action.name!r}")
     key_frames = rows[0]["key_frames"]
@@ -104,6 +104,13 @@ def install_action(object_, action):
     object_.animation_data.action = action
     if len(action.slots):
         object_.animation_data.action_slot = action.slots[0]
+
+
+def require_object(name):
+    object_ = bpy.data.objects.get(name)
+    if object_ is None:
+        raise RuntimeError(f"Blender importer did not create object {name!r}")
+    return object_
 
 
 def set_scene_time(scene, seconds):
@@ -144,21 +151,22 @@ def main():
         "source_axis_y",
         "source_axis_z",
     ]
-    static = {}
-    objects = {}
-    for name in names:
-        object_ = bpy.data.objects.get(name)
-        if object_ is None:
-            raise RuntimeError(f"Blender importer did not create object {name!r}")
-        objects[name] = object_
-        if name in {"parent_frame", "static_trs", "static_matrix"}:
-            static[name] = object_transform(object_)
+    objects = {name: require_object(name) for name in names}
+    static_names = {"parent_frame", "static_trs", "static_matrix"}
+    static = {
+        name: object_transform(objects[name]) for name in names if name in static_names
+    }
 
     origin = objects["source_axis_origin"].matrix_world.translation.copy()
-    axis_images = {}
-    for axis in "xyz":
-        point = objects[f"source_axis_{axis}"].matrix_world.translation.copy()
-        axis_images[axis] = [float(component) for component in point - origin]
+    axis_images = {
+        axis: [
+            float(component)
+            for component in (
+                objects[f"source_axis_{axis}"].matrix_world.translation.copy() - origin
+            )
+        ]
+        for axis in "xyz"
+    }
 
     animations = []
     for interpolation, node_name, action_name in (
@@ -174,7 +182,10 @@ def main():
             )
         install_action(object_, action)
         curves = action_curves(action)
-        curve_frames = curves.pop("key_frames")
+        curve_frames = curves["key_frames"]
+        fcurves = {
+            name: values for name, values in curves.items() if name != "key_frames"
+        }
         time_values = sorted(
             {frame * scene.render.fps_base / scene.render.fps for frame in curve_frames}
         )
@@ -221,7 +232,7 @@ def main():
                 "action_name": action.name,
                 "target_object": object_.name,
                 "key_times_seconds_from_imported_fcurves": time_values,
-                "fcurves": curves,
+                "fcurves": fcurves,
                 "samples": sample_rows,
             }
         )
@@ -231,15 +242,16 @@ def main():
     asset_binary = asset_path.with_suffix(".bin")
     version_directory = executable.parent / f"{bpy.app.version[0]}.{bpy.app.version[1]}"
     importer_root = version_directory / "scripts" / "addons_core" / "io_scene_gltf2"
-    importer_sources = {}
-    for relative in (
+    importer_paths = (
         Path("blender/imp/animation_node.py"),
         Path("blender/imp/animation_utils.py"),
         Path("blender/imp/node.py"),
-    ):
-        source_path = importer_root / relative
-        if source_path.exists():
-            importer_sources[relative.as_posix()] = sha256_file(source_path)
+    )
+    importer_sources = {
+        relative.as_posix(): sha256_file(importer_root / relative)
+        for relative in importer_paths
+        if (importer_root / relative).exists()
+    }
     result = {
         "schema_version": "1.0",
         "evidence_kind": "native_blender_gltf_importer_capture",

@@ -30,8 +30,26 @@ def main() -> None:
     run = read_evidence_document(capture / "manifest.json")
     observations = read_evidence_rows(capture / "observations.json")
     inputs = read_evidence_document(HERE / "converter_inputs.json")
-    if len(observations) != len(inputs["cases"]) or len(observations) != 5:
-        raise ValueError("unexpected Cesium converter capture case count")
+    case_ids = [case["case_id"] for case in inputs["cases"]]
+    if len(case_ids) != len(set(case_ids)):
+        raise ValueError("Cesium converter inputs contain duplicate case IDs")
+    matches_by_id = {
+        case_id: [row for row in observations if row.get("case_id") == case_id]
+        for case_id in case_ids
+    }
+    duplicate_ids = [
+        case_id for case_id, matches in matches_by_id.items() if len(matches) > 1
+    ]
+    if duplicate_ids:
+        raise ValueError(
+            f"duplicate Cesium capture case IDs: {', '.join(duplicate_ids)}"
+        )
+    missing_ids = [case_id for case_id, matches in matches_by_id.items() if not matches]
+    if missing_ids:
+        raise ValueError(
+            f"Cesium capture is missing selected cases: {', '.join(missing_ids)}"
+        )
+    selected_observations = [matches_by_id[case_id][0] for case_id in case_ids]
 
     DESTINATION.mkdir(parents=True, exist_ok=True)
     inputs_path = DESTINATION / "inputs.json"
@@ -42,7 +60,7 @@ def main() -> None:
             "case_id": row["case_id"],
             "outputs": compact_numeric_evidence(row["outputs"]),
         }
-        for row in observations
+        for row in selected_observations
     ]
     witnesses_path.write_text(
         dump_evidence_json(
@@ -105,6 +123,7 @@ def main() -> None:
     )
     source_inputs = ROOT / "experiments/interoperability/v1/canonical_inputs.json"
     geo_inputs = ROOT / "experiments/converters/cesium/1.124.0/geographic_inputs.json"
+    native_numeric_helper_sha256 = run.get("numeric_helper_sha256")
     manifest = {
         "schema_version": "1.0",
         "review_state": (
@@ -120,7 +139,7 @@ def main() -> None:
             "canonical_inputs_sha256": sha256(source_inputs),
             "geographic_inputs_sha256": sha256(geo_inputs),
             "native_capture_script_sha256": run["exporter"]["sha256"],
-            "native_numeric_helper_sha256": run["numeric_helper_sha256"],
+            "native_numeric_helper_sha256": native_numeric_helper_sha256,
             "native_package_lock_sha256": run["package_lock_sha256"],
             "witnesses_sha256": sha256(witnesses_path),
             "contract_sha256": sha256(contract_path),
@@ -137,7 +156,7 @@ def main() -> None:
             "geographic_inputs_sha256": sha256(geo_inputs),
         },
         "selection": {
-            "retained_observations": len(observations),
+            "retained_observations": len(selected_observations),
             "native_observations": run["observations"]["count"],
             "policy": (
                 "retain identity, mixed orientations, an antipode, a "
@@ -152,7 +171,9 @@ def main() -> None:
     (DESTINATION / "manifest.json").write_text(
         dump_evidence_json(manifest), encoding="utf-8", newline="\n"
     )
-    print(f"retained {len(observations)} Cesium converter witnesses at {DESTINATION}")
+    print(
+        f"retained {len(selected_observations)} Cesium converter witnesses at {DESTINATION}"
+    )
 
 
 if __name__ == "__main__":

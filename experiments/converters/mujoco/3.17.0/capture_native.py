@@ -66,18 +66,14 @@ def main() -> None:
     selected = [by_id[case_id] for case_id in spec["retained_case_ids"]]
     probe = np.asarray(shared["probe_vector_xyz"], dtype=np.float64)
 
-    observations = {
-        "canonical_to_native": [
-            capture_quaternion(
-                row["case_id"],
-                np.asarray(row["canonical_wxyz"], dtype=np.float64),
-                probe,
-            )
-            for row in selected
-        ],
-        "native_created": [],
-        "composition": [],
-    }
+    canonical_to_native = [
+        capture_quaternion(
+            row["case_id"],
+            np.asarray(row["canonical_wxyz"], dtype=np.float64),
+            probe,
+        )
+        for row in selected
+    ]
     ctor = spec["native_constructed_orientation"]
     qnative = np.empty(4, dtype=np.float64)
     mujoco.mju_axisAngle2Quat(
@@ -85,32 +81,42 @@ def main() -> None:
         np.asarray(ctor["axis_xyz"], dtype=np.float64),
         float(ctor["angle_radians"]),
     )
-    native_created = capture_quaternion(ctor["case_id"], qnative, probe)
-    native_created["native_constructor"] = "mju_axisAngle2Quat(axis, angle)"
-    native_created["native_mju_mat2Quat_from_constructor_matrix_wxyz"] = native_created[
-        "native_mju_mat2Quat_roundtrip_wxyz"
-    ]
-    observations["native_created"].append(native_created)
+    native_created_capture = capture_quaternion(ctor["case_id"], qnative, probe)
+    native_created = {
+        **native_created_capture,
+        "native_constructor": "mju_axisAngle2Quat(axis, angle)",
+        "native_mju_mat2Quat_from_constructor_matrix_wxyz": list(
+            native_created_capture["native_mju_mat2Quat_roundtrip_wxyz"]
+        ),
+    }
 
     pair = {
         row["case_id"]: np.asarray(row["canonical_wxyz"], dtype=np.float64)
         for row in selected
     }
     a, b = pair["mixed_a"], pair["mixed_b"]
-    for case_id, lhs, rhs in (
-        ("mixed_a_times_mixed_b", a, b),
-        ("mixed_b_times_mixed_a", b, a),
-    ):
+
+    def compose(case_id, lhs, rhs):
         product = np.empty(4, dtype=np.float64)
         mujoco.mju_mulQuat(product, lhs, rhs)
-        observations["composition"].append(
-            capture_quaternion(case_id, product, probe)
-            | {
-                "native_lhs_wxyz": lhs.tolist(),
-                "native_rhs_wxyz": rhs.tolist(),
-                "product_order": "lhs * rhs; rhs acts first",
-            }
+        return capture_quaternion(case_id, product, probe) | {
+            "native_lhs_wxyz": lhs.tolist(),
+            "native_rhs_wxyz": rhs.tolist(),
+            "product_order": "lhs * rhs; rhs acts first",
+        }
+
+    composition = [
+        compose(case_id, lhs, rhs)
+        for case_id, lhs, rhs in (
+            ("mixed_a_times_mixed_b", a, b),
+            ("mixed_b_times_mixed_a", b, a),
         )
+    ]
+    observations = {
+        "canonical_to_native": canonical_to_native,
+        "native_created": [native_created],
+        "composition": composition,
+    }
 
     package_dir = Path(mujoco.__file__).resolve().parent
     native_files = []

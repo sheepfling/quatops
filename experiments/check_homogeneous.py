@@ -113,23 +113,27 @@ def compare_one(
 
 def extra_checks(module: ModuleType) -> bool:
     print("  API checks:")
-    passed = 0
-    for q, v in (
+    cases = (
         ((0, 0, 0, 0), (1, 0, 0)),
         ((1, 0, 0), (1, 0, 0)),
         ((1, 0, 0, 0), (1, 0)),
         ((float("nan"), 0, 0, 0), (1, 0, 0)),
-    ):
-        try:
-            module.rotate(q, v)
-        except ValueError:
-            print("   PASS rejects", q, v)
-            passed += 1
-        except (ArithmeticError, TypeError, IndexError) as exc:
-            print("   FAIL rejects", q, v, type(exc).__name__, str(exc))
-        else:
-            print("   FAIL accepts", q, v)
-    return passed == 4
+    )
+    results = [_check_invalid_input(module, q, v) for q, v in cases]
+    return all(results)
+
+
+def _check_invalid_input(module: ModuleType, q, v) -> bool:
+    try:
+        module.rotate(q, v)
+    except ValueError:
+        print("   PASS rejects", q, v)
+        return True
+    except (ArithmeticError, TypeError, IndexError) as exc:
+        print("   FAIL rejects", q, v, type(exc).__name__, str(exc))
+    else:
+        print("   FAIL accepts", q, v)
+    return False
 
 
 def array_checks(module: ModuleType) -> bool:

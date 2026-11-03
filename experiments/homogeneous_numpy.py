@@ -73,8 +73,8 @@ def rotate(q: object, v: object) -> NDArray[np.float64]:
         # making the homogeneous matrix coefficients bounded by 1.
         q = np.ldexp(q, -exponent - 1)
         shape = np.broadcast_shapes(q.shape[:-1], v.shape[:-1])
-        q = np.broadcast_to(q, shape + (4,))
-        v = np.broadcast_to(v, shape + (3,))
+        q = np.broadcast_to(q, (*shape, 4))
+        v = np.broadcast_to(v, (*shape, 3))
         w, x, y, z = np.moveaxis(q, -1, 0)
         vx, vy, vz = np.moveaxis(v, -1, 0)
         norm2 = _coefficient(((w, w, 1), (x, x, 1), (y, y, 1), (z, z, 1)))
