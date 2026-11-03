@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from datetime import date
-from typing import Literal
+from typing import Literal, Optional
 
 from pydantic import BaseModel, ConfigDict
 
@@ -29,7 +29,7 @@ class EngineEulerCase(BaseModel):
     expected_matrix_rows: RotationMatrix3
     quaternion_atol: float
     matrix_atol: float
-    upstream_quaternion_tolerance: float | None
+    upstream_quaternion_tolerance: Optional[float]
     source_urls: tuple[str, ...]
 
 
