@@ -1,0 +1,9 @@
+[[orchestration.steps]]
+kind = "command"
+name = "YAML lint"
+argv = ["yamllint", "--", "{files}"]
+files = { include = ["**/*.yaml", "**/*.yml"] }
+
+[[orchestration.profiles]]
+name = "yaml"
+steps = ["YAML lint"]

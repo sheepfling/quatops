@@ -10,9 +10,9 @@ from collections.abc import Iterable, Iterator
 from dataclasses import dataclass
 from math import hypot, isfinite
 
-from . import scalar as _s
 from .._advanced import EulerResult
 from .._typing import FloatLike, FloatT
+from . import scalar as _s
 
 
 @dataclass(frozen=True)

@@ -1,7 +1,9 @@
 import math
+
 import numpy as np
 
 from quatops.hamilton import scalar
+
 
 def test_scalar_reference_values() -> None:
     q = scalar.from_wxyz((1, 2, 3, 4))

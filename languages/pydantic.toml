@@ -1,0 +1,8 @@
+[[orchestration.steps]]
+kind = "rule"
+name = "Pydantic practices"
+rule = "pydantic-practices"
+
+[[orchestration.profiles]]
+name = "pydantic"
+steps = ["Pydantic practices"]

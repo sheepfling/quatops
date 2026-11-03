@@ -1,7 +1,9 @@
 import math
+
 import numpy as np
 
 from quatops.jpl import namedtuple
+
 
 def test_namedtuple_reference_values():
     q = namedtuple.from_hamilton((1, 2, 3, 4))

@@ -2,10 +2,9 @@
 
 from fractions import Fraction
 
-from quatops import scalar
-
 import numpy as np
 
+from quatops import scalar
 from quatops.numpy.hamilton import wxyz as qnp
 
 

@@ -1,21 +1,20 @@
 """Matrix representations for both quaternion algebras and NumPy layouts."""
 
-import pytest
 import math
 
 import numpy as np
+import pytest
 
-from quatops import scalar as hamilton
-from quatops.jpl import scalar as jpl_scalar
 from quatops import dataclass as hamilton_dataclass
 from quatops import namedtuple as hamilton_namedtuple
+from quatops import scalar as hamilton
 from quatops.jpl import dataclass as jpl_dataclass
 from quatops.jpl import namedtuple as jpl_namedtuple
+from quatops.jpl import scalar as jpl_scalar
 from quatops.numpy.hamilton import wxyz as h_numpy_wxyz
 from quatops.numpy.hamilton import xyzw as h_numpy_xyzw
 from quatops.numpy.jpl import wxyz as j_numpy_wxyz
 from quatops.numpy.jpl import xyzw as j_numpy_xyzw
-
 
 SCALAR_BACKENDS = (("Hamilton", hamilton, (1.0, 2.0, -3.0, 4.0),
                     (2.0, -1.0, 0.5, 3.0)),

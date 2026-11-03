@@ -1,7 +1,9 @@
 import math
 
 import numpy as np
+
 from quatops.numpy.hamilton import xyzw
+
 
 def test_hamilton_xyzw_reference_values():
     q = xyzw.from_wxyz((1, 2, 3, 4))

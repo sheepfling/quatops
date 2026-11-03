@@ -17,6 +17,7 @@ from quatops.hamilton import numpy_xyzw as hx
 from quatops.jpl import numpy_wxyz as jw
 from quatops.jpl import numpy_xyzw as jx
 
+
 def main() -> None:
     """Run multiply and rotation timings for all four NumPy modules."""
     print("Python", sys.version.replace("\n", " "), "NumPy", np.__version__)

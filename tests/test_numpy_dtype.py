@@ -1,10 +1,10 @@
 """NumPy dtype conversion and floating-error policy are part of the API."""
 
-import pytest
 from decimal import Decimal
 from fractions import Fraction
 
 import numpy as np
+import pytest
 
 from quatops.numpy.hamilton import wxyz as qnp
 

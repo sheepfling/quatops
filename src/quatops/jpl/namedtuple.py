@@ -10,9 +10,9 @@ from collections.abc import Iterable
 from math import hypot, isfinite
 from typing import NamedTuple
 
-from . import scalar as _s
 from .._advanced import EulerResult
 from .._typing import FloatLike, FloatT
+from . import scalar as _s
 
 
 class Quaternion(NamedTuple):

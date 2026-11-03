@@ -1,11 +1,11 @@
 """Contract and reference checks for the named-field scalar backend."""
 
-import pytest
 import math
 
-from quatops import dataclass, namedtuple, scalar
-
 import numpy as np
+import pytest
+
+from quatops import dataclass, namedtuple, scalar
 
 try:
     from scipy.spatial.transform import Rotation

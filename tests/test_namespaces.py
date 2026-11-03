@@ -1,10 +1,11 @@
 """Explicit convention imports, backwards compatibility, and layouts."""
 
-import pytest
 import inspect
 from contextlib import ExitStack
-from .typing_tests import get_type_hints
 from unittest.mock import patch
+
+import numpy as np
+import pytest
 
 from quatops import dataclass as legacy_dataclass
 from quatops import namedtuple as legacy_namedtuple
@@ -15,12 +16,10 @@ from quatops.hamilton import scalar as h_scalar
 from quatops.jpl import dataclass as j_dataclass
 from quatops.jpl import namedtuple as j_namedtuple
 from quatops.jpl import scalar as j_scalar
-
-import numpy as np
-
 from quatops.numpy.hamilton import wxyz as h_numpy
 from quatops.numpy.jpl import xyzw as j_numpy
 
+from .typing_tests import get_type_hints
 
 SCALAR_PAIRS = ((legacy_scalar, h_scalar), (legacy_namedtuple, h_namedtuple),
                 (legacy_dataclass, h_dataclass))
