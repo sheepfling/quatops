@@ -14,7 +14,8 @@ include = [
   "*.md", "**/*.md", "*.json", "**/*.json", "*.yaml", "**/*.yaml",
   "*.yml", "**/*.yml", "*.toml", "**/*.toml",
 ]
-exclude = []
+# Wave-numbered discovery is archival; active experiments use product/layer paths.
+exclude = ["experiments/quatops_capture_wave2/**"]
 
 [checks.json_structure]
 extensions = [".py"]
@@ -33,10 +34,12 @@ exclude = [
   "experiments/converters/mujoco/3.17.0/capture_native.py",
   "experiments/converters/opencv/4.13.0/capture_native.py",
   "experiments/converters/opencv/4.13.0/prepare_inputs.py",
+  "experiments/converters/ros2/0.36.23/capture_native.py",
   "experiments/converters/openusd/26.11/capture_native.py",
   "experiments/converters/openusd/26.11/create_stage.py",
   "experiments/converters/spiceypy/8.3.0/capture_native.py",
   "experiments/oracles/mujoco/3.17.0/capture_mujoco.py",
+  "experiments/oracles/proj/9.5.1/capture_proj.py",
   "experiments/oracles/spiceypy/8.3.0/capture_spice.py",
   "experiments/transports/openusd/26.11/capture_openusd.py",
 ]
@@ -56,8 +59,11 @@ exclude = [
   "experiments/converters/cesium/1.124.0/create_inputs.py",
   "experiments/converters/gltf/2.0.0/create_asset.py",
   "experiments/converters/opencv/4.13.0/prepare_inputs.py",
+  "experiments/converters/ros2/0.36.23/capture_native.py",
   "experiments/converters/openusd/26.11/create_stage.py",
   "experiments/converters/eigen/5.0.1/capture_native.py",
+  "experiments/oracles/proj/9.5.1/capture_proj.py",
+  "experiments/oracles/shared/capture_io.py",
   "scripts/**",
   "tests/**",
 ]

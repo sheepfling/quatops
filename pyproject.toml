@@ -111,6 +111,8 @@ include = [
 reportUnsupportedDunderAll = "none"
 
 [tool.ruff]
+# The historical wave packet is outside the maintained product/layer indexes.
+extend-exclude = ["experiments/quatops_capture_wave2"]
 
 [tool.ruff.lint]
 # The package intentionally re-exports backend APIs with star imports.
