@@ -2,8 +2,9 @@
 
 Read this guide when changing `quatops.engines`, engine-specific references,
 or quaternion trajectory conversion. For implementation workflow, use the
-[developer guide](DEVELOPMENT.md). For concrete API details, use the separate
-[Unreal](unreal.md), [Unity](unity.md), and [Godot](godot.md) pages.
+[developer guide](ENGINE_INTEGRATIONS.md). For concrete API details, use the
+separate [Unreal](../engines/unreal.md), [Unity](../engines/unity.md), and
+[Godot](../engines/godot.md) pages.
 
 ## Required reasoning
 
@@ -18,7 +19,7 @@ or quaternion trajectory conversion. For implementation workflow, use the
 - For an active Hamilton rotation and one shared orthogonal basis change `B`,
   use `R_D = B R_S B^T` and `q_D.xyz = det(B) B q_S.xyz`, with `q_D.w = q_S.w`.
   For different world and body bases, use the two-basis matrix expression in
-  [coordinate mapping](coordinate-mapping.md); do not force it into a single
+  [coordinate mapping](../engines/coordinate-mapping.md); do not force it into a single
   axis map unless the derivation permits it.
 - Map keyframes once, preserve timestamps and deliberate quaternion signs, and
   use the engine's native SLERP at sample time. Do not convert trajectories
@@ -44,7 +45,8 @@ or quaternion trajectory conversion. For implementation workflow, use the
 
 ## Current status to preserve
 
-The current SciPy tests cover all 48 signed axis maps and the mapped SLERP
-identity. They do not run Unreal, Unity, or Godot, validate an asset import,
-or prove a specific asset's local forward axis. See
-[verification](verification.md) before repeating any accuracy claim.
+The SciPy tests cover the basis conversion and mapped SLERP identity. They do
+not run Unreal, Unity, or Godot, validate an asset import, or prove a specific
+asset's local forward axis. See issues
+[#4](https://github.com/sheepfling/quatops/issues/4) and
+[#7](https://github.com/sheepfling/quatops/issues/7) for native-runtime work.

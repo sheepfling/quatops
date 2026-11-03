@@ -20,7 +20,7 @@ Record these facts for the actual data and API being connected:
 Handedness describes the coordinate basis; it does not decide Hamilton versus
 JPL algebra. A passive transform must be inverted before applying the active
 rotation formula. Reordering four coefficients does not convert Hamilton to
-JPL. The [trajectory guide](trajectory.md) explains these boundaries.
+JPL. The [trajectory guide](../engines/trajectory.md) explains these boundaries.
 
 ## Implement the lowest-cost boundary
 
@@ -62,14 +62,15 @@ choice explicit.
 Run the focused and complete suites when changing implementation code:
 
 ```sh
-.venv/bin/pytest -q tests/test_engine_basis_oracle.py
-.venv/bin/pytest -q
+.venv/bin/python -m pytest -q tests/test_engine_basis_oracle.py
+.venv/bin/python -m pytest -q
 ```
 
-The current SciPy basis oracle passed 107 focused cases; the frozen Euler
-fixture tests passed 161 representation/case combinations; and the full suite
-passed 2,155 cases with one expected platform skip. See
-[verification](verification.md) for interpreter and dependency versions.
+For the repository's current test commands and dependency setup, see the
+[contributor verification guide](VERIFICATION.md). Native runtime checks for
+Unreal are tracked in [issue #4](https://github.com/sheepfling/quatops/issues/4);
+Unity and Godot runtime checks are tracked in
+[issue #7](https://github.com/sheepfling/quatops/issues/7).
 
 ## Establish engine-runtime correctness
 
@@ -91,5 +92,6 @@ engine integration is runtime-verified:
    after import. Record importer settings separately from the world-basis map.
 
 Keep this runtime evidence distinct from the SciPy oracle evidence. The current
-checkout has no Unreal, Unity, or Godot runtime test result; see
-[verification](verification.md).
+checkout has no Unreal, Unity, or Godot runtime test result; see issues
+[#4](https://github.com/sheepfling/quatops/issues/4) and
+[#7](https://github.com/sheepfling/quatops/issues/7).

@@ -1,9 +1,10 @@
 # Repository agent guidance
 
 When working on engine coordinate conversions, game-library adapters, or
-rotation trajectories, read [`docs/engines/AGENT_GUIDE.md`](docs/engines/AGENT_GUIDE.md)
-before changing code or making convention claims. Keep each engine's API facts
-on its own page under `docs/engines/` and the shared math in
+rotation trajectories, read
+[`docs/contributing/ENGINE_AGENT_GUIDE.md`](docs/contributing/ENGINE_AGENT_GUIDE.md)
+before changing code or making convention claims. Keep user-facing engine API
+facts on their pages under `docs/engines/` and shared math in
 `coordinate-mapping.md`.
 
 The source-frame contract for this work is an explicit right-handed frame.

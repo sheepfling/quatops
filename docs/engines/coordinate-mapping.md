@@ -40,6 +40,8 @@ its engine uses a familiar handedness.
 Do not treat these as universal engine constants: choose a map for the actual
 source axes and target scene/model axes.
 
-The reported SciPy results and their limits are summarized in
-[verification](verification.md). Runtime comparison is still needed for the
-engine and asset pipeline actually targeted.
+The conversion math is covered by the
+[SciPy basis oracle](../../tests/test_engine_basis_oracle.py). Native-runtime
+comparison is still needed for the engine and asset pipeline actually
+targeted; see [issue #4](https://github.com/sheepfling/quatops/issues/4) and
+[issue #7](https://github.com/sheepfling/quatops/issues/7).

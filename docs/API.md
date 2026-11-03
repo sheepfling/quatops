@@ -685,9 +685,10 @@ a documented double-rounding limit, not a correctly-rounded conversion guarantee
   relative accuracy. In particular, Hamilton rotation of vector
   `(1e308, 1, 1)` by `(5, 12, 13, 0)` currently returns a first component
   near `1.11e292` instead of `17/13`; the corresponding JPL quaternion is
-  `(-12, -13, 0, 5)` in `xyzw` or `(5, -12, -13, 0)` in `wxyz`. See [the precision investigation](ROTATION_NUMERICS.md)
-  for a second example and measured alternatives. Other operations can overflow
-  in intermediate calculations even when their exact result is representable.
+  `(-12, -13, 0, 5)` in `xyzw` or `(5, -12, -13, 0)` in `wxyz`. Further
+  accuracy work and regression criteria are tracked in
+  [issue #6](https://github.com/sheepfling/quatops/issues/6). Other operations
+  can overflow in intermediate calculations even when their exact result is representable.
   NumPy suppresses floating-point warnings locally, checks results, and preserves
   the caller's `numpy.seterr` configuration. Inputs are not mutated.
 

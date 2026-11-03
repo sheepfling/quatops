@@ -24,10 +24,9 @@ QuatOps brings both approaches into one tested library:
   coefficient order and component-axis placement.
 - **Explicit conventions.** Choose Hamilton or JPL at import time and use the
   selected module throughout your code.
-- **Independent verification.** Public operations are covered by seeded tests
-  against independent references, including SciPy and `numpy-quaternion`,
-  alongside separately derived invariants. See the
-  [oracle coverage](docs/ORACLE_COVERAGE.md).
+- **Independent verification.** Public operations are checked against
+  independent references, including SciPy and `numpy-quaternion`, alongside
+  separately derived invariants.
 
 The aim is to make the lightweight implementation reusable and tested, while
 providing a consistent approach when the workload calls for NumPy.
@@ -103,8 +102,8 @@ python -m pip install '.[numpy]'
 
 The [API contract](docs/API.md) covers storage rules, available operations,
 validation behavior, and numerical limits. The
-[documentation map](docs/README.md) collects contributor setup, verification,
-performance timing, and research experiments.
+[documentation map](docs/README.md) separates user guides from contributor
+verification and benchmark tools.
 
 The package retains alternative import paths for compatibility. Use the
 canonical paths in the API contract for new code.

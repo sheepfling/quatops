@@ -59,7 +59,7 @@ implemented identities where neither package supplies the operation.
 
 ## Follow-up API audit
 
-- [x] Audit all 86 public operation names exported by `quatops.scalar`
+- [x] Audit all public operation names exported by `quatops.scalar`
   against the oracle suites; add direct Monte Carlo assertions for `pow_real`
   rather than relying on its relationship to `power`.
 - [x] Check optional interpolation path controls against direct S3 coefficient
@@ -87,30 +87,30 @@ branch-policy exception next to the tests. Run the full suite with the local
 ## Coverage map and branch policies
 
 - Generic algebra and rotation-vector/matrix Monte Carlo:
-  [`test_numpy_quaternion_oracle.py`](../tests/test_numpy_quaternion_oracle.py).
+  [`test_numpy_quaternion_oracle.py`](../../tests/test_numpy_quaternion_oracle.py).
 - Analytic functions and scalar/vector extraction:
-  [`test_analytic_oracle.py`](../tests/test_analytic_oracle.py).
+  [`test_analytic_oracle.py`](../../tests/test_analytic_oracle.py).
 - Coefficient/convention conversion, axis-angle, Euler, MRP, vector alignment,
   and rotation-vector aliases:
-  [`test_rotation_conversion_oracle.py`](../tests/test_rotation_conversion_oracle.py).
+  [`test_rotation_conversion_oracle.py`](../../tests/test_rotation_conversion_oracle.py).
 - Engine signed-axis maps and basis-converted SLERP trajectories:
-  [`test_engine_basis_oracle.py`](../tests/test_engine_basis_oracle.py).
+  [`test_engine_basis_oracle.py`](../../tests/test_engine_basis_oracle.py).
 - Frozen upstream Unity.Mathematics/Godot Euler-to-quaternion and matrix values:
-  [`test_engine_euler_golden.py`](../tests/test_engine_euler_golden.py) with
-  source-attributed values in [`engine_euler_fixtures.json`](../tests/golden/engine_euler_fixtures.json).
+  [`test_engine_euler_golden.py`](../../tests/test_engine_euler_golden.py) with
+  source-attributed values in [`engine_euler_fixtures.json`](../../tests/golden/engine_euler_fixtures.json).
 - SLERP, NLERP, SQUAD, boxplus/boxminus, quaternion derivatives, and angular
   velocity integration:
-  [`test_manifold_kinematics_oracle.py`](../tests/test_manifold_kinematics_oracle.py).
+  [`test_manifold_kinematics_oracle.py`](../../tests/test_manifold_kinematics_oracle.py).
 - Multiplication matrices, skew, Jacobians, adjoint, and homogeneous matrices:
-  [`test_matrix_oracle.py`](../tests/test_matrix_oracle.py).
+  [`test_matrix_oracle.py`](../../tests/test_matrix_oracle.py).
 - Weighted alignment, means, covariance, and swing/twist:
-  [`test_estimation_oracle.py`](../tests/test_estimation_oracle.py).
+  [`test_estimation_oracle.py`](../../tests/test_estimation_oracle.py).
 - Seeded random attitudes and stream parity:
-  [`test_random_oracle.py`](../tests/test_random_oracle.py).
+  [`test_random_oracle.py`](../../tests/test_random_oracle.py).
 - Singular inputs, branch edges, invalid shapes, and empty NumPy layouts:
-  [`test_oracle_edge_contracts.py`](../tests/test_oracle_edge_contracts.py),
-  [`test_numpy_layouts.py`](../tests/test_numpy_layouts.py), and
-  [`test_numpy_component_axes.py`](../tests/test_numpy_component_axes.py).
+  [`test_oracle_edge_contracts.py`](../../tests/test_oracle_edge_contracts.py),
+  [`test_numpy_layouts.py`](../../tests/test_numpy_layouts.py), and
+  [`test_numpy_component_axes.py`](../../tests/test_numpy_component_axes.py).
 
 The logarithm of a negative real uses the positive first coefficient axis in
 both Hamilton and JPL algebraic representations. At this singular input, a
@@ -118,6 +118,6 @@ physical JPL-to-Hamilton mapping of numpy-quaternion selects the opposite vector
 sign; the branch test therefore uses the independent complex-slice formula and
 records the coefficient-policy exception explicitly.
 
-Recorded full-suite evidence is summarized in
-[`VERIFICATION.md`](VERIFICATION.md). The completed suite used the repository
-`.venv` and exercised the full scalar and NumPy representation matrix.
+Use the [contributor verification guide](VERIFICATION.md) for commands to run
+the checks in the current checkout. Coverage status here describes test
+structure; it does not publish machine-specific pass counts or timing results.

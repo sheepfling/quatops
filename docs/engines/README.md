@@ -9,9 +9,9 @@ Use `quatops.engines.SignedAxisMap` for caller-declared signed-axis conversion
 to engine XYZW values. The [trajectory guide](trajectory.md) shows how to
 preconvert a key sequence and sample it natively.
 
-For implementation workflow, start with the [developer guide](DEVELOPMENT.md).
+For implementation workflow, start with the [developer guide](../contributing/ENGINE_INTEGRATIONS.md).
 Coding agents working in this area should follow the
-[agent guide](AGENT_GUIDE.md); the repository's `AGENTS.md` points here too.
+[agent guide](../contributing/ENGINE_AGENT_GUIDE.md); the repository's `AGENTS.md` points here too.
 
 ## Choose a reference
 
@@ -23,9 +23,12 @@ Coding agents working in this area should follow the
 | Godot `Quaternion` / `Basis` / `Node3D` | [Godot](godot.md) | `Quaternion.from_euler` takes radians and uses YXZ; `Basis` exposes order-specific constructors. |
 
 The [coordinate-mapping page](coordinate-mapping.md) keeps the basis-change
-formulas in one place. The [verification note](verification.md) records what
-the supplied research bundle reports and what it did not verify. For the main
-use case, start with the [trajectory conversion guide](trajectory.md).
+formulas in one place. The SciPy conversion oracle lives in
+[`tests/test_engine_basis_oracle.py`](../../tests/test_engine_basis_oracle.py).
+Native Unreal runtime checks are tracked in
+[issue #4](https://github.com/sheepfling/quatops/issues/4); Unity and Godot
+checks are tracked in [issue #7](https://github.com/sheepfling/quatops/issues/7).
+For the main use case, start with the [trajectory conversion guide](trajectory.md).
 
 ## Reading these pages safely
 
