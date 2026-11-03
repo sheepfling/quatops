@@ -254,6 +254,38 @@ def test_axis_angle_and_two_vector_conversions_match_scipy(
     np.testing.assert_allclose(axis_angle[:, 3], expected_angle, rtol=3e-13, atol=3e-13,
                                err_msg=f"{backend_name}.to_axis_angle angle")
 
+    near_antiparallel_source = np.array(((0.2, 0.5, 0.7),))
+    near_antiparallel_target = np.array(((-0.2 + 1e-12, -0.5, -0.7),))
+    if is_numpy:
+        near_antiparallel = module.from_two_vectors(
+            orient_vectors(near_antiparallel_source, component_first),
+            orient_vectors(near_antiparallel_target, component_first),
+        )
+        near_antiparallel_values = _wxyz_values(
+            module, near_antiparallel, True, component_first
+        )
+    else:
+        near_antiparallel = module.from_two_vectors(
+            tuple(near_antiparallel_source[0]), tuple(near_antiparallel_target[0])
+        )
+        near_antiparallel_values = np.asarray(
+            (module.to_wxyz(near_antiparallel),)
+        )
+    near_antiparallel_rotation = _scipy_rotations(
+        near_antiparallel_values, is_jpl
+    )
+    expected_direction = near_antiparallel_target / np.linalg.norm(
+        near_antiparallel_target, axis=-1, keepdims=True
+    )
+    actual_direction = near_antiparallel_rotation.apply(
+        near_antiparallel_source
+        / np.linalg.norm(near_antiparallel_source, axis=-1, keepdims=True)
+    )
+    np.testing.assert_allclose(
+        actual_direction, expected_direction, rtol=0.0, atol=3e-15,
+        err_msg=f"{backend_name}.from_two_vectors near-antiparallel mapping",
+    )
+
     sources = rng.normal(size=(count, 3))
     targets = rng.normal(size=(count, 3))
     source_input = orient_vectors(sources, component_first) if is_numpy else sources

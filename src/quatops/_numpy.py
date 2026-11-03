@@ -3489,13 +3489,19 @@ def _from_two_vectors_numba_impl(
         ux, uy, uz = sx / source_norm, sy / source_norm, sz / source_norm
         vx, vy, vz = tx / target_norm, ty / target_norm, tz / target_norm
 
-        cosine = min(1.0, max(-1.0, (ux * vx + uy * vy) + uz * vz))
         cross_x = uy * vz - uz * vy
         cross_y = uz * vx - ux * vz
         cross_z = ux * vy - uy * vx
-        antiparallel = (
-            cosine < 0.0 and cross_x == 0.0 and cross_y == 0.0 and cross_z == 0.0
+        sum_norm = hypot(
+            hypot(ux + vx, uy + vy),
+            uz + vz,
         )
+        antiparallel = sum_norm == 0.0
+        if 0.0 < sum_norm < 1.0:
+            sum_x, sum_y, sum_z = ux + vx, uy + vy, uz + vz
+            cross_x = uy * sum_z - uz * sum_y
+            cross_y = uz * sum_x - ux * sum_z
+            cross_z = ux * sum_y - uy * sum_x
         if antiparallel:
             least_aligned = 0
             smallest = abs(ux)
@@ -3521,8 +3527,10 @@ def _from_two_vectors_numba_impl(
             )
             scalar = 0.0
         else:
-            vector_x, vector_y, vector_z = cross_x, cross_y, cross_z
-            scalar = 1.0 + cosine
+            vector_x = cross_x / sum_norm
+            vector_y = cross_y / sum_norm
+            vector_z = cross_z / sum_norm
+            scalar = 0.5 * sum_norm
 
         quaternion_scale = max(
             abs(scalar), abs(vector_x), abs(vector_y), abs(vector_z)
@@ -5161,15 +5169,24 @@ def _from_two_vectors(source: Any, target: Any, epsilon: int,
                 return _result(result.reshape(a.shape[:-1] + (4,)))
     ua, _, _ = _direction(a)
     ub, _, _ = _direction(b)
-    cosine = np.clip(np.sum(ua * ub, axis=-1), -1.0, 1.0)
     cross = np.cross(ua, ub)
-    anti = (cosine < 0.0) & np.all(cross == 0.0, axis=-1)
+    summed = ua + ub
+    sum_norm = np.hypot(np.hypot(summed[..., 0], summed[..., 1]), summed[..., 2])
+    anti = sum_norm == 0.0
+    stable_cross = np.cross(ua, summed)
+    cross = np.where((sum_norm < 1.0)[..., None], stable_cross, cross)
     least_aligned = np.argmin(np.abs(ua), axis=-1)
     basis = np.eye(3, dtype=np.float64)[least_aligned]
     anti_axis = np.cross(ua, basis)
     anti_axis, _, _ = _direction(anti_axis)
-    vector = np.where(anti[..., None], anti_axis, cross)
-    scalar = np.where(anti, 0.0, 1.0 + cosine)
+    vector = np.divide(
+        cross,
+        sum_norm[..., None],
+        out=np.zeros_like(cross),
+        where=sum_norm[..., None] != 0.0,
+    )
+    vector = np.where(anti[..., None], anti_axis, vector)
+    scalar = np.where(anti, 0.0, 0.5 * sum_norm)
     hamilton = np.concatenate((scalar[..., None], vector), axis=-1)
     scaled = _scaled(hamilton)
     hamilton = scaled.unit_scale / np.sqrt(scaled.sum_squares)

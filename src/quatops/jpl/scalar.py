@@ -580,18 +580,27 @@ def from_rotvec(r: Iterable[FloatT]) -> Quaternion:
 def from_two_vectors(source: Iterable[FloatT], target: Iterable[FloatT]) -> Quaternion:
     """Return the shortest active JPL rotation mapping source onto target."""
     a, b = _axis(_vector(source)), _axis(_vector(target))
-    cosine = min(1.0, max(-1.0, math.fsum(x * y for x, y in zip(a, b))))
     cross = (a[1] * b[2] - a[2] * b[1],
              a[2] * b[0] - a[0] * b[2],
              a[0] * b[1] - a[1] * b[0])
-    if cosine < 0.0 and cross == (0.0, 0.0, 0.0):
+    summed = tuple(x + y for x, y in zip(a, b))
+    sum_norm = math.hypot(*summed)
+    if sum_norm == 0.0:
         basis_index = min(range(3), key=lambda index: abs(a[index]))
         basis = tuple(1.0 if index == basis_index else 0.0 for index in range(3))
         axis = _axis((a[1] * basis[2] - a[2] * basis[1],
                       a[2] * basis[0] - a[0] * basis[2],
                       a[0] * basis[1] - a[1] * basis[0]))
         return canonicalize((-axis[0], -axis[1], -axis[2], 0.0))
-    return canonicalize(normalize((-cross[0], -cross[1], -cross[2], 1.0 + cosine)))
+    if sum_norm < 1.0:
+        cross = (a[1] * summed[2] - a[2] * summed[1],
+                 a[2] * summed[0] - a[0] * summed[2],
+                 a[0] * summed[1] - a[1] * summed[0])
+    quaternion = (
+        *(-value / sum_norm for value in cross),
+        0.5 * sum_norm,
+    )
+    return canonicalize(normalize(quaternion))
 
 
 def to_rotvec(q: Iterable[FloatT]) -> RotVec:

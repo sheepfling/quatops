@@ -583,6 +583,8 @@ def test_numba_compiles_canonicalize_commutator_and_two_vector_batches():
     right_vectors[2] = (-1e308, 1e308, 1e308)
     left_vectors[3] = (1e-300, 2e-300, -1e-300)
     right_vectors[3] = (-2e-300, 1e-300, 3e-300)
+    left_vectors[4] = (0.2, 0.5, 0.7)
+    right_vectors[4] = (-0.2 + 1e-12, -0.5, -0.7)
     cases = (hamilton_wxyz, hamilton_xyzw, jpl_wxyz, jpl_xyzw)
 
     for backend in cases:

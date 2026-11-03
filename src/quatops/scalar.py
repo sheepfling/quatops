@@ -503,7 +503,8 @@ def dot(lhs: Iterable[FloatT], rhs: Iterable[FloatT]) -> float:
 
 def norm_squared(q: Iterable[FloatT]) -> float:
     """Return the squared Euclidean coefficient norm."""
-    return dot(q, q)
+    value = _quaternion(q)
+    return dot(value, value)
 
 
 def _scaled(q: Quaternion) -> tuple:
@@ -776,18 +777,24 @@ def from_two_vectors(source: Iterable[FloatT], target: Iterable[FloatT]) -> Quat
     coordinate axis.
     """
     a, b = _axis(_vector(source)), _axis(_vector(target))
-    cosine = min(1.0, max(-1.0, fsum(x * y for x, y in zip(a, b))))
     cross = (a[1] * b[2] - a[2] * b[1],
              a[2] * b[0] - a[0] * b[2],
              a[0] * b[1] - a[1] * b[0])
-    if cosine < 0.0 and cross == (0.0, 0.0, 0.0):
+    summed = tuple(x + y for x, y in zip(a, b))
+    sum_norm = math.hypot(*summed)
+    if sum_norm == 0.0:
         basis_index = min(range(3), key=lambda index: abs(a[index]))
         basis = tuple(1.0 if index == basis_index else 0.0 for index in range(3))
         axis = _axis((a[1] * basis[2] - a[2] * basis[1],
                       a[2] * basis[0] - a[0] * basis[2],
                       a[0] * basis[1] - a[1] * basis[0]))
         return canonicalize((0.0, *axis))
-    return canonicalize(normalize((1.0 + cosine, *cross)))
+    if sum_norm < 1.0:
+        cross = (a[1] * summed[2] - a[2] * summed[1],
+                 a[2] * summed[0] - a[0] * summed[2],
+                 a[0] * summed[1] - a[1] * summed[0])
+    quaternion = (0.5 * sum_norm, *(value / sum_norm for value in cross))
+    return canonicalize(normalize(quaternion))
 
 
 def _rotvec_from_q(q: Iterable[FloatT]) -> RotVec:

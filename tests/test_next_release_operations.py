@@ -55,6 +55,7 @@ def test_scalar_and_typed_foundational_operations():
 
         assert api.dot(raw, other) == pytest.approx(9.0)
         assert api.norm_squared(raw) == pytest.approx(30.0)
+        assert api.norm_squared(iter(raw)) == pytest.approx(30.0)
         assert api.dot(raw, raw) == api.norm_squared(raw)
 
         q_divisor = api.from_rotation_vector((math.pi, 0.0, 0.0))
