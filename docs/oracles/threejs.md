@@ -12,9 +12,10 @@ This is a JavaScript `Number` capture, not float32 engine evidence.
 
 ## Observed behavior
 
-The six uppercase Euler orders matched SciPy's intrinsic uppercase orders on
-the 89 general inputs. The 540 boundary cases independently agree for the
-Euler-to-quaternion and Euler-to-matrix routes. Quaternions are recorded as
+The discovery sweep compared the six uppercase Euler orders with SciPy across
+89 general inputs and 540 boundary probes. The retained native witness file
+keeps one mixed input per order, one boundary per order, and the minimized
+near-lock readback regression. Quaternions are recorded as
 `[x, y, z, w]`; matrix values are recorded as both row-labelled 3x3 values and
 the native `Matrix4.elements` array. The latter is explicitly column-major,
 while `Matrix4.set` accepts row-major arguments, as described by the
