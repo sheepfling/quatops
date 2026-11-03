@@ -1,0 +1,79 @@
+[build-system]
+requires = ["setuptools>=77", "setuptools-scm>=8"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "quatops"
+dynamic = ["version"]
+description = "Small, explicit scalar and NumPy quaternion operations"
+readme = "README.md"
+requires-python = ">=3.9"
+license = "MIT"
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3 :: 3.9",
+    "Programming Language :: Python :: 3 :: 3.10",
+    "Programming Language :: Python :: 3 :: 3.11",
+    "Programming Language :: Python :: 3 :: 3.12",
+    "Programming Language :: Python :: 3 :: 3.13",
+    "Programming Language :: Python :: 3 :: 3.14",
+    "Programming Language :: Python :: 3 :: 3.15",
+    "Topic :: Scientific/Engineering :: Mathematics",
+    "Typing :: Typed",
+]
+
+[project.optional-dependencies]
+numpy = ["numpy>=1.20"]
+experiments = ["numpy>=1.20", "scipy>=1.7"]
+performance = [
+    "numpy>=1.20",
+    "numba>=0.60; python_version < '3.10'",
+    "numba>=0.61; python_version >= '3.10' and python_version < '3.14'",
+    "numba>=0.63; python_version >= '3.14' and python_version < '3.15'",
+    "numba>=0.68; python_version >= '3.15'",
+]
+dev = [
+    "numpy>=1.20",
+    # The last numpy-quaternion line supporting Python 3.9 predates NumPy 2.
+    "numpy<2; python_version < '3.10'",
+    "numpy-quaternion>=2022.4.4; python_version < '3.10'",
+    "numpy-quaternion>=2024.0.3; python_version >= '3.10'",
+    "numba>=0.60; python_version < '3.10'",
+    "numba>=0.61; python_version >= '3.10' and python_version < '3.14'",
+    "numba>=0.63; python_version >= '3.14' and python_version < '3.15'",
+    "numba>=0.68; python_version >= '3.15'",
+    "mypy>=1.10",
+    "pytest>=7",
+    "pytest-benchmark>=4.0",
+    "ruff>=0.8",
+    "scipy>=1.7",
+    "scipy-stubs; python_version >= '3.10'",
+    "typing-extensions>=4.6",
+]
+
+[tool.setuptools]
+package-dir = { "" = "src" }
+include-package-data = true
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+quatops = ["py.typed", "**/*.pyi"]
+
+[tool.setuptools_scm]
+fallback_version = "0.1.0a0"
+version_scheme = "no-guess-dev"
+local_scheme = "no-local-version"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*", "*Tests"]
+pythonpath = ["src"]
+addopts = "-ra -m 'not benchmark'"
+markers = [
+    "benchmark: opt-in performance measurements; no timing thresholds",
+]

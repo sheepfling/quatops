@@ -1,0 +1,7 @@
+include README.md
+include LICENSE
+graft src
+graft tests
+prune docs
+prune experiments
+global-exclude *.py[cod]

@@ -1,0 +1,314 @@
+{
+  "schema_version": 1,
+  "research_date": "2026-11-02",
+  "evidence_kind": "upstream_static_fixtures_not_local_native_captures",
+  "quaternion_order": "xyzw",
+  "matrix_layout": "rows; columns are images of the three positive basis vectors",
+  "input_note": "Input angles are stored in degrees for readability; the cited Mathematics/Godot constructors take radians.",
+  "precision_note": "Expected decimals are preserved as published, not regenerated or padded with invented precision.",
+  "comparison_note": "1e-6 is a local test tolerance for these rounded fixtures, not a general engine accuracy guarantee.",
+  "native_engines_executed": [],
+  "unreal_expected_values": null,
+  "cases": [
+    {
+      "case_id": "unity_mathematics_XYZ",
+      "engine": "Unity.Mathematics",
+      "evidence_kind": "upstream_static_fixture",
+      "input_degrees_xyz": [
+        -50.0,
+        28.0,
+        39.0
+      ],
+      "api_input_unit": "radians",
+      "engine_order": "XYZ",
+      "intrinsic": false,
+      "expected_quaternion_xyzw": [
+        -0.4597331,
+        0.06979711,
+        0.3899215,
+        0.7948176
+      ],
+      "expected_matrix_rows": [
+        [
+          0.686179155968,
+          -0.684009078513,
+          -0.2475676603
+        ],
+        [
+          0.555656924414,
+          0.273213475262,
+          0.785238676636
+        ],
+        [
+          -0.469471562786,
+          -0.676377097075,
+          0.567547772692
+        ]
+      ],
+      "quaternion_atol": 1e-06,
+      "matrix_atol": 1e-06,
+      "upstream_quaternion_tolerance": 0.0001,
+      "source_urls": [
+        "https://github.com/Unity-Technologies/Unity.Mathematics/blob/f53664de3dad88869a91ef8ebdbecf356e1312d5/src/Tests/Tests/Shared/TestQuaternion.cs",
+        "https://github.com/Unity-Technologies/Unity.Mathematics/blob/53b0c4756c3c0dff3746285a8b83e858c26cdb06/src/Tests/Tests/Shared/TestMatrix.cs"
+      ]
+    },
+    {
+      "case_id": "unity_mathematics_XZY",
+      "engine": "Unity.Mathematics",
+      "evidence_kind": "upstream_static_fixture",
+      "input_degrees_xyz": [
+        -50.0,
+        28.0,
+        39.0
+      ],
+      "api_input_unit": "radians",
+      "engine_order": "XZY",
+      "intrinsic": false,
+      "expected_quaternion_xyzw": [
+        -0.3133549,
+        0.06979711,
+        0.3899215,
+        0.8630749
+      ],
+      "expected_matrix_rows": [
+        [
+          0.686179155968,
+          -0.716805468125,
+          -0.123887395569
+        ],
+        [
+          0.62932039105,
+          0.499539794942,
+          0.595328345266
+        ],
+        [
+          -0.364847929038,
+          -0.486466765705,
+          0.793874092373
+        ]
+      ],
+      "quaternion_atol": 1e-06,
+      "matrix_atol": 1e-06,
+      "upstream_quaternion_tolerance": 0.0001,
+      "source_urls": [
+        "https://github.com/Unity-Technologies/Unity.Mathematics/blob/f53664de3dad88869a91ef8ebdbecf356e1312d5/src/Tests/Tests/Shared/TestQuaternion.cs",
+        "https://github.com/Unity-Technologies/Unity.Mathematics/blob/53b0c4756c3c0dff3746285a8b83e858c26cdb06/src/Tests/Tests/Shared/TestMatrix.cs"
+      ]
+    },
+    {
+      "case_id": "unity_mathematics_YXZ",
+      "engine": "Unity.Mathematics",
+      "evidence_kind": "upstream_static_fixture",
+      "input_degrees_xyz": [
+        -50.0,
+        28.0,
+        39.0
+      ],
+      "api_input_unit": "radians",
+      "engine_order": "YXZ",
+      "intrinsic": false,
+      "expected_quaternion_xyzw": [
+        -0.4597331,
+        0.06979711,
+        0.197169,
+        0.8630748
+      ],
+      "expected_matrix_rows": [
+        [
+          0.912505475649,
+          -0.40451934989,
+          -0.0608099701904
+        ],
+        [
+          0.276167195792,
+          0.499539794942,
+          0.821091756893
+        ],
+        [
+          -0.301770503659,
+          -0.766044443119,
+          0.567547772692
+        ]
+      ],
+      "quaternion_atol": 1e-06,
+      "matrix_atol": 1e-06,
+      "upstream_quaternion_tolerance": 0.0001,
+      "source_urls": [
+        "https://github.com/Unity-Technologies/Unity.Mathematics/blob/f53664de3dad88869a91ef8ebdbecf356e1312d5/src/Tests/Tests/Shared/TestQuaternion.cs",
+        "https://github.com/Unity-Technologies/Unity.Mathematics/blob/53b0c4756c3c0dff3746285a8b83e858c26cdb06/src/Tests/Tests/Shared/TestMatrix.cs"
+      ]
+    },
+    {
+      "case_id": "unity_mathematics_YZX",
+      "engine": "Unity.Mathematics",
+      "evidence_kind": "upstream_static_fixture",
+      "input_degrees_xyz": [
+        -50.0,
+        28.0,
+        39.0
+      ],
+      "api_input_unit": "radians",
+      "engine_order": "YZX",
+      "intrinsic": false,
+      "expected_quaternion_xyzw": [
+        -0.4597331,
+        0.3435619,
+        0.197169,
+        0.7948176
+      ],
+      "expected_matrix_rows": [
+        [
+          0.686179155968,
+          -0.62932039105,
+          0.364847929038
+        ],
+        [
+          -0.00246669562435,
+          0.499539794942,
+          0.866287428445
+        ],
+        [
+          -0.727428402887,
+          -0.595328345266,
+          0.341221453011
+        ]
+      ],
+      "quaternion_atol": 1e-06,
+      "matrix_atol": 1e-06,
+      "upstream_quaternion_tolerance": 0.0001,
+      "source_urls": [
+        "https://github.com/Unity-Technologies/Unity.Mathematics/blob/f53664de3dad88869a91ef8ebdbecf356e1312d5/src/Tests/Tests/Shared/TestQuaternion.cs",
+        "https://github.com/Unity-Technologies/Unity.Mathematics/blob/53b0c4756c3c0dff3746285a8b83e858c26cdb06/src/Tests/Tests/Shared/TestMatrix.cs"
+      ]
+    },
+    {
+      "case_id": "unity_mathematics_ZXY",
+      "engine": "Unity.Mathematics",
+      "evidence_kind": "upstream_static_fixture",
+      "input_degrees_xyz": [
+        -50.0,
+        28.0,
+        39.0
+      ],
+      "api_input_unit": "radians",
+      "engine_order": "ZXY",
+      "intrinsic": false,
+      "expected_quaternion_xyzw": [
+        -0.3133549,
+        0.3435619,
+        0.3899215,
+        0.7948176
+      ],
+      "expected_matrix_rows": [
+        [
+          0.459852836288,
+          -0.835146653037,
+          0.301770503659
+        ],
+        [
+          0.40451934989,
+          0.499539794942,
+          0.766044443119
+        ],
+        [
+          -0.790505828266,
+          -0.230195701935,
+          0.567547772692
+        ]
+      ],
+      "quaternion_atol": 1e-06,
+      "matrix_atol": 1e-06,
+      "upstream_quaternion_tolerance": 0.0001,
+      "source_urls": [
+        "https://github.com/Unity-Technologies/Unity.Mathematics/blob/f53664de3dad88869a91ef8ebdbecf356e1312d5/src/Tests/Tests/Shared/TestQuaternion.cs",
+        "https://github.com/Unity-Technologies/Unity.Mathematics/blob/53b0c4756c3c0dff3746285a8b83e858c26cdb06/src/Tests/Tests/Shared/TestMatrix.cs"
+      ]
+    },
+    {
+      "case_id": "unity_mathematics_ZYX",
+      "engine": "Unity.Mathematics",
+      "evidence_kind": "upstream_static_fixture",
+      "input_degrees_xyz": [
+        -50.0,
+        28.0,
+        39.0
+      ],
+      "api_input_unit": "radians",
+      "engine_order": "ZYX",
+      "intrinsic": false,
+      "expected_quaternion_xyzw": [
+        -0.3133549,
+        0.3435619,
+        0.197169,
+        0.8630749
+      ],
+      "expected_matrix_rows": [
+        [
+          0.686179155968,
+          -0.555656924414,
+          0.469471562786
+        ],
+        [
+          0.125029621267,
+          0.725866114623,
+          0.676377097075
+        ],
+        [
+          -0.716607116711,
+          -0.405418013897,
+          0.567547772692
+        ]
+      ],
+      "quaternion_atol": 1e-06,
+      "matrix_atol": 1e-06,
+      "upstream_quaternion_tolerance": 0.0001,
+      "source_urls": [
+        "https://github.com/Unity-Technologies/Unity.Mathematics/blob/f53664de3dad88869a91ef8ebdbecf356e1312d5/src/Tests/Tests/Shared/TestQuaternion.cs",
+        "https://github.com/Unity-Technologies/Unity.Mathematics/blob/53b0c4756c3c0dff3746285a8b83e858c26cdb06/src/Tests/Tests/Shared/TestMatrix.cs"
+      ]
+    },
+    {
+      "case_id": "godot_construct_basis_axes",
+      "engine": "Godot",
+      "evidence_kind": "upstream_static_fixture",
+      "input_degrees_xyz": [
+        31.41,
+        -49.16,
+        12.34
+      ],
+      "api_input_unit": "radians",
+      "engine_order": "YXZ",
+      "intrinsic": true,
+      "expected_quaternion_xyzw": [
+        0.2016913,
+        -0.4245716,
+        0.206033,
+        0.8582598
+      ],
+      "expected_matrix_rows": [
+        [
+          0.5545787,
+          -0.5249245,
+          -0.6456754
+        ],
+        [
+          0.182395,
+          0.833742,
+          -0.5211586
+        ],
+        [
+          0.8118957,
+          0.1712555,
+          0.5581192
+        ]
+      ],
+      "quaternion_atol": 1e-06,
+      "matrix_atol": 1e-06,
+      "upstream_quaternion_tolerance": null,
+      "source_urls": [
+        "https://github.com/godotengine/godot/blob/f62fdbde15035c5576dad93e586201f4d41ef0cb/tests/core/math/test_quaternion.h"
+      ]
+    }
+  ]
+}
