@@ -115,6 +115,48 @@ def test_scalar_and_typed_foundational_operations():
             api.dot((1e308, 0.0, 0.0, 0.0), (1e308, 0.0, 0.0, 0.0))
 
 
+def test_one_shot_iterators_work_across_scalar_surfaces():
+    raw = (1.0, 2.0, 3.0, 4.0)
+    other = (2.0, -1.0, 0.5, 3.0)
+    vector = (0.25, -0.5, 1.0)
+    matrix = (
+        (1.0, 0.0, 0.0),
+        (0.0, 1.0, 0.0),
+        (0.0, 0.0, 1.0),
+    )
+
+    def once(values):
+        return iter(values)
+
+    for path in SCALAR_APIS:
+        api = importlib.import_module(path)
+        assert api.norm_squared(once(raw)) == pytest.approx(30.0)
+        assert api.dot(once(raw), once(other)) == api.dot(raw, other)
+        np.testing.assert_allclose(
+            tuple(api.multiply(once(raw), once(other))),
+            tuple(api.multiply(raw, other)),
+        )
+        np.testing.assert_allclose(
+            tuple(api.normalize(once(raw))), tuple(api.normalize(raw))
+        )
+        np.testing.assert_allclose(
+            tuple(api.rotate(once(raw), once(vector))),
+            tuple(api.rotate(raw, vector)),
+        )
+        np.testing.assert_allclose(
+            tuple(api.from_rotation_vector(once(vector))),
+            tuple(api.from_rotation_vector(vector)),
+        )
+        np.testing.assert_allclose(
+            tuple(api.from_two_vectors(once(vector), once((0.0, 1.0, 0.0)))),
+            tuple(api.from_two_vectors(vector, (0.0, 1.0, 0.0))),
+        )
+        np.testing.assert_allclose(
+            tuple(api.from_rotation_matrix(once(once(row) for row in matrix))),
+            tuple(api.from_rotation_matrix(matrix)),
+        )
+
+
 @pytest.mark.parametrize(("convention", "order", "component_first"), NUMPY_LAYOUTS)
 def test_numpy_foundational_operations_broadcast_and_preserve_layout(
     convention, order, component_first
