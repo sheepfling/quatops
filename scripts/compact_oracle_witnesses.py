@@ -110,23 +110,21 @@ def _provenance(
         if threejs
         else "selected native witnesses; broad successful sweeps discarded"
     )
-    retained = {
-        **current,
+    return {
+        **deepcopy(current),
         "full_discovery_capture_sha256": current.get(
             "full_discovery_capture_sha256", source_sha256
         ),
         "retention_policy": policy,
+        **({"retention_revision": 3} if threejs else {}),
     }
-    if threejs:
-        retained["retention_revision"] = 3
-    return retained
 
 
 def _compact_threejs(document: Record, source_sha256: str) -> Record:
     source = document["observations"]
     if not isinstance(source, dict):
         raise TypeError("observations must be an object")
-    retained = {
+    pass_through_groups = {
         name: rows
         for name, rows in source.items()
         if name
@@ -135,6 +133,11 @@ def _compact_threejs(document: Record, source_sha256: str) -> Record:
             "euler_boundaries",
             "euler_reorder",
             "object3d_hierarchy",
+            "axis_angle",
+            "quaternion_normalization",
+            "independent_matrices",
+            "two_vector_alignment",
+            "shortest_slerp",
         }
     }
 
@@ -147,11 +150,8 @@ def _compact_threejs(document: Record, source_sha256: str) -> Record:
         "euler_quaternion_xyzw",
         "quaternion_readback_roundtrip_xyzw",
     )
-    retained["euler_regressions"] = [
-        {field: near_lock[field] for field in regression_fields}
-    ]
-
-    retained["axis_angle"] = [
+    euler_regressions = [{field: near_lock[field] for field in regression_fields}]
+    axis_angle = [
         {
             field: row[field]
             for field in (
@@ -163,7 +163,7 @@ def _compact_threejs(document: Record, source_sha256: str) -> Record:
         }
         for row in _select_ids(_rows(source, "axis_angle"), AXIS_ANGLE_CASES)
     ]
-    retained["quaternion_normalization"] = [
+    quaternion_normalization = [
         {
             key: value
             for key, value in row.items()
@@ -173,7 +173,7 @@ def _compact_threejs(document: Record, source_sha256: str) -> Record:
             _rows(source, "quaternion_normalization"), QUATERNION_CASES
         )
     ]
-    retained["independent_matrices"] = [
+    independent_matrices = [
         {
             key: value
             for key, value in row.items()
@@ -194,15 +194,22 @@ def _compact_threejs(document: Record, source_sha256: str) -> Record:
     ]
     if len(alignment) != 2:
         raise ValueError("expected the two named Three.js vector-alignment cases")
-    retained["two_vector_alignment"] = alignment
-
-    retained["shortest_slerp"] = [
+    shortest_slerp = [
         {
             **row,
             "samples": [sample for sample in row["samples"] if sample["t"] == 0.5],
         }
         for row in _rows(source, "shortest_slerp")
     ]
+    retained = {
+        **pass_through_groups,
+        "euler_regressions": euler_regressions,
+        "axis_angle": axis_angle,
+        "quaternion_normalization": quaternion_normalization,
+        "independent_matrices": independent_matrices,
+        "two_vector_alignment": alignment,
+        "shortest_slerp": shortest_slerp,
+    }
     return {
         **document,
         "observations": retained,
@@ -217,49 +224,81 @@ def _compact_other(
     source = document["observations"]
     if not isinstance(source, dict):
         raise TypeError("observations must be an object")
-    retained = dict(source)
-
-    if "euler_orders" in source:
-        key = ("order_label", "sequence_case") if target == "mujoco" else ("order",)
-        retained["euler_orders"] = _first_per_key(
-            _rows(source, "euler_orders"),
-            key,
-            include=lambda row: row["case_id"] != "euler-identity",
-        )
-    if "euler_boundaries" in source:
-        order = "order_label" if target == "mujoco" else "order"
-        retained["euler_boundaries"] = _first_per_key(
-            _rows(source, "euler_boundaries"), (order,)
-        )
-    for group, case_ids in (
-        ("axis_angle", AXIS_ANGLE_CASES),
-        ("quaternion_normalization", QUATERNION_CASES),
-        ("proper_matrices", MATRIX_CASES),
-        ("independent_matrices", (*MATRIX_CASES, "matrix-shear")),
-        ("integration", INTEGRATION_CASES),
-        ("sub_quat", QUATERNION_DIFFERENCE_CASES),
-        ("qdq2av", ANGULAR_VELOCITY_CASES),
-    ):
-        if group in source:
-            retained[group] = _select_ids(_rows(source, group), case_ids)
-    if "two_vector_alignment" in source:
-        alignment = [
-            row
-            for row in _rows(source, "two_vector_alignment")
-            if row["from_case_index"] == 0 and row["to_case_index"] in (1, 2)
-        ]
-        if len(alignment) != 2:
-            raise ValueError("expected the two named vector-alignment cases")
-        retained["two_vector_alignment"] = alignment
-
-    counts = _counts(retained)
-    counts = {
+    key = ("order_label", "sequence_case") if target == "mujoco" else ("order",)
+    euler_order_group = (
         {
-            "integration": "integration_and_derivatives",
-            "sub_quat": "quaternion_differences",
-        }.get(name, name): count
-        for name, count in counts.items()
+            "euler_orders": _first_per_key(
+                _rows(source, "euler_orders"),
+                key,
+                include=lambda row: row["case_id"] != "euler-identity",
+            )
+        }
+        if "euler_orders" in source
+        else {}
+    )
+    order = "order_label" if target == "mujoco" else "order"
+    euler_boundary_group = (
+        {
+            "euler_boundaries": _first_per_key(
+                _rows(source, "euler_boundaries"), (order,)
+            )
+        }
+        if "euler_boundaries" in source
+        else {}
+    )
+    case_groups = {
+        group: _select_ids(_rows(source, group), case_ids)
+        for group, case_ids in (
+            ("axis_angle", AXIS_ANGLE_CASES),
+            ("quaternion_normalization", QUATERNION_CASES),
+            ("proper_matrices", MATRIX_CASES),
+            ("independent_matrices", (*MATRIX_CASES, "matrix-shear")),
+            ("integration", INTEGRATION_CASES),
+            ("sub_quat", QUATERNION_DIFFERENCE_CASES),
+            ("qdq2av", ANGULAR_VELOCITY_CASES),
+        )
+        if group in source
     }
+    alignment_rows = (
+        _rows(source, "two_vector_alignment")
+        if "two_vector_alignment" in source
+        else []
+    )
+    alignment = [
+        row
+        for row in alignment_rows
+        if row["from_case_index"] == 0 and row["to_case_index"] in (1, 2)
+    ]
+    if "two_vector_alignment" in source and len(alignment) != 2:
+        raise ValueError("expected the two named vector-alignment cases")
+    alignment_group = (
+        {"two_vector_alignment": alignment} if "two_vector_alignment" in source else {}
+    )
+
+    replaced_groups = {
+        *euler_order_group,
+        *euler_boundary_group,
+        *case_groups,
+        *alignment_group,
+    }
+    retained = {
+        **{
+            name: deepcopy(rows)
+            for name, rows in source.items()
+            if name not in replaced_groups
+        },
+        **euler_order_group,
+        **euler_boundary_group,
+        **case_groups,
+        **alignment_group,
+    }
+
+    count_names = {
+        "integration": "integration_and_derivatives",
+        "sub_quat": "quaternion_differences",
+    }
+    raw_counts = _counts(retained)
+    counts = {count_names.get(name, name): count for name, count in raw_counts.items()}
     return {
         **document,
         "observations": retained,
