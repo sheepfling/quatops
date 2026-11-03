@@ -200,9 +200,6 @@ def main():
                     "time_seconds": sample_time,
                     "frame_value": frame_value,
                     "quaternion_wxyz": quaternion_wxyz(evaluated.rotation_quaternion),
-                    "quaternion_length": float(evaluated.rotation_quaternion.magnitude),
-                    "matrix_basis_rows": matrix_rows(evaluated.matrix_basis),
-                    "matrix_world_rows": matrix_rows(evaluated.matrix_world),
                 }
             )
         animations.append(

@@ -240,7 +240,9 @@ def test_threejs_gltf_loader_matches_glTF_step_slerp_and_cubic_contracts():
             quaternion_coefficient_error(sample["quaternion_xyzw"], expected)
             <= TOLERANCE
         )
-        assert sample["quaternion_length"] == pytest.approx(1.0, abs=3e-8)
+        assert np.linalg.norm(sample["quaternion_xyzw"]) == pytest.approx(
+            1.0, abs=3e-8
+        )
 
 
 @pytest.mark.parametrize(
@@ -341,7 +343,9 @@ def test_blender_importer_axis_mapping_and_quaternion_animation_profiles_are_fro
     np.testing.assert_allclose(
         midpoint["quaternion_wxyz"], component_linear, rtol=0.0, atol=TOLERANCE
     )
-    assert midpoint["quaternion_length"] == pytest.approx(0.95203203, abs=2e-8)
+    assert np.linalg.norm(midpoint["quaternion_wxyz"]) == pytest.approx(
+        0.95203203, abs=2e-8
+    )
 
     cubic = rows["CUBICSPLINE"]
     assert {
@@ -364,7 +368,9 @@ def test_blender_importer_axis_mapping_and_quaternion_animation_profiles_are_fro
         quaternion_coefficient_error(cubic_midpoint["quaternion_wxyz"], expected_target)
         > 0.08
     )
-    assert cubic_midpoint["quaternion_length"] == pytest.approx(0.97526056, abs=2e-8)
+    assert np.linalg.norm(cubic_midpoint["quaternion_wxyz"]) == pytest.approx(
+        0.97526056, abs=2e-8
+    )
     assert {
         key["handle_left_type"] for curve in cubic["fcurves"] for key in curve["keys"]
     } == {"AUTO"}

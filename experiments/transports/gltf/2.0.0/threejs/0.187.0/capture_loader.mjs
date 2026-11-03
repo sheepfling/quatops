@@ -90,14 +90,9 @@ function animationSamples(gltf, clip) {
   if (!target) throw new Error(`Missing target node ${targetName} for ${clip.name}`);
   const rows = samples.map((sample) => {
     mixer.setTime(sample.time_seconds);
-    target.updateMatrix();
-    target.updateWorldMatrix(true, false);
     return {
       ...sample,
       quaternion_xyzw: target.quaternion.toArray(),
-      quaternion_length: target.quaternion.length(),
-      local_matrix: matrix4(target.matrix),
-      world_matrix: matrix4(target.matrixWorld),
     };
   });
   mixer.stopAllAction();
