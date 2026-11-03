@@ -1,8 +1,10 @@
 """JPL XYZW negative-cross algebra, active rotations and backend parity."""
 
-import pytest
 import math
 from dataclasses import FrozenInstanceError
+
+import numpy as np
+import pytest
 
 from quatops import dataclass as h_dataclass
 from quatops import namedtuple as h_namedtuple
@@ -10,9 +12,6 @@ from quatops import scalar as h_scalar
 from quatops.jpl import dataclass as j_dataclass
 from quatops.jpl import namedtuple as j_namedtuple
 from quatops.jpl import scalar as j_scalar
-
-import numpy as np
-
 from quatops.numpy.hamilton import wxyz as h_numpy
 from quatops.numpy.jpl import xyzw as j_numpy
 

@@ -1,7 +1,9 @@
 import math
+
 import numpy as np
 
 from quatops.jpl import scalar
+
 
 def test_scalar_reference_values():
     q = scalar.from_hamilton((1, 2, 3, 4))

@@ -1,8 +1,8 @@
 import math
+
 import numpy as np
 
 from quatops.hamilton import dataclass
-
 
 
 def test_dataclass_reference_values():

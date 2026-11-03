@@ -6,4 +6,5 @@ Each quaternion stores its scalar coefficient first, in ``wxyz`` order.
 from ..numpy.jpl.components_first import wxyz as _backend
 from ..numpy.jpl.components_first.wxyz import *  # noqa: F403
 
-__all__ = _backend.__all__
+# The component-first backend builds this export tuple from its adapter table.
+__all__ = [*vars(_backend)["__all__"]]  # noqa: PLE0604

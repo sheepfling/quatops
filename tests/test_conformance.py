@@ -1,13 +1,12 @@
 """One set of independent mathematical examples for every representation."""
 
-import pytest
 import math
-
-from quatops import dataclass, namedtuple, scalar
 from typing import Callable
 
 import numpy as np
+import pytest
 
+from quatops import dataclass, namedtuple, scalar
 from quatops.numpy.hamilton import wxyz as qnumpy
 
 # Each adapter constructs the representation explicitly. Scalar-last input is

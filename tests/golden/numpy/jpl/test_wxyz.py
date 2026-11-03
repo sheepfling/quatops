@@ -4,6 +4,7 @@ import numpy as np
 
 from quatops.numpy.jpl import wxyz
 
+
 def test_jpl_wxyz_reference_values():
     q = wxyz.from_hamilton((1, 2, 3, 4))
     r = wxyz.from_hamilton((5, 6, 7, 8))

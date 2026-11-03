@@ -8,12 +8,19 @@ import numpy as np
 import pytest
 from numpy.testing import assert_array_equal
 
-from quatops import _numpy
+from quatops import _numpy, _numpy_numba_kernels
 from quatops.engines import SignedAxisMap
 from quatops.engines import numpy as engine_numpy
 from quatops.numpy.hamilton import wxyz, xyzw
 
 COUNT = 128
+
+
+def _set_rotation_kernel_state(monkeypatch, *, checked, kernels):
+    """Patch the extracted dispatcher module and its legacy NumPy alias."""
+    monkeypatch.setattr(_numpy_numba_kernels, "_NUMBA_ROTATION_CHECKED", checked)
+    monkeypatch.setattr(_numpy_numba_kernels, "_NUMBA_ROTATION_KERNELS", kernels)
+    monkeypatch.setattr(_numpy, "_NUMBA_ROTATION_KERNELS", kernels)
 
 
 @pytest.fixture
@@ -22,8 +29,7 @@ def reset_numba_state(monkeypatch):
     monkeypatch.setattr(_numpy, "_NUMBA_MULTIPLY", {})
     monkeypatch.setattr(_numpy, "_NUMBA_CHECKED", False)
     monkeypatch.setattr(_numpy, "_NUMBA_ROTATE", None)
-    monkeypatch.setattr(_numpy, "_NUMBA_ROTATION_CHECKED", False)
-    monkeypatch.setattr(_numpy, "_NUMBA_ROTATION_KERNELS", {})
+    _set_rotation_kernel_state(monkeypatch, checked=False, kernels={})
 
 
 def _identity_inputs():
@@ -252,7 +258,7 @@ def test_acceleration_import_failures_fall_back_once(
     assert not _numpy._NUMBA_MULTIPLY
     assert _numpy._NUMBA_CHECKED
     assert _numpy._NUMBA_ROTATE is None
-    assert _numpy._NUMBA_ROTATION_CHECKED
+    assert _numpy_numba_kernels._NUMBA_ROTATION_CHECKED
     assert not _numpy._NUMBA_ROTATION_KERNELS
     assert sum(record.name == "quatops._numpy" for record in caplog.records) == 3
 
@@ -286,7 +292,7 @@ def test_acceleration_registration_failures_fall_back_once(
     assert not _numpy._NUMBA_MULTIPLY
     assert _numpy._NUMBA_CHECKED
     assert _numpy._NUMBA_ROTATE is None
-    assert _numpy._NUMBA_ROTATION_CHECKED
+    assert _numpy_numba_kernels._NUMBA_ROTATION_CHECKED
     assert not _numpy._NUMBA_ROTATION_KERNELS
     assert sum(record.name == "quatops._numpy" for record in caplog.records) == 3
 
@@ -332,11 +338,10 @@ def test_acceleration_execution_failures_disable_the_dispatchers(
     monkeypatch.setattr(_numpy, "_NUMBA_MULTIPLY", {(False, 1): fail("multiply")})
     monkeypatch.setattr(_numpy, "_NUMBA_CHECKED", True)
     monkeypatch.setattr(_numpy, "_NUMBA_ROTATE", fail("rotate"))
-    monkeypatch.setattr(_numpy, "_NUMBA_ROTATION_CHECKED", True)
-    monkeypatch.setattr(
-        _numpy,
-        "_NUMBA_ROTATION_KERNELS",
-        {
+    _set_rotation_kernel_state(
+        monkeypatch,
+        checked=True,
+        kernels={
             "from_rotation_matrix": fail("from_matrix"),
             "to_rotation_matrix": fail("to_matrix"),
             "quaternion_matrix": fail("quaternion_matrix"),
@@ -409,11 +414,10 @@ def test_euler_kernel_execution_failures_disable_dispatchers(
 
         return dispatch
 
-    monkeypatch.setattr(_numpy, "_NUMBA_ROTATION_CHECKED", True)
-    monkeypatch.setattr(
-        _numpy,
-        "_NUMBA_ROTATION_KERNELS",
-        {
+    _set_rotation_kernel_state(
+        monkeypatch,
+        checked=True,
+        kernels={
             "from_euler": fail("from_euler"),
             "to_euler": fail("to_euler"),
         },

@@ -45,8 +45,8 @@ def compare(label: str, hamilton: Callable[..., object], hargs: tuple,
             jpl_values.append(first_value)
             ham_values.append(second_value)
     ham = sorted(ham_values)[2] * scale / count
-    jpl = sorted(jpl_values)[2] * scale / count
-    print(f"{label}: H={ham:.3f} {unit} J={jpl:.3f} {unit} J/H={jpl / ham:.2f}x")
+    jpl_time = sorted(jpl_values)[2] * scale / count
+    print(f"{label}: H={ham:.3f} {unit} J={jpl_time:.3f} {unit} J/H={jpl_time / ham:.2f}x")
 
 
 def main() -> None:

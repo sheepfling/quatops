@@ -1,13 +1,12 @@
 """Mixed-scale rotations checked against exact rational arithmetic."""
 
-import pytest
 import math
 from fractions import Fraction
 
-from quatops import dataclass, namedtuple, scalar
-
 import numpy as np
+import pytest
 
+from quatops import dataclass, namedtuple, scalar
 from quatops.numpy.hamilton import wxyz as array
 
 

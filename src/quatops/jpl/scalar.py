@@ -159,16 +159,10 @@ def power(q: Iterable[FloatT], exponent: FloatLike) -> Quaternion:
     Algebraic powers preserve the coefficient branch used by ``log``; they do
     not convert the quaternion's rotation convention.
     """
-    if type(exponent) is float:
-        is_integer = False
-    elif isinstance(exponent, Integral):
-        is_integer = True
-    elif isinstance(exponent, FloatLike):
-        is_integer = False
-    else:
-        raise ValueError("exponent must be a finite real number")
+    if not isinstance(exponent, FloatLike):
+        raise ValueError("exponent must be a finite real number")  # noqa: TRY004
     x, y, z, w = _quaternion(q)
-    if is_integer:
+    if isinstance(exponent, Integral):
         n = int(exponent)
         if n == 0:
             return 0.0, 0.0, 0.0, 1.0
@@ -505,7 +499,7 @@ def _canonical(q: Quaternion) -> Quaternion:
     return tuple(0.0 if c == 0.0 else (-c if flip else c) for c in (x, y, z, w))  # type: ignore[return-value]
 
 
-def _from_unit_axis(axis: Vector, angle: FloatLike) -> Quaternion:
+def _from_unit_axis(axis: Vector, angle: float) -> Quaternion:
     """Create a canonical JPL quaternion from a physical axis and radians."""
     half = angle * 0.5
     sine = math.sin(half)
@@ -822,8 +816,9 @@ def from_euler(
         values = tuple(math.radians(value) for value in values)  # type: ignore[assignment]
     if not intrinsic:
         values = tuple(reversed(values))  # type: ignore[assignment]
+    first, second, third = values
     return _advanced._euler_from_validated_angles(
-        *values, i, j, k, ell, epsilon, proper, algebra_epsilon=-1,
+        first, second, third, i, j, k, ell, epsilon, proper, algebra_epsilon=-1,
         scalar_last=True,
     )
 
@@ -1004,7 +999,8 @@ def random_quaternion(rng: object | None = None) -> Quaternion:
     draw = getattr(source, "random", None)
     if not callable(draw):
         raise ValueError("rng must provide random()")  # noqa: TRY004
-    u1, u2, u3 = (float(draw()) for _ in range(3))
+    draw_float: Callable[[], FloatLike] = draw  # type: ignore[assignment]
+    u1, u2, u3 = (float(draw_float()) for _ in range(3))
     if any(not math.isfinite(u) or not 0.0 <= u < 1.0 for u in (u1, u2, u3)):
         raise ValueError("rng.random() must return values in [0, 1)")
     x = math.sqrt(1.0 - u1) * math.sin(2.0 * math.pi * u2)

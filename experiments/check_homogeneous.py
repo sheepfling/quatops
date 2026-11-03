@@ -13,7 +13,7 @@ import sys
 from collections.abc import Iterable, Sequence
 from fractions import Fraction
 from types import ModuleType
-from typing import Callable, cast
+from typing import Callable
 
 Vec3 = tuple[float, float, float]
 PlainQuat = tuple[float, float, float, float]
@@ -29,10 +29,10 @@ def exact_rotate(q: Iterable[float], v: Iterable[float]) -> Vec3:
         (2 * (x * y + w * z), w * w - x * x + y * y - z * z, 2 * (y * z - w * x)),
         (2 * (x * z - w * y), 2 * (y * z + w * x), w * w - x * x - y * y + z * z),
     )
-    return cast(Vec3, tuple(
+    return tuple(
         float(sum(a * b for a, b in zip(row, (vx, vy, vz))) / denominator)
         for row in rows
-    ))
+    )  # type: ignore[return-value]
 
 TINY = math.nextafter(0.0, 1.0)
 CASES = (
@@ -175,7 +175,7 @@ def array_checks(module: ModuleType) -> bool:
         np.seterr(**old)
     return batch_ok and empty_ok
 
-def main(names: Sequence[str] | None = None) -> int:  # noqa: UP045
+def main(names: Sequence[str] | None = None) -> int:
     names = list(names if names is not None else sys.argv[1:])
     names = names or ["homogeneous_scalar", "homogeneous_numpy"]
     all_passed = True

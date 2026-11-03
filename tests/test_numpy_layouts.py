@@ -1,15 +1,15 @@
 """Cross-convention and component-order conformance of NumPy kernels."""
 
-import pytest
 import importlib
 import inspect
 import math
 from contextlib import ExitStack
 from unittest.mock import patch
 
-from quatops import scalar as h_scalar
-
 import numpy as np
+import pytest
+
+from quatops import scalar as h_scalar
 
 try:
     from scipy.spatial.transform import Rotation

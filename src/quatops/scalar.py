@@ -41,20 +41,19 @@ def _components(
             if not (isfinite(first) and isfinite(second)
                     and isfinite(third) and isfinite(fourth)):
                 raise ValueError(f"{name} must contain finite real numbers")
-            return items
+            return items  # type: ignore[return-value]
     elif length == 3:
         first, second, third = items
         if type(first) is float and type(second) is float and type(third) is float:
             if not (isfinite(first) and isfinite(second) and isfinite(third)):
                 raise ValueError(f"{name} must contain finite real numbers")
-            return items
+            return items  # type: ignore[return-value]
 
     if type(items[0]) is float and all(type(value) is float for value in items):
         # Built-in floats need no conversion; keep their tuple as the result.
-        result = items
+        result = items  # type: ignore[assignment]
     else:
-        if not all(isinstance(value, Real) or isinstance(value, FloatLike)
-                   for value in items):
+        if not all(isinstance(value, (Real, FloatLike)) for value in items):
             raise ValueError(f"{name} must contain finite real numbers")
         try:
             result = tuple(float(value) for value in items)
@@ -62,7 +61,7 @@ def _components(
             raise ValueError(f"{name} must contain finite real numbers") from exc
     if not all(isfinite(value) for value in result):
         raise ValueError(f"{name} must contain finite real numbers")
-    return result
+    return result  # type: ignore[return-value]
 
 
 def _quaternion(q: Iterable[FloatT]) -> Quaternion:
@@ -76,7 +75,7 @@ def _vector(v: Iterable[FloatT]) -> Vector:
 def _real_scalar(value: FloatLike, name: str) -> float:
     if type(value) is float:
         result = value
-    elif isinstance(value, Real) or isinstance(value, FloatLike):
+    elif isinstance(value, (Real, FloatLike)):
         try:
             result = float(value)
         except (TypeError, ValueError, OverflowError) as exc:
@@ -214,16 +213,10 @@ def power(q: Iterable[FloatT], exponent: FloatLike) -> Quaternion:
     Zero to a positive power is zero, zero to zero is identity, and a negative
     power of zero is undefined.
     """
-    if type(exponent) is float:
-        is_integer = False
-    elif isinstance(exponent, Integral):
-        is_integer = True
-    elif isinstance(exponent, FloatLike):
-        is_integer = False
-    else:
-        raise ValueError("exponent must be a finite real number")
+    if not isinstance(exponent, FloatLike):
+        raise ValueError("exponent must be a finite real number")  # noqa: TRY004
     base = _quaternion(q)
-    if is_integer:
+    if isinstance(exponent, Integral):
         n = int(exponent)
         if n == 0:
             return (1.0, 0.0, 0.0, 0.0)
@@ -280,7 +273,7 @@ def slerp(q0: Iterable[FloatT], q1: Iterable[FloatT], t: FloatLike,
     if not isfinite(amount):
         raise ValueError("t must be a finite real number")
     if not isinstance(shortest, bool):
-        raise ValueError("shortest must be a bool")
+        raise ValueError("shortest must be a bool")  # noqa: TRY004
     a, b = normalize(q0), normalize(q1)
     dot = fsum(x * y for x, y in zip(a, b))
     if shortest and dot < 0.0:
@@ -563,7 +556,7 @@ def rotations_equivalent(q0: Iterable[FloatT], q1: Iterable[FloatT],
     return rotation_distance(q0, q1) <= tolerance
 
 
-def _dot3(a: FloatLike, b: FloatLike, c: FloatLike, x: FloatLike, y: FloatLike, z: FloatLike) -> float:
+def _dot3(a: float, b: float, c: float, x: float, y: float, z: float) -> float:
     """Sum finite component products without avoidable intermediate overflow."""
     terms = [a*x, b*y, c*z]
     terms.sort(key=abs, reverse=True)
@@ -698,7 +691,7 @@ def _axis(values: Vector) -> Vector:
     return a / length, b / length, c / length
 
 
-def _positive_zero(value: FloatLike) -> float:
+def _positive_zero(value: float) -> float:
     """Use the canonical positive sign for a floating-point zero."""
     return 0.0 if value == 0.0 else value
 
@@ -736,7 +729,7 @@ def _axis_angle_from_q(q: Iterable[FloatT]) -> tuple[Vector, float]:
     return axis, angle
 
 
-def _from_unit_axis(axis: Vector, angle: FloatLike) -> Quaternion:
+def _from_unit_axis(axis: Vector, angle: float) -> Quaternion:
     """Create a canonical quaternion from a unit axis and angle in radians."""
     half = angle * 0.5
     sine = math.sin(half)
@@ -832,6 +825,7 @@ def to_rotation_vector(q: Iterable[FloatT]) -> RotVec:
 
 
 from ._advanced import (
+    EulerResult,
     acos,
     acosh,
     align_sign,
@@ -840,7 +834,6 @@ from ._advanced import (
     asinh,
     atan,
     atanh,
-    EulerResult,
     boxminus,
     boxplus,
     commutator,
@@ -850,8 +843,8 @@ from ._advanced import (
     from_mrp,
     integrate_angular_velocity_samples,
     log1p,
-    log10,
     log2,
+    log10,
     make_sign_continuous,
     nlerp,
     power_quaternion,
