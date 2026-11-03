@@ -40,7 +40,7 @@
     "numeric_helper_sha256": "aed1da7b180e76ff0e101a477dd6a941ed0ad076509d9716bf2bf9b6896f5fa4",
     "package_lock_sha256": "668a68bc25bbfd59ff9ff1b615ec83294b6c9c8f97fa9466f5838dbd169dc791",
     "geographic_inputs_sha256": "ca5c70314444c14cead0cc196f319e5d189657bb818eb59751c07e55ec23ff85",
-    "retention_script_sha256": "5368bbc715c41ee092fc85c01065412cbbc1bcaefc13e53a6dd02c339f6f71b2",
+    "retention_script_sha256": "5790ab5301bcd0f0db12407bc89df072577c4568cd9855ccfc46ebd02ffffece",
     "retention_helper_sha256": "47e1bf945aeefb0473a6c95eccc22bde2a5b6df9ba4581f599418a6c1ffe5081"
   }
 }

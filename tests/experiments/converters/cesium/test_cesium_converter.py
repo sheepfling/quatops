@@ -43,7 +43,10 @@ def check(actual, expected, message, *, atol=ATOL):
 def test_cesium_capture_provenance_and_explicit_frame_contract():
     assert (
         MANIFEST["review_state"]
-        == "native capture retained; QuatOps replay covered by tests/experiments/converters/cesium/test_cesium_converter.py"
+        == (
+            "native capture retained; QuatOps replay covered by "
+            "tests/experiments/converters/cesium/test_cesium_converter.py"
+        )
     )
     assert MANIFEST["target"]["name"] == "CesiumJS"
     assert MANIFEST["target"]["package_version"] == "1.124.0"

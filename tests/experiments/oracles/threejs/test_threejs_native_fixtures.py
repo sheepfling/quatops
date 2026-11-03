@@ -20,7 +20,7 @@ FIXTURE_PATH = (
 )
 FIXTURE = json.loads(FIXTURE_PATH.read_text(encoding="utf-8"))
 OBS = FIXTURE["observations"]
-CORPUS_SHA256 = "07e4d809f7eb75ad6e5454febf2b725b0b8fb389536743dd7196566d4640135f"
+CORPUS_SHA256 = "eaf7605b3298ec9dbdf7838f43f2da61d90af5351bb15e455d3eb37c6c6b5446"
 TOLERANCE = 3e-12
 
 
@@ -244,6 +244,7 @@ def test_threejs_products_shortest_slerp_and_normalization_match_quatops(
 
 
 def test_threejs_fixture_hash_fields_match_checked_in_sources():
+    corpus_path = REPOSITORY_ROOT / "experiments" / "oracles" / "shared" / "orientation_inputs_v1.json"
     script_path = (
         REPOSITORY_ROOT
         / "experiments"
@@ -253,6 +254,7 @@ def test_threejs_fixture_hash_fields_match_checked_in_sources():
         / "capture_three.mjs"
     )
     lock_path = script_path.with_name("package-lock.json")
+    assert hashlib.sha256(corpus_path.read_bytes()).hexdigest() == CORPUS_SHA256
     assert (
         hashlib.sha256(script_path.read_bytes()).hexdigest()
         == FIXTURE["provenance"]["exporter_sha256"]

@@ -31,6 +31,8 @@
     "native_observations_sha256": "efab1892958652770637bcae847e7e33bbf21cfae467dcf2b597e742a818f857",
     "generator_sha256": "0bcbaf2ca1cab9f760f5c2d5b19240eaf4d043da4bf5f9440224e8ce6d40f2be",
     "native_capture_script_sha256": "2444d7a7995e2f089ea99ad99c530593e3b0958898096ae5ac6a873dcc16fb95",
+    "checked_in_capture_runner_sha256": "2ec9a352db850e4d3a35bf71400a76caaacd9becd53353b45489365c8d32ba31",
+    "capture_script_note": "The native run used the original script hash above; the checked-in runner only changes the uv.lock lookup path.",
     "lockfile_sha256": "bfa49dc9a47c71af70e6b7deabb03c63ace6f78a371b66966414b74a99c2ae1c",
     "contract_sha256": "fcc4b28c22f4cadba08531b6750dbb8df33cf8a3d38e6e09cbeabeef4208bae9"
   },

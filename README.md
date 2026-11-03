@@ -103,7 +103,8 @@ python -m pip install '.[numpy]'
 The [API contract](docs/API.md) covers storage rules, available operations,
 validation behavior, and numerical limits. The
 [documentation map](docs/README.md) separates user guides from contributor
-verification and benchmark tools.
+verification and benchmark tools. The [test layout](tests/README.md) maps
+tests to the source package and evidence products.
 
 The package retains alternative import paths for compatibility. Use the
 canonical paths in the API contract for new code.
