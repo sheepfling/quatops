@@ -15,6 +15,7 @@ from quatops.engines import (
     unity,
     unreal,
 )
+from tests.native_engine_support import load_versioned_engine_witness
 
 ROOT = Path(__file__).parent.parent
 INPUTS = json.loads(
@@ -40,8 +41,7 @@ ADAPTERS = {
 
 
 def _fixture(engine, version):
-    path = ROOT / "tests" / "oracles" / engine / version / "witnesses.json"
-    return json.loads(path.read_text(encoding="utf-8"))
+    return load_versioned_engine_witness(ROOT, engine, version)[1]
 
 
 def _capture_rows(fixture):

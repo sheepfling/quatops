@@ -17,11 +17,7 @@
     "positive_z": "backward",
     "forward": "-Z"
   },
-  "destination_axes_from_source": [
-    "x",
-    "z",
-    "-y"
-  ],
+  "destination_axes_from_source": ["x", "z", "-y"],
   "transform_semantics": "node local to parent; world = parent world * child local; column-vector action",
   "scope": [
     "static node TRS serialization",
@@ -29,10 +25,5 @@
     "native loader local/world matrices",
     "point action and inverse point round trip"
   ],
-  "excludes": [
-    "animation",
-    "mesh model-forward convention",
-    "compression extensions",
-    "other GLTFLoader versions"
-  ]
+  "excludes": ["animation", "mesh model-forward convention", "compression extensions", "other GLTFLoader versions"]
 }

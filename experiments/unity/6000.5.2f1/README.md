@@ -1,9 +1,10 @@
 # Unity Editor 6000.5.2f1 capture
 
-This project captures the pinned `UnityEngine` quaternion API on WindowsEditor.
-Its full discovery output is temporary. Selected native converter witnesses
-are retained under [`tests/oracles/unity/6000.5.2f1`](../../../tests/oracles/unity/6000.5.2f1/contract.json).
-Only `ProjectVersion.txt` and the package manifest/lock are retained; Unity
+This project captures selected outputs from the pinned `UnityEngine`
+quaternion API on WindowsEditor; it has no external Unity package dependency.
+The temporary output is retained under
+[`tests/oracles/unity/6000.5.2f1`](../../../tests/oracles/unity/6000.5.2f1/contract.json).
+Only `ProjectVersion.txt` and the package manifest are retained; Unity
 regenerates editor and player defaults when the project is opened.
 
 From the repository root in PowerShell:
@@ -12,7 +13,7 @@ From the repository root in PowerShell:
 $root = (Resolve-Path .).Path
 $unity = 'C:\Program Files\Unity\Hub\Editor\6000.5.2f1\Editor\Unity.exe'
 $project = Join-Path $root 'experiments\unity\6000.5.2f1'
-$output = Join-Path $env:TEMP 'quatops-unity-full.json'
+$output = Join-Path $env:TEMP 'quatops-unity-witnesses.json'
 $log = Join-Path $env:TEMP 'quatops-unity-capture.log'
 $arguments = @(
   '-batchmode', '-quit', '-projectPath', "`"$project`"",
@@ -25,11 +26,11 @@ if ($capture.ExitCode -ne 0) { throw "Unity capture failed with exit code $($cap
   $output tests\oracles\unity\6000.5.2f1
 ```
 
-The retained set covers eight canonical orientations, native quaternion
+The capture emits eight canonical orientations, native quaternion
 coefficients and native basis/mixed-vector actions, and both orders of one
 noncommuting product. The contract records API, component order, frame map,
-precision, build, and capture provenance. Euler, animation, and unrelated API
-sweeps remain discovery work rather than permanent converter goldens.
+precision, build, and capture provenance. Euler and animation adapters are
+outside this converter's retained evidence.
 
 Run the replay and generated frame-map checks with:
 

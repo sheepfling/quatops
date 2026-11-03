@@ -5,10 +5,7 @@
     "version": "5.7.4",
     "build": 51494982,
     "platform": "WindowsEditor",
-    "native_scalar_profiles": [
-      "float32",
-      "float64"
-    ],
+    "native_scalar_profiles": ["float32", "float64"],
     "native_quaternion_order": "xyzw",
     "native_algebra": "Hamilton",
     "native_vector_action": "active quaternion sandwich / engine vector rotation API"
@@ -30,11 +27,7 @@
       "positive_y": "right",
       "positive_z": "up"
     },
-    "destination_axes_from_source": [
-      "y",
-      "x",
-      "z"
-    ],
+    "destination_axes_from_source": ["y", "x", "z"],
     "conversion_rule": "native_xyzw=(-y,-x,-z,w)",
     "inverse_rule": "canonical_wxyz=(W,-Y,-X,-Z)",
     "world_and_body_map": "same declared signed-axis map",
@@ -44,19 +37,14 @@
       "float64": 2e-14
     },
     "scope": "unit quaternion coefficient and physical-action conversion",
-    "excludes": [
-      "asset model-forward defaults",
-      "scene import",
-      "animation transport",
-      "Euler adapters"
-    ]
+    "excludes": ["asset model-forward defaults", "scene import", "animation transport", "Euler adapters"]
   },
   "provenance": {
     "witness_file": "witnesses.json",
-    "witness_sha256": "d65ac848c632e638eef74a6386ab1b3cf6beea12f383eeadb91003b5ff442ca2",
+    "witness_sha256": "2841460aae445aadec6e439462def372dbf0b0207df8e2d0259fc8ec875ef42a",
     "capture_source": "experiments/unreal/5.7.4/Source/QuatOpsUnrealCapture/Private/QuatOpsUnrealCaptureTests.cpp",
-    "capture_source_sha256": "40753985e3f57f5a7018dd17d50ff9b1187c2b44f9e357350f850870d1365346",
-    "original_capture_sha256": "d345723606afe741f310afb7af46f899849d204880b6c16a3c94ed97a345a034",
+    "capture_source_sha256": "7ed0a481c8af4a08c8eedf34609fc48339a3560e725c1b10f8c4881d45833a10",
+    "original_capture_sha256": "c763289dab91ea523bc2695fc270f063b777819a5bd9dc630b095dfb0412fe00",
     "canonical_input_sha256": "a6f0630806b69d3b3b29a036aa10f63bfe214668329c661598951f84f8f41eec"
   }
 }

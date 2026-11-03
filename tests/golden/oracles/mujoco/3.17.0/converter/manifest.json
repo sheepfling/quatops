@@ -117,11 +117,11 @@
   ],
   "provenance": {
     "capture_script_sha256": "2e137d0e9135ecd2e3c4c4e3c010fd1abc060f9bcae6a56840fb1bc06f8c733f",
-    "contract_sha256": "0428adfc0eb6e9398e9b602d3a98bb3a08ba871ae785b73e6e21be845a8387b9",
+    "contract_sha256": "6a2de9e8a58581109663850419dc39c01b7ae2674e60b969bdebe1fbeacefe8a",
     "converter_input_spec_sha256": "cfc5dbbc1729c6d22b9f0c2e8f7d3f335ff0b32a65a968f2f48f65a4aaa0eb82",
     "selected_inputs_sha256": "a6f0630806b69d3b3b29a036aa10f63bfe214668329c661598951f84f8f41eec",
-    "witnesses_sha256": "3e52f12367a83925d3a85b8b04a549fa6522d83f49742ecaefe7752f53da3dc6",
-    "full_oracle_sha256": "2cb1d3333a45ca1581a7121f82c5676de4cbc26b79cc2c9371f402c2d255bdd2",
+    "witnesses_sha256": "13e1c439220469185d322d04baca9286e633203cb20a78862a438daddb080733",
+    "full_oracle_sha256": "8feda68d2036c2a72f434ac06a8077dc894411745b8f771d395e4e9514234929",
     "pinned_lockfile_sha256": "98ee236da812bad9c38b900b4f19290f406969e2a8cfb0cb0e0ae9237d62c556",
     "exact_invocation": "experiments/oracles/mujoco/3.17.0/.venv/Scripts/python.exe experiments/converters/mujoco/3.17.0/capture_native.py"
   }

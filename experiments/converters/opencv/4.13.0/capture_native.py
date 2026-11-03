@@ -159,10 +159,6 @@ def main() -> None:
         encoding="utf-8",
         newline="\n",
     )
-    build_info_path = output / "opencv-build-information.txt"
-    build_info_path.write_text(
-        cv2.getBuildInformation(), encoding="utf-8", newline="\n"
-    )
     cv2_path = Path(cv2.__file__).resolve().parent
     native_binaries = [
         {"path": path.relative_to(cv2_path).as_posix(), "sha256": sha256_file(path)}
@@ -203,7 +199,6 @@ def main() -> None:
             "preparation_spec_sha256": sha256_file(HERE / "converter_inputs.json"),
             "shared_canonical_inputs_sha256": inputs["canonical_input_sha256"],
             "witnesses_sha256": sha256_file(witnesses_path),
-            "native_build_information_sha256": sha256_file(build_info_path),
             "requirements_sha256": sha256_file(HERE / "requirements-converter.txt"),
             "cv2_extension_directory": "site-packages/cv2",
             "invocation_template": (

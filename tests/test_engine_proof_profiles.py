@@ -6,8 +6,9 @@ from pathlib import Path
 
 import pytest
 
+from tests.native_engine_support import load_versioned_engine_witness
+
 ROOT = Path(__file__).parent.parent
-ORACLE_ROOT = ROOT / "tests" / "oracles"
 TARGETS = (
     ("unreal", "5.7.4"),
     ("unity", "6000.5.2f1"),
@@ -18,17 +19,12 @@ TARGETS = (
 
 
 def _load(engine, version):
-    base = ORACLE_ROOT / engine / version
-    return (
-        json.loads((base / "contract.json").read_text(encoding="utf-8")),
-        json.loads((base / "witnesses.json").read_text(encoding="utf-8")),
-    )
+    return load_versioned_engine_witness(ROOT, engine, version)
 
 
 @pytest.mark.parametrize("engine,version", TARGETS)
 def test_contract_and_witnesses_are_versioned_small_and_provenanced(engine, version):
-    base = ORACLE_ROOT / engine / version
-    contract, witnesses = _load(engine, version)
+    contract, witnesses, witness_path = _load(engine, version)
     assert contract["engine"]["version"] == version
     assert contract["engine"]["api"]
     assert contract["engine"]["native_quaternion_order"] in {"wxyz", "xyzw"}
@@ -42,12 +38,10 @@ def test_contract_and_witnesses_are_versioned_small_and_provenanced(engine, vers
     assert conversion["world_and_body_map"] == "same declared signed-axis map"
     assert conversion["input_domain"].startswith("unit Hamilton quaternion")
     assert witnesses["provenance"]["native_build_record"]["version"].startswith(version)
-    assert (base / "witnesses.json").stat().st_size < 50 * 1024
+    assert witness_path.stat().st_size < 50 * 1024
 
     expected_hashes = {
-        "witness_sha256": hashlib.sha256(
-            (base / "witnesses.json").read_bytes()
-        ).hexdigest(),
+        "witness_sha256": hashlib.sha256(witness_path.read_bytes()).hexdigest(),
         "capture_source_sha256": hashlib.sha256(
             (ROOT / contract["provenance"]["capture_source"]).read_bytes()
         ).hexdigest(),
@@ -70,7 +64,7 @@ def test_witnesses_keep_only_discriminating_inputs_and_native_actions():
         for row in canonical_inputs["orientations"]
     }
     for engine, version in TARGETS:
-        _, witnesses = _load(engine, version)
+        _, witnesses, _ = _load(engine, version)
         capture = witnesses["canonical_interop"]
         captures = capture.get("precision_captures", {"float32": capture})
         for profile in captures.values():

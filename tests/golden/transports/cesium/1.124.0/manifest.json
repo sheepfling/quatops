@@ -22,8 +22,8 @@
     "canonical_inputs_sha256": "a6f0630806b69d3b3b29a036aa10f63bfe214668329c661598951f84f8f41eec",
     "geographic_inputs_sha256": "ca5c70314444c14cead0cc196f319e5d189657bb818eb59751c07e55ec23ff85",
     "native_capture_script_sha256": "c7d2dd5842e17808cf38fa14cf74156cfd78f7ae048e843088ca31dc6b968972",
-    "witnesses_sha256": "1fda45348546b15dc11f5df0913ec6a5965117e193b8664df3905755512c7048",
-    "contract_sha256": "88575c9536bef6e8b380742a26b649d88f8123ea339edb7d08e8832ed56b1ef5",
+    "witnesses_sha256": "64b416cec98c08b32d919914505cd3dcad215d74f9950edb942330ef99ff3e2c",
+    "contract_sha256": "df361fce8d9d5311f035d51cd8e04f60718bfa3d8c869dbee4d8a69ea6488c76",
     "native_input_generator_sha256": "7e888dd727417174acf53815f4bd0a1f305828a1302c64d280d82b1d0f5c17c7",
     "native_numeric_helper_sha256": "806c713f466f011b687442482fab5ed32b0c8ab6e495e562122bb9cb30558536",
     "native_package_lock_sha256": "c2ae7e7b309ac57116dfbe977a1227a8701e62d6ef28c3fb814d5dbb96b6d439"
@@ -40,7 +40,7 @@
     "numeric_helper_sha256": "aed1da7b180e76ff0e101a477dd6a941ed0ad076509d9716bf2bf9b6896f5fa4",
     "package_lock_sha256": "668a68bc25bbfd59ff9ff1b615ec83294b6c9c8f97fa9466f5838dbd169dc791",
     "geographic_inputs_sha256": "ca5c70314444c14cead0cc196f319e5d189657bb818eb59751c07e55ec23ff85",
-    "retention_script_sha256": "dab79eb86d4e6cbdddd121a0d535c15a28239ea53b1e68c0f58f40705daaa0f9",
-    "retention_helper_sha256": "c78aa91efc318a89ba68a99165c3172f67bb3c5bee887ef92e6797dbfb2f4ef8"
+    "retention_script_sha256": "5368bbc715c41ee092fc85c01065412cbbc1bcaefc13e53a6dd02c339f6f71b2",
+    "retention_helper_sha256": "47e1bf945aeefb0473a6c95eccc22bde2a5b6df9ba4581f599418a6c1ffe5081"
   }
 }

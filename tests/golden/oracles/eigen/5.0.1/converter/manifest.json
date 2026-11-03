@@ -12,26 +12,15 @@
     "name": "Eigen",
     "version": "5.0.1",
     "header": "Eigen/Geometry",
-    "scalar_profiles": [
-      "float32",
-      "float64"
-    ]
+    "scalar_profiles": ["float32", "float64"]
   },
   "native_build": {
     "compiler_path": "C:\\Users\\peanu\\scoop\\apps\\gcc\\15.2.0\\bin\\g++.exe",
     "compiler_version": "g++.exe (GCC) 15.2.0\nCopyright (C) 2025 Free Software Foundation, Inc.\nThis is free software; see the source for copying conditions.  There is NO\nwarranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.",
     "cxx_standard": "C++17",
-    "compiler_flags": [
-      "-O2",
-      "-DNDEBUG"
-    ],
+    "compiler_flags": ["-O2", "-DNDEBUG"],
     "native_executable_sha256": "1a14d85d5c24e14ae28beca05560555db2577404b1acf0e609b942dc6e68b7cf",
-    "version_macros": [
-      3,
-      5,
-      0,
-      1
-    ]
+    "version_macros": [3, 5, 0, 1]
   },
   "selection": {
     "orientation_cases_per_scalar_profile": 8,
@@ -42,12 +31,12 @@
   "provenance": {
     "capture_runner_sha256": "80f70ec4ad12910909c9a31462c566ca5cca63de54432ddb2cb8188d7a7bf1b6",
     "native_cpp_source_sha256": "2e984b41bb71d6fefb2be59e5662880390d4ccc1bfa29b7a38d5d45ac48918fc",
-    "contract_sha256": "93bf5aded6c52a70ba6badd171fdbd6d2a7ecde93aac16313c6dd631db775664",
+    "contract_sha256": "80d24bf67748f0f315a99261d1b32f25f45548cb1e1bb3ce67ee3c812dfc845a",
     "converter_input_spec_sha256": "cdcecfa512477580a1b04d0f7aed32eca4512e585de8c41711fa9e84301a50b9",
     "selected_inputs_sha256": "a6f0630806b69d3b3b29a036aa10f63bfe214668329c661598951f84f8f41eec",
     "fixture_inputs_sha256": "9a3ad531d3bc644d0a831c5f30f9410736b4a043cc92eb0e82ccaf514c3edc1a",
     "native_input_stream_sha256": "43c76320258bcef5fc7ce5d2438f8f95bee0e1c6ef0bcbacf5ec3e19eea30318",
-    "witnesses_sha256": "0a5da990485d8f7a2828d69817e8e9e557e0d103ec62d6740f34abe2392f36d6",
+    "witnesses_sha256": "8591fc5643e12a52774f952dc774e23241e48132182c4740a0b4e5e3b28c33cf",
     "eigen_source_archive_sha256": "e9c326dc8c05cd1e044c71f30f1b2e34a6161a3b6ecf445d56b53ff1669e3dec",
     "eigen_source_metadata_sha256": "3e65f2be6206692af7bcfcdf65501d34aeda9762cca895738f19f59a350bff48",
     "eigen_version_header_sha256": "3bb04dc80ede841309fc975fd3ff522a58bbdf2d591e06e49d2456676a89e759",

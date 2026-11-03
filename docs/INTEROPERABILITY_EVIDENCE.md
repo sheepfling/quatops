@@ -38,10 +38,12 @@ native images of +X, +Y, +Z and an asymmetric probe. Both orders of the
 noncommuting mixed product are included. The selected values are preserved in
 [`tests/oracles`](../tests/oracles/) with engine/build identity, native
 precision, explicit frame contract, capture-source/input hashes, and the hash
-of the original discovery capture.
+of the exact native capture output.
 
 The native capture programs call each engine's vector action independently of
 QuatOps. The compact selector retains those values without recomputing them.
+Godot 4.7 and 4.8 have separate version contracts and capture hashes; their
+identical selected native values share one immutable witness file.
 The package tests then compare the physical action with an independently built
 SciPy basis matrix. SciPy formula checks and execution in pinned engine
 runtimes are reported separately.
@@ -54,8 +56,11 @@ native goldens.
 The Three.js, MuJoCo, and CSPICE/SpiceyPy files under
 [`tests/golden`](../tests/golden/) retain small operation-specific witness
 sets. Their provenance preserves native build details and the SHA-256 digest of
-the full discovery capture used to select them. Capture exporters remain
-available for replay. OpenUSD evidence is limited to its converter stage proof.
+the exact native capture from which they were retained. The game-engine
+exporters emit only selected quaternion witnesses. Other discovery exporters
+remain available for replay. OpenUSD evidence is limited to its converter stage
+proof.
+
 These witnesses do not imply production adapters under `src/`. Separate auxiliary
 converter proofs now compare canonical values and frame mappings against
 native Cesium, Three.js GLTFLoader, OpenUSD, ROS 2/tf2, CSPICE direct

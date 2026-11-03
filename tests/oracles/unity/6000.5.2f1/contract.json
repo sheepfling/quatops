@@ -5,9 +5,7 @@
     "version": "6000.5.2f1",
     "build": null,
     "platform": "WindowsEditor",
-    "native_scalar_profiles": [
-      "float32"
-    ],
+    "native_scalar_profiles": ["float32"],
     "native_quaternion_order": "xyzw",
     "native_algebra": "Hamilton",
     "native_vector_action": "active quaternion sandwich / engine vector rotation API"
@@ -29,11 +27,7 @@
       "positive_y": "up",
       "positive_z": "forward"
     },
-    "destination_axes_from_source": [
-      "x",
-      "z",
-      "y"
-    ],
+    "destination_axes_from_source": ["x", "z", "y"],
     "conversion_rule": "native_xyzw=(-x,-z,-y,w)",
     "inverse_rule": "canonical_wxyz=(W,-X,-Z,-Y)",
     "world_and_body_map": "same declared signed-axis map",
@@ -42,19 +36,14 @@
       "float32": 2e-06
     },
     "scope": "unit quaternion coefficient and physical-action conversion",
-    "excludes": [
-      "asset model-forward defaults",
-      "scene import",
-      "animation transport",
-      "Euler adapters"
-    ]
+    "excludes": ["asset model-forward defaults", "scene import", "animation transport", "Euler adapters"]
   },
   "provenance": {
     "witness_file": "witnesses.json",
-    "witness_sha256": "24a20312fb76f84774cb5d5d7954fce55f7573e126989764a76cc64f17486ada",
+    "witness_sha256": "e1709a607236a201d53d9cdbaa548e0b22745dc9c6b1295f3c6b2e226d1fcf2a",
     "capture_source": "experiments/unity/6000.5.2f1/Assets/Editor/QuatOpsEngineCapture.cs",
-    "capture_source_sha256": "668e0e2b0eafd48680ebc85f8dbc32ea9ed9a6686364433107d7551e112e5b28",
-    "original_capture_sha256": "5f19acfa2a082a405416a772fc9f3011033526c30b00762feae408a1da9de1bb",
+    "capture_source_sha256": "1b04a9b7bbd7897c8b0ca0da816af711ccfd4e89b4f11c2981f59351dc29f98f",
+    "original_capture_sha256": "d94da828fc5d905bad9797475f14a44bcd771c0024f4154186cb3ef5fbb57267",
     "canonical_input_sha256": "a6f0630806b69d3b3b29a036aa10f63bfe214668329c661598951f84f8f41eec"
   }
 }

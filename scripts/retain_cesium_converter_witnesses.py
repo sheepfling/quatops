@@ -4,11 +4,11 @@ from __future__ import annotations
 
 import argparse
 import hashlib
-import json
 from pathlib import Path
 
 from evidence_json import (
     compact_numeric_evidence,
+    dump_evidence_json,
     read_evidence_document,
     read_evidence_rows,
 )
@@ -45,15 +45,13 @@ def main() -> None:
         for row in observations
     ]
     witnesses_path.write_text(
-        json.dumps(
+        dump_evidence_json(
             {
                 "schema_version": "1.0",
                 "evidence_kind": "native_cesium_quatops_converter_capture",
                 "observations": retained,
-            },
-            indent=2,
-        )
-        + "\n",
+            }
+        ),
         encoding="utf-8",
         newline="\n",
     )
@@ -103,7 +101,7 @@ def main() -> None:
     }
     contract_path = DESTINATION / "contract.json"
     contract_path.write_text(
-        json.dumps(contract, indent=2) + "\n", encoding="utf-8", newline="\n"
+        dump_evidence_json(contract), encoding="utf-8", newline="\n"
     )
     source_inputs = ROOT / "experiments/interoperability/v1/canonical_inputs.json"
     geo_inputs = ROOT / "experiments/converters/cesium/1.124.0/geographic_inputs.json"
@@ -149,7 +147,7 @@ def main() -> None:
         },
     }
     (DESTINATION / "manifest.json").write_text(
-        json.dumps(manifest, indent=2) + "\n", encoding="utf-8", newline="\n"
+        dump_evidence_json(manifest), encoding="utf-8", newline="\n"
     )
     print(f"retained {len(observations)} Cesium converter witnesses at {DESTINATION}")
 

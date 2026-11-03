@@ -3,7 +3,7 @@
   "review_state": "Pinned native OpenCV converter capture; replay acceptance is recorded by repository tests",
   "execution": {
     "was_run": true,
-    "utc": "2026-11-03T07:05:19.218256+00:00",
+    "utc": "2026-11-03T16:05:41.614100+00:00",
     "python": "3.13.14 (main, Jun 23 2026, 15:19:27) [MSC v.1944 64 bit (AMD64)]",
     "platform": "Windows-11-10.0.26300-SP0",
     "architecture": "AMD64"
@@ -14,10 +14,7 @@
     "distribution": "opencv-python-headless",
     "distribution_version": "4.13.0.92",
     "numpy_version": "2.3.5",
-    "native_scalar_profiles": [
-      "float32",
-      "float64"
-    ]
+    "native_scalar_profiles": ["float32", "float64"]
   },
   "selection": {
     "orientation_cases_per_precision": 8,
@@ -36,19 +33,18 @@
     }
   ],
   "provenance": {
+    "capture_script_sha256": "f7cffefd806691a6d20c3d0998f764529fd58471fde6991cb57adb9a8a451593",
     "converter_input_sha256": "81dae4a755dba80a2a432925ff09a7d32690f6bd9ba22e6e16c5e4ed23212d2e",
+    "preparation_script_sha256": "c61abb0fec177da6a98ab3fae1be4cb213cbad6eac336f1f62c54f41b7af9ec6",
     "preparation_spec_sha256": "9f17f3eafd3186d3460488eff91e0f50771f2ee7c5e6d42409b1e93df5fc084e",
     "shared_canonical_inputs_sha256": "a6f0630806b69d3b3b29a036aa10f63bfe214668329c661598951f84f8f41eec",
-    "witnesses_sha256": "98d9b51e7ee09348f96104f2703607ad74992a10a3239b5077acb00437821ffe",
-    "native_build_information_sha256": "fc048a2b6c657a1e163e8591b98100d585d65bacf1d1f1a6e28659cae3b531f1",
+    "witnesses_sha256": "fc87da568d430b6ecd72306b52992d48077be3bce46c75199d07316ee1113e44",
     "requirements_sha256": "9cb5d4bde5f32628ab23fe65481053de6bd354dc635bf53f3836d69de5ef6e29",
     "cv2_extension_directory": "site-packages/cv2",
-    "native_capture_script_sha256": "4bd509a5adad0112d4bdca0b47c896a044758f3695df055538e93dccee5571bb",
-    "native_preparation_script_sha256": "cdba5a547eb6fac4707fd2833409a8b24a2492ecdaa88eb4d4ddfa24b534c7ce",
     "invocation_template": "python experiments/converters/opencv/4.13.0/capture_native.py --inputs tests/golden/oracles/opencv/4.13.0/converter/inputs.json"
   },
   "reproduction": {
-    "capture_script_sha256": "4b514a94f7cfaf23f653b2574edbeaa660101002e96fcfe2dbe1738b104295df",
+    "capture_script_sha256": "f7cffefd806691a6d20c3d0998f764529fd58471fde6991cb57adb9a8a451593",
     "preparation_script_sha256": "c61abb0fec177da6a98ab3fae1be4cb213cbad6eac336f1f62c54f41b7af9ec6",
     "requirements_sha256": "9cb5d4bde5f32628ab23fe65481053de6bd354dc635bf53f3836d69de5ef6e29"
   }

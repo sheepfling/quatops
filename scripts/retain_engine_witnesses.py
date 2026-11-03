@@ -1,13 +1,16 @@
-"""Select compact, provenance-linked engine witnesses from a discovery capture."""
+"""Retain selected engine witnesses with native capture provenance."""
 
 from __future__ import annotations
 
 import argparse
 import hashlib
-import json
 from pathlib import Path
 
-from evidence_json import parse_evidence_document, read_evidence_document
+from evidence_json import (
+    dump_evidence_json,
+    parse_evidence_document,
+    read_evidence_document,
+)
 
 ROOT = Path(__file__).resolve().parents[1]
 ENGINE_CONFIG = {
@@ -159,29 +162,68 @@ def retain(engine: str, version: str, source_path: Path, output_dir: Path) -> No
         "canonical_interop": canonical_interop,
     }
     output_dir.mkdir(parents=True, exist_ok=True)
-    output_path = output_dir / "witnesses.json"
-    output_path.write_text(
-        json.dumps(witness, indent=2, ensure_ascii=False) + "\n",
-        encoding="utf-8",
-        newline="\n",
-    )
-
-    contract = {
-        "engine": witness["target"],
-        "conversion": witness["contract"],
-        "provenance": {
+    if engine == "godot":
+        shared_dir = output_dir.parent / "shared"
+        shared_dir.mkdir(parents=True, exist_ok=True)
+        output_path = shared_dir / "witnesses.json"
+        shared_witness = {
+            "schema_version": 1,
+            "target": {
+                key: value
+                for key, value in witness["target"].items()
+                if key not in {"version", "build"}
+            },
+            "contract": witness["contract"],
+            "canonical_interop": canonical_interop,
+        }
+        if output_path.exists():
+            existing = read_evidence_document(output_path)
+            if existing != shared_witness:
+                raise ValueError(
+                    "Godot version produced different selected values; retain a "
+                    "separate versioned witness instead of sharing this file"
+                )
+        else:
+            output_path.write_text(
+                dump_evidence_json(shared_witness),
+                encoding="utf-8",
+                newline="\n",
+            )
+        (output_dir / "witnesses.json").unlink(missing_ok=True)
+        contract_provenance = {
+            "witness_file": "../shared/witnesses.json",
+            "witness_sha256": sha256(output_path),
+            "capture_source": witness["provenance"]["capture_source"],
+            "capture_source_sha256": witness["provenance"]["capture_source_sha256"],
+            "original_capture_sha256": witness["provenance"]["original_capture_sha256"],
+            "canonical_input_file": witness["provenance"]["canonical_input_file"],
+            "canonical_input_sha256": witness["provenance"]["canonical_input_sha256"],
+            "native_build_record": engine_info,
+            "capture_method": witness["provenance"]["capture_method"],
+            "retention_method": witness["provenance"]["retention_method"],
+        }
+    else:
+        output_path = output_dir / "witnesses.json"
+        output_path.write_text(
+            dump_evidence_json(witness), encoding="utf-8", newline="\n"
+        )
+        contract_provenance = {
             "witness_file": "witnesses.json",
             "witness_sha256": sha256(output_path),
             "capture_source": witness["provenance"]["capture_source"],
             "capture_source_sha256": witness["provenance"]["capture_source_sha256"],
             "original_capture_sha256": witness["provenance"]["original_capture_sha256"],
+            "canonical_input_file": witness["provenance"]["canonical_input_file"],
             "canonical_input_sha256": witness["provenance"]["canonical_input_sha256"],
-        },
+        }
+
+    contract = {
+        "engine": witness["target"],
+        "conversion": witness["contract"],
+        "provenance": contract_provenance,
     }
     (output_dir / "contract.json").write_text(
-        json.dumps(contract, indent=2, ensure_ascii=False) + "\n",
-        encoding="utf-8",
-        newline="\n",
+        dump_evidence_json(contract), encoding="utf-8", newline="\n"
     )
 
 
@@ -190,7 +232,7 @@ def main() -> None:
     parser.add_argument("engine", choices=tuple(ENGINE_CONFIG))
     parser.add_argument("version")
     parser.add_argument(
-        "capture_json", type=Path, help="temporary full native discovery output"
+        "capture_json", type=Path, help="temporary native capture output"
     )
     parser.add_argument(
         "output_dir",

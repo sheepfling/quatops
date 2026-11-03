@@ -5,10 +5,9 @@ discovery rows are removed. Native capture programs remain the replay source.
 """
 
 import hashlib
-import json
 from pathlib import Path
 
-from evidence_json import read_evidence_document
+from evidence_json import dump_evidence_json, read_evidence_document
 
 ROOT = Path(__file__).resolve().parents[1]
 FILES = (
@@ -120,11 +119,7 @@ def compact_threejs(data, path):
         "selected API witnesses; redundant matrix views/actions and hierarchy "
         "duplicates removed; broad successful sweeps discarded"
     )
-    path.write_text(
-        json.dumps(data, indent=2, allow_nan=False) + "\n",
-        encoding="utf-8",
-        newline="\n",
-    )
+    path.write_text(dump_evidence_json(data), encoding="utf-8", newline="\n")
 
 
 def compact(data, path):
@@ -235,11 +230,7 @@ def compact(data, path):
         )
     if "sub_quat" in data["counts"]:
         data["counts"]["quaternion_differences"] = data["counts"].pop("sub_quat")
-    path.write_text(
-        json.dumps(data, indent=2, allow_nan=False) + "\n",
-        encoding="utf-8",
-        newline="\n",
-    )
+    path.write_text(dump_evidence_json(data), encoding="utf-8", newline="\n")
 
 
 if __name__ == "__main__":

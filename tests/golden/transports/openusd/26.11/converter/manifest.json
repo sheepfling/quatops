@@ -5,11 +5,7 @@
     "name": "OpenUSD",
     "distribution": "usd-core",
     "distribution_version": "26.11",
-    "openusd_version_tuple": [
-      0,
-      26,
-      11
-    ]
+    "openusd_version_tuple": [0, 26, 11]
   },
   "stage_metadata": {
     "upAxis": "Y",
@@ -32,11 +28,11 @@
   "provenance": {
     "stage_sha256": "8cfafffffd499fe64f8107ca2efc6ce3ffae1aea69800ff6fed08790ed9c7c74",
     "converter_input_sha256": "9f776f2e085e327e4d3f69582dfc3a81b2d38d93070f4f121791daabb21bf8c0",
-    "native_observations_sha256": "8004c9ec711b8f20375fae0a800f5828bb628f2e771aed79975874f75297825f",
+    "native_observations_sha256": "efab1892958652770637bcae847e7e33bbf21cfae467dcf2b597e742a818f857",
     "generator_sha256": "0bcbaf2ca1cab9f760f5c2d5b19240eaf4d043da4bf5f9440224e8ce6d40f2be",
     "native_capture_script_sha256": "2444d7a7995e2f089ea99ad99c530593e3b0958898096ae5ac6a873dcc16fb95",
     "lockfile_sha256": "bfa49dc9a47c71af70e6b7deabb03c63ace6f78a371b66966414b74a99c2ae1c",
-    "contract_sha256": "b27100f55cfb4221a3968f6910ba7cdd00e36cc0939ebabe7687fdd0f29fd9e7"
+    "contract_sha256": "fcc4b28c22f4cadba08531b6750dbb8df33cf8a3d38e6e09cbeabeef4208bae9"
   },
   "selection": {
     "retained_observations": 3,

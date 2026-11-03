@@ -1,1 +1,20 @@
-{"evidence_kind":"native_sdk_header_abi_not_runtime","sdk_api_version":[1,1,65],"sizeof_float":4,"sizeof_XrQuaternionf":16,"XrQuaternionf_offsets_bytes":{"x":0,"y":4,"z":8,"w":12},"sizeof_XrPosef":28,"XrPosef_offsets_bytes":{"orientation":0,"position":16},"assigned_quaternion_xyzw":[0.125,-0.25,0.5,0.75],"assigned_pose_position_xyz_m":[1.25,-2.5,4],"runtime_functions_called":false}
+{
+  "evidence_kind": "native_sdk_header_abi_not_runtime",
+  "sdk_api_version": [1, 1, 65],
+  "sizeof_float": 4,
+  "sizeof_XrQuaternionf": 16,
+  "XrQuaternionf_offsets_bytes": {
+    "x": 0,
+    "y": 4,
+    "z": 8,
+    "w": 12
+  },
+  "sizeof_XrPosef": 28,
+  "XrPosef_offsets_bytes": {
+    "orientation": 0,
+    "position": 16
+  },
+  "assigned_quaternion_xyzw": [0.125, -0.25, 0.5, 0.75],
+  "assigned_pose_position_xyz_m": [1.25, -2.5, 4],
+  "runtime_functions_called": false
+}

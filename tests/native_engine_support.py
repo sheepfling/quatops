@@ -1,5 +1,8 @@
 """Shared QuatOps helpers for comparisons with native engine captures."""
 
+import json
+from pathlib import Path
+
 import numpy as np
 
 from tests.oracle_support import (
@@ -9,6 +12,24 @@ from tests.oracle_support import (
     to_wxyz,
     vectors_to_trailing,
 )
+
+
+def load_versioned_engine_witness(repository_root, engine, version):
+    """Load a version contract and resolve its immutable witness reference."""
+    base = Path(repository_root) / "tests" / "oracles" / engine / version
+    contract = json.loads((base / "contract.json").read_text(encoding="utf-8"))
+    witness_path = (base / contract["provenance"]["witness_file"]).resolve()
+    witness = json.loads(witness_path.read_text(encoding="utf-8"))
+    target = witness.get("target", {})
+    if "version" not in target:
+        target = contract["engine"]
+    fixture = {
+        **witness,
+        "target": target,
+        "contract": witness.get("contract", contract["conversion"]),
+        "provenance": witness.get("provenance", contract["provenance"]),
+    }
+    return contract, fixture, witness_path
 
 
 def from_engine_xyzw(module, xyzw, is_jpl, is_numpy, component_first):
@@ -35,7 +56,10 @@ def to_hamilton_xyzw(module, value, is_jpl, is_numpy, component_first):
 def rotate_basis(module, value):
     basis = np.eye(3, dtype=float)
     return np.stack(
-        [np.asarray(module.rotate(value, tuple(axis)), dtype=float).reshape(3) for axis in basis]
+        [
+            np.asarray(module.rotate(value, tuple(axis)), dtype=float).reshape(3)
+            for axis in basis
+        ]
     )
 
 

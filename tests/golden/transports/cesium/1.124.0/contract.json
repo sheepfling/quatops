@@ -9,11 +9,7 @@
     "positive_y": "north/forward",
     "positive_z": "up/ellipsoid normal"
   },
-  "source_map": [
-    "x",
-    "y",
-    "z"
-  ],
+  "source_map": ["x", "y", "z"],
   "native_api": [
     "Cartesian3.fromDegrees",
     "Transforms.eastNorthUpToFixedFrame",
@@ -33,10 +29,5 @@
     "inverse point and orientation recovery",
     "noncommuting composition and antipode"
   ],
-  "excludes": [
-    "Cesium Model/glTF importer",
-    "asset model-forward defaults",
-    "rendering",
-    "time-dependent EOP/ICRF"
-  ]
+  "excludes": ["Cesium Model/glTF importer", "asset model-forward defaults", "rendering", "time-dependent EOP/ICRF"]
 }

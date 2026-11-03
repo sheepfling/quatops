@@ -6,9 +6,7 @@
     "version": "6000.5.2f1",
     "build": null,
     "platform": "WindowsEditor",
-    "native_scalar_profiles": [
-      "float32"
-    ],
+    "native_scalar_profiles": ["float32"],
     "native_quaternion_order": "xyzw",
     "native_algebra": "Hamilton",
     "native_vector_action": "active quaternion sandwich / engine vector rotation API"
@@ -30,11 +28,7 @@
       "positive_y": "up",
       "positive_z": "forward"
     },
-    "destination_axes_from_source": [
-      "x",
-      "z",
-      "y"
-    ],
+    "destination_axes_from_source": ["x", "z", "y"],
     "conversion_rule": "native_xyzw=(-x,-z,-y,w)",
     "inverse_rule": "canonical_wxyz=(W,-X,-Z,-Y)",
     "world_and_body_map": "same declared signed-axis map",
@@ -43,17 +37,12 @@
       "float32": 2e-06
     },
     "scope": "unit quaternion coefficient and physical-action conversion",
-    "excludes": [
-      "asset model-forward defaults",
-      "scene import",
-      "animation transport",
-      "Euler adapters"
-    ]
+    "excludes": ["asset model-forward defaults", "scene import", "animation transport", "Euler adapters"]
   },
   "provenance": {
-    "original_capture_sha256": "5f19acfa2a082a405416a772fc9f3011033526c30b00762feae408a1da9de1bb",
+    "original_capture_sha256": "d94da828fc5d905bad9797475f14a44bcd771c0024f4154186cb3ef5fbb57267",
     "capture_source": "experiments/unity/6000.5.2f1/Assets/Editor/QuatOpsEngineCapture.cs",
-    "capture_source_sha256": "668e0e2b0eafd48680ebc85f8dbc32ea9ed9a6686364433107d7551e112e5b28",
+    "capture_source_sha256": "1b04a9b7bbd7897c8b0ca0da816af711ccfd4e89b4f11c2981f59351dc29f98f",
     "canonical_input_file": "experiments/interoperability/v1/canonical_inputs.json",
     "canonical_input_sha256": "a6f0630806b69d3b3b29a036aa10f63bfe214668329c661598951f84f8f41eec",
     "native_build_record": {
@@ -61,20 +50,15 @@
       "version": "6000.5.2f1",
       "platform": "WindowsEditor",
       "capture_method": "Unity Editor batchmode C# executeMethod",
-      "precision": "float32",
-      "mathematics_package": "com.unity.mathematics 1.4.0 (built-in)"
+      "precision": "float32"
     },
-    "capture_method": null,
+    "capture_method": "Unity Editor batchmode C# executeMethod",
     "retention_method": "selected values copied losslessly from native capture; no values regenerated"
   },
   "canonical_interop": {
     "contract_id": "quatops-canonical-hamilton-wxyz-active-rh-v1",
     "native_quaternion_order": "xyzw",
-    "frame_map_destination_axes_from_source": [
-      "x",
-      "z",
-      "y"
-    ],
+    "frame_map_destination_axes_from_source": ["x", "z", "y"],
     "probe_vector_canonical_xyz": {
       "x": 0.25,
       "y": -1.5,
@@ -88,18 +72,8 @@
     "orientation_cases": [
       {
         "case_id": "identity",
-        "canonical_wxyz": [
-          1.0,
-          0.0,
-          0.0,
-          0.0
-        ],
-        "native_quaternion": [
-          0.0,
-          0.0,
-          0.0,
-          1.0
-        ],
+        "canonical_wxyz": [1.0, 0.0, 0.0, 0.0],
+        "native_quaternion": [0.0, 0.0, 0.0, 1.0],
         "native_rotated_positive_basis_vectors_xyz": [
           {
             "x": 1.0,
@@ -122,27 +96,12 @@
           "y": 2.75,
           "z": -1.5
         },
-        "native_input_wxyz": [
-          1.0,
-          0.0,
-          0.0,
-          0.0
-        ]
+        "native_input_wxyz": [1.0, 0.0, 0.0, 0.0]
       },
       {
         "case_id": "quarter_x",
-        "canonical_wxyz": [
-          0.7071067811865476,
-          0.7071067811865476,
-          0.0,
-          0.0
-        ],
-        "native_quaternion": [
-          -0.7071067690849304,
-          0.0,
-          0.0,
-          0.7071067690849304
-        ],
+        "canonical_wxyz": [0.7071067811865476, 0.7071067811865476, 0.0, 0.0],
+        "native_quaternion": [-0.7071067690849304, 0.0, 0.0, 0.7071067690849304],
         "native_rotated_positive_basis_vectors_xyz": [
           {
             "x": 1.0,
@@ -165,27 +124,12 @@
           "y": -1.499999761581421,
           "z": -2.75
         },
-        "native_input_wxyz": [
-          0.7071067690849304,
-          0.7071067690849304,
-          0.0,
-          0.0
-        ]
+        "native_input_wxyz": [0.7071067690849304, 0.7071067690849304, 0.0, 0.0]
       },
       {
         "case_id": "quarter_y",
-        "canonical_wxyz": [
-          0.7071067811865476,
-          0.0,
-          0.7071067811865476,
-          0.0
-        ],
-        "native_quaternion": [
-          0.0,
-          0.0,
-          -0.7071067690849304,
-          0.7071067690849304
-        ],
+        "canonical_wxyz": [0.7071067811865476, 0.0, 0.7071067811865476, 0.0],
+        "native_quaternion": [0.0, 0.0, -0.7071067690849304, 0.7071067690849304],
         "native_rotated_positive_basis_vectors_xyz": [
           {
             "x": 5.960464477539063e-08,
@@ -208,27 +152,12 @@
           "y": -0.24999982118606567,
           "z": -1.5
         },
-        "native_input_wxyz": [
-          0.7071067690849304,
-          0.0,
-          0.7071067690849304,
-          0.0
-        ]
+        "native_input_wxyz": [0.7071067690849304, 0.0, 0.7071067690849304, 0.0]
       },
       {
         "case_id": "quarter_z",
-        "canonical_wxyz": [
-          0.7071067811865476,
-          0.0,
-          0.0,
-          0.7071067811865476
-        ],
-        "native_quaternion": [
-          0.0,
-          -0.7071067690849304,
-          0.0,
-          0.7071067690849304
-        ],
+        "canonical_wxyz": [0.7071067811865476, 0.0, 0.0, 0.7071067811865476],
+        "native_quaternion": [0.0, -0.7071067690849304, 0.0, 0.7071067690849304],
         "native_rotated_positive_basis_vectors_xyz": [
           {
             "x": 5.960464477539063e-08,
@@ -251,27 +180,12 @@
           "y": 2.75,
           "z": 0.24999989569187164
         },
-        "native_input_wxyz": [
-          0.7071067690849304,
-          0.0,
-          0.0,
-          0.7071067690849304
-        ]
+        "native_input_wxyz": [0.7071067690849304, 0.0, 0.0, 0.7071067690849304]
       },
       {
         "case_id": "mixed_a",
-        "canonical_wxyz": [
-          0.8,
-          0.2,
-          -0.4,
-          0.4
-        ],
-        "native_quaternion": [
-          -0.20000000298023224,
-          -0.4000000059604645,
-          0.4000000059604645,
-          0.800000011920929
-        ],
+        "canonical_wxyz": [0.8, 0.2, -0.4, 0.4],
+        "native_quaternion": [-0.20000000298023224, -0.4000000059604645, 0.4000000059604645, 0.800000011920929],
         "native_rotated_positive_basis_vectors_xyz": [
           {
             "x": 0.35999995470046997,
@@ -294,27 +208,12 @@
           "y": 1.8499999046325684,
           "z": -2.5399999618530273
         },
-        "native_input_wxyz": [
-          0.800000011920929,
-          0.20000000298023224,
-          -0.4000000059604645,
-          0.4000000059604645
-        ]
+        "native_input_wxyz": [0.800000011920929, 0.20000000298023224, -0.4000000059604645, 0.4000000059604645]
       },
       {
         "case_id": "mixed_b",
-        "canonical_wxyz": [
-          0.7,
-          -0.3,
-          0.2,
-          0.6164414002968976
-        ],
-        "native_quaternion": [
-          0.30000001192092896,
-          -0.6164414286613464,
-          -0.20000000298023224,
-          0.699999988079071
-        ],
+        "canonical_wxyz": [0.7, -0.3, 0.2, 0.6164414002968976],
+        "native_quaternion": [0.30000001192092896, -0.6164414286613464, -0.20000000298023224, 0.699999988079071],
         "native_rotated_positive_basis_vectors_xyz": [
           {
             "x": 0.15999993681907654,
@@ -337,27 +236,12 @@
           "y": 2.132668972015381,
           "z": 1.928840160369873
         },
-        "native_input_wxyz": [
-          0.699999988079071,
-          -0.30000001192092896,
-          0.20000000298023224,
-          0.6164414286613464
-        ]
+        "native_input_wxyz": [0.699999988079071, -0.30000001192092896, 0.20000000298023224, 0.6164414286613464]
       },
       {
         "case_id": "antipode_mixed_a",
-        "canonical_wxyz": [
-          -0.8,
-          -0.2,
-          0.4,
-          -0.4
-        ],
-        "native_quaternion": [
-          0.20000000298023224,
-          0.4000000059604645,
-          -0.4000000059604645,
-          -0.800000011920929
-        ],
+        "canonical_wxyz": [-0.8, -0.2, 0.4, -0.4],
+        "native_quaternion": [0.20000000298023224, 0.4000000059604645, -0.4000000059604645, -0.800000011920929],
         "native_rotated_positive_basis_vectors_xyz": [
           {
             "x": 0.35999995470046997,
@@ -380,27 +264,12 @@
           "y": 1.8499999046325684,
           "z": -2.5399999618530273
         },
-        "native_input_wxyz": [
-          -0.800000011920929,
-          -0.20000000298023224,
-          0.4000000059604645,
-          -0.4000000059604645
-        ]
+        "native_input_wxyz": [-0.800000011920929, -0.20000000298023224, 0.4000000059604645, -0.4000000059604645]
       },
       {
         "case_id": "nonprincipal_halfturn",
-        "canonical_wxyz": [
-          0.0,
-          0.5773502691896258,
-          0.5773502691896258,
-          0.5773502691896258
-        ],
-        "native_quaternion": [
-          -0.5773502588272095,
-          -0.5773502588272095,
-          -0.5773502588272095,
-          0.0
-        ],
+        "canonical_wxyz": [0.0, 0.5773502691896258, 0.5773502691896258, 0.5773502691896258],
+        "native_quaternion": [-0.5773502588272095, -0.5773502588272095, -0.5773502588272095, 0.0],
         "native_rotated_positive_basis_vectors_xyz": [
           {
             "x": -0.33333325386047363,
@@ -423,24 +292,14 @@
           "y": -1.749999761581421,
           "z": 2.499999761581421
         },
-        "native_input_wxyz": [
-          0.0,
-          0.5773502588272095,
-          0.5773502588272095,
-          0.5773502588272095
-        ]
+        "native_input_wxyz": [0.0, 0.5773502588272095, 0.5773502588272095, 0.5773502588272095]
       }
     ],
     "composition": {
       "left_case_id": "mixed_a",
       "right_case_id": "mixed_b",
       "product_order": "lhs * rhs; rhs acts first",
-      "native_product_quaternion": [
-        0.4265765845775604,
-        -0.6931531429290771,
-        0.3632882833480835,
-        0.4534234404563904
-      ],
+      "native_product_quaternion": [0.4265765845775604, -0.6931531429290771, 0.3632882833480835, 0.4534234404563904],
       "native_rotated_positive_basis_vectors_xyz": [
         {
           "x": -0.22487929463386536,
@@ -468,12 +327,7 @@
       "left_case_id": "mixed_b",
       "right_case_id": "mixed_a",
       "product_order": "lhs * rhs; rhs acts first",
-      "native_product_quaternion": [
-        -0.226576566696167,
-        -0.8531531691551208,
-        -0.12328829616308212,
-        0.4534234404563904
-      ],
+      "native_product_quaternion": [-0.226576566696167, -0.8531531691551208, -0.12328829616308212, 0.4534234404563904],
       "native_rotated_positive_basis_vectors_xyz": [
         {
           "x": -0.4861406981945038,

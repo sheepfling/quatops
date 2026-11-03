@@ -63,9 +63,7 @@
     }
   ],
   "coverage": {
-    "profiles": [
-      "FRAME"
-    ],
+    "profiles": ["FRAME"],
     "independent_input_count": 11,
     "native_observation_count": 11,
     "quatops_replay_count": 0,

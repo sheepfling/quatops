@@ -5,9 +5,7 @@
     "version": "4.7-stable",
     "build": "official",
     "platform": "Windows",
-    "native_scalar_profiles": [
-      "float32"
-    ],
+    "native_scalar_profiles": ["float32"],
     "native_quaternion_order": "xyzw",
     "native_algebra": "Hamilton",
     "native_vector_action": "active quaternion sandwich / engine vector rotation API"
@@ -30,11 +28,7 @@
       "positive_y": "up",
       "positive_z": "backward"
     },
-    "destination_axes_from_source": [
-      "x",
-      "z",
-      "-y"
-    ],
+    "destination_axes_from_source": ["x", "z", "-y"],
     "conversion_rule": "native_xyzw=(x,z,-y,w)",
     "inverse_rule": "canonical_wxyz=(W,X,-Z,Y)",
     "world_and_body_map": "same declared signed-axis map",
@@ -43,19 +37,29 @@
       "float32": 2e-06
     },
     "scope": "unit quaternion coefficient and physical-action conversion",
-    "excludes": [
-      "asset model-forward defaults",
-      "scene import",
-      "animation transport",
-      "Euler adapters"
-    ]
+    "excludes": ["asset model-forward defaults", "scene import", "animation transport", "Euler adapters"]
   },
   "provenance": {
-    "witness_file": "witnesses.json",
-    "witness_sha256": "e2ff0ac688f2006f8ed5eaa0514d6dc929ccd4829d01441e77151fd2843e6794",
+    "witness_file": "../shared/witnesses.json",
+    "witness_sha256": "a038473e80ac2aa779e37fe60de02ed1ff56928cdefae51912c404defd22dcca",
     "capture_source": "experiments/godot/capture.gd",
-    "capture_source_sha256": "12373c6ffd371e97328b3591528d043eb4c672c6eab0a42b2bdaa053fa2d2dd7",
-    "original_capture_sha256": "8c7e5a71d995ca526f642eb632c51b6009417229e4014896838faf9326c9f8bc",
-    "canonical_input_sha256": "a6f0630806b69d3b3b29a036aa10f63bfe214668329c661598951f84f8f41eec"
+    "capture_source_sha256": "e9ffcd08ef64471a2016894576059f1be3ed2e1d12a549562c4f0b6351013c61",
+    "original_capture_sha256": "9f7a786b3383f8e20f50b5eff6e516f688424bec86116ca78e1c86c41d88d28d",
+    "canonical_input_file": "experiments/interoperability/v1/canonical_inputs.json",
+    "canonical_input_sha256": "a6f0630806b69d3b3b29a036aa10f63bfe214668329c661598951f84f8f41eec",
+    "native_build_record": {
+      "build": "official",
+      "hash": "5b4e0cb0fd279832bbdd69fed5354d4e5ad26f88",
+      "major": 4,
+      "minor": 7,
+      "name": "Godot Engine",
+      "patch": 0,
+      "platform": "Windows",
+      "precision": "float32",
+      "status": "stable",
+      "version": "4.7-stable (official)"
+    },
+    "capture_method": "Godot headless GDScript SceneTree script",
+    "retention_method": "selected values copied losslessly from native capture; no values regenerated"
   }
 }

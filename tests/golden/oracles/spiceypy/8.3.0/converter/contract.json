@@ -14,14 +14,23 @@
     "matrix_action": "column vectors",
     "handedness": "right-handed",
     "normalization": "unit quaternion",
-    "frame": {"positive_x": "right", "positive_y": "forward", "positive_z": "up"}
+    "frame": {
+      "positive_x": "right",
+      "positive_y": "forward",
+      "positive_z": "up"
+    }
   },
   "target_boundary": {
     "coefficient_order": "WXYZ",
     "observed_q2m_vector_action": "active; q2m(q) * column_vector",
     "observed_product": "qxq(lhs, rhs) matches Hamilton lhs * rhs; rhs acts first",
     "source_to_target_coordinate_map": ["x", "y", "z"],
-    "probe_frame_assignment": {"positive_x": "right", "positive_y": "forward", "positive_z": "up", "meaning": "explicit test frame assignment for these numeric APIs; not a SPICE named-frame claim"},
+    "probe_frame_assignment": {
+      "positive_x": "right",
+      "positive_y": "forward",
+      "positive_z": "up",
+      "meaning": "explicit test frame assignment for these numeric APIs; not a SPICE named-frame claim"
+    },
     "native_matrix_layout": "3x3 matrix returned by q2m",
     "canonical_to_native": "identity on WXYZ coefficients for the declared shared probe frame",
     "native_to_canonical": "identity on WXYZ coefficients for the declared shared probe frame",

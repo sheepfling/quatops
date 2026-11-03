@@ -37,10 +37,7 @@
       "-o",
       "<temporary capture executable>"
     ],
-    "capture_command": [
-      "capture_sophus.exe",
-      "capture_inputs.tsv"
-    ]
+    "capture_command": ["capture_sophus.exe", "capture_inputs.tsv"]
   },
   "artifacts": {
     "capture_sources_sha256": {
@@ -51,7 +48,7 @@
     "input_sha256": "30dc873594d449b3d228392898171f090130d54cf2e794aca097f68af72feb97",
     "native_executable_sha256": "7cd8397a394b8bccce9304fc170542c1a472d9e2884d373808f5a40ead58533c",
     "native_output": "discovery.json",
-    "native_output_sha256": "98171e1c77e280395c4744fe6285198d0ed764b7d82e90a3b39a0fb7ef876638",
+    "native_output_sha256": "a55e2d1da9b102fcd3c139192e5d052d79edc837cd7a2e7627bace0498ffe75b",
     "pinned_dependency_headers_sha256": {
       "Sophus/sophus/so3.hpp": "6fe2514122e4d1b11d73b1d4a97d1d731973da9539663b56cab8d4fc94c6ba53",
       "Eigen/Eigen/Core": "d3a1c990223d4806cba32702786f499f6e40f9b743fb55eb4be06b9bcde68609",

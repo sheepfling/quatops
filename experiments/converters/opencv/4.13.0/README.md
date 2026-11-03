@@ -19,6 +19,7 @@ uv pip install --python (Join-Path $envDir 'Scripts\python.exe') -r experiments\
 & (Join-Path $envDir 'Scripts\python.exe') experiments\converters\opencv\4.13.0\capture_native.py
 ```
 
-The native witness set and build information are retained under
-`tests/golden/oracles/opencv/4.13.0/converter/`. Replay the selected boundary evidence with
+The retained manifest records the OpenCV package version, runtime details, and
+native binary hashes alongside the selected witnesses. The verbose build
+configuration is not retained. Replay the selected boundary evidence with
 `tests/test_opencv_converter.py`.

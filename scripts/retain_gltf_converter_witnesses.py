@@ -4,12 +4,12 @@ from __future__ import annotations
 
 import argparse
 import hashlib
-import json
 import shutil
 from pathlib import Path
 
 from evidence_json import (
     compact_numeric_evidence,
+    dump_evidence_json,
     read_evidence_document,
     read_evidence_rows,
 )
@@ -51,15 +51,13 @@ def main() -> None:
         shutil.copyfile(source, DESTINATION / name)
     witnesses_path = DESTINATION / "witnesses.json"
     witnesses_path.write_text(
-        json.dumps(
+        dump_evidence_json(
             {
                 "schema_version": "1.0",
                 "evidence_kind": native_manifest["evidence_kind"],
                 "observations": observations,
-            },
-            indent=2,
-        )
-        + "\n",
+            }
+        ),
         encoding="utf-8",
         newline="\n",
     )
@@ -99,10 +97,10 @@ def main() -> None:
     }
     contract_path = DESTINATION / "contract.json"
     contract_path.write_text(
-        json.dumps(contract, indent=2) + "\n", encoding="utf-8", newline="\n"
+        dump_evidence_json(contract), encoding="utf-8", newline="\n"
     )
     (DESTINATION / "manifest.json").write_text(
-        json.dumps(
+        dump_evidence_json(
             {
                 "schema_version": "1.0",
                 "review_state": "QuatOps-generated asset loaded by pinned native GLTFLoader; replay tests passed",
@@ -146,10 +144,8 @@ def main() -> None:
                         "signed-zero or nonfinite values"
                     ),
                 },
-            },
-            indent=2,
-        )
-        + "\n",
+            }
+        ),
         encoding="utf-8",
         newline="\n",
     )

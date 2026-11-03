@@ -38,7 +38,7 @@
     "input_sha256": null,
     "native_executable_sha256": "24d5e0beb86eb34ab62509c76d573deee446b61e0ef3c3427d126a650ad29762",
     "native_output": "header_abi.json",
-    "native_output_sha256": "796009decc7badfc12e194fecabcc213aea2d2dd5247699f655fdf2171d98b0f",
+    "native_output_sha256": "dfd5d5f0914e078f096aea3b25400c53758e52062112a5c911fcd39c564fc2ac",
     "pinned_sdk_headers_sha256": {
       "openxr.h": "a1882433318c34f7b52995d7f2a1ee5827f4bd56373e0b7fd7c1ef97eec8ad31",
       "openxr_platform_defines.h": "7dc30ad27f1082a71f84f5f5adf10762558fc9fe57fdc7628d796d22be3b0dbe"

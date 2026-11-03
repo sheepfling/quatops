@@ -4,11 +4,11 @@ from __future__ import annotations
 
 import argparse
 import hashlib
-import json
 from pathlib import Path
 
 from evidence_json import (
     compact_numeric_evidence,
+    dump_evidence_json,
     parse_evidence_document,
     read_evidence_document,
 )
@@ -64,9 +64,7 @@ def main() -> None:
         "observations": selected,
     }
     witnesses_path.write_text(
-        json.dumps(witnesses, indent=2, allow_nan=False) + "\n",
-        encoding="utf-8",
-        newline="\n",
+        dump_evidence_json(witnesses), encoding="utf-8", newline="\n"
     )
 
     maps = {
@@ -147,10 +145,10 @@ def main() -> None:
         "native_witnesses": "witnesses.json",
     }
     (DESTINATION / "contract.json").write_text(
-        json.dumps(contract, indent=2) + "\n", encoding="utf-8", newline="\n"
+        dump_evidence_json(contract), encoding="utf-8", newline="\n"
     )
     (DESTINATION / "manifest.json").write_text(
-        json.dumps(
+        dump_evidence_json(
             {
                 "schema_version": "1.0",
                 "evidence_kind": "native_runtime_selected_witnesses",
@@ -203,10 +201,8 @@ def main() -> None:
                         "signed-zero or nonfinite values"
                     ),
                 },
-            },
-            indent=2,
-        )
-        + "\n",
+            }
+        ),
         encoding="utf-8",
         newline="\n",
     )

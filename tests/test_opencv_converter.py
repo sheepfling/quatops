@@ -64,7 +64,6 @@ def test_opencv_contract_and_pinned_capture_provenance():
         "preparation_spec_sha256": ROOT
         / "experiments/converters/opencv/4.13.0/converter_inputs.json",
         "witnesses_sha256": FIXTURE / "witnesses.json",
-        "native_build_information_sha256": FIXTURE / "opencv-build-information.txt",
     }
     for field, path in paths.items():
         assert hashlib.sha256(path.read_bytes()).hexdigest() == provenance[field], field

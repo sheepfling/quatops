@@ -16,7 +16,9 @@ unequal mixed orientations, one antipode, a nonprincipal half-turn, and both
 orders of the mixed product. Each orientation retains its exact canonical and
 native coefficients plus the native images of +X, +Y, +Z and one asymmetric
 probe. Build identity, native precision, capture-source hash, input hash, and
-the original full-capture hash are kept with each version.
+the exact native capture-output hash are kept with each version. Godot 4.7 and
+4.8 retain separate build/capture contracts and point to one immutable witness
+file because the selected native outputs matched exactly.
 
 The broad signed-axis checks are generated in
 [`test_engine_basis_oracle.py`](../../tests/test_engine_basis_oracle.py): all

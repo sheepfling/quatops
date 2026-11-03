@@ -15,11 +15,7 @@
     "forward": "-Z",
     "metersPerUnit": 1.0
   },
-  "destination_axes_from_source": [
-    "x",
-    "z",
-    "-y"
-  ],
+  "destination_axes_from_source": ["x", "z", "-y"],
   "serialized_orientation": "USDA quatd orient op, real-first WXYZ, converted by QuatOps QuaternionFrameMap",
   "matrix_action": "OpenUSD Gf row vectors; child world row matrix = child local row matrix * parent world row matrix",
   "scope": [

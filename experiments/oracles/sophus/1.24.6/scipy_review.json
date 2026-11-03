@@ -2,7 +2,7 @@
   "schema_version": "1.0",
   "evidence_kind": "derived_reference",
   "native_capture": "discovery.json",
-  "native_capture_sha256": "98171e1c77e280395c4744fe6285198d0ed764b7d82e90a3b39a0fb7ef876638",
+  "native_capture_sha256": "a55e2d1da9b102fcd3c139192e5d052d79edc837cd7a2e7627bace0498ffe75b",
   "reference_script": "verify_scipy.py",
   "reference_script_sha256": "cf5026f801fb73c02c7fcb4861cb16733d47d3bef6a358c367ee7356c4379835",
   "quatops_executed": false,

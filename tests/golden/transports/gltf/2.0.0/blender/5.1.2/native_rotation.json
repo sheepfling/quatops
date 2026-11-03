@@ -9,11 +9,7 @@
   "loader": {
     "name": "Blender glTF importer",
     "version": "5.1.2",
-    "version_tuple": [
-      5,
-      1,
-      2
-    ],
+    "version_tuple": [5, 1, 2],
     "build_hash": "ec6e62d40fa9",
     "build_date": "2026-05-19",
     "build_platform": "Windows",
@@ -54,333 +50,107 @@
     "static_transforms": {
       "parent_frame": {
         "matrix_basis_rows": [
-          [
-            0.9210609793663025,
-            0.0,
-            -0.3894183337688446,
-            1.25
-          ],
-          [
-            0.0,
-            1.0,
-            0.0,
-            -0.75
-          ],
-          [
-            0.3894183337688446,
-            0.0,
-            0.9210609793663025,
-            -2.5
-          ],
-          [
-            0.0,
-            0.0,
-            0.0,
-            1.0
-          ]
+          [0.9210609793663025, 0.0, -0.3894183337688446, 1.25],
+          [0.0, 1.0, 0.0, -0.75],
+          [0.3894183337688446, 0.0, 0.9210609793663025, -2.5],
+          [0.0, 0.0, 0.0, 1.0]
         ],
         "matrix_world_rows": [
-          [
-            0.9210609793663025,
-            0.0,
-            -0.3894183337688446,
-            1.25
-          ],
-          [
-            0.0,
-            1.0,
-            0.0,
-            -0.75
-          ],
-          [
-            0.3894183337688446,
-            0.0,
-            0.9210609793663025,
-            -2.5
-          ],
-          [
-            0.0,
-            0.0,
-            0.0,
-            1.0
-          ]
+          [0.9210609793663025, 0.0, -0.3894183337688446, 1.25],
+          [0.0, 1.0, 0.0, -0.75],
+          [0.3894183337688446, 0.0, 0.9210609793663025, -2.5],
+          [0.0, 0.0, 0.0, 1.0]
         ]
       },
       "static_trs": {
-        "matrix_basis_rows": [
-          [
-            2.0,
-            0.0,
-            0.0,
-            2.0
-          ],
-          [
-            0.0,
-            0.25,
-            -0.8660253882408142,
-            1.0
-          ],
-          [
-            0.0,
-            0.4330126941204071,
-            0.5,
-            1.0
-          ],
-          [
-            0.0,
-            0.0,
-            0.0,
-            1.0
-          ]
-        ],
+        "matrix_basis_rows": [[2.0, 0.0, 0.0, 2.0], [0.0, 0.25, -0.8660253882408142, 1.0], [0.0, 0.4330126941204071, 0.5, 1.0], [0.0, 0.0, 0.0, 1.0]],
         "matrix_world_rows": [
-          [
-            1.842121958732605,
-            -0.16862307488918304,
-            -0.1947091668844223,
-            2.7027034759521484
-          ],
-          [
-            0.0,
-            0.25,
-            -0.8660253882408142,
-            0.25
-          ],
-          [
-            0.7788366675376892,
-            0.3988310992717743,
-            0.46053048968315125,
-            -0.8001022934913635
-          ],
-          [
-            0.0,
-            0.0,
-            0.0,
-            1.0
-          ]
+          [1.842121958732605, -0.16862307488918304, -0.1947091668844223, 2.7027034759521484],
+          [0.0, 0.25, -0.8660253882408142, 0.25],
+          [0.7788366675376892, 0.3988310992717743, 0.46053048968315125, -0.8001022934913635],
+          [0.0, 0.0, 0.0, 1.0]
         ]
       },
       "static_matrix": {
         "matrix_basis_rows": [
-          [
-            2.0,
-            0.0,
-            0.0,
-            2.0
-          ],
-          [
-            0.0,
-            0.2500000298023224,
-            -0.8660253286361694,
-            1.0
-          ],
-          [
-            0.0,
-            0.4330126643180847,
-            0.5000000596046448,
-            1.0
-          ],
-          [
-            0.0,
-            0.0,
-            0.0,
-            1.0
-          ]
+          [2.0, 0.0, 0.0, 2.0],
+          [0.0, 0.2500000298023224, -0.8660253286361694, 1.0],
+          [0.0, 0.4330126643180847, 0.5000000596046448, 1.0],
+          [0.0, 0.0, 0.0, 1.0]
         ],
         "matrix_world_rows": [
-          [
-            1.842121958732605,
-            -0.16862307488918304,
-            -0.1947091966867447,
-            2.7027034759521484
-          ],
-          [
-            0.0,
-            0.2500000298023224,
-            -0.8660253286361694,
-            0.25
-          ],
-          [
-            0.7788366675376892,
-            0.3988310694694519,
-            0.460530549287796,
-            -0.8001022934913635
-          ],
-          [
-            0.0,
-            0.0,
-            0.0,
-            1.0
-          ]
+          [1.842121958732605, -0.16862307488918304, -0.1947091966867447, 2.7027034759521484],
+          [0.0, 0.2500000298023224, -0.8660253286361694, 0.25],
+          [0.7788366675376892, 0.3988310694694519, 0.460530549287796, -0.8001022934913635],
+          [0.0, 0.0, 0.0, 1.0]
         ]
       }
     },
     "source_translation_axis_images_in_blender_xyz": {
-      "x": [
-        1.0,
-        0.0,
-        0.0
-      ],
-      "y": [
-        0.0,
-        0.0,
-        1.0
-      ],
-      "z": [
-        0.0,
-        -1.0,
-        0.0
-      ]
+      "x": [1.0, 0.0, 0.0],
+      "y": [0.0, 0.0, 1.0],
+      "z": [0.0, -1.0, 0.0]
     },
     "animations": [
       {
         "interpolation": "STEP",
         "action_name": "rotation_step",
         "target_object": "animated_step",
-        "key_times_seconds_from_imported_fcurves": [
-          0.0,
-          0.7,
-          1.9
-        ],
+        "key_times_seconds_from_imported_fcurves": [0.0, 0.7, 1.9],
         "fcurves": {
-          "slot_identifiers": [
-            "OBanimated_step"
-          ],
+          "slot_identifiers": ["OBanimated_step"],
           "data_path": "rotation_quaternion",
-          "array_indices": [
-            0,
-            1,
-            2,
-            3
-          ],
+          "array_indices": [0, 1, 2, 3],
           "key_count": 3,
           "interpolations_by_component": [
-            [
-              "CONSTANT",
-              "CONSTANT",
-              "CONSTANT"
-            ],
-            [
-              "CONSTANT",
-              "CONSTANT",
-              "CONSTANT"
-            ],
-            [
-              "CONSTANT",
-              "CONSTANT",
-              "CONSTANT"
-            ],
-            [
-              "CONSTANT",
-              "CONSTANT",
-              "CONSTANT"
-            ]
+            ["CONSTANT", "CONSTANT", "CONSTANT"],
+            ["CONSTANT", "CONSTANT", "CONSTANT"],
+            ["CONSTANT", "CONSTANT", "CONSTANT"],
+            ["CONSTANT", "CONSTANT", "CONSTANT"]
           ],
           "left_handle_types_by_component": [
-            [
-              "AUTO_CLAMPED",
-              "AUTO_CLAMPED",
-              "AUTO_CLAMPED"
-            ],
-            [
-              "AUTO_CLAMPED",
-              "AUTO_CLAMPED",
-              "AUTO_CLAMPED"
-            ],
-            [
-              "AUTO_CLAMPED",
-              "AUTO_CLAMPED",
-              "AUTO_CLAMPED"
-            ],
-            [
-              "AUTO_CLAMPED",
-              "AUTO_CLAMPED",
-              "AUTO_CLAMPED"
-            ]
+            ["AUTO_CLAMPED", "AUTO_CLAMPED", "AUTO_CLAMPED"],
+            ["AUTO_CLAMPED", "AUTO_CLAMPED", "AUTO_CLAMPED"],
+            ["AUTO_CLAMPED", "AUTO_CLAMPED", "AUTO_CLAMPED"],
+            ["AUTO_CLAMPED", "AUTO_CLAMPED", "AUTO_CLAMPED"]
           ],
           "right_handle_types_by_component": [
-            [
-              "AUTO_CLAMPED",
-              "AUTO_CLAMPED",
-              "AUTO_CLAMPED"
-            ],
-            [
-              "AUTO_CLAMPED",
-              "AUTO_CLAMPED",
-              "AUTO_CLAMPED"
-            ],
-            [
-              "AUTO_CLAMPED",
-              "AUTO_CLAMPED",
-              "AUTO_CLAMPED"
-            ],
-            [
-              "AUTO_CLAMPED",
-              "AUTO_CLAMPED",
-              "AUTO_CLAMPED"
-            ]
+            ["AUTO_CLAMPED", "AUTO_CLAMPED", "AUTO_CLAMPED"],
+            ["AUTO_CLAMPED", "AUTO_CLAMPED", "AUTO_CLAMPED"],
+            ["AUTO_CLAMPED", "AUTO_CLAMPED", "AUTO_CLAMPED"],
+            ["AUTO_CLAMPED", "AUTO_CLAMPED", "AUTO_CLAMPED"]
           ]
         },
         "samples": [
           {
             "sample": "key-0",
             "time_seconds": 0.0,
-            "quaternion_wxyz": [
-              0.9847265481948853,
-              0.1741081327199936,
-              0.0,
-              0.0
-            ]
+            "quaternion_wxyz": [0.9847265481948853, 0.1741081327199936, 0.0, 0.0]
           },
           {
             "sample": "before-key-1-1e-05",
             "time_seconds": 0.69999,
-            "quaternion_wxyz": [
-              0.9847265481948853,
-              0.1741081327199936,
-              0.0,
-              0.0
-            ]
+            "quaternion_wxyz": [0.9847265481948853, 0.1741081327199936, 0.0, 0.0]
           },
           {
             "sample": "before-key-1-1e-06",
             "time_seconds": 0.6999989999999999,
-            "quaternion_wxyz": [
-              0.8253356218338013,
-              0.0,
-              0.0,
-              0.5646424889564514
-            ]
+            "quaternion_wxyz": [0.8253356218338013, 0.0, 0.0, 0.5646424889564514]
           },
           {
             "sample": "key-1",
             "time_seconds": 0.7,
-            "quaternion_wxyz": [
-              0.8253356218338013,
-              0.0,
-              0.0,
-              0.5646424889564514
-            ]
+            "quaternion_wxyz": [0.8253356218338013, 0.0, 0.0, 0.5646424889564514]
           },
           {
             "sample": "after-key-1",
             "time_seconds": 0.700001,
-            "quaternion_wxyz": [
-              0.8253356218338013,
-              0.0,
-              0.0,
-              0.5646424889564514
-            ]
+            "quaternion_wxyz": [0.8253356218338013, 0.0, 0.0, 0.5646424889564514]
           },
           {
             "sample": "key-2",
             "time_seconds": 1.9,
-            "quaternion_wxyz": [
-              0.4535961151123047,
-              0.0,
-              -0.8912073373794556,
-              0.0
-            ]
+            "quaternion_wxyz": [0.4535961151123047, 0.0, -0.8912073373794556, 0.0]
           }
         ]
       },
@@ -388,130 +158,51 @@
         "interpolation": "LINEAR",
         "action_name": "rotation_linear",
         "target_object": "animated_linear",
-        "key_times_seconds_from_imported_fcurves": [
-          0.0,
-          0.7,
-          1.9
-        ],
+        "key_times_seconds_from_imported_fcurves": [0.0, 0.7, 1.9],
         "fcurves": {
-          "slot_identifiers": [
-            "OBanimated_linear"
-          ],
+          "slot_identifiers": ["OBanimated_linear"],
           "data_path": "rotation_quaternion",
-          "array_indices": [
-            0,
-            1,
-            2,
-            3
-          ],
+          "array_indices": [0, 1, 2, 3],
           "key_count": 3,
           "interpolations_by_component": [
-            [
-              "LINEAR",
-              "LINEAR",
-              "LINEAR"
-            ],
-            [
-              "LINEAR",
-              "LINEAR",
-              "LINEAR"
-            ],
-            [
-              "LINEAR",
-              "LINEAR",
-              "LINEAR"
-            ],
-            [
-              "LINEAR",
-              "LINEAR",
-              "LINEAR"
-            ]
+            ["LINEAR", "LINEAR", "LINEAR"],
+            ["LINEAR", "LINEAR", "LINEAR"],
+            ["LINEAR", "LINEAR", "LINEAR"],
+            ["LINEAR", "LINEAR", "LINEAR"]
           ],
           "left_handle_types_by_component": [
-            [
-              "AUTO_CLAMPED",
-              "AUTO_CLAMPED",
-              "AUTO_CLAMPED"
-            ],
-            [
-              "AUTO_CLAMPED",
-              "AUTO_CLAMPED",
-              "AUTO_CLAMPED"
-            ],
-            [
-              "AUTO_CLAMPED",
-              "AUTO_CLAMPED",
-              "AUTO_CLAMPED"
-            ],
-            [
-              "AUTO_CLAMPED",
-              "AUTO_CLAMPED",
-              "AUTO_CLAMPED"
-            ]
+            ["AUTO_CLAMPED", "AUTO_CLAMPED", "AUTO_CLAMPED"],
+            ["AUTO_CLAMPED", "AUTO_CLAMPED", "AUTO_CLAMPED"],
+            ["AUTO_CLAMPED", "AUTO_CLAMPED", "AUTO_CLAMPED"],
+            ["AUTO_CLAMPED", "AUTO_CLAMPED", "AUTO_CLAMPED"]
           ],
           "right_handle_types_by_component": [
-            [
-              "AUTO_CLAMPED",
-              "AUTO_CLAMPED",
-              "AUTO_CLAMPED"
-            ],
-            [
-              "AUTO_CLAMPED",
-              "AUTO_CLAMPED",
-              "AUTO_CLAMPED"
-            ],
-            [
-              "AUTO_CLAMPED",
-              "AUTO_CLAMPED",
-              "AUTO_CLAMPED"
-            ],
-            [
-              "AUTO_CLAMPED",
-              "AUTO_CLAMPED",
-              "AUTO_CLAMPED"
-            ]
+            ["AUTO_CLAMPED", "AUTO_CLAMPED", "AUTO_CLAMPED"],
+            ["AUTO_CLAMPED", "AUTO_CLAMPED", "AUTO_CLAMPED"],
+            ["AUTO_CLAMPED", "AUTO_CLAMPED", "AUTO_CLAMPED"],
+            ["AUTO_CLAMPED", "AUTO_CLAMPED", "AUTO_CLAMPED"]
           ]
         },
         "samples": [
           {
             "sample": "key-0",
             "time_seconds": 0.0,
-            "quaternion_wxyz": [
-              0.9847265481948853,
-              0.1741081327199936,
-              0.0,
-              0.0
-            ]
+            "quaternion_wxyz": [0.9847265481948853, 0.1741081327199936, 0.0, 0.0]
           },
           {
             "sample": "midpoint-0-1",
             "time_seconds": 0.35,
-            "quaternion_wxyz": [
-              0.9050310850143433,
-              0.0870540663599968,
-              0.0,
-              0.2823212444782257
-            ]
+            "quaternion_wxyz": [0.9050310850143433, 0.0870540663599968, 0.0, 0.2823212444782257]
           },
           {
             "sample": "key-1",
             "time_seconds": 0.7,
-            "quaternion_wxyz": [
-              0.8253356218338013,
-              0.0,
-              0.0,
-              0.5646424889564514
-            ]
+            "quaternion_wxyz": [0.8253356218338013, 0.0, 0.0, 0.5646424889564514]
           },
           {
             "sample": "key-2",
             "time_seconds": 1.9,
-            "quaternion_wxyz": [
-              0.4535961151123047,
-              0.0,
-              -0.8912073373794556,
-              0.0
-            ]
+            "quaternion_wxyz": [0.4535961151123047, 0.0, -0.8912073373794556, 0.0]
           }
         ]
       },
@@ -519,130 +210,41 @@
         "interpolation": "CUBICSPLINE",
         "action_name": "rotation_cubic",
         "target_object": "animated_cubic",
-        "key_times_seconds_from_imported_fcurves": [
-          0.0,
-          0.7,
-          1.9
-        ],
+        "key_times_seconds_from_imported_fcurves": [0.0, 0.7, 1.9],
         "fcurves": {
-          "slot_identifiers": [
-            "OBanimated_cubic"
-          ],
+          "slot_identifiers": ["OBanimated_cubic"],
           "data_path": "rotation_quaternion",
-          "array_indices": [
-            0,
-            1,
-            2,
-            3
-          ],
+          "array_indices": [0, 1, 2, 3],
           "key_count": 3,
           "interpolations_by_component": [
-            [
-              "BEZIER",
-              "BEZIER",
-              "BEZIER"
-            ],
-            [
-              "BEZIER",
-              "BEZIER",
-              "BEZIER"
-            ],
-            [
-              "BEZIER",
-              "BEZIER",
-              "BEZIER"
-            ],
-            [
-              "BEZIER",
-              "BEZIER",
-              "BEZIER"
-            ]
+            ["BEZIER", "BEZIER", "BEZIER"],
+            ["BEZIER", "BEZIER", "BEZIER"],
+            ["BEZIER", "BEZIER", "BEZIER"],
+            ["BEZIER", "BEZIER", "BEZIER"]
           ],
-          "left_handle_types_by_component": [
-            [
-              "AUTO",
-              "AUTO",
-              "AUTO"
-            ],
-            [
-              "AUTO",
-              "AUTO",
-              "AUTO"
-            ],
-            [
-              "AUTO",
-              "AUTO",
-              "AUTO"
-            ],
-            [
-              "AUTO",
-              "AUTO",
-              "AUTO"
-            ]
-          ],
-          "right_handle_types_by_component": [
-            [
-              "AUTO",
-              "AUTO",
-              "AUTO"
-            ],
-            [
-              "AUTO",
-              "AUTO",
-              "AUTO"
-            ],
-            [
-              "AUTO",
-              "AUTO",
-              "AUTO"
-            ],
-            [
-              "AUTO",
-              "AUTO",
-              "AUTO"
-            ]
-          ]
+          "left_handle_types_by_component": [["AUTO", "AUTO", "AUTO"], ["AUTO", "AUTO", "AUTO"], ["AUTO", "AUTO", "AUTO"], ["AUTO", "AUTO", "AUTO"]],
+          "right_handle_types_by_component": [["AUTO", "AUTO", "AUTO"], ["AUTO", "AUTO", "AUTO"], ["AUTO", "AUTO", "AUTO"], ["AUTO", "AUTO", "AUTO"]]
         },
         "samples": [
           {
             "sample": "key-0",
             "time_seconds": 0.0,
-            "quaternion_wxyz": [
-              0.9847265481948853,
-              0.1741081327199936,
-              0.0,
-              0.0
-            ]
+            "quaternion_wxyz": [0.9847265481948853, 0.1741081327199936, 0.0, 0.0]
           },
           {
             "sample": "midpoint-0-1",
             "time_seconds": 0.35,
-            "quaternion_wxyz": [
-              0.9388859868049622,
-              0.10767213255167007,
-              0.03591213375329971,
-              0.2382085621356964
-            ]
+            "quaternion_wxyz": [0.9388859868049622, 0.10767213255167007, 0.03591213375329971, 0.2382085621356964]
           },
           {
             "sample": "key-1",
             "time_seconds": 0.7,
-            "quaternion_wxyz": [
-              0.8253356218338013,
-              0.0,
-              0.0,
-              0.5646424889564514
-            ]
+            "quaternion_wxyz": [0.8253356218338013, 0.0, 0.0, 0.5646424889564514]
           },
           {
             "sample": "key-2",
             "time_seconds": 1.9,
-            "quaternion_wxyz": [
-              0.4535961151123047,
-              0.0,
-              -0.8912073373794556,
-              0.0
-            ]
+            "quaternion_wxyz": [0.4535961151123047, 0.0, -0.8912073373794556, 0.0]
           }
         ]
       }
