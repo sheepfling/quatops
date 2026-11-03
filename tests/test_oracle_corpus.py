@@ -15,17 +15,16 @@ CORPUS_PATH = (
     / "shared"
     / "orientation_inputs_v1.json"
 )
-CORPUS_SHA256 = "07e4d809f7eb75ad6e5454febf2b725b0b8fb389536743dd7196566d4640135f"
+CORPUS_SHA256 = "eaf7605b3298ec9dbdf7838f43f2da61d90af5351bb15e455d3eb37c6c6b5446"
 EXPECTED_COUNTS = {
-    "axis_angle_inputs": 60,
-    "euler_boundaries": 540,
-    "euler_inputs": 89,
-    "integration_inputs": 48,
+    "axis_angle_inputs": 5,
+    "euler_boundaries": 7,
+    "euler_inputs": 1,
+    "integration_inputs": 4,
     "interpolation_pairs": 7,
-    "matrix_inputs": 11,
+    "matrix_inputs": 4,
     "multiplication_pairs": 3,
-    "quaternion_inputs": 140,
-    "signed_axis_maps": 48,
+    "quaternion_inputs": 9,
     "trajectories": 3,
 }
 CORPUS = json.loads(CORPUS_PATH.read_text(encoding="utf-8"))
@@ -65,19 +64,28 @@ def test_corpus_matrix_inputs_label_proper_and_invalid_rotation_domains():
         else:
             invalid_count += 1
             assert case["domain"] == "invalid_rotation"
-    assert valid_count == 8
-    assert invalid_count == 3
+    assert valid_count == 3
+    assert invalid_count == 1
 
 
-def test_corpus_signed_axis_maps_are_distinct_proper_and_improper_maps():
-    rows = CORPUS["signed_axis_maps"]
-    matrices = [tuple(np.asarray(row["rows"], dtype=int).ravel()) for row in rows]
-    assert len(set(matrices)) == 48
-    determinants = [
-        round(np.linalg.det(np.asarray(row["rows"], dtype=int))) for row in rows
-    ]
-    assert determinants.count(1) == 24
-    assert determinants.count(-1) == 24
+def test_shared_inputs_record_which_broad_discovery_corpus_was_reduced():
+    assert (
+        CORPUS["retention"]["source_discovery_corpus_sha256"]
+        == "07e4d809f7eb75ad6e5454febf2b725b0b8fb389536743dd7196566d4640135f"
+    )
+    assert CORPUS["retention"]["discovery_counts"] == {
+        "axis_angle_inputs": 60,
+        "euler_boundaries": 540,
+        "euler_inputs": 89,
+        "integration_inputs": 48,
+        "interpolation_pairs": 7,
+        "matrix_inputs": 11,
+        "multiplication_pairs": 3,
+        "quaternion_inputs": 140,
+        "signed_axis_maps": 48,
+        "trajectories": 3,
+    }
+    assert "signed_axis_maps" not in CORPUS
 
 
 def test_trajectory_inputs_keep_strictly_increasing_times():

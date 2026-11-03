@@ -11,9 +11,9 @@ Cesium's native WGS84 ENU-to-ECEF transform; frame placement is not folded into
 the local quaternion conversion.
 
 The native capture ran CesiumJS `1.124.0` with Node.js `v24.21.0` on Windows
-x64. It retains nine selected cases covering identity, principal turns, mixed
-rotations, an antipode, a nonprincipal half-turn, noncommuting composition,
-and distinct geographic branches. Native outputs include the ENU-to-ECEF and
+x64. It retains five selected cases covering identity, mixed rotations, an
+antipode, noncommuting composition, and four distinct geographic origins.
+Native outputs include the ENU-to-ECEF and
 model-to-ECEF matrices, local basis/probe actions, point and direction actions,
 inverse point transforms, ECEF quaternion, and recovered local quaternion.
 

@@ -22,7 +22,7 @@ Separate compact fixtures preserve the native side of these auxiliary proofs:
 
 - [ROS 2 tf2 0.36.23](oracles/ros2/0.36.23/manifest.json): two directions of
   the named three-frame chain, message fields, and native `fromMsg` result.
-- [CesiumJS 1.124.0](transports/cesium/1.124.0/manifest.json): nine local
+- [CesiumJS 1.124.0](transports/cesium/1.124.0/manifest.json): five local
   orientations placed in selected WGS84 ENU/ECEF frames.
 - [glTF 2.0 / Three.js 0.187.0](transports/gltf/2.0.0/threejs/0.187.0/converter/manifest.json):
   a QuatOps-generated static hierarchy loaded by native `GLTFLoader`.

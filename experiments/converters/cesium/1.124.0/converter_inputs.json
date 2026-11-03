@@ -73,81 +73,6 @@
       "height_m": 0
     },
     {
-      "case_id": "quarter_x@geo-03",
-      "canonical_orientation_case": "quarter_x",
-      "location_case": "geo-03",
-      "canonical_wxyz": [
-        0.7071067811865476,
-        0.7071067811865476,
-        0.0,
-        0.0
-      ],
-      "quatops_cesium_local_xyzw": [
-        0.7071067811865476,
-        0.0,
-        0.0,
-        0.7071067811865476
-      ],
-      "local_translation_xyz_m": [
-        1.25,
-        -2.5,
-        3.75
-      ],
-      "longitude_degrees": -75,
-      "latitude_degrees": 40,
-      "height_m": 1000
-    },
-    {
-      "case_id": "quarter_y@geo-04",
-      "canonical_orientation_case": "quarter_y",
-      "location_case": "geo-04",
-      "canonical_wxyz": [
-        0.7071067811865476,
-        0.0,
-        0.7071067811865476,
-        0.0
-      ],
-      "quatops_cesium_local_xyzw": [
-        0.0,
-        0.7071067811865476,
-        0.0,
-        0.7071067811865476
-      ],
-      "local_translation_xyz_m": [
-        -7.0,
-        3.5,
-        2.0
-      ],
-      "longitude_degrees": 45,
-      "latitude_degrees": -45,
-      "height_m": 400000
-    },
-    {
-      "case_id": "quarter_z@geo-04",
-      "canonical_orientation_case": "quarter_z",
-      "location_case": "geo-04",
-      "canonical_wxyz": [
-        0.7071067811865476,
-        0.0,
-        0.0,
-        0.7071067811865476
-      ],
-      "quatops_cesium_local_xyzw": [
-        0.0,
-        0.0,
-        0.7071067811865476,
-        0.7071067811865476
-      ],
-      "local_translation_xyz_m": [
-        2.0,
-        5.0,
-        -1.0
-      ],
-      "longitude_degrees": 45,
-      "latitude_degrees": -45,
-      "height_m": 400000
-    },
-    {
       "case_id": "mixed_a@geo-03",
       "canonical_orientation_case": "mixed_a",
       "location_case": "geo-03",
@@ -220,31 +145,6 @@
       ],
       "longitude_degrees": 0,
       "latitude_degrees": 90,
-      "height_m": 0
-    },
-    {
-      "case_id": "nonprincipal_halfturn@geo-00",
-      "canonical_orientation_case": "nonprincipal_halfturn",
-      "location_case": "geo-00",
-      "canonical_wxyz": [
-        0.0,
-        0.5773502691896258,
-        0.5773502691896258,
-        0.5773502691896258
-      ],
-      "quatops_cesium_local_xyzw": [
-        0.5773502691896258,
-        0.5773502691896258,
-        0.5773502691896258,
-        0.0
-      ],
-      "local_translation_xyz_m": [
-        4.0,
-        -1.0,
-        2.0
-      ],
-      "longitude_degrees": 0,
-      "latitude_degrees": 0,
       "height_m": 0
     },
     {

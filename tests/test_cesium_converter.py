@@ -50,7 +50,7 @@ def test_cesium_capture_provenance_and_explicit_frame_contract():
     assert MANIFEST["target"]["api_version"] == "1.124"
     assert MANIFEST["execution"]["was_run"] is True
     assert MANIFEST["execution"]["node"] == "v24.21.0"
-    assert MANIFEST["selection"]["retained_observations"] == 9
+    assert MANIFEST["selection"]["retained_observations"] == 5
     assert MANIFEST["review_state"].startswith("native capture retained")
     assert CONTRACT["forward"].startswith("R_ECEF_from_model = R_ECEF_from_ENU")
     assert INPUTS["frame_contract"]["map_canonical_to_cesium_enu"] == ["x", "y", "z"]

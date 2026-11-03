@@ -12,12 +12,14 @@ The shared input corpus and capture envelope are documented in
 [`shared/README.md`](shared/README.md).
 
 [`shared/orientation_inputs_v1.json`](shared/orientation_inputs_v1.json) is an
-input-only corpus. SHA-256:
-`07e4d809f7eb75ad6e5454febf2b725b0b8fb389536743dd7196566d4640135f`.
-It includes 89 Euler inputs, 540 Euler boundary probes, 60 axis-angle cases,
-140 quaternion algebra inputs, 3 multiplication pairs, 7 interpolation pairs,
-11 independent rotation matrices, 48 integration inputs, 48 signed-axis maps,
-and 3 trajectories. It contains no native expected outputs.
+input-only retained witness set. SHA-256:
+`eaf7605b3298ec9dbdf7838f43f2da61d90af5351bb15e455d3eb37c6c6b5446`.
+It contains 5 axis-angle inputs, 7 Euler boundary cases, one mixed Euler input,
+9 quaternion cases, 3 multiplication pairs, 7 interpolation pairs, 4 matrix
+inputs, 4 integration inputs, and 3 short trajectory examples. The 48 signed
+axis maps are generated in the shared property tests instead of duplicated in
+the capture corpus. The broad discovery source digest is retained in the
+corpus metadata; passing sweep outputs were discarded.
 
 The corpus freezes actual values and IEEE-754 input bits where relevant. A
 runtime adapter must preserve those source values, record any unit conversion

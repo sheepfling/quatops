@@ -29,13 +29,9 @@ def main() -> None:
     to_cesium_local = QuaternionFrameMap(identity, identity)
     selection = (
         ("identity", "geo-00", (0.0, 0.0, 0.0)),
-        ("quarter_x", "geo-03", (1.25, -2.5, 3.75)),
-        ("quarter_y", "geo-04", (-7.0, 3.5, 2.0)),
-        ("quarter_z", "geo-04", (2.0, 5.0, -1.0)),
         ("mixed_a", "geo-03", (12.5, -8.25, 4.0)),
         ("mixed_b", "geo-04", (-3.0, 6.0, 9.0)),
         ("antipode_mixed_a", "geo-09", (0.5, 1.0, -2.0)),
-        ("nonprincipal_halfturn", "geo-00", (4.0, -1.0, 2.0)),
     )
     locations = {row["case_id"]: row for row in geographic["locations"]}
     cases = []

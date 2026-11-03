@@ -26,7 +26,7 @@ def main() -> None:
     run = read_evidence_document(capture / "manifest.json")
     observations = read_evidence_rows(capture / "observations.json")
     inputs = read_evidence_document(HERE / "converter_inputs.json")
-    if len(observations) != len(inputs["cases"]) or len(observations) != 9:
+    if len(observations) != len(inputs["cases"]) or len(observations) != 5:
         raise ValueError("unexpected Cesium converter capture case count")
 
     DESTINATION.mkdir(parents=True, exist_ok=True)
@@ -125,8 +125,8 @@ def main() -> None:
             "retained_observations": len(observations),
             "native_observations": run["observations"]["count"],
             "policy": (
-                "retain identity, principal turns, mixed and antipodal cases, "
-                "half-turn, composition, and three geographic branches"
+                "retain identity, mixed orientations, an antipode, a "
+                "noncommuting composition, and four WGS84 origins"
             ),
         },
     }

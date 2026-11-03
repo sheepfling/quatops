@@ -92,7 +92,7 @@
       "capture_helper_sha256": "5f9ee3af35720aed1ae476b07d2465e3ce9b742ce6c538edf32da64f10325347",
       "dockerfile_sha256": "56865b382ad0c3fe1c0c2ebb6da4f3faed410d0c81839f33ce44687d876bbcb5",
       "build_recipe_sha256": "65e75f02b743ef65eab8f0041ba8f286c767a60e3e02a64921e1a822af00e835",
-      "corpus_sha256": "07e4d809f7eb75ad6e5454febf2b725b0b8fb389536743dd7196566d4640135f"
+      "corpus_sha256": "eaf7605b3298ec9dbdf7838f43f2da61d90af5351bb15e455d3eb37c6c6b5446"
     }
   },
   "selection": {
