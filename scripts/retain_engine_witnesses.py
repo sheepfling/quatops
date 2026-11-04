@@ -7,7 +7,7 @@ import hashlib
 from copy import deepcopy
 from dataclasses import dataclass
 from pathlib import Path
-from typing import cast
+from typing import Union, cast
 
 from pydantic import JsonValue
 
@@ -104,7 +104,7 @@ def _quaternion(row: JsonRecord, field: str) -> list[float]:
         )
     ):
         raise TypeError(f"{field} must contain four numeric coefficients")
-    numeric_values = cast(list[int | float], value)
+    numeric_values = cast(list[Union[int, float]], value)
     return [float(component) for component in numeric_values]
 
 
