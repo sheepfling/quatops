@@ -81,6 +81,13 @@ def test_opencv_contract_and_pinned_capture_provenance():
         assert hashlib.sha256(path.read_bytes()).hexdigest() == reproduction[field], (
             field
         )
+    archived_capture = (
+        ROOT
+        / "experiments/provenance/reproduction-v1/opencv-4.13.0/capture_native.py.txt"
+    )
+    archived_hash = hashlib.sha256(archived_capture.read_bytes()).hexdigest()
+    assert archived_hash == provenance["capture_script_sha256"]
+    assert archived_hash == reproduction["previous_checkout_capture_script_sha256"]
     assert (
         provenance["shared_canonical_inputs_sha256"]
         == hashlib.sha256(SHARED_PATH.read_bytes()).hexdigest()

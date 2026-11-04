@@ -88,15 +88,15 @@ def main() -> None:
     composition: list[OpenCVComposition] = []
     for dtype_label in inputs.precision_profiles:
         dtype = PROFILE_DTYPES[dtype_label]
-        for row in inputs.orientations:
-            canonical_to_native.append(
-                capture_matrix(
-                    row.case_id,
-                    dtype_label,
-                    np.asarray(row.quatops_rotation_vector_xyz_radians),
-                    probe,
-                )
+        canonical_to_native.extend(
+            capture_matrix(
+                row.case_id,
+                dtype_label,
+                np.asarray(row.quatops_rotation_vector_xyz_radians),
+                probe,
             )
+            for row in inputs.orientations
+        )
 
         native_axis = inputs.native_constructed_orientation
         native_rotvec = (

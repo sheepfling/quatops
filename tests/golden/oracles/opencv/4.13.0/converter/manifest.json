@@ -45,8 +45,10 @@
     "invocation_template": "python experiments/converters/opencv/4.13.0/prepare_inputs.py --output <temporary inputs.json>; then run capture_native.py --inputs <temporary inputs.json>"
   },
   "reproduction": {
-    "capture_script_sha256": "ce6df5cbbbb0983633e7ee64df2b39219b7c8e1a69731a480b152f780fda499b",
+    "capture_script_sha256": "34131beae7c2e98b6029f6db1a01e9e19571a6325194967e7ba624e6e1546c93",
+    "previous_checkout_capture_script_sha256": "ce6df5cbbbb0983633e7ee64df2b39219b7c8e1a69731a480b152f780fda499b",
     "preparation_script_sha256": "d48c5017e46355a72fdf4ce96b1a66c8c78779ecbd15edb4b3a430de46c6ac92",
-    "lockfile_sha256": "8288ebf7e36753cc45b10f2fa0594bd5b55aee6b6405055ee8f8a972ce6ac9bf"
+    "lockfile_sha256": "8288ebf7e36753cc45b10f2fa0594bd5b55aee6b6405055ee8f8a972ce6ac9bf",
+    "capture_script_identity_note": "The reproduction script now uses equivalent list extension; provenance.capture_script_sha256 preserves the historical producer used for the retained capture."
   }
 }

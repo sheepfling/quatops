@@ -10,6 +10,7 @@ experiments/interoperability/** -text
 experiments/unity/** -text
 experiments/unreal/** -text
 experiments/converters/** -text
+experiments/provenance/** -text
 tests/oracles/** -text
 scripts/evidence_json.py -text
 scripts/compact_oracle_witnesses.py -text

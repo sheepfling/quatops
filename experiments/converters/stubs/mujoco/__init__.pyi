@@ -2,8 +2,9 @@
 
 import numpy as np
 from numpy.typing import NDArray
+from typing_extensions import TypeAlias
 
-_Float64Array = NDArray[np.float64]
+_Float64Array: TypeAlias = NDArray[np.float64]
 
 __file__: str
 
