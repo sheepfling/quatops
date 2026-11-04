@@ -4,13 +4,19 @@ from __future__ import annotations
 
 from typing import Literal
 
+from pydantic import FiniteFloat
+
 from scripts.evidence_schema.crystallized import (
     CanonicalInputContract,
     CanonicalInputs,
     CanonicalOrientationInput,
     CoordinateFrame,
 )
-from scripts.evidence_schema.primitives import NativeCaptureModel, Quaternion4, Vector3
+from scripts.evidence_schema.primitives import (
+    NativeCaptureModel,
+    Quaternion4,
+    Vector3,
+)
 
 
 class SharedFrameInput(NativeCaptureModel):
@@ -52,6 +58,26 @@ class SharedCanonicalInputCapture(NativeCaptureModel):
     probe_vector_xyz: Vector3
     orientations: list[SharedQuaternionInput]
     composition: SharedCompositionInput
+
+
+class GeographicLocationInput(NativeCaptureModel):
+    case_id: str
+    longitude_degrees: FiniteFloat
+    latitude_degrees: FiniteFloat
+    height_m: FiniteFloat
+
+
+class GeographicInputCorpus(NativeCaptureModel):
+    """Typed WGS84 geographic inputs shared by native frame evidence."""
+
+    schema_version: Literal["1.0"]
+    ellipsoid: Literal["WGS84"]
+    kind: Literal["inputs_not_expected_outputs"]
+    locations: list[GeographicLocationInput]
+    heading_pitch_roll_radians: list[Vector3]
+    local_point_xyz_m: Vector3
+    local_direction_xyz: Vector3
+    exact_pole_note: str
 
 
 def crystallize_shared_inputs(capture: SharedCanonicalInputCapture) -> CanonicalInputs:

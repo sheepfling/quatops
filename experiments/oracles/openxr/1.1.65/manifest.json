@@ -132,13 +132,17 @@
       "native_stdout": "temporary, retained observations minimized to witnesses/test_runtime_frame_chain.json",
       "native_stdout_sha256": "2b6fd85ce08f1ce225bac520f13d317872df437c55b7f7c7a95b72e7b0aba39e",
       "witness_file": "witnesses/test_runtime_frame_chain.json",
-      "witness_sha256": "a2a9eb4fbf8677d5009e1753308028ccc2fb639073f0dfb43d84bfa331392285",
+      "witness_sha256": "8eecbeb483cdbf62aee5d359bf8905e081b9bd47e1fef5af1cc712235880372c",
       "native_executable_sha256": "69571d1b059fbe3c9f92ee1df83a4e4a3ed71682a848e06b15271f895912923b",
       "test_runtime_dll_sha256": "3ce3378cc5993915ea906c47e7bb6704a82abcea854b70aa447325f8f809ac6c",
       "test_runtime_source_sha256": "1ab9f9e7ae170c7a1896ae51c6535a60f9eae5c8d2eef52bddd4ae5e369c50be",
       "test_runtime_export_def_sha256": "af512b797de324c47ce66c84c47b14d96c93c8838cf44dd16fef616966e99879",
       "loader_negotiation_header_sha256": "3dca4239643a8505355de010c6d9e18dd05eae91c9b976add2fc878ac416890f"
     }
+  },
+  "replay": {
+    "verifier_script_sha256": "387601f1b8915f38aec8f074fbe52f95e8b8235749c93acb8c193247336b2a54",
+    "test_module": "tests/experiments/oracles/openxr/test_openxr_test_runtime.py"
   },
   "review": {
     "state": "header_abi_spec_contract_and_khronos_test_runtime_frame_chain_reviewed",

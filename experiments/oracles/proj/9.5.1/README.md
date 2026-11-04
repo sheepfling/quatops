@@ -30,6 +30,9 @@ $captureDir = Join-Path $env:TEMP 'quatops-captures\proj-9.5.1\latest'
 
 The input file defaults to the shared
 [`geographic_inputs_v1.json`](../../shared/geographic_inputs_v1.json). The
-exporter disables network access and uses WGS84 without external datum grids. See
+requirements include Pydantic for the shared capture envelope and pyproj for
+the native transforms. The exporter validates the geographic input corpus with
+the shared strict Pydantic schema, disables network access, and uses WGS84
+without external datum grids. See
 [`docs/oracles/proj.md`](../../../../docs/oracles/proj.md) for the measured
 scope and numerical limits.

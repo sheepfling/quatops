@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import argparse
-import json
 from importlib import resources
 from pathlib import Path
 
@@ -17,6 +16,7 @@ from experiments.oracles.shared.capture_io import (
     contract,
     numeric,
 )
+from scripts.evidence_schema.shared_inputs import GeographicInputCorpus
 
 
 def main() -> None:
@@ -32,7 +32,9 @@ def main() -> None:
     args = cli.parse_args()
 
     network.set_network_enabled(False)
-    data = json.loads(args.geographic.read_text(encoding="utf-8"))
+    data = GeographicInputCorpus.model_validate_json(
+        args.geographic.read_bytes(), strict=True
+    )
     module_files = resources.files("pyproj")
     native_binary = next(
         (
@@ -69,10 +71,10 @@ def main() -> None:
     capture.artifacts.append((args.geographic.resolve(), "geographic_input_corpus"))
 
     geocentric = Transformer.from_crs(4979, 4978, always_xy=True)
-    for item in data["locations"]:
-        longitude = item["longitude_degrees"]
-        latitude = item["latitude_degrees"]
-        height = item["height_m"]
+    for item in data.locations:
+        longitude = item.longitude_degrees
+        latitude = item.latitude_degrees
+        height = item.height_m
         origin = geocentric.transform(longitude, latitude, height, errcheck=True)
         pipeline = (
             "+proj=topocentric +ellps=WGS84 "
@@ -84,7 +86,7 @@ def main() -> None:
             [1, 0, 0],
             [0, 1, 0],
             [0, 0, 1],
-            data["local_point_xyz_m"],
+            data.local_point_xyz_m,
         ]
         ecef_points = [
             local.transform(*point, direction=TransformDirection.INVERSE, errcheck=True)
@@ -93,7 +95,7 @@ def main() -> None:
         probe_readback = local.transform(*ecef_points[-1], errcheck=True)
         capture.add(
             Observation(
-                item["case_id"],
+                item.case_id,
                 "geographic-enu-ecef",
                 "pyproj.Transformer.from_crs(4979,4978); from_pipeline(topocentric); transform",
                 contract(

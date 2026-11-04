@@ -12,6 +12,7 @@ from typing import Any
 
 from experiments.oracles.shared.capture_io import (
     Capture,
+    NumericType,
     Observation,
     contract,
     numeric,
@@ -39,7 +40,7 @@ def deb_version(package: str) -> str:
     return result.stdout.strip()
 
 
-def pack(value: Any, label: str) -> Any:
+def pack(value: Any, label: NumericType) -> Any:
     if isinstance(value, dict):
         return {key: pack(item, label) for key, item in value.items()}
     if isinstance(value, list) and (
@@ -123,7 +124,8 @@ def main() -> None:
         )
 
     result = json.loads(run.stdout)
-    label = {4: "binary32", 8: "binary64"}.get(result["native_scalar_bytes"])
+    numeric_types: dict[int, NumericType] = {4: "binary32", 8: "binary64"}
+    label = numeric_types.get(result["native_scalar_bytes"])
     if label is None:
         raise ValueError("Unknown native scalar size")
     if result["native_scalar_bytes"] != 8:

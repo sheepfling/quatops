@@ -26,9 +26,9 @@ jobs:
       - name: Install development dependencies
         run: python -m pip install -e ".[dev]"
       - name: Validate retained evidence JSON
-        run: python scripts/validate_evidence_json.py
+        run: python -m scripts.validate_evidence_json --repository-root .
       - name: Validate converter evidence packages
-        run: python scripts/validate_converter_evidence.py
+        run: python -m scripts.validate_converter_evidence --repository-root .
       - name: Run tests
         run: python -m pytest -q
       - name: Check types
