@@ -13,7 +13,7 @@ from types import MappingProxyType
 from typing import Literal, cast
 
 from ..python import hamilton as _hamilton
-from .frames import (
+from ..semantics.frames import (
     FramedOrientation,
     FramedOrientationBatch,
     SemanticQuaternionMap,

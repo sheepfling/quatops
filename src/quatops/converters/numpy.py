@@ -11,7 +11,7 @@ from ..engines import numpy as _engine_numpy
 from ..engines.basis import SignedAxisMap
 from ..numpy.hamilton import wxyz as _hamilton
 from ..python import hamilton as _scalar_hamilton
-from .frames import FramedOrientationBatch, SemanticQuaternionMap
+from ..semantics.frames import FramedOrientationBatch, SemanticQuaternionMap
 from .targets import (
     ConverterProfile,
     TargetOrientationBatch,
@@ -36,6 +36,20 @@ def _component_array(
     if moved.shape[-1] != length:
         raise ValueError(f"component axis must have length {length}")
     return moved, normalized_axis
+
+
+def _require_unit_quaternion_batch(values: Any, component_axis: int) -> None:
+    moved, _ = _component_array(values, component_axis, 4, "orientations")
+    if not np.issubdtype(moved.dtype, np.number) or np.iscomplexobj(moved):
+        raise TypeError("physical orientation batches must contain real numbers")
+    if not np.all(np.isfinite(moved)):
+        raise ValueError("physical orientation batches must contain finite values")
+    norms = np.linalg.norm(moved.astype(np.float64), axis=-1)
+    if not np.all(np.abs(norms - 1.0) <= 1e-6):
+        raise ValueError(
+            "physical orientation batches require unit quaternions within 1e-6; "
+            "normalize explicitly before conversion"
+        )
 
 
 def _to_destination_wxyz(

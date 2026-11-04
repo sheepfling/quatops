@@ -66,10 +66,10 @@ quaternion orientation. The scalar/frame primitive checks cover all 48 signed
 maps and all 48-by-48 world/body map pairs in
 [`test_engine_basis_oracle.py`](../../tests/quatops/engines/test_engine_basis_oracle.py).
 
-For semantic frame IDs, axis descriptions, and a map derived from each frame's
-declared basis in a named reference, use the common
-[`quatops.converters` API](../converters.md). It checks that the orientation's
-parent and child frame labels match the mapping before converting coefficients.
+For semantic frame IDs, axis descriptions, and common physical conventions,
+use `quatops.semantics`. The common [`quatops.converters` gateway](../converters.md)
+derives a map from the declared parent and child bases, then converts the
+canonical Hamilton orientation to the selected target profile.
 
 The native Unity, Godot, and Blender examples use separately declared source
 frames; their specific maps are recorded on the [Unity](unity.md),

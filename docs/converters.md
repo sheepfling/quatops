@@ -1,175 +1,133 @@
-# Frame-aware target converters
+# Target converters
 
-QuatOps' converter front uses one canonical value contract and keeps the
-target's storage details in a declared profile:
+Physical frame meaning lives in [`quatops.semantics`](semantics.md). This page
+covers the shared gateway from a frame-labelled physical orientation to a
+declared target representation:
 
-- Canonical coefficients are active Hamilton WXYZ quaternions.
-- An orientation is labelled `q_parent_from_child` and acts as
-  `v_parent = R(q) @ v_child`.
-- Source and destination coordinate frames, positive-axis meanings, and
-  handedness are explicit.
-- Conversion preserves quaternion magnitude and sign. It does not normalize,
-  canonicalize, infer a model-forward axis, or choose an engine default.
+```text
+physical orientation (parent <- child, with named frame conventions)
+                         |
+                         v
+canonical active Hamilton WXYZ orientation
+                         |
+                         v
+common conversion gateway (parent/body basis maps + target representation)
+                         |
+                         v
+engine, transport, or library profile
+```
 
-The scalar API uses only the Python standard library. NumPy batch methods load
-NumPy only when called.
+The gateway and target profiles live in `quatops.converters`. Older
+frame-oriented imports from that package remain available for compatibility.
 
-Frame labels also make transform chains composable: a
-`world <- base` orientation can compose with `base <- sensor`, and the
-intermediate label is checked before multiplying. Hamilton product order is
-`lhs * rhs`, with the right-hand orientation acting first.
+## Canonical orientation contract
 
-## Declare the frames, then choose the target profile
+`PhysicalOrientation` means an active Hamilton WXYZ `q_parent_from_child`,
+requires a unit quaternion within `1e-6`, and preserves its sign. Its parent
+and child frame definitions determine separate world and body coordinate maps.
+Both maps must have matching determinant parity so the converted value remains
+a proper rotation. See [physical frame semantics](semantics.md) for frame
+conventions, composition, and the lower-level non-unit `FramedOrientation`.
 
-`CoordinateFrame.basis_to_reference` contains the frame's positive X/Y/Z axes
-as columns expressed in a named, right-handed reference frame. A
-`FrameCorrespondence` derives the component map from two such declarations.
-Use a separate correspondence for the parent/world and child/body sides.
-Their determinant parities must match for the result to remain a proper
-rotation. If `A_source` and `A_destination` contain the frame basis vectors as
-columns in the same reference, the derived component map is
-`B_destination_from_source = A_destination.T @ A_source`.
+## One conversion gateway
+
+The gateway derives the two coordinate maps from the physical source frames
+and the caller-declared target frames. All registered target profiles use the
+same scalar and batch entry points.
 
 ```python
 from quatops.converters import (
+    convert_orientation_from_target,
+    convert_orientation_to_target,
+)
+from quatops.engines import OrthogonalBasisMap
+from quatops.semantics import (
+    CANONICAL_BODY_RFU,
+    CANONICAL_WORLD_RFU,
     CoordinateFrame,
-    FrameCorrespondence,
-    FramedOrientation,
-    SemanticQuaternionMap,
-    get_converter,
+    PhysicalOrientation,
 )
-from quatops.engines import OrthogonalBasisMap, SignedAxisMap
+from quatops.types import HamiltonQuaternion
 
-# Both canonical reference bases are explicitly right-handed.
-canonical_world = CoordinateFrame(
-    "canonical.world",
-    "physical-world",
-    ("right", "forward", "up"),
-    SignedAxisMap(("x", "y", "z")),
-    "right",
+canonical_world = CANONICAL_WORLD_RFU.bind(
+    "application.world.rfu", "application.world.axes"
 )
-canonical_body = CoordinateFrame(
-    "canonical.body",
-    "physical-body",
-    ("right", "forward", "up"),
-    SignedAxisMap(("x", "y", "z")),
-    "right",
+canonical_body = CANONICAL_BODY_RFU.bind(
+    "asset.body.rfu", "asset.body.axes"
 )
 
-# This target basis maps canonical +X,+Y,+Z to target +X,+Z,+Y.
-# The same declared map applies to world and body coordinates here.
+# The target basis is declared for this application and asset. Its axes have
+# +X right, +Y up, +Z forward, expressed in the canonical RFU references.
 target_basis = OrthogonalBasisMap(((1, 0, 0), (0, 0, 1), (0, 1, 0)))
 target_world = CoordinateFrame(
-    "unity.world",
-    "physical-world",
+    "application.target-world",
+    "application.world.axes",
     ("right", "up", "forward"),
     target_basis,
     "left",
+    role="world",
+    reference_convention=canonical_world.reference_convention,
 )
 target_body = CoordinateFrame(
-    "unity.body",
-    "physical-body",
+    "asset.target-local",
+    "asset.body.axes",
     ("right", "up", "forward"),
     target_basis,
     "left",
-)
-mapping = SemanticQuaternionMap(
-    world=FrameCorrespondence(canonical_world, target_world),
-    body=FrameCorrespondence(canonical_body, target_body),
+    role="body",
+    reference_convention=canonical_body.reference_convention,
 )
 
-source = FramedOrientation(
-    quaternion_wxyz=(0.8, 0.2, -0.4, 0.4),
-    from_frame="canonical.body",
-    to_frame="canonical.world",
+physical = PhysicalOrientation(
+    HamiltonQuaternion(0.8, 0.2, -0.4, 0.4),
+    parent_frame=canonical_world,
+    child_frame=canonical_body,
 )
-unity = get_converter("unity.quaternion")
-native = unity.to_target(source, mapping)  # target XYZW, frame labels retained
-recovered = unity.from_target(native, mapping)
-```
-
-The example's axes describe that particular application mapping. Replace them
-with the actual world and model/body frame declarations for the data being
-converted. `OrthogonalBasisMap` supports arbitrary orthogonal rotations and
-reflections; `SignedAxisMap` is the efficient signed-permutation form.
-
-## Standard ECEF-from-body orientation
-
-For applications that use an Earth-fixed world, QuatOps provides a named
-semantic value, `ECEFBodyOrientation`, for `q_ECEF_from_body`. Its parent frame
-is the right-handed ECEF frame (+X at the equator/prime meridian, +Y at the
-equator/90° east, +Z toward the north pole). Its child frame is the explicit
-right-handed QuatOps body frame (+X right, +Y forward, +Z up). The value wraps
-the standard Hamilton WXYZ quaternion; it does not include position or a
-geodetic origin.
-
-The conversion path is explicit: semantic `ECEFBodyOrientation` → labelled
-Hamilton WXYZ → target profile. This example deliberately declares target
-world and body axes aligned to the two canonical frames. For a scene with a
-different world basis or model-forward axis, declare those maps from the
-actual scene and asset frames.
-
-```python
-from quatops.converters import (
-    CANONICAL_BODY_FRAME,
-    ECEF_FRAME,
-    CoordinateFrame,
-    ECEFBodyOrientation,
-    FrameCorrespondence,
-    SemanticQuaternionMap,
-    get_converter,
+native = convert_orientation_to_target(
+    physical, "unity.quaternion", target_world, target_body
 )
-from quatops.engines import SignedAxisMap
-
-identity = SignedAxisMap(("x", "y", "z"))
-target_world = CoordinateFrame(
-    "application.world",
-    ECEF_FRAME.reference,
-    ECEF_FRAME.axes,
-    identity,
-)
-target_body = CoordinateFrame(
-    "application.body",
-    CANONICAL_BODY_FRAME.reference,
-    CANONICAL_BODY_FRAME.axes,
-    identity,
-)
-frame_map = SemanticQuaternionMap(
-    FrameCorrespondence(ECEF_FRAME, target_world),
-    FrameCorrespondence(CANONICAL_BODY_FRAME, target_body),
-)
-
-physical = ECEFBodyOrientation.from_wxyz((0.8, 0.2, -0.4, 0.4))
-canonical_hamilton = physical.to_framed_hamilton()
-unity = get_converter("unity.quaternion")
-native = unity.to_target(canonical_hamilton, frame_map)
-restored = ECEFBodyOrientation.from_framed_hamilton(
-    unity.from_target(native, frame_map)
+recovered = convert_orientation_from_target(
+    native,
+    "unity.quaternion",
+    canonical_world,
+    canonical_body,
+    target_world,
+    target_body,
 )
 ```
 
-Use `FramedOrientation` directly when the parent frame is a local scene,
-robot, camera, or another explicitly named reference rather than ECEF. The
-same target profiles handle both forms after the semantic value is expressed
-as a labelled Hamilton orientation.
+This example's basis is an application declaration, not a Unity default. Use
+the engine's captured convention for its world frame and an independent
+asset/model convention for the child frame. The gateway rejects mismatched
+reference identities and invalid frame pairs.
+
+The lower-level `ConverterProfile.to_target` and `from_target` methods remain
+available when an application already owns a `FramedOrientation` and a
+compiled `SemanticQuaternionMap`.
 
 ## Batch conversion
 
-Pass a labelled WXYZ batch to the same target profile. `component_axis` defaults
-to the last axis, and the output retains that axis position and target frame
-labels.
+`PhysicalOrientationBatch` attaches the same parent and child frame definitions
+to an array of WXYZ values. The batch gateway accepts a configurable component
+axis, checks that each input is unit length within `1e-6`, and uses the same
+target profile and frame map as scalar conversion. NumPy loads only when a
+batch method is called.
 
 ```python
 import numpy as np
-from quatops.converters import FramedOrientationBatch
+from quatops.converters import convert_orientation_batch_to_target
+from quatops.semantics import PhysicalOrientationBatch
 
-keys = FramedOrientationBatch(
-    values=np.asarray([source.quaternion_wxyz, source.quaternion_wxyz]),
-    from_frame="canonical.body",
-    to_frame="canonical.world",
+keys = PhysicalOrientationBatch(
+    values=np.asarray(
+        [(0.8, 0.2, -0.4, 0.4), (0.7, -0.3, 0.2, 0.6164414002968976)]
+    ),
+    parent_frame=canonical_world,
+    child_frame=canonical_body,
 )
-native_keys = unity.to_target_array(keys, mapping)
-source_keys = unity.from_target_array(native_keys, mapping)
+native_keys = convert_orientation_batch_to_target(
+    keys, "unity.quaternion", target_world, target_body
+)
 ```
 
 For a signed-axis map, quaternion batch conversion is component selection and
@@ -179,29 +137,26 @@ package is imported by QuatOps.
 
 ## Declared target boundaries and evidence status
 
-`quatops.converters.CONVERTERS` contains immutable, typed profiles. The same
-`to_target`, `from_target`, `to_target_array`, and `from_target_array`
-operations are available for every quaternion or rotation-vector profile.
-`TARGET_DECLARATIONS` also records related evidence targets that do not expose
-a quaternion converter.
+`quatops.converters.CONVERTERS` contains immutable typed target profiles. The
+common gateway routes all accepted, declared, and supporting profiles through
+the same conversion rules; evidence status limits the claim for each target.
 
 | Profile group | Declared boundary | Evidence state and scope |
 | --- | --- | --- |
-| Unreal, Unity, Godot, Blender | `unreal.fquat`, `unity.quaternion`, `godot.quaternion`, `blender.mathutils.quaternion` | Accepted for the captured versions and frame contracts. Blender's quaternion profile is distinct from its glTF importer observations. |
-| CesiumJS, glTF, Three.js, OpenUSD, ROS 2/tf2 | `cesium.quaternion`, `gltf.rotation`, `threejs.quaternion`, `openusd.gfquatd`, `ros2.geometry-msgs-quaternion` | Accepted within the captured ENU/ECEF, static asset, transform-stack, and static frame-chain scopes. Translation, serialization, and dynamic runtime behavior remain separate operations. |
-| SpiceyPy/CSPICE, MuJoCo, Eigen | `spiceypy.cspice-q`, `mujoco.quaternion`, `eigen.quaternion-constructor`, `eigen.quaternion-coeffs` | Accepted for the captured numeric probe frames and operations. Application-specific frames remain caller-declared. |
-| OpenCV | `opencv.rodrigues` | Accepted for the captured radians-based vector/matrix boundary. Camera extrinsics remain separate. Rotation-vector conversion preserves the physical rotation, not a quaternion's chosen sign. |
+| Unreal, Unity, Godot, Blender | `unreal.fquat`, `unity.quaternion`, `godot.quaternion`, `blender.mathutils.quaternion` | Accepted for captured versions and frame contracts. Blender's quaternion profile is separate from importer observations. |
+| CesiumJS, glTF, Three.js, OpenUSD, ROS 2/tf2 | `cesium.quaternion`, `gltf.rotation`, `threejs.quaternion`, `openusd.gfquatd`, `ros2.geometry-msgs-quaternion` | Accepted within captured ENU/ECEF, static asset, transform-stack, and static frame-chain scopes. Translation, serialization, and dynamic runtime behavior remain separate operations. |
+| SpiceyPy/CSPICE, MuJoCo, Eigen | `spiceypy.cspice-q`, `mujoco.quaternion`, `eigen.quaternion-constructor`, `eigen.quaternion-coeffs` | Accepted for captured numeric probe frames and operations. Application-specific frames remain caller-declared. |
+| OpenCV | `opencv.rodrigues` | Accepted for the captured radians-based vector/matrix boundary. Camera extrinsics remain separate. |
 | OpenXR | `openxr.xrquaternionf` | Declared from the 1.1.65 contract and Khronos test runtime. No vendor runtime or hardware behavior is claimed. |
 | Sophus | `sophus.so3-params` | Supporting mathematical oracle only; no application-frame converter acceptance claim. |
 
 PROJ is indexed as frame-transform evidence, the Khronos validator as format
-validation, and Blender/VTK/Trimesh loader captures as loader observations.
-Those roles are explicit in `TARGET_DECLARATIONS`; none is silently presented
-as a quaternion converter.
+validation, and Blender/VTK/Trimesh captures as loader observations. Their
+roles are explicit in `TARGET_DECLARATIONS`; none is presented as a quaternion
+converter.
 
-These profiles convert orientation values and retain frame identity. They do
-not implement every target's object construction, serialized asset, pose
-translation, time sampling, or runtime lifecycle. Consult the
-[interoperability evidence atlas](INTEROPERABILITY_EVIDENCE.md) for accepted
-scope and exclusions, and the [shared coordinate mapping reference](engines/coordinate-mapping.md)
-for the basis equations.
+These orientation profiles do not implement target object construction,
+serialized asset authoring, pose translation, time sampling, or runtime
+lifecycle. See the [interoperability evidence atlas](INTEROPERABILITY_EVIDENCE.md)
+and [shared coordinate mapping reference](engines/coordinate-mapping.md) for
+accepted scope and basis equations.
