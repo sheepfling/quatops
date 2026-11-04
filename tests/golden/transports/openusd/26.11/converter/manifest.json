@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "review_state": "QuatOps-generated USDA reopened by pinned OpenUSD; replay tests passed",
+  "review_state": "QuatOps-generated USDA reopened by pinned OpenUSD; native capture retained",
   "target": {
     "name": "OpenUSD",
     "distribution": "usd-core",
@@ -14,7 +14,7 @@
   },
   "execution": {
     "was_run": true,
-    "utc": "2026-11-03T07:05:47.487638+00:00",
+    "utc": "2026-11-04T05:27:36.718572+00:00",
     "python": "3.14.6 (tags/v3.14.6:c63aec6, Jun 10 2026, 10:26:10) [MSC v.1944 64 bit (AMD64)]",
     "platform": "Windows-11-10.0.26300-SP0",
     "architecture": "AMD64"
@@ -28,24 +28,23 @@
   "provenance": {
     "stage_sha256": "8cfafffffd499fe64f8107ca2efc6ce3ffae1aea69800ff6fed08790ed9c7c74",
     "converter_input_sha256": "325531e0017680496d231cee4092d811e87922efe13f0c6b3a50c2a834c5a2cd",
+    "captured_converter_input_sha256": "325531e0017680496d231cee4092d811e87922efe13f0c6b3a50c2a834c5a2cd",
     "native_observations_sha256": "1ccf08a682e1283c7f86894accadd1eba0a46e12a63bf280282305407c80125e",
-    "generator_sha256": "0bcbaf2ca1cab9f760f5c2d5b19240eaf4d043da4bf5f9440224e8ce6d40f2be",
-    "native_capture_script_sha256": "2444d7a7995e2f089ea99ad99c530593e3b0958898096ae5ac6a873dcc16fb95",
-    "checked_in_capture_runner_sha256": "2ec9a352db850e4d3a35bf71400a76caaacd9becd53353b45489365c8d32ba31",
-    "capture_script_note": "The native run used the original script hash above; the checked-in runner only changes the uv.lock lookup path.",
+    "native_run_manifest_sha256": "828539db36b4752d8188129da440e7181fb79bc0e0a78cece2051083c1a153f9",
+    "full_observation_sha256": "decdf65eaee75dc1ee0fd6a36d90a6691b56d8bae86c2dae7e1f82e38afe4b3c",
+    "generator_sha256": "575b0454de80916bb4bb2890df2a308d11a78e0c22851e81ef03c374c26b761e",
+    "native_capture_script_sha256": "2ec9a352db850e4d3a35bf71400a76caaacd9becd53353b45489365c8d32ba31",
     "lockfile_sha256": "bfa49dc9a47c71af70e6b7deabb03c63ace6f78a371b66966414b74a99c2ae1c",
-    "contract_sha256": "f63dc85f686ea90cb6a276063f46dc79b83de5ece74875384cd76f661263e9c3",
-    "captured_converter_input_sha256": "9f776f2e085e327e4d3f69582dfc3a81b2d38d93070f4f121791daabb21bf8c0",
-    "input_serialization_note": "JSON formatting changed only; parsed native input values are unchanged."
+    "contract_sha256": "0340bf759e3687c4432902446ef64ce10e46554749f86dabdf7e5303ac56820a"
+  },
+  "reproduction": {
+    "retention_script_sha256": "9a70d4010799556b6d0d008a4d3ed7d83ffe6a8b3b8faac193934d399f5a9815",
+    "retention_helper_sha256": "cbd84cc6825ea484953121efc6755c9bdd210bbce410e8c1fb0a137a3953eb1c",
+    "retention_formatter_sha256": "56961d6be101a2bdfb1b21372c823ec86dfd636547d851901b7284f2ae20e0b3"
   },
   "selection": {
     "retained_observations": 3,
     "native_observations": 3,
     "policy": "orient op and reset flag per role; native world basis and mixed point actions; one inverse point round trip"
-  },
-  "reproduction": {
-    "retention_script_sha256": "5cf3395b6d895a476970854b52c2c6fb6ba21762abd4de937b1ddf63f3518bf4",
-    "retention_helper_sha256": "cbd84cc6825ea484953121efc6755c9bdd210bbce410e8c1fb0a137a3953eb1c",
-    "retention_formatter_sha256": "56961d6be101a2bdfb1b21372c823ec86dfd636547d851901b7284f2ae20e0b3"
   }
 }

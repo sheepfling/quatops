@@ -86,10 +86,10 @@ def test_openusd_converter_stage_provenance_and_frame_declarations():
     }
     for field, path in paths.items():
         assert hashlib.sha256(path.read_bytes()).hexdigest() == provenance[field]
-    assert provenance["input_serialization_note"].startswith(
-        "JSON formatting changed only"
+    assert (
+        provenance["captured_converter_input_sha256"]
+        == provenance["converter_input_sha256"]
     )
-    assert len(provenance["captured_converter_input_sha256"]) == 64
     assert (
         provenance["lockfile_sha256"]
         == hashlib.sha256(

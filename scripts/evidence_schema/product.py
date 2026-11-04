@@ -2,11 +2,11 @@
 
 from __future__ import annotations
 
-import hashlib
 import re
 from pathlib import Path
 from typing import Any
 
+from quatops.scalar import multiply as multiply_wxyz
 from scripts.converter_evidence import (
     ConverterEvidencePackage,
     converter_fixture_directories,
@@ -43,6 +43,7 @@ from scripts.evidence_schema.targets import (
     SpiceyPyInputs,
     ThreeGltfInputs,
 )
+from scripts.evidence_schema.utilities import sha256_file, slug_identifier
 
 _ADAPTER_PATHS = {
     "Eigen": "experiments/converters/eigen/5.0.1/capture_native.py",
@@ -70,10 +71,6 @@ _INPUT_HASH_KEYS = (
     "input_sha256",
     "corpus_sha256",
 )
-
-
-def _hash(path: Path) -> str:
-    return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
 def _find_manifest_value(value: Any, keys: tuple[str, ...]) -> str | None:
@@ -249,10 +246,6 @@ def _layer(package: ConverterEvidencePackage) -> EvidenceLayer:
     return "native-quaternion-api"
 
 
-def _slug(value: str) -> str:
-    return re.sub(r"[^a-z0-9]+", "-", value.lower()).strip("-")
-
-
 def _provenance(
     package: ConverterEvidencePackage,
     *,
@@ -268,9 +261,9 @@ def _provenance(
 
     if not adapter_path.is_file():
         raise FileNotFoundError(f"capture adapter not found: {adapter_path}")
-    checked_in_adapter_hash = _hash(adapter_path)
+    checked_in_adapter_hash = sha256_file(adapter_path)
     if package.inputs_source_path is not None:
-        input_hash = _hash(package.inputs_source_path)
+        input_hash = sha256_file(package.inputs_source_path)
     else:
         input_hash = _find_manifest_value(manifest, _INPUT_HASH_KEYS)
         if input_hash is None:
@@ -284,9 +277,9 @@ def _provenance(
         capture_adapter=adapter_relative,
         capture_adapter_sha256=declared_adapter_hash,
         input_sha256=input_hash,
-        contract_sha256=_hash(contract_path),
-        witnesses_sha256=_hash(witnesses_path),
-        manifest_sha256=_hash(manifest_path),
+        contract_sha256=sha256_file(contract_path),
+        witnesses_sha256=sha256_file(witnesses_path),
+        manifest_sha256=sha256_file(manifest_path),
         native_runtime=runtime,
         native_binary_sha256=_primary_native_binary(manifest, package.target.name),
         checked_in_adapter_sha256=(
@@ -329,7 +322,7 @@ def _header(
         ),
         contract_id=package.contract_id,
         contract=evidence_contract,
-        witness_set_id=f"{_slug(package.target.name)}-converter-v1",
+        witness_set_id=f"{slug_identifier(package.target.name)}-converter-v1",
         provenance=_provenance(
             package,
             repository_root=repository_root,
@@ -351,17 +344,6 @@ def _validate_canonical_quaternion(
         )
 
 
-def _hamilton_product_wxyz(left: list[float], right: list[float]) -> list[float]:
-    lw, lx, ly, lz = left
-    rw, rx, ry, rz = right
-    return [
-        lw * rw - lx * rx - ly * ry - lz * rz,
-        lw * rx + lx * rw + ly * rz - lz * ry,
-        lw * ry - lx * rz + ly * rw + lz * rx,
-        lw * rz + lx * ry - ly * rx + lz * rw,
-    ]
-
-
 def _validate_converter_input_links(
     package: ConverterEvidencePackage,
     *,
@@ -370,17 +352,18 @@ def _validate_converter_input_links(
     repository_root: Path,
 ) -> None:
     inputs = package.inputs
-    expected_hash = _hash(canonical_path)
+    expected_hash = sha256_file(canonical_path)
     canonical_by_case = {
         row.case_id: row.coefficients_wxyz for row in canonical_inputs.orientations
     }
     canonical_case_ids = list(canonical_by_case)
     target = package.target.name
 
+    # ROS 2 keeps its explicit frame-chain inputs in the native capture itself.
     if inputs is None:
-        if target != "ROS 2 tf2":
-            raise ValueError(f"{target} package lacks its typed input document")
-        return
+        if target == "ROS 2 tf2":
+            return
+        raise ValueError(f"{target} package lacks its typed input document")
 
     if isinstance(inputs, (EigenInputs, MuJoCoInputs, OpenCVInputs, SpiceyPyInputs)):
         referenced_path = (repository_root / inputs.shared_canonical_inputs).resolve()
@@ -403,7 +386,7 @@ def _validate_converter_input_links(
                 f"{canonical_inputs.composition_left_case_id} * "
                 f"{canonical_inputs.composition_right_case_id}"
             ):
-                expected = _hamilton_product_wxyz(
+                expected = multiply_wxyz(
                     canonical_by_case[canonical_inputs.composition_left_case_id],
                     canonical_by_case[canonical_inputs.composition_right_case_id],
                 )
@@ -447,7 +430,7 @@ def build_evidence_product(repository_root: Path) -> EvidenceProduct:
         repository_root / "experiments/interoperability/v1/canonical_inputs.json"
     )
     canonical_document = read_evidence_document(canonical_path)
-    canonical_hash = _hash(canonical_path)
+    canonical_hash = sha256_file(canonical_path)
     canonical_capture = SharedCanonicalInputCapture.model_validate(
         canonical_document, strict=True
     )

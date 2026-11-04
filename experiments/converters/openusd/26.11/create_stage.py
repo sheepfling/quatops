@@ -4,11 +4,16 @@ from __future__ import annotations
 
 import hashlib
 import json
+import sys
 from pathlib import Path
 
-from quatops.engines import QuaternionFrameMap, SignedAxisMap
-
 ROOT = Path(__file__).resolve().parents[4]
+sys.path.insert(0, str(ROOT))
+sys.path.insert(0, str(ROOT / "src"))
+
+from quatops.engines import QuaternionFrameMap, SignedAxisMap
+from scripts.evidence_format import dump_evidence_json
+
 CANONICAL_INPUTS = ROOT / "experiments/interoperability/v1/canonical_inputs.json"
 HERE = Path(__file__).parent
 INPUTS_OUT = HERE / "converter_inputs.json"
@@ -91,9 +96,7 @@ def main() -> None:
             "reset_ops": ["!resetXformStack!", "xformOp:translate", "xformOp:orient"],
         },
     }
-    INPUTS_OUT.write_text(
-        json.dumps(payload, indent=2) + "\n", encoding="utf-8", newline="\n"
-    )
+    INPUTS_OUT.write_text(dump_evidence_json(payload), encoding="utf-8", newline="\n")
 
     def orient(row):
         return ", ".join(number(v) for v in row["usd_wxyz"])

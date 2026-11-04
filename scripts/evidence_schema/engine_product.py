@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import hashlib
 import re
 from pathlib import Path
 from typing import Literal
@@ -32,6 +31,7 @@ from scripts.evidence_schema.engine_targets import (
     NativeVector3,
     Vector3Object,
 )
+from scripts.evidence_schema.utilities import sha256_file, slug_identifier
 
 _RETAINED_CASES = frozenset(
     {
@@ -113,7 +113,7 @@ def load_engine_package(
     ):
         raise ValueError(f"{directory}: native frame map differs")
     if contract.provenance.witness_sha256:
-        actual_witness_hash = hashlib.sha256(witness_path.read_bytes()).hexdigest()
+        actual_witness_hash = sha256_file(witness_path)
         if actual_witness_hash != contract.provenance.witness_sha256:
             raise ValueError(
                 f"{directory}: native witness digest differs from contract"
@@ -438,12 +438,8 @@ def crystallize_engine_package(
     if provenance.capture_source is None or provenance.capture_source_sha256 is None:
         raise ValueError("engine capture contract lacks adapter provenance")
     adapter_path = repository_root / Path(provenance.capture_source)
-    checked_in_hash = (
-        hashlib.sha256(adapter_path.read_bytes()).hexdigest()
-        if adapter_path.is_file()
-        else None
-    )
-    witness_hash = hashlib.sha256(package.witness_path.read_bytes()).hexdigest()
+    checked_in_hash = sha256_file(adapter_path) if adapter_path.is_file() else None
+    witness_hash = sha256_file(package.witness_path)
     canonical_hash = provenance.canonical_input_sha256
     if canonical_hash is None:
         raise ValueError("engine contract lacks canonical input digest")
@@ -461,7 +457,7 @@ def crystallize_engine_package(
         capture_adapter=provenance.capture_source,
         capture_adapter_sha256=provenance.capture_source_sha256,
         input_sha256=canonical_hash,
-        contract_sha256=hashlib.sha256(package.contract_path.read_bytes()).hexdigest(),
+        contract_sha256=sha256_file(package.contract_path),
         witnesses_sha256=witness_hash,
         native_runtime=native_runtime,
         checked_in_adapter_sha256=(
@@ -486,7 +482,7 @@ def crystallize_engine_package(
         "godot-shared-native-witness-v1"
         if package.contract_path.parent.name.startswith("4.")
         and package.contract_path.parent.parent.name == "godot"
-        else f"{package.contract_path.parent.parent.name}-native-witness-v1"
+        else f"{slug_identifier(package.contract_path.parent.parent.name)}-native-witness-v1"
     )
     header = CrystallizationHeader(
         evidence_id=f"{engine.engine}:{target.version}",

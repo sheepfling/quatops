@@ -53,6 +53,13 @@ selected native outputs live under `tests/golden/`. The common reduced view is
 generated in memory by `scripts/crystallize_converter_evidence.py` and can be
 exported on demand without retaining a second copy beside the source fixtures.
 
+Python native captures use an isolated, version-scoped `pyproject.toml` and
+`uv.lock` beside the capture script. Run the target README's `uv sync --locked`
+and `uv run --locked --project ...` commands; these install the native package
+for that target without adding engine bindings to QuatOps' general development
+environment. Pyright uses the matching local `.pyi` API stubs for binary-only
+extensions.
+
 To add a target version, add a new version directory and fixture directory;
 keep prior native manifests and witness values immutable. Broad discovery
 sweeps stay outside the retained witness files. A minimized native counterexample

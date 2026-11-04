@@ -18,6 +18,7 @@
   "destination_axes_from_source": ["x", "z", "-y"],
   "serialized_orientation": "USDA quatd orient op, real-first WXYZ, converted by QuatOps QuaternionFrameMap",
   "matrix_action": "OpenUSD Gf row vectors; child world row matrix = child local row matrix * parent world row matrix",
+  "native_numeric_type": "binary64 Gf.Quatd and Gf.Matrix4d",
   "scope": [
     "file serialization and reopen",
     "quatd orient op readback",
@@ -32,6 +33,5 @@
     "time samples",
     "shear/nonuniform scale decomposition",
     "renderer or file import pipeline"
-  ],
-  "native_numeric_type": "binary64 Gf.Quatd and Gf.Matrix4d"
+  ]
 }

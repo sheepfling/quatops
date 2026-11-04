@@ -4,11 +4,18 @@ from __future__ import annotations
 
 import argparse
 import hashlib
+import sys
 from pathlib import Path
 
-from evidence_json import dump_evidence_json, read_evidence_document, read_evidence_rows
-
 ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT))
+
+from scripts.evidence_json import (
+    dump_evidence_json,
+    read_evidence_document,
+    read_evidence_rows,
+)
+
 HERE = ROOT / "experiments/converters/openusd/26.11"
 DESTINATION = ROOT / "tests/golden/transports/openusd/26.11/converter"
 
@@ -126,7 +133,7 @@ def main() -> None:
         dump_evidence_json(
             {
                 "schema_version": "1.0",
-                "review_state": "QuatOps-generated USDA reopened by pinned OpenUSD; replay tests passed",
+                "review_state": "QuatOps-generated USDA reopened by pinned OpenUSD; native capture retained",
                 "target": native["target"],
                 "stage_metadata": native["stage_metadata"],
                 "execution": native["execution"],
@@ -134,6 +141,9 @@ def main() -> None:
                 "provenance": {
                     "stage_sha256": sha256(HERE / "quatops_hierarchy.usda"),
                     "converter_input_sha256": sha256(HERE / "converter_inputs.json"),
+                    "captured_converter_input_sha256": native["inputs"][
+                        "converter_input_sha256"
+                    ],
                     "native_observations_sha256": sha256(witnesses_path),
                     "native_run_manifest_sha256": sha256(capture / "manifest.json"),
                     "full_observation_sha256": sha256(capture / "observations.json"),

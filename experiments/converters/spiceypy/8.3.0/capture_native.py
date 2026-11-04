@@ -15,7 +15,9 @@ ROOT = HERE.parents[3]
 sys.path.insert(0, str(ROOT))
 
 import numpy as np
-import spiceypy as spice  # pyright: ignore[reportMissingModuleSource]  # native binary API stub
+
+# Installed by this target's locked project; the root typecheck uses its stub.
+import spiceypy as spice  # pyright: ignore[reportMissingModuleSource]
 
 from scripts.evidence_format import dump_evidence_json
 

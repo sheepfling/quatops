@@ -14,6 +14,10 @@ uv run --locked --project experiments/converters/spiceypy/8.3.0 --python 3.10.11
   python experiments/converters/spiceypy/8.3.0/capture_native.py
 ```
 
+This version directory is SpiceyPy's optional native-capture dependency set.
+Its locked project installs `spiceypy==8.3.0`; the root QuatOps environment
+does not need this native capture dependency.
+
 The script writes only the retained converter witnesses and run provenance to
 `tests/golden/oracles/spiceypy/8.3.0/converter/`. Replay those frozen native
 values with `tests/experiments/converters/spiceypy/test_spiceypy_converter.py`.

@@ -14,6 +14,10 @@ uv run --locked --project experiments/converters/mujoco/3.17.0 --python 3.10.11 
   python experiments/converters/mujoco/3.17.0/capture_native.py
 ```
 
+This version directory is MuJoCo's optional native-capture dependency set. Its
+locked project installs `mujoco==3.17.0` and `numpy==2.2.6`; the root QuatOps
+environment does not need either native capture dependency.
+
 The script writes only the retained converter witnesses and run provenance to
 `tests/golden/oracles/mujoco/3.17.0/converter/`. Replay those frozen native
 values with `tests/experiments/converters/mujoco/test_mujoco_converter.py`.

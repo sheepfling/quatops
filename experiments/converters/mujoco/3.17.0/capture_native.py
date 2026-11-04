@@ -15,7 +15,8 @@ HERE = Path(__file__).resolve().parent
 ROOT = HERE.parents[3]
 sys.path.insert(0, str(ROOT))
 
-import mujoco  # pyright: ignore[reportMissingModuleSource]  # native binary API stub
+# Installed by this target's locked project; the root typecheck uses its stub.
+import mujoco  # pyright: ignore[reportMissingModuleSource]
 import numpy as np
 
 from scripts.evidence_format import dump_evidence_json
