@@ -16,11 +16,12 @@ retaining one copy of this broad corpus per target.
 ## Supporting captures
 
 - [PROJ 9.5.1](proj/9.5.1/README.md): WGS84 geodetic, ECEF, and ENU probes.
-- [Sophus 1.24.6](sophus/1.24.6/README.md): SO(3) discovery; no named converter
-  is accepted from this first capture.
-- [OpenXR SDK 1.1.65](openxr/1.1.65/README.md): header ABI only; no runtime
-  pose behavior is claimed.
+- [Sophus 1.24.6](sophus/1.24.6/README.md): selected native `SO3f` and
+  `SO3d` construction, exp/log, composition, inverse, and perturbation
+  witnesses; no named converter is claimed.
+- [OpenXR SDK 1.1.65](openxr/1.1.65/README.md): reviewed specification
+  contract and exact native header ABI; runtime pose behavior is unmeasured.
 
 Native outputs, specification-derived expectations, and independent formula
 checks are different evidence types. Only selected, reviewed observations are
-retained as goldens; broad passing sweeps remain reproducible discovery runs.
+retained; broad passing sweeps remain reproducible discovery runs.

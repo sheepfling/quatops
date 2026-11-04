@@ -15,7 +15,6 @@ from pydantic import JsonValue, RootModel
 from scipy.spatial.transform import Rotation
 
 HERE = Path(__file__).resolve().parent
-_TOLERANCE = 2e-14
 
 
 class NativeCapture(RootModel[dict[str, JsonValue]]):
@@ -47,6 +46,8 @@ def main() -> None:
     input_path = options.capture.resolve()
     parsed = NativeCapture.model_validate_json(input_path.read_bytes(), strict=True)
     capture = cast(dict[str, Any], parsed.root)
+    is_float32 = capture["target"] == "Sophus SO3f"
+    tolerance = 2e-6 if is_float32 else 2e-14
     maxima = {
         "quaternion_construction_matrix": 0.0,
         "quaternion_construction_action": 0.0,
@@ -149,8 +150,8 @@ def main() -> None:
             float(np.max(np.abs(_rotation_matrix(item) - expected.as_matrix()))),
         )
 
-    if any(error > _TOLERANCE for error in maxima.values()):
-        raise AssertionError(f"SciPy formula differences exceed {_TOLERANCE}: {maxima}")
+    if any(error > tolerance for error in maxima.values()):
+        raise AssertionError(f"SciPy formula differences exceed {tolerance}: {maxima}")
 
     review = {
         "schema_version": "1.0",
@@ -161,12 +162,13 @@ def main() -> None:
         "reference_script_sha256": _sha256(Path(__file__)),
         "quatops_executed": False,
         "reference": {"library": "SciPy Rotation", "version": scipy.__version__},
+        "native_target": capture["target"],
         "checks": [
             "SO3 constructor normalization, matrix action, XYZW storage, and quaternion log",
             "SO3 exp/log including near-zero and greater-than-pi inputs",
             "noncommuting product orders, inverse, and left/right perturbations",
         ],
-        "absolute_tolerance": _TOLERANCE,
+        "absolute_tolerance": tolerance,
         "max_abs_errors": maxima,
         "result": "pass",
         "generated_utc": datetime.now(timezone.utc).isoformat(),

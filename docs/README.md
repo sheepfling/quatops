@@ -33,8 +33,11 @@ Unreal, Unity, Godot, and Blender have versioned native convention and
 converter witnesses. Remaining evidence gaps are narrower:
 
 - [Extreme float64 rotation accuracy](https://github.com/sheepfling/quatops/issues/6)
-- OpenXR runtime behavior, including `xrLocateSpace` and reference-space relations.
-- Broader Sophus scalar, Jacobian, and derivative contracts.
+- OpenXR runtime behavior, including `xrLocateSpace` and runtime-specific
+  reference-space relations. The versioned specification and header ABI are
+  captured; no runtime is available in the capture environment.
+- Sophus Jacobian and tangent-derivative behavior is outside the selected
+  `SO3f`/`SO3d` discovery scope and is not a converter release gate.
 
 See the [interoperability evidence atlas](INTEROPERABILITY_EVIDENCE.md) for
 the accepted scope and explicit limits of each converter.

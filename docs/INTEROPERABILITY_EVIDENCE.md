@@ -98,8 +98,8 @@ $acceptanceTests = @(
 | [OpenCV 4.13.0](oracles/opencv.md) | Native `cv2.Rodrigues` plus `cv2.gemm` basis/probe actions, reverse rotvec conversion, noncommuting matrix composition; float32 and float64 | C++ `cv::Quat`, camera/world frames, and Jacobian adapters |
 | [Eigen 5.0.1](oracles/eigen.md) | Native C++ `Quaternionf`/`Quaterniond` WXYZ construction, XYZW coeffs, vector action, matrix conversion, `AngleAxis`, and both product orders | Application-specific frames, Sophus tangent semantics, serialization, and interpolation |
 | PROJ 9.5.1 | 11 native WGS84 probes, second Windows run, analytic ENU/ECEF basis and SciPy matrix review | Supporting frame evidence only; no PROJ quaternion or Cesium runtime claim |
-| Sophus 1.24.6 | Native `SO3d` capture tooling and input set; separate SciPy comparison can be regenerated | Discovery outputs are temporary; no accepted converter or float32, Jacobian, or full tangent contract |
-| OpenXR 1.1.65 | Native SDK header ABI probe for `XrQuaternionf` and `XrPosef` | No OpenXR runtime; `xrLocateSpace` and runtime frame behavior remain pending |
+| Sophus 1.24.6 | Selected native `SO3f` and `SO3d` witnesses for constructor normalization/order, antipodes, exp/log, action, inverse, noncommuting products, and perturbation side; separate SciPy 1.18.1 checks pass | Supporting math evidence only; no named converter, Jacobian, or tangent-derivative claim |
+| OpenXR 1.1.65 | Reviewed specification pose/frame contract plus exact native SDK header ABI for `XrQuaternionf` and `XrPosef` | No runtime registered; native `xrLocateSpace`, tracking, and runtime-specific relations remain unmeasured |
 
 These are auxiliary proofs and fixtures, not new runtime APIs under `src/`.
 Native library/runtime execution, SDK-header ABI capture, and SciPy formula
@@ -111,10 +111,10 @@ passing broad sweeps are not included in the product evidence set.
 The compact converter suites are grouped by target under
 `tests/experiments/converters/`: ROS 2/tf2, Cesium, glTF, OpenUSD, SpiceyPy,
 MuJoCo, OpenCV, and Eigen. Accepted converter manifests and selected outputs
-live under `tests/golden/`; the first Sophus and OpenXR discovery
-capture tooling remains under `experiments/oracles/` pending target-specific
-review gates. Its broad output is temporary. Passing sweep outputs are not
-copied into accepted witness sets.
+live under `tests/golden/`; selected Sophus discovery witnesses and the
+OpenXR header capture remain under `experiments/oracles/`. Sophus raw sweeps
+remain temporary, and OpenXR has no runtime capture because none is registered
+in this environment. Neither is a QuatOps converter acceptance claim.
 
 ## Evidence policy
 

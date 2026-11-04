@@ -1,34 +1,25 @@
 # Sophus 1.24.6 SO(3) discovery
 
-The first native capture builds Sophus 1.24.6 against Eigen 5.0.1 with GCC
-15.2.0 on Windows x86-64. Its assigned right-handed probe frame is +X right,
-+Y forward, +Z up; this is the capture's test frame, not a frame assigned by
-Sophus.
+Pinned native captures cover both `Sophus::SO3f` and `Sophus::SO3d`, compiled
+against Sophus 1.24.6 and Eigen 5.0.1 with GCC 15.2.0 on Windows x86-64. The
+capture assigns +X right, +Y forward, +Z up as its right-handed probe frame;
+that is not a universal Sophus frame.
 
-The discovery set records `SO3d` construction from WXYZ `Eigen::Quaterniond`
-inputs, native coefficient access, vector action, matrices, `exp`/`log`,
-inverse, both noncommuting product orders, and left/right perturbation
-products. It includes direct quaternion logs for a non-unit input, an
-antipodal pair, a non-principal half-turn, a near-π case, and an input above π.
-The raw capture and pin are in
-[`experiments/oracles/sophus/1.24.6`](../../experiments/oracles/sophus/1.24.6/README.md).
+The selected observations in
+[`experiments/oracles/sophus/1.24.6`](../../experiments/oracles/sophus/1.24.6/README.md)
+cover constructor normalization and order, XYZW `SO3::params()`, antipodal
+signs and equivalent action, basis-vector actions, `exp`/`log` through the
+principal-π branch, inverse, both noncommuting product orders, and left/right
+perturbation products. The profile-specific native values are in
+[`float32 witnesses`](../../experiments/oracles/sophus/1.24.6/witnesses/float32.json)
+and [`float64 witnesses`](../../experiments/oracles/sophus/1.24.6/witnesses/float64.json).
+This is supporting SO(3) evidence, not a named QuatOps converter.
 
-The observed constructor normalizes the non-unit input, while `params()` and
-Eigen quaternion coefficients use XYZW order. The antipodal inputs preserve
-opposite stored quaternion signs but produce the same native matrix and vector
-action. The `log(exp(omega))` output wraps the 3.5-radian input to a principal
-rotation vector. These are observations from this pinned `SO3d` run, not a
-complete Sophus compatibility contract.
+Separate SciPy 1.18.1 comparisons passed against the native captures: float64
+maximum absolute error `1.78e-15` at `2e-14` tolerance; float32 maximum
+`9.5e-7` at `2e-6`. SciPy is derived-reference evidence and did not execute
+QuatOps. Jacobians and tangent derivatives remain outside this selected scope.
 
-The separate SciPy `Rotation` comparison covers construction, vector action,
-storage, exp/log, composition, inverse, and both perturbation products. Its
-largest recorded matrix difference is `2.22e-16`; vector action differs by at
-most `1.78e-15`. This is derived-reference evidence, not a QuatOps execution.
-The capture remains a discovery result: float32, Jacobians, tangent
-derivatives, and broader edge cases have not been accepted.
-
-The [Sophus 1.24.6 release](https://github.com/strasdat/Sophus/releases/tag/1.24.6)
-and pinned [`so3.hpp`](https://github.com/strasdat/Sophus/blob/1.24.6/sophus/so3.hpp)
-are the primary API references. The `SO3` source documents unit-quaternion
-storage, normalization on quaternion construction, the double cover, and the
-principal logarithm branch.
+Primary sources are the [Sophus 1.24.6 release](https://github.com/strasdat/Sophus/releases/tag/1.24.6),
+pinned [`so3.hpp`](https://github.com/strasdat/Sophus/blob/1.24.6/sophus/so3.hpp),
+and [Eigen 5.0.1's Quaternion API](https://libeigen.gitlab.io/eigen/docs-5.0/classEigen_1_1Quaternion.html).

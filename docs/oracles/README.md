@@ -19,21 +19,19 @@ For a cross-target summary of measured conventions and evidence status, see the
 - [ROS 2 Jazzy / tf2 0.36.23](ros2-tf2.md): native named-frame chain,
   forward and reverse lookup, message fields, and QuatOps replay.
 
-## Discovery started
+## Supporting discovery evidence
 
-- [Sophus 1.24.6](sophus.md): native `SO3d` construction, exp/log, actions,
-  composition, and perturbation observations; first discovery set is not an
-  accepted full contract.
-- [OpenXR 1.1.65](openxr.md): native SDK-header ABI only. No OpenXR runtime
-  behavior has been captured yet.
+- [Sophus 1.24.6](sophus.md): selected native `SO3f` and `SO3d` witnesses
+  reviewed against separate SciPy 1.18.1 formula checks; not a named converter.
+- [OpenXR 1.1.65](openxr.md): normative pose contract and native SDK header
+  ABI reviewed; no runtime is installed or registered here.
 
-## Still planned
+## Runtime-dependent evidence still unavailable
 
-These behaviors remain unverified until a suitable runtime is available and
-executed:
-
-- OpenXR `xrLocateSpace`, reference-space relations, and native pose transfer.
-- Broader Sophus scalar, Jacobian, and derivative contracts.
+OpenXR `xrLocateSpace`, tracking validity, and runtime-specific space
+relations require a configured OpenXR runtime and remain unmeasured. Sophus
+Jacobians and tangent derivatives are outside the selected `SO3f`/`SO3d`
+discovery scope, not part of a named converter claim.
 
 See [transport captures](../transports/README.md) for glTF captures and
 [converter evidence](../transports/openusd.md) for the OpenUSD stage round trip.

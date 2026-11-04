@@ -1,28 +1,34 @@
-# OpenXR 1.1.65 discovery
+# OpenXR 1.1.65 ABI and pose-contract discovery
 
-The initial native probe compiles against the Khronos OpenXR SDK 1.1.65
-headers. On GCC 15.2.0 / Windows x86-64 it measured `XrQuaternionf` as four
-32-bit floats with byte offsets `x=0, y=4, z=8, w=12`, and `XrPosef` as 28
-bytes with `orientation` at byte 0 and `position` at byte 16. The capture is
-at [`experiments/oracles/openxr/1.1.65`](../../experiments/oracles/openxr/1.1.65/README.md).
+The native SDK probe compiles against the pinned Khronos OpenXR 1.1.65
+headers. It records `XrQuaternionf` as four float32 fields in XYZW order and
+`XrPosef` as orientation followed by position, with measured sizes and byte
+offsets in
+[`experiments/oracles/openxr/1.1.65`](../../experiments/oracles/openxr/1.1.65/README.md).
 
-This is header ABI evidence only. No OpenXR runtime was configured on the
-capture machine, and no `xr*` function was called. Runtime space-location,
-tracking, and pose-direction behavior therefore remain pending.
+The specification defines the quaternion as unit length, pose position in
+meters, and rotation before translation. `xrLocateSpace` returns the pose of
+`space` in `baseSpace` at the requested time. Reading that pose as a
+`baseSpace <- space` mapping for point conversion follows the pose definition;
+it is a frame-direction interpretation, not a measurement from this machine's
+runtime. Locations are time-specific, and a runtime may revise them as it
+updates reference-space origins.
 
-The [OpenXR 1.1.65 `XrQuaternionf` reference](https://registry.khronos.org/OpenXR/specs/1.1/man/html/XrQuaternionf.html)
-defines a unit quaternion with `x, y, z, w` fields. [`XrPosef`](https://registry.khronos.org/OpenXR/specs/1.1/man/html/XrPosef.html)
-contains an orientation and a position in a space; the specification says
-the rotation is applied before translation. [`xrLocateSpace`](https://registry.khronos.org/OpenXR/specs/1.1/man/html/xrLocateSpace.html)
-returns the pose of `space` within `baseSpace`, so interpreting its pose as a
-coordinate map from the located space into the base space follows from that
-definition. OpenXR does not promise one universal world frame.
+`VIEW`, `LOCAL`, and `LOCAL_FLOOR` use +X right, +Y up, -Z forward. `VIEW`
+follows the viewer and is not gravity-aligned. `LOCAL` is world-locked and
+gravity-aligned, with an origin the runtime may choose at launch or another
+calibrated zero. `LOCAL_FLOOR` is similar but places its origin at an estimated
+floor level. `STAGE` has a floor-level origin at the center of a runtime-defined
+rectangle, uses +Y up, and aligns XZ to its bounds; its support is optional.
+These documented frame facts do not create a universal OpenXR world frame.
 
-The named `VIEW`, `LOCAL`, and `LOCAL_FLOOR` spaces specify +X right, +Y up,
-and -Z forward. `STAGE` has its own runtime-defined floor origin and XZ bounds.
-The first real runtime capture should use explicit, nontrivial application
-spaces and check `xrLocateSpace` in both directions at a fixed valid time.
+The SDK-header ABI capture was compiled and rerun, and its exact output is
+retained. No runtime is installed or registered on the capture machine, so no
+`xrLocateSpace` call, tracking result, or runtime-specific relation is claimed.
+The completed discovery is specification plus header ABI evidence; live
+runtime behavior remains a separate gate.
 
-These conventions are specified in the official [OpenXR 1.1.65 reference-space](https://registry.khronos.org/OpenXR/specs/1.1/man/html/XrReferenceSpaceType.html)
-and [space-location](https://registry.khronos.org/OpenXR/specs/1.1/man/html/XrSpaceLocation.html)
-references. The SDK pin is the [Khronos release-1.1.65 tag](https://github.com/KhronosGroup/OpenXR-SDK/releases/tag/release-1.1.65).
+Primary references: OpenXR 1.1.65 [`XrQuaternionf`](https://registry.khronos.org/OpenXR/specs/1.1/man/html/XrQuaternionf.html),
+[`XrPosef`](https://registry.khronos.org/OpenXR/specs/1.1/man/html/XrPosef.html),
+[`xrLocateSpace`](https://registry.khronos.org/OpenXR/specs/1.1/man/html/xrLocateSpace.html),
+and [`XrReferenceSpaceType`](https://registry.khronos.org/OpenXR/specs/1.1/man/html/XrReferenceSpaceType.html).

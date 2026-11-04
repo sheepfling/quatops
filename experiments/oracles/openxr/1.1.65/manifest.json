@@ -11,11 +11,11 @@
     "tag": "release-1.1.65",
     "commit": "24a1f2b92d212501a2b1b8d30ffd53abf55fcfa8",
     "compiler_standard": "C++17",
-    "scope": "XrQuaternionf and XrPosef header ABI only; no OpenXR runtime functions are called"
+    "scope": "OpenXR 1.1.65 specification pose/frame facts and pinned XrQuaternionf/XrPosef header ABI; no OpenXR runtime is configured and no xr* function is called"
   },
   "execution": {
     "was_run": true,
-    "utc": "2026-11-03T08:09:32.870310+00:00",
+    "utc": "2026-11-04T05:02:02+00:00",
     "platform": "Windows-11-10.0.26300-SP0",
     "architecture": "AMD64",
     "compiler": "g++ (GCC) 15.2.0",
@@ -28,27 +28,44 @@
       "capture_header_abi.cpp",
       "-o",
       "<temporary capture executable>"
-    ]
+    ],
+    "runtime_configured": false,
+    "runtime_functions_called": false
   },
   "artifacts": {
     "capture_sources_sha256": {
-      "capture_header_abi.cpp": "665804fe016e3c17c1ab5c2c83b98c2d5b285da367ab681881a14d86d308e019",
-      "source.json": "08b000bc4857c432325504638a7b1782a09c1b5c195a070c40386b44a2870449"
+      "capture_header_abi.cpp": "074a48c31e4ad0c856427cddfa1455a44a95dd5f425ad5d3edcb30559389cec3",
+      "source.json": "e89a06147d034fa257df638e950614004353486536170d7f175321a48b1c567b"
     },
     "input_sha256": null,
-    "native_executable_sha256": "24d5e0beb86eb34ab62509c76d573deee446b61e0ef3c3427d126a650ad29762",
+    "native_executable_sha256": "cde1b53cec2514fc446540529ab3b27953b7ae77bb469fd53a4e6e47d7e66c29",
     "native_output": "header_abi.json",
     "native_output_sha256": "dfd5d5f0914e078f096aea3b25400c53758e52062112a5c911fcd39c564fc2ac",
+    "native_output_matches_stdout": true,
     "pinned_sdk_headers_sha256": {
       "openxr.h": "a1882433318c34f7b52995d7f2a1ee5827f4bd56373e0b7fd7c1ef97eec8ad31",
       "openxr_platform_defines.h": "7dc30ad27f1082a71f84f5f5adf10762558fc9fe57fdc7628d796d22be3b0dbe"
     }
   },
   "review": {
-    "state": "captured_not_reviewed",
+    "state": "header_abi_and_spec_contract_reviewed_runtime_not_captured",
+    "specification_facts_reviewed": [
+      "XrQuaternionf is a unit quaternion with float x, y, z, w members.",
+      "XrPosef stores orientation and position; position is in meters and orientation is applied before translation.",
+      "xrLocateSpace returns the pose of space in baseSpace at the requested time; results may change as reference-space origins are revised.",
+      "VIEW, LOCAL, and LOCAL_FLOOR use +X right, +Y up, -Z forward; STAGE uses +Y up with runtime-defined XZ bounds and optional support."
+    ],
+    "frame_direction_interpretation": "Reading the returned pose as a baseSpace-from-space point mapping follows the pose definition; this is a specification interpretation, not a native runtime observation.",
+    "specification_sources": [
+      "https://registry.khronos.org/OpenXR/specs/1.1/man/html/XrQuaternionf.html",
+      "https://registry.khronos.org/OpenXR/specs/1.1/man/html/XrPosef.html",
+      "https://registry.khronos.org/OpenXR/specs/1.1/man/html/xrLocateSpace.html",
+      "https://registry.khronos.org/OpenXR/specs/1.1/man/html/XrReferenceSpaceType.html"
+    ],
     "limitations": [
-      "Header ABI only; no OpenXR runtime is configured and no xr* function was called.",
-      "This does not establish runtime pose location, tracking, or a universal world frame."
+      "No OpenXR runtime was installed or registered in the capture environment; no xr* function was called.",
+      "Runtime pose location, tracking validity, and runtime-specific space relations are not native observations.",
+      "OpenXR does not define a universal world frame."
     ]
   }
 }

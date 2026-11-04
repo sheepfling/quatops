@@ -13,5 +13,5 @@
     "commit": "bc3b39870ecb690a623a3f49149a358b95c5781d"
   },
   "compiler_standard": "C++17",
-  "scope": "SO3d quaternion construction, exp/log, action, inverse, product order, and perturbation side"
+  "scope": "SO3f and SO3d quaternion construction, exp/log, action, inverse, product order, and perturbation side"
 }

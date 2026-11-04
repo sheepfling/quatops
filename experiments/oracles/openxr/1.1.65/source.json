@@ -7,5 +7,5 @@
   "tag": "release-1.1.65",
   "commit": "24a1f2b92d212501a2b1b8d30ffd53abf55fcfa8",
   "compiler_standard": "C++17",
-  "scope": "XrQuaternionf and XrPosef header ABI only; no OpenXR runtime functions are called"
+  "scope": "OpenXR 1.1.65 specification pose/frame facts and pinned XrQuaternionf/XrPosef header ABI; no OpenXR runtime is configured and no xr* function is called"
 }
