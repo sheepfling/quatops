@@ -43,7 +43,9 @@ def test_openxr_producer_hash_and_current_replay_identity_are_distinct() -> None
     )
     assert hashlib.sha256(VERIFIER_PATH.read_bytes()).hexdigest() == current_hash
     assert historical_hash != current_hash
-    assert manifest["replay"]["test_module"] == str(Path(__file__).relative_to(ROOT))
+    assert (
+        manifest["replay"]["test_module"] == Path(__file__).relative_to(ROOT).as_posix()
+    )
     witness_hash = hashlib.sha256(WITNESS_PATH.read_bytes()).hexdigest()
     assert (
         witness_hash

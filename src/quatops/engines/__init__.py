@@ -6,6 +6,16 @@ Use ``SignedAxisMap`` for caller-declared signed permutations,
 ``quatops.engines.numpy`` and are optional.
 """
 
-from .basis import QuaternionFrameMap, SignedAxisMap, change_rotation_basis
+from .basis import (
+    OrthogonalBasisMap,
+    QuaternionFrameMap,
+    SignedAxisMap,
+    change_rotation_basis,
+)
 
-__all__ = ["QuaternionFrameMap", "SignedAxisMap", "change_rotation_basis"]
+__all__ = [
+    "OrthogonalBasisMap",
+    "QuaternionFrameMap",
+    "SignedAxisMap",
+    "change_rotation_basis",
+]

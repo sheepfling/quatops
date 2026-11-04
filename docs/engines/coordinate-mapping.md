@@ -48,7 +48,9 @@ source axes and target scene/model axes.
 
 `quatops.engines.SignedAxisMap.matrix` exposes the row-major matrix for a
 caller-declared signed permutation. `.inverse()` returns its transpose and
-reverses vector or quaternion conversion. Use
+reverses vector or quaternion conversion. For a general orthogonal basis,
+`quatops.engines.OrthogonalBasisMap` validates and stores the row-major 3x3
+map. Use
 `quatops.engines.change_rotation_basis(rotation, world_map, body_map)` for the
 two-map matrix expression; omitting `body_map` uses the same map on both sides.
 For quaternion-valued two-frame changes, compile a
@@ -63,6 +65,11 @@ determinants, because such a result is useful to inspect but is not a proper
 quaternion orientation. The scalar/frame primitive checks cover all 48 signed
 maps and all 48-by-48 world/body map pairs in
 [`test_engine_basis_oracle.py`](../../tests/quatops/engines/test_engine_basis_oracle.py).
+
+For semantic frame IDs, axis descriptions, and a map derived from each frame's
+declared basis in a named reference, use the common
+[`quatops.converters` API](../converters.md). It checks that the orientation's
+parent and child frame labels match the mapping before converting coefficients.
 
 The native Unity, Godot, and Blender examples use separately declared source
 frames; their specific maps are recorded on the [Unity](unity.md),

@@ -19,12 +19,15 @@ The [coordinate-mapping page](coordinate-mapping.md) gives the shared basis
 math. The [CAP-300 contract](CAP-300.md) explains the release gate and the
 [proof matrix](proof-matrix.md) links each selected versioned native witness
 set. Capture exporters and rerun instructions are indexed in
-[`experiments/README.md`](../../experiments/README.md).
+[`experiments/README.md`](../../experiments/README.md). The common
+frame-labelled scalar and NumPy converter front, including other target
+boundaries, is documented in the [converter guide](../converters.md).
 
 Auxiliary converter-boundary evidence for Cesium, ROS 2/tf2, glTF loaders, and
 OpenUSD is indexed in the
-[interoperability evidence atlas](../INTEROPERABILITY_EVIDENCE.md); its fixtures
-remain under `tests/golden/` and do not add runtime adapters here.
+[interoperability evidence atlas](../INTEROPERABILITY_EVIDENCE.md). The common
+profiles convert declared orientation fields; their fixtures, native SDK
+capture, file generation, and runtime-specific operations remain separate.
 
 ## Scope
 

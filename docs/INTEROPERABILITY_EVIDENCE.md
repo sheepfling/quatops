@@ -60,16 +60,26 @@ sweeps for Euler conversion, integration, derivatives, and perturbations are
 outside this converter evidence set. OpenUSD evidence is limited to its
 converter stage proof.
 
-These witnesses do not imply production adapters under `src/`. Separate auxiliary
-converter proofs now compare canonical values and frame mappings against
-native Cesium, Three.js GLTFLoader, OpenUSD, ROS 2/tf2, CSPICE direct
-quaternion APIs, MuJoCo direct quaternion APIs, OpenCV Rodrigues, and Eigen's
-native C++ quaternion APIs.
+The capture exporters and retained witnesses remain auxiliary evidence outside
+`src/`. The common field-level converter profiles under `src/quatops/converters`
+map explicitly labelled orientation values into the declared target layouts;
+they do not perform target SDK object construction or complete asset, message,
+geographic, or scene serialization. Separate native proofs compare canonical
+values and frame mappings against Cesium, Three.js GLTFLoader, OpenUSD, ROS
+2/tf2, CSPICE direct quaternion APIs, MuJoCo direct quaternion APIs, OpenCV
+Rodrigues, Eigen's native C++ quaternion APIs, and the OpenXR test-runtime
+contract.
+
+The [converter guide](converters.md) indexes every profile with its acceptance
+state. OpenXR has a declared field converter but no vendor-runtime acceptance;
+Sophus remains a mathematical oracle, and PROJ remains frame-transform
+evidence.
 
 Run the converter acceptance set with:
 
 ```shell
 uv run --extra dev python -m pytest -q \
+  tests/quatops/converters \
   tests/quatops/engines \
   tests/experiments/engines \
   tests/experiments/converters

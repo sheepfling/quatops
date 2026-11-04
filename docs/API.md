@@ -451,6 +451,13 @@ methods accept Hamilton or JPL coefficients in either order; the optional
 component axis. These conversions preserve magnitude and keyframe signs; they
 do not normalize or choose interpolation paths.
 
+For named parent/child frames and a shared target interface across scalar and
+batch conversions, use [`quatops.converters`](converters.md). Its converter
+profiles declare native component order, representation, evidence scope, and
+version. `CoordinateFrame` carries named positive axes and a basis in an
+explicit reference; `SemanticQuaternionMap` derives separate parent/world and
+child/body mappings from those declarations. No target frame is inferred.
+
 NumPy Euler functions accept independent `angle_axis` and `component_axis`
 arguments, each defaulting to `-1` in trailing-component modules and `0` in
 `components_first` modules. For `from_euler`, `angle_axis` locates the input

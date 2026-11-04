@@ -3,10 +3,91 @@
 from __future__ import annotations
 
 from collections.abc import Iterable, Sequence
+from math import isfinite
+from typing import Union
 
 from ..python import hamilton as _hamilton
 
 _AXIS_INDEX = {"x": 0, "y": 1, "z": 2}
+
+
+class OrthogonalBasisMap:
+    """Map vector coordinates with a general orthogonal 3x3 basis matrix.
+
+    The row-major matrix maps source components to destination components.
+    Use :class:`SignedAxisMap` for the faster signed-permutation case. This
+    class also supports continuously varying bases such as a local tangent
+    frame at a geographic origin.
+    """
+
+    __slots__ = ("_matrix", "determinant")
+
+    _matrix: tuple[tuple[float, float, float], ...]
+    determinant: int
+
+    def __setattr__(self, name: str, value: object) -> None:
+        if hasattr(self, name):
+            raise AttributeError("OrthogonalBasisMap instances are immutable")
+        object.__setattr__(self, name, value)
+
+    def __init__(
+        self, matrix: Sequence[Sequence[float]], tolerance: float = 1e-10
+    ) -> None:
+        rows = tuple(tuple(float(value) for value in row) for row in matrix)
+        if len(rows) != 3 or any(len(row) != 3 for row in rows):
+            raise ValueError("matrix must be 3x3")
+        if not isfinite(tolerance) or tolerance <= 0.0:
+            raise ValueError("tolerance must be finite and positive")
+        if any(not isfinite(value) for row in rows for value in row):
+            raise ValueError("matrix values must be finite")
+
+        gram = tuple(
+            tuple(sum(rows[k][i] * rows[k][j] for k in range(3)) for j in range(3))
+            for i in range(3)
+        )
+        if any(
+            abs(gram[i][j] - (1.0 if i == j else 0.0)) > tolerance
+            for i in range(3)
+            for j in range(3)
+        ):
+            raise ValueError("matrix must be orthogonal within tolerance")
+
+        determinant_value = (
+            rows[0][0] * (rows[1][1] * rows[2][2] - rows[1][2] * rows[2][1])
+            - rows[0][1] * (rows[1][0] * rows[2][2] - rows[1][2] * rows[2][0])
+            + rows[0][2] * (rows[1][0] * rows[2][1] - rows[1][1] * rows[2][0])
+        )
+        if abs(abs(determinant_value) - 1.0) > tolerance:
+            raise ValueError("matrix determinant must be +1 or -1")
+        self._matrix = rows  # type: ignore[assignment]
+        self.determinant = 1 if determinant_value > 0.0 else -1
+
+    @property
+    def matrix(self) -> tuple[tuple[float, float, float], ...]:
+        """Return the row-major source-to-destination component map."""
+        return self._matrix
+
+    def vector(self, value: Iterable[float]) -> tuple[float, float, float]:
+        """Map one 3-vector into destination coordinates."""
+        vector = tuple(float(component) for component in value)
+        if len(vector) != 3:
+            raise ValueError("a vector must contain exactly three components")
+        return tuple(
+            sum(row[column] * vector[column] for column in range(3))
+            for row in self._matrix
+        )  # type: ignore[return-value]
+
+    def inverse(self) -> OrthogonalBasisMap:
+        """Return the inverse map, which is the transpose of this matrix."""
+        return OrthogonalBasisMap(
+            tuple(
+                tuple(self._matrix[column][row] for column in range(3))
+                for row in range(3)
+            )
+        )
+
+    def __repr__(self) -> str:
+        return f"OrthogonalBasisMap({self._matrix!r})"
 
 
 class SignedAxisMap:
@@ -183,6 +264,13 @@ class SignedAxisMap:
         return f"SignedAxisMap({self.destination_axes!r})"
 
 
+BasisMap = Union[SignedAxisMap, OrthogonalBasisMap]
+
+
+def _is_basis_map(value: object) -> bool:
+    return isinstance(value, (SignedAxisMap, OrthogonalBasisMap))
+
+
 class QuaternionFrameMap:
     """Convert active Hamilton WXYZ orientations between explicit frames.
 
@@ -207,15 +295,13 @@ class QuaternionFrameMap:
             raise AttributeError("QuaternionFrameMap instances are immutable")
         object.__setattr__(self, name, value)
 
-    def __init__(
-        self, world_map: SignedAxisMap, body_map: SignedAxisMap | None = None
-    ) -> None:
-        if not isinstance(world_map, SignedAxisMap):
-            raise TypeError("world_map must be a SignedAxisMap")
+    def __init__(self, world_map: BasisMap, body_map: BasisMap | None = None) -> None:
+        if not _is_basis_map(world_map):
+            raise TypeError("world_map must be a SignedAxisMap or OrthogonalBasisMap")
         if body_map is None:
             body_map = world_map
-        elif not isinstance(body_map, SignedAxisMap):
-            raise TypeError("body_map must be a SignedAxisMap")
+        elif not _is_basis_map(body_map):
+            raise TypeError("body_map must be a SignedAxisMap or OrthogonalBasisMap")
         if world_map.determinant != body_map.determinant:
             raise ValueError(
                 "world_map and body_map must have the same determinant "
@@ -234,7 +320,11 @@ class QuaternionFrameMap:
         self.body_map = body_map
         self._shared_map = (
             world_map
-            if world_map.destination_axes == body_map.destination_axes
+            if (
+                isinstance(world_map, SignedAxisMap)
+                and isinstance(body_map, SignedAxisMap)
+                and world_map.destination_axes == body_map.destination_axes
+            )
             else None
         )
         self._shared_inverse_map = (
@@ -285,11 +375,21 @@ class QuaternionFrameMap:
             self._body_correction,
         )
 
+    @property
+    def world_correction_wxyz(self) -> tuple[float, float, float, float]:
+        """Return the compiled proper-rotation correction for the world map."""
+        return self._world_correction
+
+    @property
+    def body_correction_wxyz(self) -> tuple[float, float, float, float]:
+        """Return the compiled proper-rotation correction for the body map."""
+        return self._body_correction
+
 
 def change_rotation_basis(
     rotation_matrix: Iterable[Iterable[float]],
-    world_map: SignedAxisMap,
-    body_map: SignedAxisMap | None = None,
+    world_map: BasisMap,
+    body_map: BasisMap | None = None,
 ) -> tuple[tuple[float, float, float], ...]:
     """Express a rotation matrix in separately mapped world and body frames.
 
@@ -302,12 +402,12 @@ def change_rotation_basis(
     orientation quaternion only when the world and body maps have the same
     determinant, making the result's determinant +1.
     """
-    if not isinstance(world_map, SignedAxisMap):
-        raise TypeError("world_map must be a SignedAxisMap")
+    if not _is_basis_map(world_map):
+        raise TypeError("world_map must be a SignedAxisMap or OrthogonalBasisMap")
     if body_map is None:
         body_map = world_map
-    elif not isinstance(body_map, SignedAxisMap):
-        raise TypeError("body_map must be a SignedAxisMap")
+    elif not _is_basis_map(body_map):
+        raise TypeError("body_map must be a SignedAxisMap or OrthogonalBasisMap")
 
     rows = tuple(tuple(float(value) for value in row) for row in rotation_matrix)
     if len(rows) != 3 or any(len(row) != 3 for row in rows):
