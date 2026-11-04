@@ -93,7 +93,7 @@
       "exporter_source_sha256": "756e3f521b43faaade5a139ca14574cddf42187ec1b3c185e5cd815e9bdde4f2",
       "runner_sha256": "ceac57e127746594aef46a369a8aa42574c7c7b453376037b7be58d8eb9e16dd",
       "previous_checkout_runner_sha256": "be4047a273917756c9f0f9154a0990b8318797048744be360457a391e80c8d7b",
-      "capture_helper_sha256": "b950a3e961649f0043bd20525e788b8953246ab9b6125d3a0feaf95ef50cfa89",
+      "capture_helper_sha256": "a0fa76c3f4aab85c1d5ec8f78634cd2f02c064f020c6779501d7780f2c232277",
       "retention_script_sha256": "b7e89fac342c57846b18cbdb9394226d4c28e0e698ca5ed300cf34768a78596e",
       "retention_helper_sha256": "cbd84cc6825ea484953121efc6755c9bdd210bbce410e8c1fb0a137a3953eb1c",
       "retention_formatter_sha256": "56961d6be101a2bdfb1b21372c823ec86dfd636547d851901b7284f2ae20e0b3",

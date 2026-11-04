@@ -32,19 +32,21 @@ class CaptureContract(BaseModel):
 
     model_config = ConfigDict(extra="forbid", frozen=True, strict=True)
 
-    units: Optional[ContractUnits] = "radians"  # noqa: UP045 -- Pydantic resolves annotations on Python 3.9.
-    quaternion_order: Optional[QuaternionOrder] = None  # noqa: UP045 -- Pydantic resolves annotations on Python 3.9.
-    matrix_action: Optional[MatrixAction] = "column vectors"  # noqa: UP045 -- Pydantic resolves annotations on Python 3.9.
-    frame_direction: Optional[FrameDirection] = "active rotation in one numeric basis"  # noqa: UP045 -- Pydantic resolves annotations on Python 3.9.
+    units: Optional[ContractUnits] = "radians"  # noqa: UP045 -- Python 3.9 Pydantic.
+    quaternion_order: Optional[QuaternionOrder] = None  # noqa: UP045 -- Python 3.9 Pydantic.
+    matrix_action: Optional[MatrixAction] = "column vectors"  # noqa: UP045 -- Python 3.9 Pydantic.
+    frame_direction: Optional[FrameDirection] = (  # noqa: UP045 -- Python 3.9 Pydantic.
+        "active rotation in one numeric basis"
+    )
 
 
 class ContractRecord(TypedDict):
     """Serialized literal-only contract fields stored in each observation."""
 
-    units: Optional[ContractUnits]  # noqa: UP045 -- TypedDict must resolve on Python 3.9.
-    quaternion_order: Optional[QuaternionOrder]  # noqa: UP045 -- TypedDict must resolve on Python 3.9.
-    matrix_action: Optional[MatrixAction]  # noqa: UP045 -- TypedDict must resolve on Python 3.9.
-    frame_direction: Optional[FrameDirection]  # noqa: UP045 -- TypedDict must resolve on Python 3.9.
+    units: Optional[ContractUnits]  # noqa: UP045 -- Python 3.9.
+    quaternion_order: Optional[QuaternionOrder]  # noqa: UP045 -- Python 3.9.
+    matrix_action: Optional[MatrixAction]  # noqa: UP045 -- Python 3.9.
+    frame_direction: Optional[FrameDirection]  # noqa: UP045 -- Python 3.9.
 
 
 def sha256(path: Path) -> str:
@@ -114,7 +116,7 @@ class Observation:
     native_inputs: dict[str, Any]
     native_outputs: dict[str, Any]
     status: str = "ok"
-    diagnostic: Optional[str] = None  # noqa: UP045 -- dataclass annotations support Python 3.9.
+    diagnostic: Optional[str] = None  # noqa: UP045 -- Python 3.9.
     schema_version: str = "1.0"
 
 
@@ -127,9 +129,9 @@ class Capture:
     output_dir: Path
     exporter_path: Path
     precision: dict[str, Any]
-    oracle_family: Optional[str] = None  # noqa: UP045 -- dataclass annotations support Python 3.9.
+    oracle_family: Optional[str] = None  # noqa: UP045 -- Python 3.9.
     dependencies: list[dict[str, Any]] = field(default_factory=list)
-    native_binary: Optional[Path] = None  # noqa: UP045 -- dataclass annotations support Python 3.9.
+    native_binary: Optional[Path] = None  # noqa: UP045 -- Python 3.9.
     limitations: list[str] = field(default_factory=list)
     observations: list[Observation] = field(default_factory=list)
     artifacts: list[tuple[Path, str]] = field(default_factory=list)
@@ -236,10 +238,12 @@ class Capture:
 
 def contract(
     *,
-    units: Optional[ContractUnits] = "radians",  # noqa: UP045 -- supports Python 3.9.
-    order: Optional[QuaternionOrder] = None,  # noqa: UP045 -- supports Python 3.9.
-    action: Optional[MatrixAction] = "column vectors",  # noqa: UP045 -- supports Python 3.9.
-    frame: Optional[FrameDirection] = "active rotation in one numeric basis",  # noqa: UP045 -- supports Python 3.9.
+    units: Optional[ContractUnits] = "radians",  # noqa: UP045 -- Python 3.9.
+    order: Optional[QuaternionOrder] = None,  # noqa: UP045 -- Python 3.9.
+    action: Optional[MatrixAction] = "column vectors",  # noqa: UP045 -- Python 3.9.
+    frame: Optional[FrameDirection] = (  # noqa: UP045 -- Python 3.9.
+        "active rotation in one numeric basis"
+    ),
 ) -> ContractRecord:
     model = CaptureContract(
         units=units,

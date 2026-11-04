@@ -116,7 +116,7 @@ def test_full_ros_stdout_schema_accepts_each_operation_and_general_products():
     assert len(capture.observations) == 5
 
 
-def _selected_corpus(*, extra_euler: bool = False) -> RosSelectedCorpus:
+def _selected_corpus_document(*, extra_euler: bool = False):
     euler_inputs = [
         {
             "case_id": "euler-0",
@@ -136,32 +136,35 @@ def _selected_corpus(*, extra_euler: bool = False) -> RosSelectedCorpus:
                 "xyz": [0.25, -0.5, 1.0],
             }
         )
+    return {
+        "euler_inputs": euler_inputs,
+        "multiplication_pairs": [
+            {
+                "case_id": "product-general",
+                "a_wxyz": [4, 1, 2, 3],
+                "b_wxyz": [8, 5, 6, 7],
+                "family": "algebra",
+            }
+        ],
+        "matrix_inputs": [
+            {
+                "case_id": "matrix-identity",
+                "domain": "proper_rotation",
+                "rows": [[1, 0, 0], [0, 1, 0], [0, 0, 1]],
+            },
+            {
+                "case_id": "matrix-shear",
+                "domain": "invalid_rotation",
+                "rows": [[1, 1, 0], [0, 1, 0], [0, 0, 1]],
+            },
+        ],
+        "vectors_xyz": [[1, 0, 0], [0, 1, 0], [0, 0, 1], [2, -3, 5]],
+    }
+
+
+def _selected_corpus(*, extra_euler: bool = False) -> RosSelectedCorpus:
     return RosSelectedCorpus.model_validate(
-        {
-            "euler_inputs": euler_inputs,
-            "multiplication_pairs": [
-                {
-                    "case_id": "product-general",
-                    "a_wxyz": [4, 1, 2, 3],
-                    "b_wxyz": [8, 5, 6, 7],
-                    "family": "algebra",
-                }
-            ],
-            "matrix_inputs": [
-                {
-                    "case_id": "matrix-identity",
-                    "domain": "proper_rotation",
-                    "rows": [[1, 0, 0], [0, 1, 0], [0, 0, 1]],
-                },
-                {
-                    "case_id": "matrix-shear",
-                    "domain": "invalid_rotation",
-                    "rows": [[1, 1, 0], [0, 1, 0], [0, 0, 1]],
-                },
-            ],
-            "vectors_xyz": [[1, 0, 0], [0, 1, 0], [0, 0, 1], [2, -3, 5]],
-        },
-        strict=True,
+        _selected_corpus_document(extra_euler=extra_euler), strict=True
     )
 
 
@@ -236,7 +239,7 @@ def test_ros_capture_rejects_same_count_probe_value_or_order_mismatch(probes):
 
 
 def test_ros_selected_corpus_rejects_duplicate_case_ids():
-    corpus = _selected_corpus().model_dump(mode="python")
+    corpus = _selected_corpus_document()
     corpus["euler_inputs"].append(dict(corpus["euler_inputs"][0]))
     with pytest.raises(ValidationError, match="case IDs must be nonempty and unique"):
         RosSelectedCorpus.model_validate(corpus, strict=True)
@@ -262,13 +265,12 @@ def test_ros_capture_link_uses_variable_corpus_sizes_and_only_selected_proper_ma
     capture = RosFullCapture.model_validate(
         _linked_capture(extra_euler=True), strict=True
     )
+    variable_corpus = _selected_corpus_document(extra_euler=True)
+    variable_corpus["vectors_xyz"] = [[1, 0, 0], [0, 1, 0], [2, -3, 5]]
     validate_ros_capture_corpus_link(
-        capture,
-        _selected_corpus(extra_euler=True).model_copy(
-            update={"vectors_xyz": [[1, 0, 0], [0, 1, 0], [2, -3, 5]]}
-        ),
+        capture, RosSelectedCorpus.model_validate(variable_corpus, strict=True)
     )
-    extra_matrix = _selected_corpus().model_dump(mode="python")
+    extra_matrix = _selected_corpus_document()
     extra_matrix["matrix_inputs"].append(
         {
             "case_id": "matrix-extra",
