@@ -95,7 +95,7 @@
       "previous_checkout_runner_sha256": "be4047a273917756c9f0f9154a0990b8318797048744be360457a391e80c8d7b",
       "capture_helper_sha256": "a0fa76c3f4aab85c1d5ec8f78634cd2f02c064f020c6779501d7780f2c232277",
       "retention_script_sha256": "b7e89fac342c57846b18cbdb9394226d4c28e0e698ca5ed300cf34768a78596e",
-      "retention_helper_sha256": "cbd84cc6825ea484953121efc6755c9bdd210bbce410e8c1fb0a137a3953eb1c",
+      "retention_helper_sha256": "8a0dd9379b0e50726685f2254a881d5836f444845b05e22ec892db9e828ee9a1",
       "retention_formatter_sha256": "56961d6be101a2bdfb1b21372c823ec86dfd636547d851901b7284f2ae20e0b3",
       "dockerfile_sha256": "70cd2720db531d2debdb37ea6d41ac12095b2f3912baa0e3b22bc522dd941e25",
       "build_recipe_sha256": "65e75f02b743ef65eab8f0041ba8f286c767a60e3e02a64921e1a822af00e835",

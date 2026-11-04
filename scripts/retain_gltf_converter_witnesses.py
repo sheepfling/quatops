@@ -11,6 +11,7 @@ from scripts.evidence_json import (
     dump_evidence_json,
     read_evidence_document,
     read_evidence_rows,
+    select_numeric_evidence,
 )
 
 
@@ -19,15 +20,7 @@ def sha256(path: Path) -> str:
 
 
 def select_numeric(item: object, index: int | None = None) -> object:
-    if not isinstance(item, dict) or "values" not in item or "dtype" not in item:
-        raise TypeError("expected a typed native numeric value")
-    values = item["values"]
-    selected = values[index] if index is not None else values[:3]
-    result = {"values": selected, "dtype": item["dtype"]}
-    if "ieee754_hex_be" in item:
-        bits = item["ieee754_hex_be"]
-        result["ieee754_hex_be"] = bits[index] if index is not None else bits[:3]
-    return result
+    return select_numeric_evidence(item, index if index is not None else slice(3))
 
 
 def main() -> None:

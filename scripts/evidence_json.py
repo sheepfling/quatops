@@ -108,12 +108,77 @@ def compact_numeric_evidence(value: Any) -> Any:
                 "dtype": value["dtype"],
             }
             bits = value.get("ieee754_hex_be", [])
-            if any(
-                bit in {"80000000", "8000000000000000"} for bit in bits
-            ) or _contains_nonfinite_marker(value["values"]):
+            if "ieee754_hex_be" in value and (
+                any(bit in {"80000000", "8000000000000000"} for bit in bits)
+                or _contains_nonfinite_marker(value["values"])
+            ):
                 result["ieee754_hex_be"] = bits
             return result
         return {key: compact_numeric_evidence(item) for key, item in value.items()}
     if isinstance(value, list):
         return [compact_numeric_evidence(item) for item in value]
     return value
+
+
+def _numeric_shape(value: object) -> list[int]:
+    if isinstance(value, list):
+        if not value:
+            return [0]
+        shape = _numeric_shape(value[0])
+        if any(_numeric_shape(child) != shape for child in value[1:]):
+            raise ValueError("numeric values must have a rectangular shape")
+        return [len(value), *shape]
+    if isinstance(value, (int, float)) and not isinstance(value, bool):
+        return []
+    if (
+        isinstance(value, dict)
+        and set(value) == {"nonfinite"}
+        and value["nonfinite"] in ("nan", "+inf", "-inf")
+    ):
+        return []
+    raise TypeError("expected a numeric scalar, nonfinite tag, or list")
+
+
+def select_numeric_evidence(item: object, selection: int | slice) -> dict[str, object]:
+    """Select outer values and their flat scalar bit sidecar without inventing bits."""
+    if not isinstance(item, dict) or "values" not in item or "dtype" not in item:
+        raise TypeError("expected a typed native numeric value")
+    values = item["values"]
+    if not isinstance(values, list):
+        raise TypeError("numeric selection requires an outer list")
+    shape = _numeric_shape(values)
+    if "shape" in item:
+        declared = item["shape"]
+        if (
+            not isinstance(declared, list)
+            or any(type(size) is not int or size < 0 for size in declared)
+            or declared[: len(shape)] != shape
+            or (0 not in shape and len(declared) != len(shape))
+        ):
+            raise ValueError("numeric shape does not match values")
+        # Empty axes hide trailing dimensions; retain their declared rank.
+        shape = declared
+    width = math.prod(shape[1:])
+    if isinstance(selection, bool) or not isinstance(selection, (int, slice)):
+        raise TypeError("numeric selection must be an integer or slice")
+    selected = values[selection]
+    if isinstance(selection, int):
+        index = selection if selection >= 0 else len(values) + selection
+        indices = range(index, index + 1)
+        selected_shape = shape[1:]
+    else:
+        indices = range(*selection.indices(len(values)))
+        selected_shape = [len(indices), *shape[1:]]
+    result: dict[str, object] = {"values": selected, "dtype": item["dtype"]}
+    if "shape" in item:
+        result["shape"] = selected_shape
+    if "ieee754_hex_be" in item:
+        bits = item["ieee754_hex_be"]
+        if not isinstance(bits, list) or len(bits) != len(values) * width:
+            raise ValueError("numeric bit sidecar length does not match values")
+        result["ieee754_hex_be"] = [
+            bit
+            for index in indices
+            for bit in bits[index * width : (index + 1) * width]
+        ]
+    return result

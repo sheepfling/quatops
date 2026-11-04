@@ -11,6 +11,7 @@ from scripts.evidence_json import (
     dump_evidence_json,
     read_evidence_document,
     read_evidence_rows,
+    select_numeric_evidence,
 )
 
 
@@ -19,10 +20,7 @@ def sha256(path: Path) -> str:
 
 
 def _vectors(value: dict, *, start: int = 0, stop: int | None = None) -> dict:
-    return {
-        "values": value["values"][start:stop],
-        "dtype": value["dtype"],
-    }
+    return select_numeric_evidence(value, slice(start, stop))
 
 
 def _retained_outputs(case_id: str, outputs: dict) -> dict:
