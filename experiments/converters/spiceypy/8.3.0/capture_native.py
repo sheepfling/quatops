@@ -8,14 +8,14 @@ import json
 import platform
 import sys
 from datetime import datetime, timezone
+from importlib import resources
 from pathlib import Path
 
 # Installed by this target's locked project; the root typecheck uses its stub.
 import numpy as np
 import spiceypy as spice  # pyright: ignore[reportMissingModuleSource]
 
-HERE = Path(__file__).resolve().parent
-ROOT = HERE.parents[3]
+from scripts.evidence_format import dump_evidence_json
 
 
 def sha256_file(path: Path) -> str:
@@ -40,21 +40,20 @@ def capture_quaternion(case_id: str, q: np.ndarray, probe: np.ndarray) -> dict:
 
 
 def main() -> None:
-    sys.path.insert(0, str(ROOT))
-    from scripts.evidence_format import dump_evidence_json
-
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--inputs", type=Path, default=HERE / "converter_inputs.json")
-    parser.add_argument(
-        "--output-dir",
-        type=Path,
-        default=ROOT / "tests/golden/oracles/spiceypy/8.3.0/converter",
-    )
+    parser.add_argument("--repository-root", type=Path, required=True)
+    parser.add_argument("--inputs", type=Path)
+    parser.add_argument("--output-dir", type=Path)
     options = parser.parse_args()
-    input_path = options.inputs.resolve()
+    repository_root = options.repository_root.resolve(strict=True)
+    target_dir = repository_root / "experiments/converters/spiceypy/8.3.0"
+    input_path = (options.inputs or target_dir / "converter_inputs.json").resolve()
+    output_dir = options.output_dir or (
+        repository_root / "tests/golden/oracles/spiceypy/8.3.0/converter"
+    )
     spec_bytes = input_path.read_bytes()
     spec = json.loads(spec_bytes.decode("utf-8"))
-    shared_path = ROOT / spec["shared_canonical_inputs"]
+    shared_path = repository_root / spec["shared_canonical_inputs"]
     shared_bytes = shared_path.read_bytes()
     shared = json.loads(shared_bytes.decode("utf-8"))
     by_id = {row["case_id"]: row for row in shared["orientations"]}
@@ -111,10 +110,10 @@ def main() -> None:
             }
         )
 
-    library_path = Path(spice.__file__).resolve().parent / "utils" / "cspice.dll"
+    library_path = Path(str(resources.files("spiceypy"))) / "utils" / "cspice.dll"
     if not library_path.exists():
         raise FileNotFoundError(library_path)
-    out = options.output_dir.resolve()
+    out = output_dir.resolve()
     out.mkdir(parents=True, exist_ok=True)
     witnesses_path = out / "witnesses.json"
     witnesses = {
@@ -160,13 +159,14 @@ def main() -> None:
             "converter_input_spec_sha256": sha256_file(input_path),
             "selected_inputs_sha256": sha256_file(shared_path),
             "witnesses_sha256": sha256_file(witnesses_path),
-            "pinned_lockfile_sha256": sha256_file(HERE / "uv.lock"),
+            "pinned_lockfile_sha256": sha256_file(target_dir / "uv.lock"),
             "loaded_cspice_binary_path": str(library_path),
             "loaded_cspice_binary_sha256": sha256_file(library_path),
             "exact_invocation": (
                 "uv run --locked --project experiments/converters/spiceypy/8.3.0 "
                 "--python 3.10.11 "
                 "python experiments/converters/spiceypy/8.3.0/capture_native.py"
+                " --repository-root <repository>"
             ),
         },
     }

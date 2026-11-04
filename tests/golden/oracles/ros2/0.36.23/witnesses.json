@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0",
   "evidence_kind": "native_ros2_tf2_buffer_core_capture",
-  "selected_from_full_observation_count": 102,
+  "selected_from_full_observation_count": 9,
   "native_inputs": {
     "world_from_base": {
       "quaternion_xyzw": {

@@ -57,6 +57,13 @@ def close(actual, expected, message):
 
 
 def test_ros_capture_is_native_pinned_and_selected_values_are_lossless():
+    assert (
+        "QuaternionFrameMap(world_map=target_map, body_map=source_map)"
+        in (CONTRACT["conversion"])
+    )
+    assert ".from_destination_wxyz()" in CONTRACT["conversion"]
+    assert "world_map=target_map.inverse()" not in CONTRACT["conversion"]
+    assert "body_map=source_map.inverse()" not in CONTRACT["conversion"]
     assert MANIFEST["evidence_kind"] == "native_runtime_selected_witnesses"
     assert MANIFEST["product"]["name"] == "ROS 2 tf2"
     assert MANIFEST["product"]["version"] == "0.36.23"
@@ -72,7 +79,7 @@ def test_ros_capture_is_native_pinned_and_selected_values_are_lossless():
     } == {"jazzy"}
     assert MANIFEST["native_build"]["native_scalar_bytes"] == 8
     assert MANIFEST["native_build"]["cpp_standard"] == 202002
-    assert MANIFEST["selection"]["full_capture_observations"] == 102
+    assert MANIFEST["selection"]["full_capture_observations"] == 9
     assert MANIFEST["selection"]["retained_observations"] == 2
     assert set(ROWS) == {"lookup-world-from-sensor", "lookup-sensor-from-world"}
     assert CONTRACT["target"]["native_scalar_dtype"] == "float64"
@@ -90,7 +97,7 @@ def test_ros_capture_is_native_pinned_and_selected_values_are_lossless():
         == hashlib.sha256((FIXTURE / "witnesses.json").read_bytes()).hexdigest()
     )
     reproduction = provenance["reproduction"]
-    assert len(reproduction["captured_replay_corpus_sha256"]) == 64
+    assert len(provenance["full_observation_sha256"]) == 64
     assert reproduction["input_serialization_note"].startswith(
         "JSON formatting changed only"
     )

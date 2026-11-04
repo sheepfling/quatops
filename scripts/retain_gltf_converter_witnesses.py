@@ -6,18 +6,11 @@ import argparse
 import hashlib
 from pathlib import Path
 
-from evidence_json import (
+from scripts.evidence_json import (
     compact_numeric_evidence,
     dump_evidence_json,
     read_evidence_document,
     read_evidence_rows,
-)
-
-ROOT = Path(__file__).resolve().parents[1]
-HERE = ROOT / "experiments/converters/gltf/2.0.0"
-DESTINATION = ROOT / "tests/golden/transports/gltf/2.0.0/threejs/0.187.0/converter"
-PACKAGE_LOCK = (
-    ROOT / "experiments/transports/gltf/2.0.0/threejs/0.187.0/package-lock.json"
 )
 
 
@@ -40,7 +33,17 @@ def select_numeric(item: object, index: int | None = None) -> object:
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("capture_dir", type=Path)
+    parser.add_argument("--repository-root", type=Path, required=True)
     args = parser.parse_args()
+    repository_root = args.repository_root.resolve(strict=True)
+    source_dir = repository_root / "experiments/converters/gltf/2.0.0"
+    destination = (
+        repository_root / "tests/golden/transports/gltf/2.0.0/threejs/0.187.0/converter"
+    )
+    package_lock = (
+        repository_root
+        / "experiments/transports/gltf/2.0.0/threejs/0.187.0/package-lock.json"
+    )
     capture = args.capture_dir.resolve()
     native_manifest = read_evidence_document(capture / "manifest.json")
     observations = compact_numeric_evidence(
@@ -84,8 +87,8 @@ def main() -> None:
         for row in observations
     ]
 
-    DESTINATION.mkdir(parents=True, exist_ok=True)
-    witnesses_path = DESTINATION / "witnesses.json"
+    destination.mkdir(parents=True, exist_ok=True)
+    witnesses_path = destination / "witnesses.json"
     witnesses_path.write_text(
         dump_evidence_json(
             {
@@ -133,11 +136,11 @@ def main() -> None:
             "other GLTFLoader versions",
         ],
     }
-    contract_path = DESTINATION / "contract.json"
+    contract_path = destination / "contract.json"
     contract_path.write_text(
         dump_evidence_json(contract), encoding="utf-8", newline="\n"
     )
-    (DESTINATION / "manifest.json").write_text(
+    (destination / "manifest.json").write_text(
         dump_evidence_json(
             {
                 "schema_version": "1.0",
@@ -145,8 +148,9 @@ def main() -> None:
                 "target": native_manifest["target"],
                 "execution": native_manifest["execution"],
                 "provenance": {
-                    "input_sha256": sha256(HERE / "converter_inputs.json"),
-                    "asset_sha256": sha256(HERE / "quatops_hierarchy.gltf"),
+                    "input_sha256": sha256(source_dir / "converter_inputs.json"),
+                    "captured_input_sha256": native_manifest["asset"]["input_sha256"],
+                    "asset_sha256": sha256(source_dir / "quatops_hierarchy.gltf"),
                     "native_observations_sha256": sha256(witnesses_path),
                     "full_run_manifest_sha256": sha256(capture / "manifest.json"),
                     "full_observation_sha256": sha256(capture / "observations.json"),
@@ -160,20 +164,24 @@ def main() -> None:
                         "numeric_helper_sha256"
                     ],
                     "contract_sha256": sha256(contract_path),
+                    "input_serialization_note": (
+                        "JSON formatting changed only; parsed native input values are unchanged."
+                    ),
                 },
                 "reproduction": {
-                    "generator_sha256": sha256(HERE / "create_asset.py"),
-                    "loader_script_sha256": sha256(HERE / "capture_threejs.mjs"),
-                    "package_lock_sha256": sha256(PACKAGE_LOCK),
+                    "generator_sha256": sha256(source_dir / "create_asset.py"),
+                    "loader_script_sha256": sha256(source_dir / "capture_threejs.mjs"),
+                    "package_lock_sha256": sha256(package_lock),
                     "numeric_helper_sha256": sha256(
-                        ROOT / "experiments/converters/shared/numeric_evidence.mjs"
+                        repository_root
+                        / "experiments/converters/shared/numeric_evidence.mjs"
                     ),
                     "retention_script_sha256": sha256(Path(__file__)),
                     "retention_helper_sha256": sha256(
-                        ROOT / "scripts/evidence_json.py"
+                        repository_root / "scripts/evidence_json.py"
                     ),
                     "retention_formatter_sha256": sha256(
-                        ROOT / "scripts/evidence_format.py"
+                        repository_root / "scripts/evidence_format.py"
                     ),
                 },
                 "selection": {
@@ -194,8 +202,8 @@ def main() -> None:
         newline="\n",
     )
     print(
-        f"retained {len(observations)} Three.js loader witnesses at {DESTINATION}; "
-        f"asset remains at {HERE / 'quatops_hierarchy.gltf'}"
+        f"retained {len(observations)} Three.js loader witnesses at {destination}; "
+        f"asset remains at {source_dir / 'quatops_hierarchy.gltf'}"
     )
 
 

@@ -16,8 +16,11 @@ $archive = Join-Path $env:TEMP 'eigen-5.0.1.tar.gz'
 $extract = Join-Path $env:TEMP 'quatops-eigen-5.0.1'
 Invoke-WebRequest -Uri 'https://gitlab.com/libeigen/eigen/-/archive/5.0.1/eigen-5.0.1.tar.gz' -OutFile $archive
 tar -xzf $archive -C $extract
-.venv\Scripts\python.exe `
+uv sync --locked --project experiments/converters/eigen/5.0.1 --python 3.11.15
+uv run --locked --project experiments/converters/eigen/5.0.1 --python 3.11.15 `
+  python `
   experiments\converters\eigen\5.0.1\capture_native.py `
+  --repository-root . `
   --eigen-root (Join-Path $extract 'eigen-5.0.1') `
   --eigen-archive $archive
 ```

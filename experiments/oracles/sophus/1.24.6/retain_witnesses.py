@@ -9,7 +9,8 @@ from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, model_serializer, model_validator
 
-HERE = Path(__file__).resolve().parent
+from scripts.evidence_format import dump_evidence_json
+
 _CONSTRUCTION_CASES = (
     "identity",
     "x_quarter",
@@ -285,13 +286,6 @@ def reduce_capture(capture_bytes: bytes) -> DiscoveryWitnesses:
 
 
 def _format_witnesses(value: DiscoveryWitnesses) -> str:
-    import sys
-
-    repository_root = HERE.parents[3]
-    if str(repository_root) not in sys.path:
-        sys.path.insert(0, str(repository_root))
-    from scripts.evidence_format import dump_evidence_json
-
     return dump_evidence_json(value.model_dump(mode="json"))
 
 
@@ -309,9 +303,7 @@ def main() -> None:
         encoding="utf-8",
         newline="\n",
     )
-    print(
-        f"Wrote {output_path.relative_to(HERE) if output_path.is_relative_to(HERE) else output_path}"
-    )
+    print(f"Wrote {output_path}")
     print(
         f"Retained {len(selected.quaternion_construction)} constructor and "
         f"{len(selected.exp_log)} exp/log witnesses; raw capture remains external."

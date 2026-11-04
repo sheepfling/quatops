@@ -17,8 +17,8 @@ if ($LASTEXITCODE -ne 0) { throw "Unreal build failed: $LASTEXITCODE" }
   -unattended -nop4 -nosplash -nullrhi `
   "-QuatOpsCaptureOutput=$env:TEMP\quatops-unreal-witnesses.json"
 if ($LASTEXITCODE -ne 0) { throw "Unreal capture failed: $LASTEXITCODE" }
-.venv\Scripts\python.exe scripts\retain_engine_witnesses.py unreal 5.7.4 `
-  "$env:TEMP\quatops-unreal-witnesses.json" tests\oracles\unreal\5.7.4
+.venv\Scripts\python.exe -m scripts.retain_engine_witnesses unreal 5.7.4 `
+  "$env:TEMP\quatops-unreal-witnesses.json" tests\oracles\unreal\5.7.4 --repository-root .
 ```
 
 The capture uses `FQuat4f` and `FQuat4d` and emits eight explicit unit inputs,

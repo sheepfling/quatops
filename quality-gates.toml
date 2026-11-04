@@ -44,27 +44,13 @@ exclude = []
 
 [checks.path_discovery]
 extensions = [".py"]
-# These checkout-local tools intentionally discover the source tree.
+# The experiment launcher intentionally installs its configured source paths;
+# test support locates checked-in fixture roots for replay tests.
 exclude = [
-  "experiments/one_off_benchmark.py",
   "experiments/run.py",
-  # Repository-relative roots are deliberate for fixture locators and capture
-  # entrypoints; they are not runtime package imports.
-  "experiments/converters/cesium/1.124.0/create_inputs.py",
-  "experiments/converters/gltf/2.0.0/create_asset.py",
-  "experiments/converters/opencv/4.13.0/prepare_inputs.py",
-  "experiments/converters/ros2/0.36.23/capture_native.py",
-  "experiments/converters/openusd/26.11/create_stage.py",
-  "experiments/converters/eigen/5.0.1/capture_native.py",
-  "experiments/converters/mujoco/3.17.0/capture_native.py",
-  "experiments/converters/spiceypy/8.3.0/capture_native.py",
-  "experiments/oracles/sophus/1.24.6/retain_witnesses.py",
-  "experiments/oracles/proj/9.5.1/capture_proj.py",
-  "experiments/oracles/shared/capture_io.py",
-  "scripts/**",
-  "tests/**",
+  "tests/support/paths.py",
 ]
-inspection_exclude = ["tests/**"]
+inspection_exclude = []
 
 [checks.line_length]
 exclude = []

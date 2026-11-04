@@ -2,26 +2,25 @@
 
 from __future__ import annotations
 
-import sys
+import argparse
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parents[1]
-sys.path.insert(0, str(ROOT))
+from scripts.evidence_json import validate_evidence_payload
 
-_EVIDENCE_ROOTS = (
-    ROOT / "tests" / "golden",
-    ROOT / "experiments" / "oracles",
-    ROOT / "experiments" / "converters",
-    ROOT / "experiments" / "transports",
-)
 _EXCLUDED_PARTS = {".venv", "__pycache__", "node_modules", "build", "install"}
 
 
-def evidence_json_files() -> list[Path]:
+def evidence_json_files(repository_root: Path) -> list[Path]:
     """Collect maintained evidence JSON and omit local runtimes/build outputs."""
+    evidence_roots = (
+        repository_root / "tests" / "golden",
+        repository_root / "experiments" / "oracles",
+        repository_root / "experiments" / "converters",
+        repository_root / "experiments" / "transports",
+    )
     files = {
         path
-        for evidence_root in _EVIDENCE_ROOTS
+        for evidence_root in evidence_roots
         if evidence_root.is_dir()
         for path in evidence_root.rglob("*.json")
         if not (_EXCLUDED_PARTS.intersection(path.parts))
@@ -29,22 +28,25 @@ def evidence_json_files() -> list[Path]:
     return sorted(files)
 
 
-def _validate_file(path: Path) -> None:
-    from scripts.evidence_json import validate_evidence_payload
-
+def _validate_file(path: Path, repository_root: Path) -> None:
     try:
         validate_evidence_payload(path)
     except Exception as error:
-        raise ValueError(f"invalid evidence JSON: {path.relative_to(ROOT)}") from error
+        raise ValueError(
+            f"invalid evidence JSON: {path.relative_to(repository_root)}"
+        ) from error
 
 
 def main() -> None:
-    files = evidence_json_files()
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--repository-root", type=Path, required=True)
+    repository_root = parser.parse_args().repository_root.resolve(strict=True)
+    files = evidence_json_files(repository_root)
     if not files:
         raise RuntimeError("no retained evidence JSON files were found")
 
     for path in files:
-        _validate_file(path)
+        _validate_file(path, repository_root)
     print(f"Validated {len(files)} retained evidence JSON files")
 
 

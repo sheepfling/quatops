@@ -14,7 +14,7 @@
   },
   "execution": {
     "was_run": true,
-    "utc": "2026-11-04T05:52:51.177026+00:00",
+    "utc": "2026-11-04T08:41:23.345477+00:00",
     "python": "3.14.6 (tags/v3.14.6:c63aec6, Jun 10 2026, 10:26:10) [MSC v.1944 64 bit (AMD64)]",
     "platform": "Windows-11-10.0.26300-SP0",
     "architecture": "AMD64"
@@ -27,18 +27,18 @@
   },
   "provenance": {
     "stage_sha256": "8cfafffffd499fe64f8107ca2efc6ce3ffae1aea69800ff6fed08790ed9c7c74",
-    "converter_input_sha256": "325531e0017680496d231cee4092d811e87922efe13f0c6b3a50c2a834c5a2cd",
-    "captured_converter_input_sha256": "325531e0017680496d231cee4092d811e87922efe13f0c6b3a50c2a834c5a2cd",
+    "converter_input_sha256": "8b79b57491921a8db2cf353f67afa473e732b5a38e815b0744e0569eb5630281",
+    "captured_converter_input_sha256": "8b79b57491921a8db2cf353f67afa473e732b5a38e815b0744e0569eb5630281",
     "native_observations_sha256": "1ccf08a682e1283c7f86894accadd1eba0a46e12a63bf280282305407c80125e",
-    "native_run_manifest_sha256": "42c33561db2b2dfbe80ac92cdda7d025cc943e25a220b588a51cb56af9abd5c7",
-    "full_observation_sha256": "decdf65eaee75dc1ee0fd6a36d90a6691b56d8bae86c2dae7e1f82e38afe4b3c",
-    "generator_sha256": "ca73e1d35cf375d17bcccd7eac43192b7b7e81af26a56bc30d9d9d567157c034",
-    "native_capture_script_sha256": "2ec9a352db850e4d3a35bf71400a76caaacd9becd53353b45489365c8d32ba31",
-    "lockfile_sha256": "bfa49dc9a47c71af70e6b7deabb03c63ace6f78a371b66966414b74a99c2ae1c",
+    "native_run_manifest_sha256": "e8afcc582be671238fd380dd7f03994564fb5402e4c95a11eabf350c6684d2f3",
+    "full_observation_sha256": "e2caabd89ad7d75c1d68f2a5f9c66fed86579db3f9f040e1d5abdf4fd1ed9b39",
+    "generator_sha256": "13ac39b7846ebfddde2326f8eed11eb859cc24354dee916cf1478305b46abd76",
+    "native_capture_script_sha256": "1e9e0c258837a66dba56d9eb3ecbabb0cbd04353763778758329ef3b2c50e0c4",
+    "lockfile_sha256": "5bef7ea8cec65c6054abc37722b1a2a11021719902408230281cb4f4e926e44a",
     "contract_sha256": "0340bf759e3687c4432902446ef64ce10e46554749f86dabdf7e5303ac56820a"
   },
   "reproduction": {
-    "retention_script_sha256": "f5003d72f9576d1d8da1e0ed0bc8b30679739cce85a9a234f4db1e824205a29c",
+    "retention_script_sha256": "eee3356fe1911ebb7e8c5eaea14aab90d4c876b14cdeb2a26ae0c87e4781ab88",
     "retention_helper_sha256": "cbd84cc6825ea484953121efc6755c9bdd210bbce410e8c1fb0a137a3953eb1c",
     "retention_formatter_sha256": "56961d6be101a2bdfb1b21372c823ec86dfd636547d851901b7284f2ae20e0b3"
   },

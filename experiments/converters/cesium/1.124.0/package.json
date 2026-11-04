@@ -4,5 +4,8 @@
   "type": "module",
   "dependencies": {
     "cesium": "1.124.0"
+  },
+  "overrides": {
+    "@zip.js/zip.js": "2.7.34"
   }
 }

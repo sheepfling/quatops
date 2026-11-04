@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+from urllib.parse import urlsplit
 
 import numpy as np
 from scipy.spatial.transform import Rotation
@@ -92,7 +93,10 @@ def test_eigen_contract_source_pin_and_native_build_provenance():
         assert hashlib.sha256(path.read_bytes()).hexdigest() == provenance[field], field
     assert provenance["eigen_source_archive_sha256"] == SOURCE["archive_sha256"]
     assert provenance["eigen_version_header_sha256"] == SOURCE["version_header_sha256"]
-    assert SOURCE["official_archive_url"].endswith("/5.0.1/eigen-5.0.1.tar.gz")
+    archive_url = urlsplit(SOURCE["official_archive_url"])
+    assert archive_url.scheme == "https"
+    assert archive_url.netloc == "gitlab.com"
+    assert archive_url.path == "/libeigen/eigen/-/archive/5.0.1/eigen-5.0.1.tar.gz"
     cpp = paths["reproduction_native_cpp_source_sha256"].read_text(encoding="utf-8")
     runner = paths["reproduction_capture_runner_sha256"].read_text(encoding="utf-8")
     assert "#include <Eigen/Geometry>" in cpp

@@ -11,7 +11,7 @@ selected witnesses:
 ```powershell
 uv sync --locked --project experiments/converters/spiceypy/8.3.0 --python 3.10.11
 uv run --locked --project experiments/converters/spiceypy/8.3.0 --python 3.10.11 `
-  python experiments/converters/spiceypy/8.3.0/capture_native.py
+  python experiments/converters/spiceypy/8.3.0/capture_native.py --repository-root .
 ```
 
 This version directory is SpiceyPy's optional native-capture dependency set.

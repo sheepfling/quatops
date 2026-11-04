@@ -2,26 +2,31 @@
 
 from __future__ import annotations
 
+import argparse
 import hashlib
 import json
-import sys
 from pathlib import Path
 
 from quatops.engines import QuaternionFrameMap, SignedAxisMap
-
-ROOT = Path(__file__).resolve().parents[4]
-sys.path.insert(0, str(ROOT))
-CANONICAL_INPUTS = ROOT / "experiments/interoperability/v1/canonical_inputs.json"
-HERE = Path(__file__).parent
-INPUTS_OUT = HERE / "converter_inputs.json"
-ASSET_OUT = HERE / "quatops_hierarchy.gltf"
+from scripts.evidence_json import read_evidence_document
+from scripts.evidence_schema.shared_inputs import SharedCanonicalInputCapture
+from scripts.evidence_schema.targets import ThreeGltfInputs
 
 
 def main() -> None:
-    from scripts.evidence_json import read_evidence_document
-
-    source = read_evidence_document(CANONICAL_INPUTS)
-    values = {row["case_id"]: row["canonical_wxyz"] for row in source["orientations"]}
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--repository-root", type=Path, required=True)
+    repository_root = parser.parse_args().repository_root.resolve(strict=True)
+    target_dir = repository_root / "experiments/converters/gltf/2.0.0"
+    canonical_inputs = (
+        repository_root / "experiments/interoperability/v1/canonical_inputs.json"
+    )
+    inputs_out = target_dir / "converter_inputs.json"
+    asset_out = target_dir / "quatops_hierarchy.gltf"
+    source = SharedCanonicalInputCapture.model_validate(
+        read_evidence_document(canonical_inputs), strict=True
+    )
+    values = {row.case_id: row.canonical_wxyz for row in source.orientations}
     # glTF test-frame declaration: +X right, +Y up, -Z forward. This is the
     # explicit mapping used by this artifact, not a guessed imported-model axis.
     frame = SignedAxisMap(("x", "z", "-y"))
@@ -47,7 +52,7 @@ def main() -> None:
         "schema_version": "1.0",
         "kind": "quatops_generated_gltf_converter_input",
         "canonical_input_sha256": hashlib.sha256(
-            CANONICAL_INPUTS.read_bytes()
+            canonical_inputs.read_bytes()
         ).hexdigest(),
         "frame_contract": {
             "canonical": {
@@ -72,7 +77,7 @@ def main() -> None:
             [1.0, 0.0, 0.0],
             [0.0, 1.0, 0.0],
             [0.0, 0.0, 1.0],
-            source["probe_vector_xyz"],
+            source.probe_vector_xyz,
         ],
         "gltf_probe_vectors_xyz": [
             list(frame.vector(v))
@@ -80,13 +85,16 @@ def main() -> None:
                 (1.0, 0.0, 0.0),
                 (0.0, 1.0, 0.0),
                 (0.0, 0.0, 1.0),
-                source["probe_vector_xyz"],
+                source.probe_vector_xyz,
             )
         ],
         "nodes": rows,
     }
-    INPUTS_OUT.write_text(
-        json.dumps(payload, indent=2) + "\n", encoding="utf-8", newline="\n"
+    typed_payload = ThreeGltfInputs.model_validate(payload, strict=True)
+    inputs_out.write_text(
+        json.dumps(typed_payload.model_dump(mode="json"), indent=2) + "\n",
+        encoding="utf-8",
+        newline="\n",
     )
     asset = {
         "asset": {
@@ -109,10 +117,10 @@ def main() -> None:
             },
         ],
     }
-    ASSET_OUT.write_text(
+    asset_out.write_text(
         json.dumps(asset, indent=2) + "\n", encoding="utf-8", newline="\n"
     )
-    print(f"wrote QuatOps inputs and glTF asset: {ASSET_OUT}")
+    print(f"wrote QuatOps inputs and glTF asset: {asset_out}")
 
 
 if __name__ == "__main__":

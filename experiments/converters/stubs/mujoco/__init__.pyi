@@ -1,42 +1,19 @@
-"""Type surface for the MuJoCo 3.17.0 native rotation bindings used by captures."""
+"""Type surface for the untyped MuJoCo bindings used by the capture."""
 
-from typing import Any
-
+import numpy as np
 from numpy.typing import NDArray
-from typing_extensions import TypeAlias
 
-_FloatArray: TypeAlias = NDArray[Any]
+_Float64Array = NDArray[np.float64]
 
 __file__: str
 
 def mj_versionString() -> str: ...
 def mju_axisAngle2Quat(
-    quaternion: _FloatArray, axis: _FloatArray, angle: float
+    quaternion: _Float64Array, axis: _Float64Array, angle: float
 ) -> None: ...
-def mju_derivQuat(
-    derivative: _FloatArray, quaternion: _FloatArray, velocity: _FloatArray
-) -> None: ...
-def mju_euler2Quat(
-    quaternion: _FloatArray, angles: _FloatArray, sequence: str
-) -> None: ...
-def mju_mat2Quat(quaternion: _FloatArray, matrix: _FloatArray) -> None: ...
-def mju_mulQuat(product: _FloatArray, lhs: _FloatArray, rhs: _FloatArray) -> None: ...
-def mju_quat2Mat(matrix: _FloatArray, quaternion: _FloatArray) -> None: ...
-def mju_quat2Vel(velocity: _FloatArray, quaternion: _FloatArray, dt: float) -> None: ...
-def mju_quatIntegrate(
-    quaternion: _FloatArray, velocity: _FloatArray, scale: float
+def mju_mulQuat(
+    product: _Float64Array, lhs: _Float64Array, rhs: _Float64Array
 ) -> None: ...
 def mju_rotVecQuat(
-    result: _FloatArray, vector: _FloatArray, quaternion: _FloatArray
-) -> None: ...
-def mju_subQuat(result: _FloatArray, lhs: _FloatArray, rhs: _FloatArray) -> None: ...
-def mjd_quatIntegrate(
-    velocity: _FloatArray,
-    scale: float,
-    dquat: _FloatArray,
-    dvel: _FloatArray,
-    dscale: _FloatArray,
-) -> None: ...
-def mjd_subQuat(
-    lhs: _FloatArray, rhs: _FloatArray, d_lhs: _FloatArray, d_rhs: _FloatArray
+    result: _Float64Array, vector: _Float64Array, quaternion: _Float64Array
 ) -> None: ...

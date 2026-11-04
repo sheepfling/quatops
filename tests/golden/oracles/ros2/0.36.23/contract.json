@@ -33,7 +33,7 @@
     "interpretation": "Each signed-axis map maps canonical frame-coordinate components into the named ROS frame. The maps are fixture declarations, not inferred from frame IDs."
   },
   "frame_direction": "lookupTransform(target, source) returns target_from_source; its rotation and translation map source point coordinates into target coordinates",
-  "conversion": "For each edge, convert native target_from_source quaternion with QuaternionFrameMap(world_map=target_map.inverse(), body_map=source_map.inverse()).from_destination_wxyz(); map translation with target_map.inverse().vector(). Compose labelled edges world_from_base and base_from_sensor in that order.",
+  "conversion": "For each edge, convert native target_from_source quaternion with QuaternionFrameMap(world_map=target_map, body_map=source_map).from_destination_wxyz(); map translation with target_map.inverse().vector(). Compose labelled edges world_from_base and base_from_sensor in that order.",
   "inverse_conversion": "Apply the same operation to the reverse lookup using its declared target/source maps; equivalently invert the canonical forward rigid transform.",
   "input_domain": "unit rotations, finite translations, static transforms at one exact timestamp; native double tf2Scalar",
   "scope": [

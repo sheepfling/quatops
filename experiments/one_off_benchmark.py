@@ -26,14 +26,11 @@ import pytest_benchmark
 import quaternion
 import scipy
 
-ROOT = Path(__file__).resolve().parents[1]
 TEST_FILES = (
-    ROOT / "tests" / "benchmarks" / "hamilton" / "test_one_off.py",
-    ROOT / "tests" / "benchmarks" / "jpl" / "test_one_off_jpl.py",
+    Path("tests/benchmarks/hamilton/test_one_off.py"),
+    Path("tests/benchmarks/jpl/test_one_off_jpl.py"),
 )
-VECTOR_TEST_FILE = (
-    ROOT / "tests" / "benchmarks" / "quatops" / "test_public_operations.py"
-)
+VECTOR_TEST_FILE = Path("tests/benchmarks/quatops/test_public_operations.py")
 WINNER_TOLERANCE = 0.01
 
 
@@ -63,7 +60,10 @@ def _case_label(test_name: str, group: str) -> str:
 
 
 def _run_pytest(
-    min_rounds: int, max_time: float, test_files: tuple[Path, ...] = TEST_FILES
+    min_rounds: int,
+    max_time: float,
+    repository_root: Path,
+    test_files: tuple[Path, ...],
 ) -> dict[str, Any]:
     """Run selected performance benchmarks and return pytest-benchmark JSON."""
     with tempfile.TemporaryDirectory(prefix="quatops-benchmark-") as temp_dir:
@@ -80,10 +80,10 @@ def _run_pytest(
             f"--benchmark-max-time={max_time}",
             "--benchmark-warmup=on",
             f"--benchmark-json={json_path}",
-            *(str(test_file) for test_file in test_files),
+            *(str(repository_root / test_file) for test_file in test_files),
         ]
         result = subprocess.run(
-            command, check=False, cwd=ROOT, capture_output=True, text=True
+            command, check=False, cwd=repository_root, capture_output=True, text=True
         )
         if result.returncode:
             print(result.stdout, end="", file=sys.stderr)
@@ -183,6 +183,7 @@ def _print_report(report: dict[str, Any]) -> None:
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--repository-root", type=Path, required=True)
     parser.add_argument("--min-rounds", type=int, default=9)
     parser.add_argument("--max-time", type=float, default=0.2)
     parser.add_argument(
@@ -192,15 +193,18 @@ def main(argv: list[str] | None = None) -> int:
     )
     parser.add_argument("--json", type=Path, help="write the report to this path")
     args = parser.parse_args(argv)
+    repository_root = args.repository_root.resolve(strict=True)
     if args.min_rounds < 1 or args.max_time <= 0:
         parser.error(
             "--min-rounds must be positive and --max-time must be greater than zero"
         )
 
-    test_files = TEST_FILES
+    test_files = tuple(TEST_FILES)
     if args.include_vectorized:
         test_files += (VECTOR_TEST_FILE,)
-    plugin_data = _run_pytest(args.min_rounds, args.max_time, test_files)
+    plugin_data = _run_pytest(
+        args.min_rounds, args.max_time, repository_root, test_files
+    )
     report = {
         "created_utc": datetime.now(timezone.utc).isoformat(),
         "command": " ".join(sys.argv),

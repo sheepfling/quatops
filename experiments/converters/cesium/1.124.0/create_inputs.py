@@ -2,27 +2,35 @@
 
 from __future__ import annotations
 
+import argparse
 import hashlib
 import json
-import sys
 from pathlib import Path
 
 from quatops.engines import QuaternionFrameMap, SignedAxisMap
 from quatops.python import hamilton
-
-ROOT = Path(__file__).resolve().parents[4]
-sys.path.insert(0, str(ROOT))
-WITNESS_INPUTS = ROOT / "experiments/interoperability/v1/canonical_inputs.json"
-GEOGRAPHIC_INPUTS = ROOT / "experiments/oracles/shared/geographic_inputs_v1.json"
-OUTPUT = Path(__file__).with_name("converter_inputs.json")
+from scripts.evidence_json import read_evidence_document
+from scripts.evidence_schema.shared_inputs import SharedCanonicalInputCapture
+from scripts.evidence_schema.targets import CesiumInputs
 
 
 def main() -> None:
-    from scripts.evidence_json import read_evidence_document
-
-    canonical = read_evidence_document(WITNESS_INPUTS)
-    geographic = read_evidence_document(GEOGRAPHIC_INPUTS)
-    by_id = {row["case_id"]: row["canonical_wxyz"] for row in canonical["orientations"]}
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--repository-root", type=Path, required=True)
+    repository_root = parser.parse_args().repository_root.resolve(strict=True)
+    target_dir = repository_root / "experiments/converters/cesium/1.124.0"
+    witness_inputs = (
+        repository_root / "experiments/interoperability/v1/canonical_inputs.json"
+    )
+    geographic_inputs = (
+        repository_root / "experiments/oracles/shared/geographic_inputs_v1.json"
+    )
+    output = target_dir / "converter_inputs.json"
+    canonical = SharedCanonicalInputCapture.model_validate(
+        read_evidence_document(witness_inputs), strict=True
+    )
+    geographic = read_evidence_document(geographic_inputs)
+    by_id = {row.case_id: row.canonical_wxyz for row in canonical.orientations}
     identity = SignedAxisMap(("x", "y", "z"))
     to_cesium_local = QuaternionFrameMap(identity, identity)
     selection = (
@@ -76,10 +84,10 @@ def main() -> None:
         "schema_version": "1.0",
         "kind": "quatops_generated_converter_inputs",
         "canonical_input_sha256": hashlib.sha256(
-            WITNESS_INPUTS.read_bytes()
+            witness_inputs.read_bytes()
         ).hexdigest(),
         "geographic_input_sha256": hashlib.sha256(
-            GEOGRAPHIC_INPUTS.read_bytes()
+            geographic_inputs.read_bytes()
         ).hexdigest(),
         "frame_contract": {
             "canonical_local": {
@@ -102,14 +110,17 @@ def main() -> None:
             [1.0, 0.0, 0.0],
             [0.0, 1.0, 0.0],
             [0.0, 0.0, 1.0],
-            canonical["probe_vector_xyz"],
+            canonical.probe_vector_xyz,
         ],
         "cases": cases,
     }
-    OUTPUT.write_text(
-        json.dumps(payload, indent=2) + "\n", encoding="utf-8", newline="\n"
+    typed_payload = CesiumInputs.model_validate(payload, strict=True)
+    output.write_text(
+        json.dumps(typed_payload.model_dump(mode="json"), indent=2) + "\n",
+        encoding="utf-8",
+        newline="\n",
     )
-    print(f"wrote {len(cases)} QuatOps-generated Cesium converter inputs: {OUTPUT}")
+    print(f"wrote {len(cases)} QuatOps-generated Cesium converter inputs: {output}")
 
 
 if __name__ == "__main__":

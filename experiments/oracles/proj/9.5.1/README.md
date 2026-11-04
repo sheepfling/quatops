@@ -20,10 +20,12 @@ write a fresh capture outside the repository:
 
 ```powershell
 $envDir = Join-Path $env:TEMP 'quatops-captures\proj-9.5.1'
+$env:PYTHONPATH = (Get-Location).Path
 uv venv --python 3.13.14 $envDir
 uv pip install --python (Join-Path $envDir 'Scripts\python.exe') -r experiments\oracles\proj\9.5.1\requirements.txt
 $captureDir = Join-Path $env:TEMP 'quatops-captures\proj-9.5.1\latest'
-& (Join-Path $envDir 'Scripts\python.exe') experiments\oracles\proj\9.5.1\capture_proj.py --output $captureDir
+& (Join-Path $envDir 'Scripts\python.exe') experiments\oracles\proj\9.5.1\capture_proj.py `
+  --geographic experiments\oracles\shared\geographic_inputs_v1.json --output $captureDir
 ```
 
 The input file defaults to the shared

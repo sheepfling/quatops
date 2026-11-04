@@ -8,6 +8,7 @@ import json
 import platform
 import sys
 from datetime import datetime, timezone
+from importlib import resources
 from importlib.metadata import version
 from pathlib import Path
 
@@ -15,8 +16,15 @@ from pathlib import Path
 import mujoco  # pyright: ignore[reportMissingModuleSource]
 import numpy as np
 
-HERE = Path(__file__).resolve().parent
-ROOT = HERE.parents[3]
+from scripts.evidence_format import dump_evidence_json
+from scripts.evidence_schema.shared_inputs import SharedCanonicalInputCapture
+from scripts.evidence_schema.targets import (
+    MuJoCoCapture,
+    MuJoCoInputs,
+    MuJoCoObservations,
+    MuJoCoOrientation,
+    TargetIdentity,
+)
 
 
 def sha256_file(path: Path) -> str:
@@ -29,8 +37,16 @@ def native_action(vector: np.ndarray, q: np.ndarray) -> np.ndarray:
     return output
 
 
-def capture_quaternion(case_id: str, q: np.ndarray, probe: np.ndarray) -> dict:
-    result = {
+def capture_quaternion(
+    case_id: str,
+    q: np.ndarray,
+    probe: np.ndarray,
+    *,
+    native_constructor: str | None = None,
+    lhs: np.ndarray | None = None,
+    rhs: np.ndarray | None = None,
+) -> MuJoCoOrientation:
+    result: dict[str, object] = {
         "case_id": case_id,
         "native_input_wxyz": q.tolist(),
         "native_mju_rotVecQuat_basis_xyz": [
@@ -39,66 +55,68 @@ def capture_quaternion(case_id: str, q: np.ndarray, probe: np.ndarray) -> dict:
     }
     if case_id == "mixed_a":
         result["native_mju_rotVecQuat_probe_xyz"] = native_action(probe, q).tolist()
-    return result
+    if native_constructor is not None:
+        result["native_constructor"] = native_constructor
+    if lhs is not None and rhs is not None:
+        result["native_lhs_wxyz"] = lhs.tolist()
+        result["native_rhs_wxyz"] = rhs.tolist()
+        result["product_order"] = "lhs * rhs; rhs acts first"
+    return MuJoCoOrientation.model_validate(result, strict=True)
 
 
 def main() -> None:
-    sys.path.insert(0, str(ROOT))
-    from scripts.evidence_format import dump_evidence_json
-
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--inputs", type=Path, default=HERE / "converter_inputs.json")
-    parser.add_argument(
-        "--output-dir",
-        type=Path,
-        default=ROOT / "tests/golden/oracles/mujoco/3.17.0/converter",
-    )
+    parser.add_argument("--repository-root", type=Path, required=True)
+    parser.add_argument("--inputs", type=Path)
+    parser.add_argument("--output-dir", type=Path)
     options = parser.parse_args()
-    input_path = options.inputs.resolve()
+    repository_root = options.repository_root.resolve(strict=True)
+    target_dir = repository_root / "experiments/converters/mujoco/3.17.0"
+    input_path = (options.inputs or target_dir / "converter_inputs.json").resolve()
+    output_dir = options.output_dir or (
+        repository_root / "tests/golden/oracles/mujoco/3.17.0/converter"
+    )
     spec_bytes = input_path.read_bytes()
-    spec = json.loads(spec_bytes.decode("utf-8"))
-    shared_path = ROOT / spec["shared_canonical_inputs"]
+    spec = MuJoCoInputs.model_validate_json(spec_bytes, strict=True)
+    shared_path = repository_root / spec.shared_canonical_inputs
     shared_bytes = shared_path.read_bytes()
-    shared = json.loads(shared_bytes.decode("utf-8"))
-    by_id = {row["case_id"]: row for row in shared["orientations"]}
-    selected = [by_id[case_id] for case_id in spec["retained_case_ids"]]
-    probe = np.asarray(shared["probe_vector_xyz"], dtype=np.float64)
+    shared = SharedCanonicalInputCapture.model_validate_json(shared_bytes, strict=True)
+    by_id = {row.case_id: row for row in shared.orientations}
+    selected = [by_id[case_id] for case_id in spec.retained_case_ids]
+    probe = np.asarray(shared.probe_vector_xyz, dtype=np.float64)
 
     canonical_to_native = [
         capture_quaternion(
-            row["case_id"],
-            np.asarray(row["canonical_wxyz"], dtype=np.float64),
+            row.case_id,
+            np.asarray(row.canonical_wxyz, dtype=np.float64),
             probe,
         )
         for row in selected
     ]
-    ctor = spec["native_constructed_orientation"]
+    ctor = spec.native_constructed_orientation
     qnative = np.empty(4, dtype=np.float64)
     mujoco.mju_axisAngle2Quat(
         qnative,
-        np.asarray(ctor["axis_xyz"], dtype=np.float64),
-        float(ctor["angle_radians"]),
+        np.asarray(ctor.axis_xyz, dtype=np.float64),
+        ctor.angle_radians,
     )
-    native_created_capture = capture_quaternion(ctor["case_id"], qnative, probe)
-    native_created = {
-        **native_created_capture,
-        "native_constructor": "mju_axisAngle2Quat(axis, angle)",
-    }
+    native_created = capture_quaternion(
+        ctor.case_id or "native_axis_angle",
+        qnative,
+        probe,
+        native_constructor="mju_axisAngle2Quat(axis, angle)",
+    )
 
     pair = {
-        row["case_id"]: np.asarray(row["canonical_wxyz"], dtype=np.float64)
+        row.case_id: np.asarray(row.canonical_wxyz, dtype=np.float64)
         for row in selected
     }
     a, b = pair["mixed_a"], pair["mixed_b"]
 
-    def compose(case_id, lhs, rhs):
+    def compose(case_id: str, lhs: np.ndarray, rhs: np.ndarray) -> MuJoCoOrientation:
         product = np.empty(4, dtype=np.float64)
         mujoco.mju_mulQuat(product, lhs, rhs)
-        return capture_quaternion(case_id, product, probe) | {
-            "native_lhs_wxyz": lhs.tolist(),
-            "native_rhs_wxyz": rhs.tolist(),
-            "product_order": "lhs * rhs; rhs acts first",
-        }
+        return capture_quaternion(case_id, product, probe, lhs=lhs, rhs=rhs)
 
     composition = [
         compose(case_id, lhs, rhs)
@@ -107,32 +125,34 @@ def main() -> None:
             ("mixed_b_times_mixed_a", b, a),
         )
     ]
-    observations = {
-        "canonical_to_native": canonical_to_native,
-        "native_created": [native_created],
-        "composition": composition,
-    }
+    observations = MuJoCoObservations(
+        canonical_to_native=canonical_to_native,
+        native_created=[native_created],
+        composition=composition,
+    )
 
-    package_dir = Path(mujoco.__file__).resolve().parent
+    package_dir = Path(str(resources.files("mujoco")))
     native_library = package_dir / "mujoco.dll"
     if not native_library.is_file():
         raise FileNotFoundError(f"MuJoCo native DLL not found: {native_library}")
     native_files = [{"path": "mujoco.dll", "sha256": sha256_file(native_library)}]
-    out = options.output_dir.resolve()
+    out = output_dir.resolve()
     out.mkdir(parents=True, exist_ok=True)
     witnesses_path = out / "witnesses.json"
-    witnesses = {
-        "schema_version": "1.0",
-        "evidence_kind": "native_runtime_selected_converter_witnesses",
-        "target": {
-            "name": "MuJoCo",
-            "package_version": version("mujoco"),
-            "engine_version": mujoco.mj_versionString(),
-        },
-        "observations": observations,
-    }
+    witnesses = MuJoCoCapture(
+        schema_version="1.0",
+        evidence_kind="native_runtime_selected_converter_witnesses",
+        target=TargetIdentity(
+            name="MuJoCo",
+            package_version=version("mujoco"),
+            engine_version=mujoco.mj_versionString(),
+        ),
+        observations=observations,
+    )
     witnesses_path.write_text(
-        dump_evidence_json(witnesses), encoding="utf-8", newline="\n"
+        dump_evidence_json(witnesses.model_dump(mode="json", exclude_none=True)),
+        encoding="utf-8",
+        newline="\n",
     )
     manifest = {
         "schema_version": "1.0",
@@ -166,16 +186,17 @@ def main() -> None:
             "converter_input_spec_sha256": sha256_file(input_path),
             "selected_inputs_sha256": sha256_file(shared_path),
             "witnesses_sha256": sha256_file(witnesses_path),
-            "pinned_lockfile_sha256": sha256_file(HERE / "uv.lock"),
+            "pinned_lockfile_sha256": sha256_file(target_dir / "uv.lock"),
             "exact_invocation": (
                 "uv run --locked --project experiments/converters/mujoco/3.17.0 "
                 "--python 3.10.11 "
-                "python experiments/converters/mujoco/3.17.0/capture_native.py"
+                "python experiments/converters/mujoco/3.17.0/capture_native.py "
+                "--repository-root <repository>"
             ),
         },
     }
     (out / "manifest.json").write_text(
-        json.dumps(manifest, indent=2, allow_nan=False) + "\n",
+        dump_evidence_json(manifest),
         encoding="utf-8",
         newline="\n",
     )

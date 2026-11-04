@@ -19,15 +19,15 @@ Regenerate the compact proof product after changing a capture, contract, or
 retention rule:
 
 ```powershell
-.venv\Scripts\python.exe scripts\crystallize_converter_evidence.py
-.venv\Scripts\python.exe scripts\crystallize_converter_evidence.py --output $env:TEMP\quatops-converters.json
-.venv\Scripts\python.exe scripts\crystallize_converter_evidence.py --check --output $env:TEMP\quatops-converters.json
+.venv\Scripts\python.exe -m scripts.crystallize_converter_evidence --repository-root .
+.venv\Scripts\python.exe -m scripts.crystallize_converter_evidence --repository-root . --output $env:TEMP\quatops-converters.json
+.venv\Scripts\python.exe -m scripts.crystallize_converter_evidence --repository-root . --check --output $env:TEMP\quatops-converters.json
 ```
 
 Validate the typed source packages independently:
 
 ```powershell
-.venv\Scripts\python.exe scripts\validate_converter_evidence.py
+.venv\Scripts\python.exe -m scripts.validate_converter_evidence --repository-root .
 ```
 
 The first command validates and reduces the typed source packages in memory; it

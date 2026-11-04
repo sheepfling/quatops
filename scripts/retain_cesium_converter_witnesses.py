@@ -6,16 +6,12 @@ import argparse
 import hashlib
 from pathlib import Path
 
-from evidence_json import (
+from scripts.evidence_json import (
     compact_numeric_evidence,
     dump_evidence_json,
     read_evidence_document,
     read_evidence_rows,
 )
-
-ROOT = Path(__file__).resolve().parents[1]
-HERE = ROOT / "experiments/converters/cesium/1.124.0"
-DESTINATION = ROOT / "tests/golden/transports/cesium/1.124.0"
 
 
 def sha256(path: Path) -> str:
@@ -55,11 +51,15 @@ def _retained_outputs(case_id: str, outputs: dict) -> dict:
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("capture_dir", type=Path)
+    parser.add_argument("--repository-root", type=Path, required=True)
     args = parser.parse_args()
+    repository_root = args.repository_root.resolve(strict=True)
+    source_dir = repository_root / "experiments/converters/cesium/1.124.0"
+    destination = repository_root / "tests/golden/transports/cesium/1.124.0"
     capture = args.capture_dir.resolve()
     run = read_evidence_document(capture / "manifest.json")
     observations = read_evidence_rows(capture / "observations.json")
-    inputs = read_evidence_document(HERE / "converter_inputs.json")
+    inputs = read_evidence_document(source_dir / "converter_inputs.json")
     case_ids = [case["case_id"] for case in inputs["cases"]]
     if len(case_ids) != len(set(case_ids)):
         raise ValueError("Cesium converter inputs contain duplicate case IDs")
@@ -81,8 +81,8 @@ def main() -> None:
         )
     selected_observations = [matches_by_id[case_id][0] for case_id in case_ids]
 
-    DESTINATION.mkdir(parents=True, exist_ok=True)
-    witnesses_path = DESTINATION / "witnesses.json"
+    destination.mkdir(parents=True, exist_ok=True)
+    witnesses_path = destination / "witnesses.json"
     retained = [
         {
             "case_id": row["case_id"],
@@ -145,12 +145,16 @@ def main() -> None:
             "time-dependent EOP/ICRF",
         ],
     }
-    contract_path = DESTINATION / "contract.json"
+    contract_path = destination / "contract.json"
     contract_path.write_text(
         dump_evidence_json(contract), encoding="utf-8", newline="\n"
     )
-    source_inputs = ROOT / "experiments/interoperability/v1/canonical_inputs.json"
-    geo_inputs = ROOT / "experiments/oracles/shared/geographic_inputs_v1.json"
+    source_inputs = (
+        repository_root / "experiments/interoperability/v1/canonical_inputs.json"
+    )
+    geo_inputs = (
+        repository_root / "experiments/oracles/shared/geographic_inputs_v1.json"
+    )
     native_numeric_helper_sha256 = run.get("numeric_helper_sha256")
     manifest = {
         "schema_version": "1.0",
@@ -163,7 +167,8 @@ def main() -> None:
         "provenance": {
             "run_manifest_sha256": sha256(capture / "manifest.json"),
             "full_observation_sha256": sha256(capture / "observations.json"),
-            "converter_input_sha256": sha256(HERE / "converter_inputs.json"),
+            "converter_input_sha256": sha256(source_dir / "converter_inputs.json"),
+            "captured_converter_input_sha256": run["inputs"]["sha256"],
             "canonical_inputs_sha256": sha256(source_inputs),
             "geographic_inputs_sha256": sha256(geo_inputs),
             "native_capture_script_sha256": run["exporter"]["sha256"],
@@ -171,17 +176,24 @@ def main() -> None:
             "native_package_lock_sha256": run["package_lock_sha256"],
             "witnesses_sha256": sha256(witnesses_path),
             "contract_sha256": sha256(contract_path),
+            "input_serialization_note": (
+                "JSON formatting changed only; parsed native input values are unchanged."
+            ),
         },
         "reproduction": {
-            "input_generator_sha256": sha256(HERE / "create_inputs.py"),
-            "capture_script_sha256": sha256(HERE / "capture_native.mjs"),
+            "input_generator_sha256": sha256(source_dir / "create_inputs.py"),
+            "capture_script_sha256": sha256(source_dir / "capture_native.mjs"),
             "numeric_helper_sha256": sha256(
-                ROOT / "experiments/converters/shared/numeric_evidence.mjs"
+                repository_root / "experiments/converters/shared/numeric_evidence.mjs"
             ),
             "retention_script_sha256": sha256(Path(__file__)),
-            "retention_helper_sha256": sha256(ROOT / "scripts/evidence_json.py"),
-            "retention_formatter_sha256": sha256(ROOT / "scripts/evidence_format.py"),
-            "package_lock_sha256": sha256(HERE / "package-lock.json"),
+            "retention_helper_sha256": sha256(
+                repository_root / "scripts/evidence_json.py"
+            ),
+            "retention_formatter_sha256": sha256(
+                repository_root / "scripts/evidence_format.py"
+            ),
+            "package_lock_sha256": sha256(source_dir / "package-lock.json"),
             "geographic_inputs_sha256": sha256(geo_inputs),
         },
         "selection": {
@@ -198,11 +210,11 @@ def main() -> None:
             ),
         },
     }
-    (DESTINATION / "manifest.json").write_text(
+    (destination / "manifest.json").write_text(
         dump_evidence_json(manifest), encoding="utf-8", newline="\n"
     )
     print(
-        f"retained {len(selected_observations)} Cesium converter witnesses at {DESTINATION}"
+        f"retained {len(selected_observations)} Cesium converter witnesses at {destination}"
     )
 
 

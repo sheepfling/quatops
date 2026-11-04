@@ -23,10 +23,12 @@ rectangle, uses +Y up, and aligns XZ to its bounds; its support is optional.
 These documented frame facts do not create a universal OpenXR world frame.
 
 The SDK-header ABI capture was compiled and rerun, and its exact output is
-retained. No runtime is installed or registered on the capture machine, so no
-`xrLocateSpace` call, tracking result, or runtime-specific relation is claimed.
-The completed discovery is specification plus header ABI evidence; live
-runtime behavior remains a separate gate.
+retained. A separate native capture ran `xrLocateSpace` against the pinned
+Khronos software test runtime for a static three-space LOCAL frame chain. The
+selected outputs and SciPy frame-chain replay are documented in the
+[versioned capture guide](../../experiments/oracles/openxr/1.1.65/README.md).
+This does not establish vendor-runtime, tracking, headset, or live display-time
+behavior.
 
 Primary references: OpenXR 1.1.65 [`XrQuaternionf`](https://registry.khronos.org/OpenXR/specs/1.1/man/html/XrQuaternionf.html),
 [`XrPosef`](https://registry.khronos.org/OpenXR/specs/1.1/man/html/XrPosef.html),

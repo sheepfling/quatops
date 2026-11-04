@@ -6,14 +6,17 @@ import argparse
 import json
 import os
 import subprocess
-import sys
 import xml.etree.ElementTree as ET
 from pathlib import Path
 from typing import Any
 
-ROOT = Path(__file__).resolve().parents[4]
-HERE = Path(__file__).resolve().parent
-sys.path.insert(0, str(ROOT))
+from experiments.oracles.shared.capture_io import (
+    Capture,
+    Observation,
+    contract,
+    numeric,
+    sha256,
+)
 
 
 def version_for(package: str) -> tuple[str, Path]:
@@ -37,8 +40,6 @@ def deb_version(package: str) -> str:
 
 
 def pack(value: Any, label: str) -> Any:
-    from experiments.oracles.shared.capture_io import numeric
-
     if isinstance(value, dict):
         return {key: pack(item, label) for key, item in value.items()}
     if isinstance(value, list) and (
@@ -51,23 +52,21 @@ def pack(value: Any, label: str) -> Any:
 
 
 def main() -> None:
-    from experiments.oracles.shared.capture_io import (
-        Capture,
-        Observation,
-        contract,
-        sha256,
-    )
-
     parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--repository-root", type=Path, required=True)
     parser.add_argument(
         "--corpus",
         type=Path,
-        default=ROOT / "experiments/oracles/shared/orientation_inputs_v1.json",
     )
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--executable", type=Path, required=True)
     parser.add_argument("--runtime-image", required=True)
     args = parser.parse_args()
+    repository_root = args.repository_root.resolve(strict=True)
+    package_dir = repository_root / "experiments/converters/ros2/0.36.23"
+    corpus = args.corpus or (
+        repository_root / "experiments/oracles/shared/orientation_inputs_v1.json"
+    )
 
     package_versions = [
         {
@@ -85,9 +84,9 @@ def main() -> None:
         "ros2_tf2",
         "ROS 2 tf2",
         package_versions[0]["version"],
-        args.corpus,
+        corpus,
         args.output,
-        Path(__file__),
+        package_dir / "capture_native.py",
         {
             "input": "native tf2Scalar; geometry_msgs double fields",
             "arithmetic": "tf2Scalar as measured by compiled executable",
@@ -109,7 +108,7 @@ def main() -> None:
     )
 
     run = subprocess.run(
-        [str(args.executable.resolve()), str(args.corpus.resolve())],
+        [str(args.executable.resolve()), str(corpus.resolve())],
         text=True,
         capture_output=True,
         check=False,
@@ -152,11 +151,11 @@ def main() -> None:
         [
             (stdout, "native_process_output"),
             (stderr, "native_process_stderr"),
-            (HERE / "native/src/capture_ros.cpp", "native_exporter_source"),
-            (HERE / "native/CMakeLists.txt", "build_recipe"),
-            (HERE / "Dockerfile", "runtime_image_recipe"),
+            (package_dir / "native/src/capture_ros.cpp", "native_exporter_source"),
+            (package_dir / "native/CMakeLists.txt", "build_recipe"),
+            (package_dir / "Dockerfile", "runtime_image_recipe"),
             (
-                ROOT / "experiments/oracles/shared/capture_io.py",
+                repository_root / "experiments/oracles/shared/capture_io.py",
                 "capture_envelope_helper",
             ),
         ]

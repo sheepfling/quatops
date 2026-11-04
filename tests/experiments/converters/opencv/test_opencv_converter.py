@@ -75,8 +75,7 @@ def test_opencv_contract_and_pinned_capture_provenance():
         / "experiments/converters/opencv/4.13.0/capture_native.py",
         "preparation_script_sha256": ROOT
         / "experiments/converters/opencv/4.13.0/prepare_inputs.py",
-        "requirements_sha256": ROOT
-        / "experiments/converters/opencv/4.13.0/requirements-converter.txt",
+        "lockfile_sha256": ROOT / "experiments/converters/opencv/4.13.0/uv.lock",
     }
     for field, path in reproduction_paths.items():
         assert hashlib.sha256(path.read_bytes()).hexdigest() == reproduction[field], (

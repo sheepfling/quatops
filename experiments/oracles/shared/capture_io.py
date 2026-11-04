@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import argparse
 import hashlib
 import json
 import math
@@ -13,10 +12,39 @@ from collections import Counter
 from dataclasses import asdict, dataclass, field
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Literal
+from typing import Any, Literal, TypedDict
+
+from pydantic import BaseModel, ConfigDict
 
 NumericType = Literal["binary32", "binary64"]
-ROOT = Path(__file__).resolve().parents[3]
+ContractUnits = Literal["radians", "geographic degrees; Cartesian metres"]
+QuaternionOrder = Literal["wxyz", "xyzw"]
+MatrixAction = Literal["column vectors"]
+FrameDirection = Literal[
+    "active rotation in one numeric basis",
+    "forward ECEF -> ENU; inverse ENU -> ECEF",
+    "lookup target_from_source; transform maps source point coordinates into target",
+]
+
+
+class CaptureContract(BaseModel):
+    """Typed convention fields embedded in a raw observation."""
+
+    model_config = ConfigDict(extra="forbid", frozen=True, strict=True)
+
+    units: ContractUnits | None = "radians"
+    quaternion_order: QuaternionOrder | None = None
+    matrix_action: MatrixAction | None = "column vectors"
+    frame_direction: FrameDirection | None = "active rotation in one numeric basis"
+
+
+class ContractRecord(TypedDict):
+    """Serialized literal-only contract fields stored in each observation."""
+
+    units: ContractUnits | None
+    quaternion_order: QuaternionOrder | None
+    matrix_action: MatrixAction | None
+    frame_direction: FrameDirection | None
 
 
 def sha256(path: Path) -> str:
@@ -77,25 +105,12 @@ def write_json(path: Path, value: Any) -> None:
     )
 
 
-def parser(description: str) -> argparse.ArgumentParser:
-    result = argparse.ArgumentParser(description=description)
-    result.add_argument(
-        "--corpus",
-        type=Path,
-        default=ROOT / "experiments/oracles/shared/orientation_inputs_v1.json",
-    )
-    result.add_argument(
-        "--output", type=Path, required=True, help="New, empty capture directory"
-    )
-    return result
-
-
 @dataclass(frozen=True, slots=True)
 class Observation:
     case_id: str
     operation_id: str
     native_entry_point: str
-    contract: dict[str, Any]
+    contract: ContractRecord
     native_inputs: dict[str, Any]
     native_outputs: dict[str, Any]
     status: str = "ok"
@@ -221,14 +236,20 @@ class Capture:
 
 def contract(
     *,
-    units: str | None = "radians",
-    order: str | None = None,
-    action: str | None = "column vectors",
-    frame: str | None = "active rotation in one numeric basis",
-) -> dict[str, Any]:
+    units: ContractUnits | None = "radians",
+    order: QuaternionOrder | None = None,
+    action: MatrixAction | None = "column vectors",
+    frame: FrameDirection | None = "active rotation in one numeric basis",
+) -> ContractRecord:
+    model = CaptureContract(
+        units=units,
+        quaternion_order=order,
+        matrix_action=action,
+        frame_direction=frame,
+    )
     return {
-        "units": units,
-        "quaternion_order": order,
-        "matrix_action": action,
-        "frame_direction": frame,
+        "units": model.units,
+        "quaternion_order": model.quaternion_order,
+        "matrix_action": model.matrix_action,
+        "frame_direction": model.frame_direction,
     }

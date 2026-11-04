@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import argparse
 import json
-import sys
 from pathlib import Path
 from typing import Literal
 
@@ -14,8 +13,8 @@ import scipy
 from pydantic import BaseModel, ConfigDict
 from scipy.spatial.transform import Rotation
 
-ROOT = Path(__file__).resolve().parents[4]
-sys.path.insert(0, str(ROOT))
+from scripts.evidence_format import dump_evidence_json
+from scripts.evidence_json import read_evidence_document
 
 ObservationKey = Literal["A_from_B", "B_from_C", "A_from_C"]
 OBSERVATION_CASES: tuple[tuple[ObservationKey, str, str], ...] = (
@@ -111,8 +110,6 @@ def main() -> None:
     parser.add_argument("capture", type=Path)
     parser.add_argument("--retain-to", type=Path)
     args = parser.parse_args()
-    from scripts.evidence_json import read_evidence_document
-
     raw_capture = read_evidence_document(args.capture)
     capture = Capture.model_validate(raw_capture)
     if capture.api_version != (1, 1, 65):
@@ -174,8 +171,6 @@ def main() -> None:
             "native frame-chain composition did not match the direct locate"
         )
     if args.retain_to is not None:
-        from scripts.evidence_json import dump_evidence_json
-
         args.retain_to.parent.mkdir(parents=True, exist_ok=True)
         args.retain_to.write_text(
             dump_evidence_json(raw_capture), encoding="utf-8", newline="\n"

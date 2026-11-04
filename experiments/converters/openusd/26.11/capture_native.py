@@ -4,49 +4,83 @@ from __future__ import annotations
 
 import argparse
 import hashlib
-import json
 import platform
 import sys
+from collections.abc import Iterable, Sequence
 from datetime import datetime, timezone
+from importlib import resources
 from importlib.metadata import version
 from pathlib import Path
 
 from pxr import Gf, Usd, UsdGeom
+from pydantic import BaseModel, ConfigDict
 
-HERE = Path(__file__).parent
+from scripts.evidence_format import dump_evidence_json
+from scripts.evidence_schema.primitives import Matrix4, Quaternion4, Vector3
+from scripts.evidence_schema.targets import OpenUsdInputs
+
+
+class NativeOpenUsdOutputs(BaseModel):
+    """Typed raw OpenUSD API observations before witness reduction."""
+
+    model_config = ConfigDict(extra="forbid", strict=True)
+
+    orient_op_wxyz: Quaternion4
+    local_matrix_rows: Matrix4
+    world_matrix_rows: Matrix4
+    ordered_xform_ops: list[str]
+    resets_xform_stack: bool
+    local_points_xyz: list[Vector3]
+    world_points_xyz: list[Vector3]
+    world_directions_xyz: list[Vector3]
+    world_to_local_point_roundtrip_xyz: list[Vector3]
+
+
+class NativeOpenUsdObservation(BaseModel):
+    """One captured prim and the exact native operations read from it."""
+
+    model_config = ConfigDict(extra="forbid", strict=True)
+
+    node: str
+    prim_path: str
+    native_entry_points: list[str]
+    outputs: NativeOpenUsdOutputs
 
 
 def sha(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
-def vec(value):
+def vec(value: Iterable[float]) -> list[float]:
     return [float(x) for x in value]
 
 
-def matrix_rows(matrix):
+def matrix_rows(matrix: Sequence[Sequence[float]]) -> list[list[float]]:
     return [[float(matrix[r][c]) for c in range(4)] for r in range(4)]
 
 
-def q_wxyz(quaternion):
+def q_wxyz(quaternion: Gf.Quatd) -> list[float]:
     return [float(quaternion.GetReal()), *[float(x) for x in quaternion.GetImaginary()]]
 
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--stage", type=Path, default=HERE / "quatops_hierarchy.usda")
-    parser.add_argument("--inputs", type=Path, default=HERE / "converter_inputs.json")
+    parser.add_argument("--repository-root", type=Path, required=True)
+    parser.add_argument("--stage", type=Path)
+    parser.add_argument("--inputs", type=Path)
     parser.add_argument("--output", type=Path, required=True)
     args = parser.parse_args()
-    stage_path = args.stage.resolve()
-    inputs_path = args.inputs.resolve()
-    inputs = json.loads(inputs_path.read_text(encoding="utf-8"))
+    repository_root = args.repository_root.resolve(strict=True)
+    target_dir = repository_root / "experiments/converters/openusd/26.11"
+    stage_path = (args.stage or target_dir / "quatops_hierarchy.usda").resolve()
+    inputs_path = (args.inputs or target_dir / "converter_inputs.json").resolve()
+    inputs = OpenUsdInputs.model_validate_json(inputs_path.read_bytes(), strict=True)
     stage = Usd.Stage.Open(str(stage_path))
     if stage is None:
         raise RuntimeError(f"OpenUSD could not open {stage_path}")
     cache = UsdGeom.XformCache()
-    probe_vectors = [Gf.Vec3d(*row) for row in inputs["usd_probe_vectors_xyz"]]
-    observations = []
+    probe_vectors = [Gf.Vec3d(*row) for row in inputs.usd_probe_vectors_xyz]
+    raw_observations: list[dict[str, object]] = []
     for node, prim_path in (
         ("parent", "/Scene/Parent"),
         ("child", "/Scene/Parent/Child"),
@@ -60,7 +94,7 @@ def main() -> None:
         orient = next(op for op in ops if op.GetOpType() == UsdGeom.XformOp.TypeOrient)
         qnative = orient.Get()
         inverse = world.GetInverse()
-        observations.append(
+        raw_observations.append(
             {
                 "node": node,
                 "prim_path": prim_path,
@@ -94,7 +128,11 @@ def main() -> None:
                 },
             }
         )
-    package_dir = Path(__import__("pxr").__file__).parent
+    observations = [
+        NativeOpenUsdObservation.model_validate(row, strict=True)
+        for row in raw_observations
+    ]
+    package_dir = Path(str(resources.files("pxr")))
     binaries = {}
     for relative in (
         "usd_ms.dll",
@@ -108,7 +146,7 @@ def main() -> None:
     output_path.mkdir(parents=True, exist_ok=True)
     observations_path = output_path / "observations.json"
     observations_path.write_text(
-        json.dumps(observations, indent=2, allow_nan=False) + "\n",
+        dump_evidence_json([row.model_dump(mode="json") for row in observations]),
         encoding="utf-8",
         newline="\n",
     )
@@ -139,9 +177,9 @@ def main() -> None:
             "converter_input_sha256": sha(inputs_path),
         },
         "exporter": {"path": str(Path(__file__).name), "sha256": sha(Path(__file__))},
-        "generator_sha256": sha(HERE / "create_stage.py"),
-        "lockfile_sha256": sha(HERE / "uv.lock"),
-        "canonical_inputs_sha256": inputs["canonical_input_sha256"],
+        "generator_sha256": sha(target_dir / "create_stage.py"),
+        "lockfile_sha256": sha(target_dir / "uv.lock"),
+        "canonical_inputs_sha256": inputs.canonical_input_sha256,
         "observations": {
             "path": "observations.json",
             "sha256": sha(observations_path),
@@ -149,7 +187,7 @@ def main() -> None:
         },
     }
     (output_path / "manifest.json").write_text(
-        json.dumps(manifest, indent=2) + "\n", encoding="utf-8", newline="\n"
+        dump_evidence_json(manifest), encoding="utf-8", newline="\n"
     )
     print(
         f"captured {len(observations)} native OpenUSD stage observations at {output_path}"

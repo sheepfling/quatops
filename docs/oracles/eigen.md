@@ -27,3 +27,5 @@ application-specific world, body, camera, or asset frame.
 
 The official [Eigen quaternion API reference](https://eigen.tuxfamily.org/dox/classEigen_1_1Quaternion.html)
 documents the WXYZ constructor parameter order and XYZW `coeffs()` storage.
+The [versioned native capture runbook](../../experiments/converters/eigen/5.0.1/README.md)
+contains the pinned source archive, build command, and replay command.

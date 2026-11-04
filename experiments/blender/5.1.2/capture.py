@@ -1,10 +1,13 @@
 """Capture the selected Blender quaternion-converter witnesses."""
 
+from __future__ import annotations
+
 import argparse
 import json
 import sys
 import tempfile
 from pathlib import Path
+from typing import TypedDict
 
 import bpy
 from mathutils import Quaternion, Vector
@@ -25,19 +28,28 @@ ORIENTATIONS = (
 PROBE = Vector((0.25, -1.5, 2.75))
 AXES = (Vector((1.0, 0.0, 0.0)), Vector((0.0, 1.0, 0.0)), Vector((0.0, 0.0, 1.0)))
 DESTINATION_AXES = ("x", "y", "z")
+TARGET_VERSION = "5.1.2"
 
 
-def vector_values(value):
+class OrientationCase(TypedDict):
+    case_id: str
+    canonical_wxyz: list[float]
+    native_quaternion: list[float]
+    native_rotated_positive_basis_vectors_xyz: list[list[float]]
+    native_rotated_probe_vector_xyz: list[float]
+
+
+def vector_values(value: Vector) -> list[float]:
     return [float(component) for component in value]
 
 
-def rotated_axes(quaternion):
+def rotated_axes(quaternion: Quaternion) -> list[list[float]]:
     return [vector_values(quaternion @ axis) for axis in AXES]
 
 
-def capture_canonical_interop():
+def capture_canonical_interop() -> dict[str, object]:
     native = {case_id: Quaternion(wxyz) for case_id, wxyz in ORIENTATIONS}
-    orientation_cases = [
+    orientation_cases: list[OrientationCase] = [
         {
             "case_id": case_id,
             "canonical_wxyz": list(wxyz),
@@ -48,7 +60,7 @@ def capture_canonical_interop():
         for case_id, wxyz in ORIENTATIONS
     ]
 
-    def composition(left_id, right_id):
+    def composition(left_id: str, right_id: str) -> dict[str, object]:
         product = native[left_id] @ native[right_id]
         return {
             "left_case_id": left_id,
@@ -71,7 +83,7 @@ def capture_canonical_interop():
     }
 
 
-def build_fixture():
+def build_fixture() -> dict[str, object]:
     version = bpy.app.version_string
     build_hash = bpy.app.build_hash
     if isinstance(build_hash, bytes):
@@ -117,21 +129,20 @@ def build_fixture():
     }
 
 
-def parse_output_path():
+def parse_output_path() -> Path:
     script_args = sys.argv[sys.argv.index("--") + 1 :] if "--" in sys.argv else []
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output", type=Path, default=None)
     args = parser.parse_args(script_args)
     version = bpy.app.version_string
-    if Path(__file__).resolve().parent.name != version:
+    if TARGET_VERSION != version:
         raise RuntimeError(
-            f"capture directory {Path(__file__).resolve().parent.name!r} "
-            f"does not match Blender runtime version {version!r}"
+            f"capture targets Blender {TARGET_VERSION!r}, but runtime is {version!r}"
         )
     return args.output or Path(tempfile.gettempdir()) / "quatops-blender-witnesses.json"
 
 
-def main():
+def main() -> None:
     output = parse_output_path()
     output.parent.mkdir(parents=True, exist_ok=True)
     payload = build_fixture()

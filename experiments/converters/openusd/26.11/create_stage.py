@@ -2,17 +2,14 @@
 
 from __future__ import annotations
 
+import argparse
 import hashlib
 import json
-import sys
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parents[4]
-
-CANONICAL_INPUTS = ROOT / "experiments/interoperability/v1/canonical_inputs.json"
-HERE = Path(__file__).parent
-INPUTS_OUT = HERE / "converter_inputs.json"
-STAGE_OUT = HERE / "quatops_hierarchy.usda"
+from quatops.engines import QuaternionFrameMap, SignedAxisMap
+from scripts.evidence_format import dump_evidence_json
+from scripts.evidence_schema.targets import OpenUsdInputs
 
 
 def number(value: float) -> str:
@@ -20,12 +17,16 @@ def number(value: float) -> str:
 
 
 def main() -> None:
-    sys.path.insert(0, str(ROOT))
-    sys.path.insert(0, str(ROOT / "src"))
-    from quatops.engines import QuaternionFrameMap, SignedAxisMap
-    from scripts.evidence_format import dump_evidence_json
-
-    corpus = json.loads(CANONICAL_INPUTS.read_text(encoding="utf-8"))
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--repository-root", type=Path, required=True)
+    repository_root = parser.parse_args().repository_root.resolve(strict=True)
+    target_dir = repository_root / "experiments/converters/openusd/26.11"
+    canonical_inputs = (
+        repository_root / "experiments/interoperability/v1/canonical_inputs.json"
+    )
+    inputs_out = target_dir / "converter_inputs.json"
+    stage_out = target_dir / "quatops_hierarchy.usda"
+    corpus = json.loads(canonical_inputs.read_text(encoding="utf-8"))
     by_id = {row["case_id"]: row["canonical_wxyz"] for row in corpus["orientations"]}
     # Explicit right-handed USD test frame: X right, Y up, -Z forward.
     frame = SignedAxisMap(("x", "z", "-y"))
@@ -53,7 +54,7 @@ def main() -> None:
         "schema_version": "1.0",
         "kind": "quatops_generated_openusd_converter_input",
         "canonical_input_sha256": hashlib.sha256(
-            CANONICAL_INPUTS.read_bytes()
+            canonical_inputs.read_bytes()
         ).hexdigest(),
         "frame_contract": {
             "canonical": {
@@ -96,7 +97,12 @@ def main() -> None:
             "reset_ops": ["!resetXformStack!", "xformOp:translate", "xformOp:orient"],
         },
     }
-    INPUTS_OUT.write_text(dump_evidence_json(payload), encoding="utf-8", newline="\n")
+    checked_inputs = OpenUsdInputs.model_validate(payload, strict=True)
+    inputs_out.write_text(
+        dump_evidence_json(checked_inputs.model_dump(mode="json")),
+        encoding="utf-8",
+        newline="\n",
+    )
 
     def orient(row):
         return ", ".join(number(v) for v in row["usd_wxyz"])
@@ -136,8 +142,8 @@ def Xform "Scene"
     }}
 }}
 """
-    STAGE_OUT.write_text(stage, encoding="utf-8", newline="\n")
-    print(f"wrote QuatOps converter stage: {STAGE_OUT}")
+    stage_out.write_text(stage, encoding="utf-8", newline="\n")
+    print(f"wrote QuatOps converter stage: {stage_out}")
 
 
 if __name__ == "__main__":

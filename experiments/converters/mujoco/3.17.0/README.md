@@ -8,18 +8,19 @@ QuatOps or assigning frames to a simulation model.
 From the repository root, install the pinned environment and capture the
 selected witnesses:
 
-```powershell
+```shell
 uv sync --locked --project experiments/converters/mujoco/3.17.0 --python 3.10.11
-uv run --locked --project experiments/converters/mujoco/3.17.0 --python 3.10.11 `
-  python experiments/converters/mujoco/3.17.0/capture_native.py
+uv run --locked --project experiments/converters/mujoco/3.17.0 --python 3.10.11 \
+  python experiments/converters/mujoco/3.17.0/capture_native.py --repository-root .
 ```
 
-This version directory is MuJoCo's optional native-capture dependency set. Its
-locked project installs `mujoco==3.17.0` and `numpy==2.2.6`; the root QuatOps
-environment does not need either native capture dependency.
+The [`mujoco` optional dependency set](../../../pyproject.toml) pins
+`mujoco==3.17.0` and `numpy==2.2.6`; the root QuatOps development install does
+not need either native capture dependency.
 
-The script writes only the retained converter witnesses and run provenance to
-`tests/golden/oracles/mujoco/3.17.0/converter/`. Replay those frozen native
-values with `tests/experiments/converters/mujoco/test_mujoco_converter.py`.
+The script writes only retained converter witnesses and provenance to
+[`tests/golden/oracles/mujoco/3.17.0/converter`](../../../../tests/golden/oracles/mujoco/3.17.0/converter/manifest.json).
+Replay those native values with
+[`test_mujoco_converter.py`](../../../../tests/experiments/converters/mujoco/test_mujoco_converter.py).
 Broader Euler, integration, and derivative discovery is outside this evidence
 package.

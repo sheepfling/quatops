@@ -23,15 +23,16 @@ For a cross-target summary of measured conventions and evidence status, see the
 
 - [Sophus 1.24.6](sophus.md): selected native `SO3f` and `SO3d` witnesses
   reviewed against separate SciPy 1.18.1 formula checks; not a named converter.
-- [OpenXR 1.1.65](openxr.md): normative pose contract and native SDK header
-  ABI reviewed; no runtime is installed or registered here.
+- [OpenXR 1.1.65](openxr.md): normative pose contract, native SDK header ABI,
+  and static frame-chain capture through the pinned Khronos test runtime; no
+  vendor runtime or tracking hardware is covered.
 
 ## Runtime-dependent evidence still unavailable
 
-OpenXR `xrLocateSpace`, tracking validity, and runtime-specific space
-relations require a configured OpenXR runtime and remain unmeasured. Sophus
-Jacobians and tangent derivatives are outside the selected `SO3f`/`SO3d`
-discovery scope, not part of a named converter claim.
+OpenXR vendor-runtime `xrLocateSpace` behavior, tracking validity, and
+runtime-specific space relations require a configured vendor runtime and
+tracking system. Sophus Jacobians and tangent derivatives are outside the
+selected `SO3f`/`SO3d` discovery scope, not part of a named converter claim.
 
 See [transport captures](../transports/README.md) for glTF captures and
 [converter evidence](../transports/openusd.md) for the OpenUSD stage round trip.

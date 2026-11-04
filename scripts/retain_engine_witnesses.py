@@ -24,7 +24,6 @@ else:
         read_evidence_document,
     )
 
-ROOT = Path(__file__).resolve().parents[1]
 JsonRecord = dict[str, JsonValue]
 
 
@@ -83,6 +82,21 @@ def _record(value: object, *, context: str) -> JsonRecord:
     if not isinstance(value, dict) or any(not isinstance(key, str) for key in value):
         raise TypeError(f"{context} must be a JSON object with string keys")
     return cast(JsonRecord, value)
+
+
+def _axis_map(value: object) -> list[str]:
+    """Validate signed source-axis labels while preserving their order."""
+    labels = {"x", "-x", "y", "-y", "z", "-z"}
+    if (
+        not isinstance(value, list)
+        or len(value) != 3
+        or any(not isinstance(label, str) or label not in labels for label in value)
+        or len({label.lstrip("-") for label in value}) != 3
+    ):
+        raise TypeError(
+            "destination_axes_from_source must be a signed axis permutation"
+        )
+    return value
 
 
 def _rows(value: object, *, context: str) -> list[JsonRecord]:
@@ -197,7 +211,13 @@ def sha256(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
-def retain(engine: str, version: str, source_path: Path, output_dir: Path) -> None:
+def retain(
+    engine: str,
+    version: str,
+    source_path: Path,
+    output_dir: Path,
+    repository_root: Path,
+) -> None:
     config = ENGINE_CONFIG[engine]
     if config.version and version != config.version:
         raise ValueError(f"{engine} version must be {config.version}")
@@ -209,7 +229,9 @@ def retain(engine: str, version: str, source_path: Path, output_dir: Path) -> No
     canonical_interop = _record(
         captured.get("canonical_interop"), context="canonical_interop"
     )
-    canonical_inputs = ROOT / "experiments/interoperability/v1/canonical_inputs.json"
+    canonical_inputs = (
+        repository_root / "experiments/interoperability/v1/canonical_inputs.json"
+    )
     input_document = read_evidence_document(canonical_inputs)
     input_rows = _rows(input_document.get("orientations"), context="orientations")
     expected_inputs: dict[str, list[float]] = {}
@@ -261,11 +283,8 @@ def retain(engine: str, version: str, source_path: Path, output_dir: Path) -> No
             ),
             context=config.frame_key,
         )
-    axes_from_source = _record(
-        map_record.get("destination_axes_from_source"),
-        context="destination_axes_from_source",
-    )
-    capture_source = ROOT / capture_source_name
+    axes_from_source = _axis_map(map_record.get("destination_axes_from_source"))
+    capture_source = repository_root / capture_source_name
     witness = {
         "schema_version": 1,
         "target": {
@@ -308,7 +327,7 @@ def retain(engine: str, version: str, source_path: Path, output_dir: Path) -> No
         },
         "provenance": {
             "original_capture_sha256": hashlib.sha256(original_bytes).hexdigest(),
-            "capture_source": capture_source_name.replace("\\", "/"),
+            "capture_source": capture_source_name,
             "capture_source_sha256": sha256(capture_source),
             "canonical_input_file": "experiments/interoperability/v1/canonical_inputs.json",
             "canonical_input_sha256": sha256(canonical_inputs),
@@ -397,8 +416,15 @@ def main() -> None:
         type=Path,
         help="versioned directory for retained contract and witnesses",
     )
+    parser.add_argument("--repository-root", type=Path, required=True)
     args = parser.parse_args()
-    retain(args.engine, args.version, args.capture_json, args.output_dir)
+    retain(
+        args.engine,
+        args.version,
+        args.capture_json,
+        args.output_dir,
+        args.repository_root.resolve(strict=True),
+    )
 
 
 if __name__ == "__main__":

@@ -12,6 +12,14 @@ has a distinct version directory and frozen observations.
 - [`build_asset.py`](assets/build_asset.py) rebuilds the two source files using
   Python's standard library only. It imports no QuatOps, SciPy, or NumPy code.
 
+Run the builder with explicit output paths from any working directory:
+
+```shell
+python experiments/transports/gltf/2.0.0/assets/build_asset.py \
+  --binary-output experiments/transports/gltf/2.0.0/assets/rotation_transport.bin \
+  --gltf-output experiments/transports/gltf/2.0.0/assets/rotation_transport.gltf
+```
+
 ## Loaders
 
 - [Three.js GLTFLoader 0.187.0](threejs/0.187.0/README.md)

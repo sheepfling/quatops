@@ -9,13 +9,13 @@ directory, then retain the selected native witnesses:
 
 ```powershell
 uv run --project experiments/converters/openusd/26.11 --locked --python 3.14.6 `
-  python experiments/converters/openusd/26.11/create_stage.py
+  python experiments/converters/openusd/26.11/create_stage.py --repository-root .
 $captureDir = Join-Path $env:TEMP "quatops-openusd-26.11-capture"
 uv run --project experiments/converters/openusd/26.11 --locked --python 3.14.6 `
-  python experiments/converters/openusd/26.11/capture_native.py `
+  python experiments/converters/openusd/26.11/capture_native.py --repository-root . `
   --output $captureDir
-uv run --no-project --python 3.14.6 --with "pydantic>=2,<3" `
-  python -m scripts.retain_openusd_converter_witnesses $captureDir
+uv run --project experiments/converters/openusd/26.11 --locked --python 3.14.6 `
+  python -m scripts.retain_openusd_converter_witnesses $captureDir --repository-root .
 ```
 
 The contract declares a right-handed canonical frame with +X right, +Y

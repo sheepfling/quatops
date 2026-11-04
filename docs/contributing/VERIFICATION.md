@@ -27,8 +27,8 @@ These are the same checks used by CI:
     tests/typing_tests/consumer.py tests/typing_tests/float32_consumer.py
 .venv/bin/pyright --pythonpath .venv/bin/python
 .venv/bin/ruff check src tests experiments
-.venv/bin/python scripts/validate_evidence_json.py
-.venv/bin/python scripts/validate_converter_evidence.py
+.venv/bin/python -m scripts.validate_evidence_json --repository-root .
+.venv/bin/python -m scripts.validate_converter_evidence --repository-root .
 .venv/bin/ruff check --select B,C4,E4,PERF,RUF,SIM,UP \
     experiments/oracles experiments/converters scripts
 .venv/bin/ruff format --check experiments scripts

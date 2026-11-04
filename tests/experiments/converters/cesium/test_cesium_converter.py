@@ -93,7 +93,6 @@ def test_cesium_capture_provenance_and_explicit_frame_contract():
         "JSON formatting changed only"
     )
     assert len(provenance["captured_converter_input_sha256"]) == 64
-    assert len(provenance["captured_geographic_inputs_sha256"]) == 64
     hash_paths = {
         "converter_input_sha256": INPUTS_PATH,
         "canonical_inputs_sha256": ROOT

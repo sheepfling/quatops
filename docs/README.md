@@ -10,6 +10,9 @@
   API notes, coordinate maps, and quaternion trajectory conversion.
 - [Interoperability evidence atlas](INTEROPERABILITY_EVIDENCE.md): consolidated
   engine, math-oracle, transport, and capture-layer findings with open gaps.
+- [Converter setup and capture runbooks](../experiments/converters/README.md):
+  install pinned target environments, run portable captures, and find replay
+  checks.
 - [Changelog](../CHANGELOG.md): release and compatibility notes.
 
 ## For contributors
@@ -33,9 +36,9 @@ Unreal, Unity, Godot, and Blender have versioned native convention and
 converter witnesses. Remaining evidence gaps are narrower:
 
 - [Extreme float64 rotation accuracy](https://github.com/sheepfling/quatops/issues/6)
-- OpenXR runtime behavior, including `xrLocateSpace` and runtime-specific
-  reference-space relations. The versioned specification and header ABI are
-  captured; no runtime is available in the capture environment.
+- OpenXR vendor and hardware runtime behavior. A pinned Khronos test-runtime
+  capture covers one static `xrLocateSpace` frame chain; tracking and runtime-
+  specific reference-space relations remain unmeasured.
 - Sophus Jacobian and tangent-derivative behavior is outside the selected
   `SO3f`/`SO3d` discovery scope and is not a converter release gate.
 

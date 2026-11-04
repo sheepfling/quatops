@@ -52,3 +52,5 @@ ROS 2/tf2 build. It does not cover DDS/CDR serialization, live publishers,
 time interpolation/extrapolation, dynamic transforms, or covariance messages.
 The Python replay and its SciPy/reference checks do not start ROS; native
 runtime execution and mathematical replay are separate evidence.
+The [versioned capture runbook](../../experiments/converters/ros2/0.36.23/README.md)
+contains the Docker image, C++ build, capture, and retention commands.

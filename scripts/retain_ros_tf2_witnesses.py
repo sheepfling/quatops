@@ -6,24 +6,12 @@ import argparse
 import hashlib
 from pathlib import Path
 
-from evidence_json import (
+from scripts.evidence_json import (
     compact_numeric_evidence,
     dump_evidence_json,
     parse_evidence_document,
     read_evidence_document,
 )
-
-ROOT = Path(__file__).resolve().parents[1]
-HERE = ROOT / "experiments/converters/ros2/0.36.23"
-SOURCE = HERE / "native/src/capture_ros.cpp"
-RUNNER = HERE / "capture_native.py"
-DOCKERFILE = HERE / "Dockerfile"
-CMAKE = HERE / "native/CMakeLists.txt"
-CAPTURE_HELPER = ROOT / "experiments/oracles/shared/capture_io.py"
-RETENTION_HELPER = ROOT / "scripts/evidence_json.py"
-RETENTION_FORMATTER = ROOT / "scripts/evidence_format.py"
-CORPUS = ROOT / "experiments/oracles/shared/orientation_inputs_v1.json"
-DESTINATION = ROOT / "tests/golden/oracles/ros2/0.36.23"
 
 
 def sha256(path: Path) -> str:
@@ -33,7 +21,19 @@ def sha256(path: Path) -> str:
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("capture_dir", type=Path, help="Full native capture folder")
+    parser.add_argument("--repository-root", type=Path, required=True)
     args = parser.parse_args()
+    repository_root = args.repository_root.resolve(strict=True)
+    package_dir = repository_root / "experiments/converters/ros2/0.36.23"
+    source = package_dir / "native/src/capture_ros.cpp"
+    runner = package_dir / "capture_native.py"
+    dockerfile = package_dir / "Dockerfile"
+    cmake = package_dir / "native/CMakeLists.txt"
+    capture_helper = repository_root / "experiments/oracles/shared/capture_io.py"
+    retention_helper = repository_root / "scripts/evidence_json.py"
+    retention_formatter = repository_root / "scripts/evidence_format.py"
+    corpus = repository_root / "experiments/oracles/shared/orientation_inputs_v1.json"
+    destination = repository_root / "tests/golden/oracles/ros2/0.36.23"
     capture_dir = args.capture_dir.resolve()
     manifest = read_evidence_document(capture_dir / "manifest.json")
     native = read_evidence_document(capture_dir / "native-stdout.json")
@@ -93,8 +93,8 @@ def main() -> None:
         }
     )
 
-    DESTINATION.mkdir(parents=True, exist_ok=True)
-    witnesses_path = DESTINATION / "witnesses.json"
+    destination.mkdir(parents=True, exist_ok=True)
+    witnesses_path = destination / "witnesses.json"
     witnesses = {
         "schema_version": "1.0",
         "evidence_kind": "native_ros2_tf2_buffer_core_capture",
@@ -151,8 +151,8 @@ def main() -> None:
         ),
         "conversion": (
             "For each edge, convert native target_from_source quaternion with "
-            "QuaternionFrameMap(world_map=target_map.inverse(), "
-            "body_map=source_map.inverse()).from_destination_wxyz(); map "
+            "QuaternionFrameMap(world_map=target_map, "
+            "body_map=source_map).from_destination_wxyz(); map "
             "translation with target_map.inverse().vector(). Compose labelled "
             "edges world_from_base and base_from_sensor in that order."
         ),
@@ -182,10 +182,10 @@ def main() -> None:
         ],
         "native_witnesses": "witnesses.json",
     }
-    (DESTINATION / "contract.json").write_text(
+    (destination / "contract.json").write_text(
         dump_evidence_json(contract), encoding="utf-8", newline="\n"
     )
-    (DESTINATION / "manifest.json").write_text(
+    (destination / "manifest.json").write_text(
         dump_evidence_json(
             {
                 "schema_version": "1.0",
@@ -209,23 +209,26 @@ def main() -> None:
                     ),
                     "native_stdout_sha256": sha256(capture_dir / "native-stdout.json"),
                     "capture_manifest_sha256": sha256(capture_dir / "manifest.json"),
-                    "corpus_sha256": sha256(CORPUS),
-                    "exporter_source_sha256": sha256(SOURCE),
-                    "capture_runner_sha256": sha256(RUNNER),
-                    "capture_helper_sha256": sha256(CAPTURE_HELPER),
-                    "dockerfile_sha256": sha256(DOCKERFILE),
-                    "build_recipe_sha256": sha256(CMAKE),
+                    "corpus_sha256": sha256(corpus),
+                    "exporter_source_sha256": sha256(source),
+                    "capture_runner_sha256": sha256(runner),
+                    "capture_helper_sha256": sha256(capture_helper),
+                    "dockerfile_sha256": sha256(dockerfile),
+                    "build_recipe_sha256": sha256(cmake),
                     "selected_witnesses_sha256": sha256(witnesses_path),
                     "reproduction": {
-                        "exporter_source_sha256": sha256(SOURCE),
-                        "runner_sha256": sha256(RUNNER),
-                        "capture_helper_sha256": sha256(CAPTURE_HELPER),
+                        "exporter_source_sha256": sha256(source),
+                        "runner_sha256": sha256(runner),
+                        "capture_helper_sha256": sha256(capture_helper),
                         "retention_script_sha256": sha256(Path(__file__)),
-                        "retention_helper_sha256": sha256(RETENTION_HELPER),
-                        "retention_formatter_sha256": sha256(RETENTION_FORMATTER),
-                        "dockerfile_sha256": sha256(DOCKERFILE),
-                        "build_recipe_sha256": sha256(CMAKE),
-                        "corpus_sha256": sha256(CORPUS),
+                        "retention_helper_sha256": sha256(retention_helper),
+                        "retention_formatter_sha256": sha256(retention_formatter),
+                        "dockerfile_sha256": sha256(dockerfile),
+                        "build_recipe_sha256": sha256(cmake),
+                        "corpus_sha256": sha256(corpus),
+                        "input_serialization_note": (
+                            "JSON formatting changed only; parsed replay input values are unchanged."
+                        ),
                     },
                 },
                 "selection": {
@@ -246,7 +249,7 @@ def main() -> None:
         newline="\n",
     )
     print(
-        f"retained {len(selected['observations'])} native ROS/tf2 witnesses at {DESTINATION}"
+        f"retained {len(selected['observations'])} native ROS/tf2 witnesses at {destination}"
     )
 
 

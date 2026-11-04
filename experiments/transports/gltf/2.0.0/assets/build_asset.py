@@ -1,20 +1,22 @@
 """Build the deterministic glTF 2.0 rotation transport input using stdlib."""
 
+from __future__ import annotations
+
+import argparse
 import json
 import math
 import struct
+from collections.abc import Sequence
 from pathlib import Path
 
-HERE = Path(__file__).parent
 
-
-def axis_quaternion(axis, angle):
+def axis_quaternion(axis: Sequence[float], angle: float) -> list[float]:
     length = math.sqrt(sum(component * component for component in axis))
     scale = math.sin(angle / 2.0) / length
     return [*(component * scale for component in axis), math.cos(angle / 2.0)]
 
 
-def append_f32(blob, values):
+def append_f32(blob: bytearray, values: Sequence[float]) -> tuple[int, int]:
     while len(blob) % 4:
         blob.append(0)
     offset = len(blob)
@@ -22,7 +24,11 @@ def append_f32(blob, values):
     return offset, len(values) * 4
 
 
-def main():
+def main() -> None:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--binary-output", type=Path, required=True)
+    parser.add_argument("--gltf-output", type=Path, required=True)
+    args = parser.parse_args()
     times = [0.0, 0.7, 1.9]
     rotations = [
         axis_quaternion((1.0, 0.0, 0.0), 0.35),
@@ -48,8 +54,13 @@ def main():
     accessors = []
 
     def accessor(
-        values, count, type_name, min_values=None, max_values=None, target=None
-    ):
+        values: Sequence[float] | Sequence[Sequence[float]],
+        count: int,
+        type_name: str,
+        min_values: list[float] | None = None,
+        max_values: list[float] | None = None,
+        target: int | None = None,
+    ) -> int:
         flat = (
             [component for element in values for component in element]
             if type_name != "SCALAR"
@@ -184,8 +195,10 @@ def main():
         "accessors": accessors,
     }
 
-    (HERE / "rotation_transport.bin").write_bytes(binary)
-    (HERE / "rotation_transport.gltf").write_text(
+    args.binary_output.parent.mkdir(parents=True, exist_ok=True)
+    args.gltf_output.parent.mkdir(parents=True, exist_ok=True)
+    args.binary_output.write_bytes(binary)
+    args.gltf_output.write_text(
         json.dumps(asset, indent=2, separators=(",", ": ")) + "\n",
         encoding="utf-8",
     )

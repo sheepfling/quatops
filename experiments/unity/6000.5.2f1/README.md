@@ -22,8 +22,8 @@ $arguments = @(
 )
 $capture = Start-Process -FilePath $unity -ArgumentList $arguments -PassThru -Wait -WindowStyle Hidden
 if ($capture.ExitCode -ne 0) { throw "Unity capture failed with exit code $($capture.ExitCode). See $log" }
-.venv\Scripts\python.exe scripts\retain_engine_witnesses.py unity 6000.5.2f1 `
-  $output tests\oracles\unity\6000.5.2f1
+.venv\Scripts\python.exe -m scripts.retain_engine_witnesses unity 6000.5.2f1 `
+  $output tests\oracles\unity\6000.5.2f1 --repository-root .
 ```
 
 The capture emits eight canonical orientations, native quaternion

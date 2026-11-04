@@ -44,11 +44,11 @@ input or serialized asset is already maintained beside its experiment, the
 package references that source by path and digest instead of retaining a
 second byte-identical copy. Unknown fields and malformed vector, quaternion,
 or matrix shapes fail validation. The raw capture files are never rewritten.
-Run `python scripts/validate_evidence_json.py` for syntax and JSON-value validation, then
-`python scripts/validate_converter_evidence.py` for typed validation of the
+Run `python -m scripts.validate_evidence_json --repository-root .` for syntax and JSON-value validation, then
+`python -m scripts.validate_converter_evidence --repository-root .` for typed validation of the
 converter packages and Unreal, Unity, Godot, and Blender versions. The
 target-neutral selected-value product is reduced in memory with
-`python scripts/crystallize_converter_evidence.py`, rather than checked in
+`python -m scripts.crystallize_converter_evidence --repository-root .`, rather than checked in
 beside its source values. Pass `--output <path>` to export portable JSON or
 `--check --output <path>` to verify an existing export against the captures and
 retention rules.

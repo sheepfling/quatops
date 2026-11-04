@@ -22,7 +22,8 @@ colcon build \
   --build-base /tmp/ros-build \
   --install-base /tmp/ros-install
 source /tmp/ros-install/setup.bash
-python3 experiments/converters/ros2/0.36.23/capture_native.py \
+PYTHONPATH=/workspace python3 experiments/converters/ros2/0.36.23/capture_native.py \
+  --repository-root /workspace \
   --corpus experiments/oracles/shared/orientation_inputs_v1.json \
   --output /captures/full \
   --executable /tmp/ros-install/quatops_ros_capture/lib/quatops_ros_capture/capture_ros \
@@ -36,7 +37,7 @@ docker run --rm `
 ```
 
 To reselect the compact witnesses from a completed run, use
-`scripts/retain_ros_tf2_witnesses.py <capture-directory>`. The retained fixture
+`python -m scripts.retain_ros_tf2_witnesses <capture-directory> --repository-root .`. The retained fixture
 and QuatOps replay are in
 [`tests/golden/oracles/ros2/0.36.23`](../../../../tests/golden/oracles/ros2/0.36.23/manifest.json)
 and [`tests/experiments/converters/ros2/test_ros_tf2_converter.py`](../../../../tests/experiments/converters/ros2/test_ros_tf2_converter.py).

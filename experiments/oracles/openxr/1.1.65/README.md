@@ -55,6 +55,7 @@ Windows x86-64 and `uv` for the pinned Python formula-check dependencies.
 $Sdk = 'C:/path/to/OpenXR-SDK'
 $SdkSource = 'C:/path/to/OpenXR-SDK-Source'
 $CaptureDir = Join-Path $env:TEMP 'quatops-openxr-1.1.65'
+$env:PYTHONPATH = (Resolve-Path ..\..\..\..).Path
 $CaptureBytes = 'import pathlib,subprocess,sys; pathlib.Path(sys.argv[1]).write_bytes(subprocess.check_output(sys.argv[2:]))'
 New-Item -ItemType Directory -Force -Path $CaptureDir | Out-Null
 

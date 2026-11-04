@@ -34,6 +34,7 @@ g++ -std=c++17 -O2 `
   -I C:/path/to/eigen `
   -I C:/path/to/Sophus `
   capture_native.cpp -o capture_sophus.exe
+$env:PYTHONPATH = (Resolve-Path ..\..\..\..).Path
 foreach ($profile in @('float32', 'float64')) {
   $capture = Join-Path $env:TEMP "quatops-sophus-$profile.json"
   $captureCopy = "import pathlib, subprocess, sys; " + `

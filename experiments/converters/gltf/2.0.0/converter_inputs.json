@@ -7,36 +7,121 @@
       "handedness": "right",
       "positive_x": "right",
       "positive_y": "forward",
-      "positive_z": "up"
+      "positive_z": "up",
+      "forward": null,
+      "upAxis": null
     },
     "gltf_probe_frame": {
       "handedness": "right",
       "positive_x": "right",
       "positive_y": "up",
       "positive_z": "backward",
-      "forward": "-Z"
+      "forward": "-Z",
+      "upAxis": null
     },
-    "destination_axes_from_canonical": ["x", "z", "-y"],
+    "destination_axes_from_canonical": [
+      "x",
+      "z",
+      "-y"
+    ],
     "quaternion": "Hamilton active; glTF rotation property stores XYZW",
     "translation": "gltf_translation = B * canonical_translation",
     "scope": "static parent/child TRS artifact; no model import-axis assumption"
   },
-  "probe_vectors_xyz": [[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0], [0.25, -1.5, 2.75]],
-  "gltf_probe_vectors_xyz": [[1.0, 0.0, -0.0], [0.0, 0.0, -1.0], [0.0, 1.0, -0.0], [0.25, 2.75, 1.5]],
+  "probe_vectors_xyz": [
+    [
+      1.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      1.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      1.0
+    ],
+    [
+      0.25,
+      -1.5,
+      2.75
+    ]
+  ],
+  "gltf_probe_vectors_xyz": [
+    [
+      1.0,
+      0.0,
+      -0.0
+    ],
+    [
+      0.0,
+      0.0,
+      -1.0
+    ],
+    [
+      0.0,
+      1.0,
+      -0.0
+    ],
+    [
+      0.25,
+      2.75,
+      1.5
+    ]
+  ],
   "nodes": [
     {
       "node": "parent",
-      "canonical_wxyz": [0.7071067811865476, 0.0, 0.0, 0.7071067811865476],
-      "gltf_xyzw": [0.0, 0.7071067811865476, -0.0, 0.7071067811865476],
-      "canonical_translation_xyz": [3.0, -2.0, 1.0],
-      "gltf_translation_xyz": [3.0, 1.0, 2.0]
+      "canonical_wxyz": [
+        0.7071067811865476,
+        0.0,
+        0.0,
+        0.7071067811865476
+      ],
+      "gltf_xyzw": [
+        0.0,
+        0.7071067811865476,
+        -0.0,
+        0.7071067811865476
+      ],
+      "canonical_translation_xyz": [
+        3.0,
+        -2.0,
+        1.0
+      ],
+      "gltf_translation_xyz": [
+        3.0,
+        1.0,
+        2.0
+      ]
     },
     {
       "node": "child",
-      "canonical_wxyz": [0.8, 0.2, -0.4, 0.4],
-      "gltf_xyzw": [0.2, 0.4, 0.4, 0.8],
-      "canonical_translation_xyz": [1.25, -2.5, 3.75],
-      "gltf_translation_xyz": [1.25, 3.75, 2.5]
+      "canonical_wxyz": [
+        0.8,
+        0.2,
+        -0.4,
+        0.4
+      ],
+      "gltf_xyzw": [
+        0.2,
+        0.4,
+        0.4,
+        0.8
+      ],
+      "canonical_translation_xyz": [
+        1.25,
+        -2.5,
+        3.75
+      ],
+      "gltf_translation_xyz": [
+        1.25,
+        3.75,
+        2.5
+      ]
     }
   ]
 }

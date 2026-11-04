@@ -12,8 +12,8 @@ $script = Join-Path $root 'experiments\godot\capture.gd'
 $output = Join-Path $env:TEMP 'quatops-godot47-witnesses.json'
 & $godot --headless --path $project --script $script -- $output
 if ($LASTEXITCODE -ne 0) { throw "Godot capture failed: $LASTEXITCODE" }
-.venv\Scripts\python.exe scripts\retain_engine_witnesses.py godot 4.7-stable `
-  $output tests\oracles\godot\4.7-stable
+.venv\Scripts\python.exe -m scripts.retain_engine_witnesses godot 4.7-stable `
+  $output tests\oracles\godot\4.7-stable --repository-root .
 ```
 
 The output contains eight canonical orientations, exact native quaternions,

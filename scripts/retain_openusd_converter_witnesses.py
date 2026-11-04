@@ -12,10 +12,6 @@ from scripts.evidence_json import (
     read_evidence_rows,
 )
 
-ROOT = Path(__file__).resolve().parents[1]
-HERE = ROOT / "experiments/converters/openusd/26.11"
-DESTINATION = ROOT / "tests/golden/transports/openusd/26.11/converter"
-
 
 def sha256(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
@@ -24,7 +20,11 @@ def sha256(path: Path) -> str:
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("capture_dir", type=Path)
+    parser.add_argument("--repository-root", type=Path, required=True)
     args = parser.parse_args()
+    repository_root = args.repository_root.resolve(strict=True)
+    source_dir = repository_root / "experiments/converters/openusd/26.11"
+    destination = repository_root / "tests/golden/transports/openusd/26.11/converter"
     capture = args.capture_dir.resolve()
     native = read_evidence_document(capture / "manifest.json")
     observations = read_evidence_rows(capture / "observations.json")
@@ -67,8 +67,8 @@ def main() -> None:
         for row in observations
     ]
 
-    DESTINATION.mkdir(parents=True, exist_ok=True)
-    witnesses_path = DESTINATION / "witnesses.json"
+    destination.mkdir(parents=True, exist_ok=True)
+    witnesses_path = destination / "witnesses.json"
     witnesses_path.write_text(
         dump_evidence_json(
             {
@@ -122,11 +122,11 @@ def main() -> None:
             "renderer or file import pipeline",
         ],
     }
-    contract_path = DESTINATION / "contract.json"
+    contract_path = destination / "contract.json"
     contract_path.write_text(
         dump_evidence_json(contract), encoding="utf-8", newline="\n"
     )
-    (DESTINATION / "manifest.json").write_text(
+    (destination / "manifest.json").write_text(
         dump_evidence_json(
             {
                 "schema_version": "1.0",
@@ -136,26 +136,30 @@ def main() -> None:
                 "execution": native["execution"],
                 "native_binaries_sha256": native["native_binaries_sha256"],
                 "provenance": {
-                    "stage_sha256": sha256(HERE / "quatops_hierarchy.usda"),
-                    "converter_input_sha256": sha256(HERE / "converter_inputs.json"),
+                    "stage_sha256": sha256(source_dir / "quatops_hierarchy.usda"),
+                    "converter_input_sha256": sha256(
+                        source_dir / "converter_inputs.json"
+                    ),
                     "captured_converter_input_sha256": native["inputs"][
                         "converter_input_sha256"
                     ],
                     "native_observations_sha256": sha256(witnesses_path),
                     "native_run_manifest_sha256": sha256(capture / "manifest.json"),
                     "full_observation_sha256": sha256(capture / "observations.json"),
-                    "generator_sha256": sha256(HERE / "create_stage.py"),
-                    "native_capture_script_sha256": sha256(HERE / "capture_native.py"),
+                    "generator_sha256": sha256(source_dir / "create_stage.py"),
+                    "native_capture_script_sha256": sha256(
+                        source_dir / "capture_native.py"
+                    ),
                     "lockfile_sha256": native["lockfile_sha256"],
                     "contract_sha256": sha256(contract_path),
                 },
                 "reproduction": {
                     "retention_script_sha256": sha256(Path(__file__)),
                     "retention_helper_sha256": sha256(
-                        ROOT / "scripts/evidence_json.py"
+                        repository_root / "scripts/evidence_json.py"
                     ),
                     "retention_formatter_sha256": sha256(
-                        ROOT / "scripts/evidence_format.py"
+                        repository_root / "scripts/evidence_format.py"
                     ),
                 },
                 "selection": {
@@ -172,8 +176,8 @@ def main() -> None:
         newline="\n",
     )
     print(
-        f"retained {len(observations)} OpenUSD witnesses at {DESTINATION}; "
-        f"stage remains at {HERE / 'quatops_hierarchy.usda'}"
+        f"retained {len(observations)} OpenUSD witnesses at {destination}; "
+        f"stage remains at {source_dir / 'quatops_hierarchy.usda'}"
     )
 
 

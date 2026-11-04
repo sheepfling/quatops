@@ -68,21 +68,11 @@ native C++ quaternion APIs.
 
 Run the converter acceptance set with:
 
-```powershell
-$acceptanceTests = @(
-  'tests\quatops\engines\test_canonical_interoperability.py',
-  'tests\quatops\engines\test_engine_basis_oracle.py',
-  'tests\experiments\engines\shared\test_engine_proof_profiles.py',
-  'tests\experiments\converters\ros2\test_ros_tf2_converter.py',
-  'tests\experiments\converters\cesium\test_cesium_converter.py',
-  'tests\experiments\converters\gltf\test_gltf_converter_roundtrip.py',
-  'tests\experiments\converters\openusd\test_openusd_converter_roundtrip.py',
-  'tests\experiments\converters\spiceypy\test_spiceypy_converter.py',
-  'tests\experiments\converters\mujoco\test_mujoco_converter.py',
-  'tests\experiments\converters\opencv\test_opencv_converter.py',
-  'tests\experiments\converters\eigen\test_eigen_converter.py'
-)
-.venv\Scripts\python.exe -m pytest -q $acceptanceTests
+```shell
+uv run --extra dev python -m pytest -q \
+  tests/quatops/engines \
+  tests/experiments/engines \
+  tests/experiments/converters
 ```
 
 ## Converter-boundary evidence and remaining scope
@@ -91,6 +81,8 @@ $acceptanceTests = @(
 | --- | --- | --- |
 | [CesiumJS 1.124.0](oracles/cesium.md) | QuatOps local-ENU orientations placed at selected WGS84 origins with native ENU-to-ECEF transforms, point actions, and inverse recovery; 5 selected witnesses | Other local frames, asset axes, rendering, and time-dependent Earth orientation |
 | [glTF 2.0 / Three.js GLTFLoader 0.187.0](transports/gltf.md) | QuatOps-generated static `.gltf` hierarchy loaded by the pinned native loader; local/world actions, hierarchy composition, inverse, and file hashes | Animation export/import is outside this converter proof; other loaders retain separate behavior evidence |
+| glTF 2.0 loader observations through Blender 5.1.2, VTK, and Trimesh | Native loader captures for authored assets | No QuatOps-generated round-trip acceptance claim for these loader routes |
+| Khronos glTF Validator 2.0.0-dev.3.10 | Native file/spec validation | Validation only; not a rotation-action oracle |
 | [OpenUSD 26.11](transports/openusd.md) | QuatOps-generated USDA reopened by pinned OpenUSD; orient ops, parent/child composition, reset stack, and native point/direction actions | Time-sampled ops, scale/shear decomposition, renderer/importer behavior, and asset axes |
 | [ROS 2 Jazzy / tf2 0.36.23](oracles/ros2-tf2.md) | Native `BufferCore` three-frame chain, both lookup directions, transformed points, `TransformStamped` fields, and `fromMsg` round trip | DDS/CDR wire transport, live network, time interpolation/extrapolation, and dynamic broadcasters |
 | [SpiceyPy 8.3.0 / CSPICE_N0067](oracles/spiceypy.md) | Eight selected canonical inputs, native `q2m`/`mxv` actions, `m2q` round trip, native `axisar` matrix to `m2q` quaternion route, and both `qxq` product orders | `eul2m`/Euler frame direction, named SPICE frames, kernels, and spacecraft frame semantics |
@@ -98,8 +90,8 @@ $acceptanceTests = @(
 | [OpenCV 4.13.0](oracles/opencv.md) | Native `cv2.Rodrigues` plus `cv2.gemm` basis/probe actions, reverse rotvec conversion, noncommuting matrix composition; float32 and float64 | C++ `cv::Quat`, camera/world frames, and Jacobian adapters |
 | [Eigen 5.0.1](oracles/eigen.md) | Native C++ `Quaternionf`/`Quaterniond` WXYZ construction, XYZW coeffs, vector action, matrix conversion, `AngleAxis`, and both product orders | Application-specific frames, Sophus tangent semantics, serialization, and interpolation |
 | PROJ 9.5.1 | 11 native WGS84 probes, second Windows run, analytic ENU/ECEF basis and SciPy matrix review | Supporting frame evidence only; no PROJ quaternion or Cesium runtime claim |
-| Sophus 1.24.6 | Selected native `SO3f` and `SO3d` witnesses for constructor normalization/order, antipodes, exp/log, action, inverse, noncommuting products, and perturbation side; separate SciPy 1.18.1 checks pass | Supporting math evidence only; no named converter, Jacobian, or tangent-derivative claim |
-| OpenXR 1.1.65 | Reviewed specification pose/frame contract plus exact native SDK header ABI for `XrQuaternionf` and `XrPosef` | No runtime registered; native `xrLocateSpace`, tracking, and runtime-specific relations remain unmeasured |
+| [Sophus 1.24.6](oracles/sophus.md) | Selected native `SO3f` and `SO3d` witnesses for constructor normalization/order, antipodes, exp/log, action, inverse, noncommuting products, and perturbation side; separate SciPy 1.18.1 checks pass | Supporting math evidence only; no named converter, Jacobian, or tangent-derivative claim |
+| [OpenXR 1.1.65 / Khronos test runtime](oracles/openxr.md) | Reviewed specification pose/frame contract, exact SDK header ABI, and a native static-space `xrLocateSpace` chain using the pinned test runtime | Static test-runtime relation and pose action captured; no vendor runtime, tracking, or hardware behavior claimed |
 
 These are auxiliary proofs and fixtures, not new runtime APIs under `src/`.
 Native library/runtime execution, SDK-header ABI capture, and SciPy formula
@@ -110,11 +102,14 @@ passing broad sweeps are not included in the product evidence set.
 
 The compact converter suites are grouped by target under
 `tests/experiments/converters/`: ROS 2/tf2, Cesium, glTF, OpenUSD, SpiceyPy,
-MuJoCo, OpenCV, and Eigen. Accepted converter manifests and selected outputs
+MuJoCo, OpenCV, and Eigen. Separate loader observations for Blender, VTK, and
+Trimesh and format validation by Khronos glTF Validator remain discovery
+evidence without converter acceptance claims. Accepted converter manifests and selected outputs
 live under `tests/golden/`; selected Sophus discovery witnesses and the
-OpenXR header capture remain under `experiments/oracles/`. Sophus raw sweeps
-remain temporary, and OpenXR has no runtime capture because none is registered
-in this environment. Neither is a QuatOps converter acceptance claim.
+OpenXR SDK and test-runtime captures remain under `experiments/oracles/`.
+Sophus raw sweeps remain temporary. The OpenXR capture exercises the Khronos
+test runtime only; it does not represent a vendor runtime or tracked hardware.
+Neither Sophus nor OpenXR is a QuatOps converter acceptance claim.
 
 ## Evidence policy
 

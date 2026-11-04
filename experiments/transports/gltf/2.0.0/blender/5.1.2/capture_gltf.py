@@ -1,16 +1,33 @@
 """Capture Blender 5.1.2's native glTF importer and animation evaluation."""
 
+from __future__ import annotations
+
 import hashlib
 import json
 import math
 import sys
 from datetime import datetime, timezone
 from pathlib import Path
+from typing import Any, TypedDict
 
 import bpy
 
 
-def sha256_file(path):
+class CurveKey(TypedDict):
+    interpolation: str
+    handle_left_type: str
+    handle_right_type: str
+
+
+class CurveRow(TypedDict):
+    slot_identifier: str
+    data_path: str
+    array_index: int
+    keys: list[CurveKey]
+    key_frames: list[float]
+
+
+def sha256_file(path: Path) -> str:
     digest = hashlib.sha256()
     with Path(path).open("rb") as stream:
         for block in iter(lambda: stream.read(1024 * 1024), b""):
@@ -18,7 +35,7 @@ def sha256_file(path):
     return digest.hexdigest()
 
 
-def text_value(value):
+def text_value(value: str | bytes) -> str:
     return (
         value.decode("utf-8", errors="replace")
         if isinstance(value, bytes)
@@ -26,11 +43,11 @@ def text_value(value):
     )
 
 
-def matrix_rows(matrix):
+def matrix_rows(matrix: Any) -> list[list[float]]:
     return [[float(matrix[row][column]) for column in range(4)] for row in range(4)]
 
 
-def quaternion_wxyz(quaternion):
+def quaternion_wxyz(quaternion: Any) -> list[float]:
     return [
         float(quaternion.w),
         float(quaternion.x),
@@ -39,7 +56,7 @@ def quaternion_wxyz(quaternion):
     ]
 
 
-def object_transform(object_):
+def object_transform(object_: Any) -> dict[str, list[list[float]]]:
     bpy.context.view_layer.update()
     evaluated = object_.evaluated_get(bpy.context.evaluated_depsgraph_get())
     return {
@@ -48,33 +65,34 @@ def object_transform(object_):
     }
 
 
-def action_curves(action):
-    rows = []
+def action_curves(action: Any) -> dict[str, object]:
+    rows: list[CurveRow] = []
     for layer in action.layers:
         for strip in layer.strips:
             for slot in action.slots:
                 bag = strip.channelbag(slot)
                 if bag is None:
                     continue
-                rows.extend(
-                    {
-                        "slot_identifier": slot.identifier,
-                        "data_path": curve.data_path,
-                        "array_index": curve.array_index,
-                        "keys": [
-                            {
-                                "interpolation": point.interpolation,
-                                "handle_left_type": point.handle_left_type,
-                                "handle_right_type": point.handle_right_type,
-                            }
-                            for point in curve.keyframe_points
-                        ],
-                        "key_frames": [
-                            float(point.co.x) for point in curve.keyframe_points
-                        ],
-                    }
-                    for curve in bag.fcurves
-                )
+                for curve in bag.fcurves:
+                    keys: list[CurveKey] = [
+                        {
+                            "interpolation": point.interpolation,
+                            "handle_left_type": point.handle_left_type,
+                            "handle_right_type": point.handle_right_type,
+                        }
+                        for point in curve.keyframe_points
+                    ]
+                    rows.append(
+                        {
+                            "slot_identifier": slot.identifier,
+                            "data_path": curve.data_path,
+                            "array_index": curve.array_index,
+                            "keys": keys,
+                            "key_frames": [
+                                float(point.co.x) for point in curve.keyframe_points
+                            ],
+                        }
+                    )
     if not rows:
         raise RuntimeError(f"No F-curves in action {action.name!r}")
     key_frames = rows[0]["key_frames"]
@@ -98,7 +116,7 @@ def action_curves(action):
     }
 
 
-def install_action(object_, action):
+def install_action(object_: Any, action: Any) -> None:
     if object_.animation_data is None:
         object_.animation_data_create()
     object_.animation_data.action = action
@@ -106,14 +124,14 @@ def install_action(object_, action):
         object_.animation_data.action_slot = action.slots[0]
 
 
-def require_object(name):
+def require_object(name: str) -> Any:
     object_ = bpy.data.objects.get(name)
     if object_ is None:
         raise RuntimeError(f"Blender importer did not create object {name!r}")
     return object_
 
 
-def set_scene_time(scene, seconds):
+def set_scene_time(scene: Any, seconds: float) -> float:
     # The glTF importer maps t=0 to Blender frame 0, even when scene.frame_start
     # remains 1. Sample the imported action's absolute frame coordinate.
     frame_value = seconds * scene.render.fps / scene.render.fps_base
@@ -123,7 +141,7 @@ def set_scene_time(scene, seconds):
     return frame_value
 
 
-def main():
+def main() -> None:
     if "--" not in sys.argv:
         raise RuntimeError("Expected -- followed by --asset PATH --output PATH")
     import argparse
@@ -196,9 +214,7 @@ def main():
         t0, t1, t2 = time_values
         epsilon = min(1e-6, (t1 - t0) / 1000.0, (t2 - t1) / 1000.0)
         boundary_samples = []
-        for offset in (1e-5, epsilon):
-            if offset == epsilon == 1e-5:
-                continue
+        for offset in dict.fromkeys((1e-5, epsilon)):
             boundary_samples.append((f"before-key-1-{offset:.0e}", t1 - offset))
         if interpolation == "STEP":
             samples = [

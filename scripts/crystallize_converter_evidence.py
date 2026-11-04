@@ -3,20 +3,17 @@
 from __future__ import annotations
 
 import argparse
-import sys
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parents[1]
-sys.path.insert(0, str(ROOT))
+from scripts.evidence_schema.product import (
+    build_evidence_product,
+    render_evidence_product,
+)
 
 
 def main() -> None:
-    from scripts.evidence_schema.product import (
-        build_evidence_product,
-        render_evidence_product,
-    )
-
     parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--repository-root", type=Path, required=True)
     parser.add_argument(
         "--output",
         type=Path,
@@ -28,8 +25,9 @@ def main() -> None:
         help="fail if the existing product differs from regenerated evidence",
     )
     args = parser.parse_args()
+    repository_root = args.repository_root.resolve(strict=True)
 
-    product = build_evidence_product(ROOT)
+    product = build_evidence_product(repository_root)
     if args.check:
         if args.output is None:
             raise SystemExit("--check requires --output")

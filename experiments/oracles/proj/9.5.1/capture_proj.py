@@ -4,30 +4,27 @@ from __future__ import annotations
 
 import argparse
 import json
-import sys
+from importlib import resources
 from pathlib import Path
 
 import pyproj
 from pyproj import Transformer, network
 from pyproj.enums import TransformDirection
 
-ROOT = Path(__file__).resolve().parents[4]
+from experiments.oracles.shared.capture_io import (
+    Capture,
+    Observation,
+    contract,
+    numeric,
+)
 
 
 def main() -> None:
-    sys.path.insert(0, str(ROOT))
-    from experiments.oracles.shared.capture_io import (
-        Capture,
-        Observation,
-        contract,
-        numeric,
-    )
-
     cli = argparse.ArgumentParser(description=__doc__)
     cli.add_argument(
         "--geographic",
         type=Path,
-        default=ROOT / "experiments/oracles/shared/geographic_inputs_v1.json",
+        required=True,
     )
     cli.add_argument(
         "--output", type=Path, required=True, help="New, empty capture directory"
@@ -36,8 +33,15 @@ def main() -> None:
 
     network.set_network_enabled(False)
     data = json.loads(args.geographic.read_text(encoding="utf-8"))
-    module_dir = Path(pyproj.__file__).parent
-    native_binary = next(iter(module_dir.glob("_transformer*")), None)
+    module_files = resources.files("pyproj")
+    native_binary = next(
+        (
+            Path(str(resource))
+            for resource in module_files.iterdir()
+            if resource.name.startswith("_transformer")
+        ),
+        None,
+    )
     capture = Capture(
         "proj_geographic",
         "PROJ via pyproj",
