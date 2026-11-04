@@ -15,11 +15,14 @@ and execute from the repository root:
 $envDir = Join-Path $env:TEMP 'quatops-captures\opencv-4.13.0'
 uv venv --python 3.13.14 $envDir
 uv pip install --python (Join-Path $envDir 'Scripts\python.exe') -r experiments\converters\opencv\4.13.0\requirements-converter.txt
-.venv\Scripts\python.exe experiments\converters\opencv\4.13.0\prepare_inputs.py
-& (Join-Path $envDir 'Scripts\python.exe') experiments\converters\opencv\4.13.0\capture_native.py
+$inputs = Join-Path $env:TEMP 'quatops-captures\opencv-4.13.0-inputs.json'
+.venv\Scripts\python.exe experiments\converters\opencv\4.13.0\prepare_inputs.py --output $inputs
+& (Join-Path $envDir 'Scripts\python.exe') experiments\converters\opencv\4.13.0\capture_native.py --inputs $inputs
 ```
 
 The retained manifest records the OpenCV package version, runtime details, and
 native binary hashes alongside the selected witnesses. The verbose build
-configuration is not retained. Replay the selected boundary evidence with
+configuration and generated QuatOps input file are not retained; the shared
+source plan and exact native-observed rotation vectors remain available.
+Replay the selected boundary evidence with
 `tests/experiments/converters/opencv/test_opencv_converter.py`.

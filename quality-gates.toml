@@ -35,9 +35,7 @@ exclude = [
   "experiments/converters/openusd/26.11/capture_native.py",
   "experiments/converters/openusd/26.11/create_stage.py",
   "experiments/converters/spiceypy/8.3.0/capture_native.py",
-  "experiments/oracles/mujoco/3.17.0/capture_mujoco.py",
   "experiments/oracles/proj/9.5.1/capture_proj.py",
-  "experiments/oracles/spiceypy/8.3.0/capture_spice.py",
 ]
 
 [checks.output_escaping]

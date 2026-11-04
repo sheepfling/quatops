@@ -85,22 +85,25 @@
     "exporter_source_sha256": "3d8374d3e3dede9d14e06ae5fb5667504cc41787ca7451eb989c914a68e2f41d",
     "runner_sha256": "89631d8ef80638380c87fe45334d28d7092b2ebcc43280bffc7e71a9bb0db61e",
     "dockerfile_sha256": "ed11408beb834fbb24ac68e7773d08dbb068be8e0b94dffa569d86c1de7edd0c",
-    "selected_witnesses_sha256": "21632da6445f4e55ece38daabf144e009823c800d8db7aeb21a53395673a0424",
+    "selected_witnesses_sha256": "45a36d22466141597dc4062b088885b4d076484c53438b95a0650630f1b134b4",
     "reproduction": {
       "exporter_source_sha256": "3d8374d3e3dede9d14e06ae5fb5667504cc41787ca7451eb989c914a68e2f41d",
       "runner_sha256": "922a65af8cf55ae2e91398ee9e1162c3a5ffcf03338c02262c1ff1c83179dfcd",
-      "capture_helper_sha256": "5f9ee3af35720aed1ae476b07d2465e3ce9b742ce6c538edf32da64f10325347",
+      "capture_helper_sha256": "b690009841d5c54803381d4256c058635afd5649e3b59441bb22bb63f3cbb4ad",
       "dockerfile_sha256": "56865b382ad0c3fe1c0c2ebb6da4f3faed410d0c81839f33ce44687d876bbcb5",
       "build_recipe_sha256": "65e75f02b743ef65eab8f0041ba8f286c767a60e3e02a64921e1a822af00e835",
-      "corpus_sha256": "eaf7605b3298ec9dbdf7838f43f2da61d90af5351bb15e455d3eb37c6c6b5446",
-      "retention_script_sha256": "28a164df70a9e9af40616a53c054190e730d0980f90428b6361ed5db7bf3ba54",
-      "retention_helper_sha256": "47e1bf945aeefb0473a6c95eccc22bde2a5b6df9ba4581f599418a6c1ffe5081"
+      "corpus_sha256": "4af272e762f402cb4b3a60ff063bcc2ef1b79aa82e6890207abfa1bf16890db7",
+      "retention_script_sha256": "b0fef46180731b5f71ce5db6ce709061e4bcec848e2c3b27853cbaccb6c39120",
+      "retention_helper_sha256": "cbd84cc6825ea484953121efc6755c9bdd210bbce410e8c1fb0a137a3953eb1c",
+      "captured_replay_corpus_sha256": "eaf7605b3298ec9dbdf7838f43f2da61d90af5351bb15e455d3eb37c6c6b5446",
+      "input_serialization_note": "JSON formatting changed only; parsed replay input values are unchanged.",
+      "retention_formatter_sha256": "56961d6be101a2bdfb1b21372c823ec86dfd636547d851901b7284f2ae20e0b3"
     }
   },
   "selection": {
     "retained_observations": 2,
     "full_capture_observations": 102,
-    "policy": "retain both directions of the nontrivial named-frame chain; discard other successful sweeps",
+    "policy": "retain both lookup directions; store shared edge inputs once and keep one forward message, point action, and round trip",
     "numeric_values": "round-trippable decimals and dtype; exact bits only for signed-zero or nonfinite values"
   }
 }

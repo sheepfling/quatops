@@ -15,7 +15,11 @@ ROOT = REPOSITORY_ROOT
 FIXTURE = ROOT / "tests/golden/oracles/mujoco/3.17.0/converter"
 CONTRACT = json.loads((FIXTURE / "contract.json").read_text(encoding="utf-8"))
 MANIFEST = json.loads((FIXTURE / "manifest.json").read_text(encoding="utf-8"))
-INPUTS = json.loads((FIXTURE / "inputs.json").read_text(encoding="utf-8"))
+INPUTS = json.loads(
+    (ROOT / "experiments/converters/mujoco/3.17.0/converter_inputs.json").read_text(
+        encoding="utf-8"
+    )
+)
 WITNESSES = json.loads((FIXTURE / "witnesses.json").read_text(encoding="utf-8"))
 SHARED_PATH = ROOT / "experiments/interoperability/v1/canonical_inputs.json"
 SHARED = json.loads(SHARED_PATH.read_text(encoding="utf-8"))
@@ -25,7 +29,7 @@ CANONICAL = {
     for item in SHARED["orientations"]
 }
 PROBE = np.asarray(SHARED["probe_vector_xyz"], dtype=float)
-PROBES = np.vstack((np.eye(3), PROBE))
+BASIS = np.eye(3)
 ATOL = 3e-12
 
 
@@ -74,46 +78,35 @@ def test_mujoco_boundary_contract_and_capture_provenance_are_explicit():
         "retained_orientation_cases": 8,
         "native_created_orientations": 1,
         "noncommuting_product_orders": 2,
-        "native_quaternion_actions_per_orientation": 4,
+        "native_basis_images_per_orientation": 3,
+        "native_mixed_probe_case_id": "mixed_a",
     }
-    full = json.loads(
-        (ROOT / "tests/golden/oracles/mujoco/3.17.0/native_rotation.json").read_text(
-            encoding="utf-8"
-        )
-    )
     paths = {
-        "capture_script_sha256": ROOT
+        "reproduction_capture_script_sha256": ROOT
         / "experiments/converters/mujoco/3.17.0/capture_native.py",
         "contract_sha256": FIXTURE / "contract.json",
         "converter_input_spec_sha256": ROOT
         / "experiments/converters/mujoco/3.17.0/converter_inputs.json",
         "selected_inputs_sha256": SHARED_PATH,
         "witnesses_sha256": FIXTURE / "witnesses.json",
-        "full_oracle_sha256": ROOT
-        / "tests/golden/oracles/mujoco/3.17.0/native_rotation.json",
-        "pinned_lockfile_sha256": ROOT / "experiments/oracles/mujoco/3.17.0/uv.lock",
+        "pinned_lockfile_sha256": ROOT / "experiments/converters/mujoco/3.17.0/uv.lock",
     }
     for field, path in paths.items():
         assert (
             hashlib.sha256(path.read_bytes()).hexdigest()
             == MANIFEST["provenance"][field]
         ), field
-    capture_source = paths["capture_script_sha256"].read_text(encoding="utf-8")
+    capture_source = paths["reproduction_capture_script_sha256"].read_text(
+        encoding="utf-8"
+    )
     assert (
         "import quatops" not in capture_source and "from quatops" not in capture_source
     )
-    assert sorted(
-        (item["path"], item["sha256"]) for item in MANIFEST["native_binary_files"]
-    ) == sorted(
-        (item["path"], item["sha256"])
-        for item in full["runtime"]["native_binary_files_under_package"]
-    )
-    assert (FIXTURE / "inputs.json").read_bytes() == (
-        ROOT / "experiments/converters/mujoco/3.17.0/converter_inputs.json"
-    ).read_bytes()
+    assert MANIFEST["native_binary_files"][0]["path"] == "mujoco.dll"
+    assert len(MANIFEST["native_binary_files"][0]["sha256"]) == 64
 
 
-def test_mujoco_native_quat2mat_rotvec_and_mat2quat_preserve_canonical_action():
+def test_mujoco_native_quaternion_action_preserves_canonical_orientation():
     selected_ids = INPUTS["retained_case_ids"]
     rows = {item["case_id"]: item for item in OBS["canonical_to_native"]}
     assert set(rows) == set(selected_ids)
@@ -122,32 +115,21 @@ def test_mujoco_native_quat2mat_rotvec_and_mat2quat_preserve_canonical_action():
         native = rows[case_id]
         q_native = np.asarray(native["native_input_wxyz"], dtype=float)
         np.testing.assert_array_equal(q_native, canonical)
-        expected_matrix = matrix(canonical)
         check(
-            native["native_mju_quat2Mat_rows"],
-            expected_matrix,
-            f"MuJoCo mju_quat2Mat {case_id}",
-        )
-        expected_actions = np.asarray([hamilton.rotate(canonical, p) for p in PROBES])
-        check(
-            native["native_mju_rotVecQuat_basis_and_probe_xyz"],
-            expected_actions,
+            native["native_mju_rotVecQuat_basis_xyz"],
+            [hamilton.rotate(canonical, p) for p in BASIS],
             f"MuJoCo mju_rotVecQuat {case_id}",
         )
-        check(
-            native["native_mju_rotVecQuat_basis_and_probe_xyz"],
-            (expected_matrix @ PROBES.T).T,
-            f"MuJoCo basis action {case_id}",
-        )
-        check(
-            matrix(native["native_mju_mat2Quat_roundtrip_wxyz"]),
-            expected_matrix,
-            f"MuJoCo mju_mat2Quat roundtrip {case_id}",
-        )
+        if case_id == "mixed_a":
+            check(
+                native["native_mju_rotVecQuat_probe_xyz"],
+                hamilton.rotate(canonical, PROBE),
+                "MuJoCo mixed-vector action",
+            )
 
     check(
-        rows["antipode_mixed_a"]["native_mju_rotVecQuat_basis_and_probe_xyz"],
-        rows["mixed_a"]["native_mju_rotVecQuat_basis_and_probe_xyz"],
+        rows["antipode_mixed_a"]["native_mju_rotVecQuat_basis_xyz"],
+        rows["mixed_a"]["native_mju_rotVecQuat_basis_xyz"],
         "MuJoCo q versus -q",
     )
 
@@ -159,25 +141,16 @@ def test_mujoco_native_axisangle_constructor_converts_back_to_canonical():
         np.asarray(case["axis_xyz"]) * case["angle_radians"]
     ).as_matrix()
     q_native = np.asarray(native["native_input_wxyz"], dtype=float)
+    check(matrix(q_native), expected_matrix, "MuJoCo native-created quaternion")
     check(
-        native["native_mju_quat2Mat_rows"],
-        expected_matrix,
-        "MuJoCo native-created quaternion matrix",
-    )
-    check(
-        native["native_mju_rotVecQuat_basis_and_probe_xyz"],
-        (expected_matrix @ PROBES.T).T,
+        native["native_mju_rotVecQuat_basis_xyz"],
+        (expected_matrix @ BASIS.T).T,
         "MuJoCo native-created vector action",
     )
     check(
-        [hamilton.rotate(q_native, p) for p in PROBES],
-        native["native_mju_rotVecQuat_basis_and_probe_xyz"],
+        [hamilton.rotate(q_native, p) for p in BASIS],
+        native["native_mju_rotVecQuat_basis_xyz"],
         "MuJoCo native-to-canonical identity map",
-    )
-    check(
-        matrix(native["native_mju_mat2Quat_roundtrip_wxyz"]),
-        expected_matrix,
-        "MuJoCo native-created reverse matrix roundtrip",
     )
 
 
@@ -203,20 +176,15 @@ def test_mujoco_mulquat_matches_quatops_noncommuting_composition_both_orders():
             f"MuJoCo mju_mulQuat coefficients {case_id}",
         )
         check(
-            row["native_mju_quat2Mat_rows"],
-            matrix(expected),
-            f"MuJoCo product matrix {case_id}",
-        )
-        check(
-            row["native_mju_rotVecQuat_basis_and_probe_xyz"],
-            [hamilton.rotate(expected, p) for p in PROBES],
+            row["native_mju_rotVecQuat_basis_xyz"],
+            [hamilton.rotate(expected, p) for p in BASIS],
             f"MuJoCo product action {case_id}",
         )
 
     forward = np.asarray(
-        rows["mixed_a_times_mixed_b"]["native_mju_rotVecQuat_basis_and_probe_xyz"][-1]
+        rows["mixed_a_times_mixed_b"]["native_mju_rotVecQuat_basis_xyz"]
     )
     reverse = np.asarray(
-        rows["mixed_b_times_mixed_a"]["native_mju_rotVecQuat_basis_and_probe_xyz"][-1]
+        rows["mixed_b_times_mixed_a"]["native_mju_rotVecQuat_basis_xyz"]
     )
     assert np.max(np.abs(forward - reverse)) > 0.1

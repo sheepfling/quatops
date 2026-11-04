@@ -20,7 +20,8 @@
     "orientation_cases_per_precision": 8,
     "native_created_orientations_per_precision": 1,
     "noncommuting_product_orders_per_precision": 2,
-    "native_actions_per_orientation": 4
+    "native_basis_images_per_orientation": 3,
+    "native_mixed_probe_case_id": "mixed_a"
   },
   "native_binaries": [
     {
@@ -34,18 +35,18 @@
   ],
   "provenance": {
     "capture_script_sha256": "f7cffefd806691a6d20c3d0998f764529fd58471fde6991cb57adb9a8a451593",
-    "converter_input_sha256": "81dae4a755dba80a2a432925ff09a7d32690f6bd9ba22e6e16c5e4ed23212d2e",
     "preparation_script_sha256": "c61abb0fec177da6a98ab3fae1be4cb213cbad6eac336f1f62c54f41b7af9ec6",
     "preparation_spec_sha256": "9f17f3eafd3186d3460488eff91e0f50771f2ee7c5e6d42409b1e93df5fc084e",
     "shared_canonical_inputs_sha256": "a6f0630806b69d3b3b29a036aa10f63bfe214668329c661598951f84f8f41eec",
-    "witnesses_sha256": "fc87da568d430b6ecd72306b52992d48077be3bce46c75199d07316ee1113e44",
+    "witnesses_sha256": "478d5f05bfbc6278c6ccdfa182221db004d76abe6a875e393cb707261bee4744",
     "requirements_sha256": "9cb5d4bde5f32628ab23fe65481053de6bd354dc635bf53f3836d69de5ef6e29",
     "cv2_extension_directory": "site-packages/cv2",
-    "invocation_template": "python experiments/converters/opencv/4.13.0/capture_native.py --inputs tests/golden/oracles/opencv/4.13.0/converter/inputs.json"
+    "invocation_template": "python experiments/converters/opencv/4.13.0/prepare_inputs.py --output <temporary inputs.json>; then run capture_native.py --inputs <temporary inputs.json>",
+    "prepared_inputs_sha256": "81dae4a755dba80a2a432925ff09a7d32690f6bd9ba22e6e16c5e4ed23212d2e"
   },
   "reproduction": {
-    "capture_script_sha256": "f7cffefd806691a6d20c3d0998f764529fd58471fde6991cb57adb9a8a451593",
-    "preparation_script_sha256": "c61abb0fec177da6a98ab3fae1be4cb213cbad6eac336f1f62c54f41b7af9ec6",
+    "capture_script_sha256": "05f00ffa84e4586f8f5212938d5babde69766433269ea0311cd11499985266b3",
+    "preparation_script_sha256": "aa0574e24eb9b465995c2701927a10ad50710cff5a653611e4608ba3f5177764",
     "requirements_sha256": "9cb5d4bde5f32628ab23fe65481053de6bd354dc635bf53f3836d69de5ef6e29"
   }
 }

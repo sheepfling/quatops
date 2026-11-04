@@ -41,7 +41,7 @@
   },
   "provenance": {
     "witness_file": "../shared/witnesses.json",
-    "witness_sha256": "a038473e80ac2aa779e37fe60de02ed1ff56928cdefae51912c404defd22dcca",
+    "witness_sha256": "918fd07acd669639123da5622b7cce569bf9b8a6f54742bd9cd7c7eef9fed807",
     "capture_source": "experiments/godot/capture.gd",
     "capture_source_sha256": "e9ffcd08ef64471a2016894576059f1be3ed2e1d12a549562c4f0b6351013c61",
     "original_capture_sha256": "87b2ae2ab1fa4d15a9c5eead13828c6afcae76f4fca84e8e5b1acc421ae69f8f",
@@ -60,6 +60,6 @@
       "version": "4.8-dev1 (official)"
     },
     "capture_method": "Godot headless GDScript SceneTree script",
-    "retention_method": "selected values copied losslessly from native capture; no values regenerated"
+    "retention_method": "selected native outputs retained losslessly; inputs linked by case ID; redundant inputs and probe actions omitted"
   }
 }

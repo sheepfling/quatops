@@ -3,7 +3,7 @@
   "review_state": "Pinned native capture only; replay acceptance is recorded by repository tests",
   "execution": {
     "was_run": true,
-    "utc": "2026-11-03T07:47:52.822949+00:00",
+    "utc": "2026-11-04T03:58:40.506374+00:00",
     "python": "3.10.11 (tags/v3.10.11:7d4cc5a, Apr  5 2023, 00:38:17) [MSC v.1929 64 bit (AMD64)]",
     "platform": "Windows-10-10.0.26300-SP0",
     "architecture": "AMD64"
@@ -18,18 +18,19 @@
     "retained_orientation_cases": 8,
     "native_created_orientations": 1,
     "noncommuting_product_orders": 2,
-    "native_quaternion_actions_per_orientation": 4
+    "native_basis_images_per_orientation": 3,
+    "native_mixed_probe_case_id": "mixed_a"
   },
   "provenance": {
-    "capture_script_sha256": "febeb47235bf78852e7dd8935b8bb5a4eb174941c7d46402c386dbf79e6a8fe6",
+    "capture_script_sha256": "dbb67ac883809aef96daf1d1374e665500c52a1b25ef50f0e5aceee21e6cc051",
+    "reproduction_capture_script_sha256": "dbb67ac883809aef96daf1d1374e665500c52a1b25ef50f0e5aceee21e6cc051",
     "contract_sha256": "3897449f31edcb43c0f81234a95e539d84f702b0ce9c0f61adac410679c05bc9",
     "converter_input_spec_sha256": "aa7756f7c655246f53fbd4e34b1a48d72942c2bcb41fc181f8021fd666bfa058",
     "selected_inputs_sha256": "a6f0630806b69d3b3b29a036aa10f63bfe214668329c661598951f84f8f41eec",
-    "witnesses_sha256": "73da80dbd98169e9a0d4e796c1927a4497c6fac93426f4ac42bb1ce5ef9e7959",
-    "full_oracle_sha256": "8a6c6042c242bcacd3f5bab71b15256eb75a678b877987c096c0201043bb32f2",
+    "witnesses_sha256": "182188b8c1768b4b40b69b5d9cea983d394dd676376c7e0066f6bb8f5b440873",
     "pinned_lockfile_sha256": "d6ff7d22431be11b71292b83ac1ef9766b1735ff7ffc4f8955534246081323b5",
-    "loaded_cspice_binary_path": "C:\\Users\\peanu\\GIT\\sheepfling\\quatops\\experiments\\oracles\\spiceypy\\8.3.0\\.venv\\Lib\\site-packages\\spiceypy\\utils\\cspice.dll",
+    "loaded_cspice_binary_path": "C:\\Users\\peanu\\GIT\\sheepfling\\quatops\\experiments\\converters\\spiceypy\\8.3.0\\.venv\\Lib\\site-packages\\spiceypy\\utils\\cspice.dll",
     "loaded_cspice_binary_sha256": "7fd2dcc58d73ed5293847e67109897caba34240b8f9c38ad739c0b2ec6ce7715",
-    "exact_invocation": "experiments/oracles/spiceypy/8.3.0/.venv/Scripts/python.exe experiments/converters/spiceypy/8.3.0/capture_native.py"
+    "exact_invocation": "uv run --locked --project experiments/converters/spiceypy/8.3.0 --python 3.10.11 python experiments/converters/spiceypy/8.3.0/capture_native.py"
   }
 }

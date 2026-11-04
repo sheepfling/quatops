@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import argparse
 import hashlib
 import json
 from datetime import datetime, timezone
@@ -14,8 +15,6 @@ from pydantic import JsonValue, RootModel
 from scipy.spatial.transform import Rotation
 
 HERE = Path(__file__).resolve().parent
-INPUTS_PATH = HERE / "discovery.json"
-OUTPUT_PATH = HERE / "scipy_review.json"
 _TOLERANCE = 2e-14
 
 
@@ -41,7 +40,12 @@ def _quaternion_xyzw(item: dict[str, Any]) -> np.ndarray:
 
 
 def main() -> None:
-    parsed = NativeCapture.model_validate_json(INPUTS_PATH.read_bytes(), strict=True)
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--capture", required=True, type=Path)
+    parser.add_argument("--output", type=Path)
+    options = parser.parse_args()
+    input_path = options.capture.resolve()
+    parsed = NativeCapture.model_validate_json(input_path.read_bytes(), strict=True)
     capture = cast(dict[str, Any], parsed.root)
     maxima = {
         "quaternion_construction_matrix": 0.0,
@@ -151,8 +155,8 @@ def main() -> None:
     review = {
         "schema_version": "1.0",
         "evidence_kind": "derived_reference",
-        "native_capture": "discovery.json",
-        "native_capture_sha256": _sha256(INPUTS_PATH),
+        "native_capture": input_path.name,
+        "native_capture_sha256": _sha256(input_path),
         "reference_script": "verify_scipy.py",
         "reference_script_sha256": _sha256(Path(__file__)),
         "quatops_executed": False,
@@ -167,11 +171,14 @@ def main() -> None:
         "result": "pass",
         "generated_utc": datetime.now(timezone.utc).isoformat(),
     }
-    OUTPUT_PATH.write_text(
-        json.dumps(review, indent=2, allow_nan=False) + "\n",
-        encoding="utf-8",
-        newline="\n",
-    )
+    if options.output is not None:
+        output_path = options.output.resolve()
+        output_path.parent.mkdir(parents=True, exist_ok=True)
+        output_path.write_text(
+            json.dumps(review, indent=2, allow_nan=False) + "\n",
+            encoding="utf-8",
+            newline="\n",
+        )
     print(json.dumps(review, indent=2, allow_nan=False))
 
 

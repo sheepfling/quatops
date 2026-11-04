@@ -21,6 +21,7 @@ DOCKERFILE = HERE / "Dockerfile"
 CMAKE = HERE / "native/CMakeLists.txt"
 CAPTURE_HELPER = ROOT / "experiments/oracles/shared/capture_io.py"
 RETENTION_HELPER = ROOT / "scripts/evidence_json.py"
+RETENTION_FORMATTER = ROOT / "scripts/evidence_format.py"
 CORPUS = ROOT / "experiments/oracles/shared/orientation_inputs_v1.json"
 DESTINATION = ROOT / "tests/golden/oracles/ros2/0.36.23"
 
@@ -53,7 +54,44 @@ def main() -> None:
     for row in selected:
         if row["case_id"] != "world-base-sensor":
             raise ValueError("unexpected frame-chain witness")
-    selected = compact_numeric_evidence(selected)
+    by_operation = {row["operation_id"]: row for row in selected}
+    forward = by_operation["lookup-world-from-sensor"]
+
+    def transform(row: dict) -> dict:
+        return {
+            "quaternion_xyzw": row["quaternion_xyzw"],
+            "translation_xyz": row["translation_xyz"],
+        }
+
+    def observation(row: dict) -> dict:
+        outputs = {"lookup": transform(row["native_outputs"]["lookup"])}
+        if row["operation_id"] == "lookup-world-from-sensor":
+            outputs.update(
+                {
+                    "lookup_message": row["native_outputs"]["lookup_message"],
+                    "message_roundtrip": transform(
+                        row["native_outputs"]["message_roundtrip"]
+                    ),
+                    "probe_in_target_xyz": row["native_outputs"]["probe_in_target_xyz"],
+                }
+            )
+        return {"operation_id": row["operation_id"], "native_outputs": outputs}
+
+    inputs = forward["native_inputs"]
+    retained_inputs = {
+        "world_from_base": transform(inputs["world_from_base"]),
+        "base_from_sensor": transform(inputs["base_from_sensor"]),
+        "probe_in_source_xyz": inputs["probe_in_source_xyz"],
+        "source_frame": inputs["source_frame"],
+        "stamp_sec": inputs["stamp_sec"],
+        "target_frame": inputs["target_frame"],
+    }
+    selected = compact_numeric_evidence(
+        {
+            "native_inputs": retained_inputs,
+            "observations": [observation(row) for row in selected],
+        }
+    )
 
     DESTINATION.mkdir(parents=True, exist_ok=True)
     witnesses_path = DESTINATION / "witnesses.json"
@@ -61,7 +99,7 @@ def main() -> None:
         "schema_version": "1.0",
         "evidence_kind": "native_ros2_tf2_buffer_core_capture",
         "selected_from_full_observation_count": len(observations),
-        "observations": selected,
+        **selected,
     }
     witnesses_path.write_text(
         dump_evidence_json(witnesses), encoding="utf-8", newline="\n"
@@ -184,17 +222,18 @@ def main() -> None:
                         "capture_helper_sha256": sha256(CAPTURE_HELPER),
                         "retention_script_sha256": sha256(Path(__file__)),
                         "retention_helper_sha256": sha256(RETENTION_HELPER),
+                        "retention_formatter_sha256": sha256(RETENTION_FORMATTER),
                         "dockerfile_sha256": sha256(DOCKERFILE),
                         "build_recipe_sha256": sha256(CMAKE),
                         "corpus_sha256": sha256(CORPUS),
                     },
                 },
                 "selection": {
-                    "retained_observations": len(selected),
+                    "retained_observations": len(selected["observations"]),
                     "full_capture_observations": len(observations),
                     "policy": (
-                        "retain both directions of the nontrivial named-frame "
-                        "chain; discard other successful sweeps"
+                        "retain both lookup directions; store shared edge inputs "
+                        "once and keep one forward message, point action, and round trip"
                     ),
                     "numeric_values": (
                         "round-trippable decimals and dtype; exact bits only for "
@@ -206,7 +245,9 @@ def main() -> None:
         encoding="utf-8",
         newline="\n",
     )
-    print(f"retained {len(selected)} native ROS/tf2 witnesses at {DESTINATION}")
+    print(
+        f"retained {len(selected['observations'])} native ROS/tf2 witnesses at {DESTINATION}"
+    )
 
 
 if __name__ == "__main__":

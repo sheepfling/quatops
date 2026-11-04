@@ -38,7 +38,7 @@
     "input": "binary64 geographic degrees/metres",
     "arithmetic": "native PROJ double",
     "output": "binary64",
-    "serialized": "JSON plus IEEE bits"
+    "serialized": "Round-trip binary64 JSON values; duplicate per-value IEEE-754 sidecars are omitted."
   },
   "exporter": {
     "path": "historical native exporter source not retained; see SHA-256",
@@ -47,23 +47,26 @@
     "role": "historical native-run exporter; original source path was removed during evidence curation"
   },
   "corpus": {
-    "path": "experiments/oracles/proj/9.5.1/geographic_inputs.json",
+    "path": "experiments/oracles/shared/geographic_inputs_v1.json",
     "sha256": "ca5c70314444c14cead0cc196f319e5d189657bb818eb59751c07e55ec23ff85"
   },
   "artifacts": [
     {
       "path": "observations.jsonl",
-      "sha256": "d908e22625445f11e0167b136587cfe511161885f22f35fddea53b5e6069e20d",
-      "role": "raw_native_observations"
+      "sha256": "90e3a7dd5fc29607d4786f2cd1b76380c74abdbc07203474219c707077854d52",
+      "role": "selected_native_observations",
+      "source_capture_sha256": "67adb8fcedc1cd9b6aca1b203a6109b8b57f2d8fe3f381951cbcb0dcd56e5f5a"
     },
     {
-      "path": "experiments/oracles/proj/9.5.1/geographic_inputs.json",
+      "path": "experiments/oracles/shared/geographic_inputs_v1.json",
       "sha256": "ca5c70314444c14cead0cc196f319e5d189657bb818eb59751c07e55ec23ff85",
       "role": "geographic_input_corpus"
     }
   ],
   "coverage": {
-    "profiles": ["FRAME"],
+    "profiles": [
+      "FRAME"
+    ],
     "independent_input_count": 11,
     "native_observation_count": 11,
     "quatops_replay_count": 0,
@@ -84,12 +87,19 @@
   },
   "reproduction": {
     "exporter_path": "experiments/oracles/proj/9.5.1/capture_proj.py",
-    "exporter_sha256": "34e4f826b89f19ecc3884cbf31107f73db15111e65847b2cb03321bf4f7edd2a",
+    "exporter_sha256": "9295111b0a0d2ddf36c207ee50c7078a28202b60911a5589301299622a665a9a",
     "capture_helper_path": "experiments/oracles/shared/capture_io.py",
-    "capture_helper_sha256": "5f9ee3af35720aed1ae476b07d2465e3ce9b742ce6c538edf32da64f10325347",
-    "input_path": "experiments/oracles/proj/9.5.1/geographic_inputs.json",
+    "capture_helper_sha256": "b690009841d5c54803381d4256c058635afd5649e3b59441bb22bb63f3cbb4ad",
+    "input_path": "experiments/oracles/shared/geographic_inputs_v1.json",
     "input_sha256": "ca5c70314444c14cead0cc196f319e5d189657bb818eb59751c07e55ec23ff85",
     "requirements_path": "experiments/oracles/proj/9.5.1/requirements.txt",
     "requirements_sha256": "6ac96b8e4a780288a062b02f6a1c3c3c8039c54452dc39bc07c9d07187433d3a"
+  },
+  "retention": {
+    "source_observations_sha256": "67adb8fcedc1cd9b6aca1b203a6109b8b57f2d8fe3f381951cbcb0dcd56e5f5a",
+    "original_full_capture_sha256": "d908e22625445f11e0167b136587cfe511161885f22f35fddea53b5e6069e20d",
+    "selection": "For each of 11 locations, retain native ECEF origin, three ENU unit-axis endpoints, one mixed-point ECEF endpoint, and its local inverse readback. Inputs resolve by case ID in the shared geographic corpus.",
+    "verified_inverse_readbacks": "All five prior local readbacks at each location were checked against their source points within 1e-8 m before retaining the mixed-point readback.",
+    "verified_hex_values_removed": 583
   }
 }

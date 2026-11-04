@@ -27,7 +27,13 @@ execution.
 The versioned [capture package](../../experiments/oracles/proj/9.5.1/README.md)
 retains the geographic inputs, pyproj requirement, and exporter for rerunning
 the target capture. The native observation values remain frozen even though
-the original broad discovery output is not shipped. PROJ's topocentric
+the original broad discovery output is not shipped. Each retained location
+stores the native ECEF origin, three ENU axis endpoints, one transformed mixed
+point, and that point's local inverse readback. Location inputs resolve by
+case ID from the shared geographic corpus. Redundant inputs and readbacks were
+removed after checking their values; retained decimal values round-trip to the
+original binary64 patterns, so duplicate per-value hex arrays are omitted.
+PROJ's topocentric
 operation is described in the
 [PROJ topocentric conversion reference](https://proj.org/en/stable/operations/conversions/topocentric.html).
 The exact-pole longitude convention remains distinct from Cesium's own

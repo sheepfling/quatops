@@ -14,6 +14,10 @@ def main() -> None:
         converter_fixture_directories,
         load_converter_evidence,
     )
+    from scripts.evidence_schema.engine_product import (
+        ENGINE_VERSIONS,
+        load_engine_package,
+    )
 
     directories = converter_fixture_directories(ROOT)
     if not directories:
@@ -23,10 +27,18 @@ def main() -> None:
         package = load_converter_evidence(directory, repository_root=ROOT)
         print(
             f"PASS {package.target.name} {package.target.version}: "
-            f"{len(package.observations)} observation groups "
+            f"{package.observation_group_count} typed observation groups "
             f"({package.evidence_kind})"
         )
-    print(f"Validated {len(directories)} converter evidence packages")
+    for engine, version in ENGINE_VERSIONS:
+        package = load_engine_package(ROOT, engine, version)
+        print(
+            f"PASS {package.capture.target.engine} {version}: typed native witness package"
+        )
+    print(
+        f"Validated {len(directories)} converter packages and "
+        f"{len(ENGINE_VERSIONS)} engine version packages"
+    )
 
 
 if __name__ == "__main__":

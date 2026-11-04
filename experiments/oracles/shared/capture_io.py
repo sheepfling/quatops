@@ -23,7 +23,9 @@ def sha256(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
-def numeric(values: Any, dtype: NumericType = "binary64") -> dict[str, Any]:
+def numeric(
+    values: Any, dtype: NumericType = "binary64", *, include_bits: bool = True
+) -> dict[str, Any]:
     """Serialize a numeric array, retaining post-binding bits and negative zero.
 
     NumPy is deliberately not required. Foreign vector/matrix objects must first
@@ -36,7 +38,8 @@ def numeric(values: Any, dtype: NumericType = "binary64") -> dict[str, Any]:
         if isinstance(value, (list, tuple)):
             return [visit(item) for item in value]
         native = struct.unpack(code, struct.pack(code, float(value)))[0]
-        bits.append(struct.pack(code, native).hex())
+        if include_bits:
+            bits.append(struct.pack(code, native).hex())
         if not math.isfinite(native):
             return {
                 "nonfinite": "nan"
@@ -57,12 +60,14 @@ def numeric(values: Any, dtype: NumericType = "binary64") -> dict[str, Any]:
 
     dimensions = shape(values)
     result = visit(values)
-    return {
+    result = {
         "values": result,
         "dtype": dtype,
         "shape": dimensions,
-        "ieee754_hex_be": bits,
     }
+    if include_bits:
+        result["ieee754_hex_be"] = bits
+    return result
 
 
 def write_json(path: Path, value: Any) -> None:
@@ -127,7 +132,13 @@ class Capture:
             raise ValueError("An ok observation must have native output")
         self.observations.append(observation)
 
-    def finish(self, profiles: list[str], *, exit_code: int = 0) -> Path:
+    def finish(
+        self,
+        profiles: list[str],
+        *,
+        exit_code: int = 0,
+        observation_role: str = "raw_native_observations",
+    ) -> Path:
         rows = self.output_dir / "observations.jsonl"
         rows.write_text(
             "".join(
@@ -137,7 +148,7 @@ class Capture:
             encoding="utf-8",
         )
         counts = Counter(item.status for item in self.observations)
-        artifacts = [(rows, "raw_native_observations"), *self.artifacts]
+        artifacts = [(rows, observation_role), *self.artifacts]
         manifest = {
             "schema_version": "1.0",
             "capture_id": self.output_dir.name,

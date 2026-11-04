@@ -16,7 +16,7 @@ CORPUS_PATH = (
     / "shared"
     / "orientation_inputs_v1.json"
 )
-CORPUS_SHA256 = "eaf7605b3298ec9dbdf7838f43f2da61d90af5351bb15e455d3eb37c6c6b5446"
+CORPUS_SHA256 = "4af272e762f402cb4b3a60ff063bcc2ef1b79aa82e6890207abfa1bf16890db7"
 EXPECTED_COUNTS = {
     "axis_angle_inputs": 5,
     "euler_boundaries": 7,

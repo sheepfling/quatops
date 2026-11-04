@@ -14,9 +14,10 @@ from pathlib import Path
 import cv2
 import numpy as np
 
+from scripts.evidence_json import dump_evidence_json
+
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parents[3]
-DEFAULT_INPUT = ROOT / "tests/golden/oracles/opencv/4.13.0/converter/inputs.json"
 DEFAULT_OUTPUT = ROOT / "tests/golden/oracles/opencv/4.13.0/converter"
 PROFILE_DTYPES = {"float32": np.float32, "float64": np.float64}
 
@@ -32,7 +33,7 @@ def native_action(matrix: np.ndarray, vector: np.ndarray) -> list[float]:
 
 
 def capture_matrix(
-    case_id: str, dtype_label: str, rotation_vector: np.ndarray, probes: np.ndarray
+    case_id: str, dtype_label: str, rotation_vector: np.ndarray, probe: np.ndarray
 ) -> dict:
     rotvec = np.asarray(rotation_vector, dtype=PROFILE_DTYPES[dtype_label]).reshape(
         3, 1
@@ -41,35 +42,33 @@ def capture_matrix(
     matrix = np.asarray(matrix)
     reverse_rotvec, _ = cv2.Rodrigues(matrix)
     reverse_rotvec = np.asarray(reverse_rotvec)
-    reconstructed, _ = cv2.Rodrigues(reverse_rotvec)
-    return {
+    result = {
         "case_id": case_id,
         "dtype": dtype_label,
         "native_input_rotation_vector_xyz_radians": rotvec.reshape(3)
         .astype(np.float64)
         .tolist(),
-        "native_rodrigues_matrix_rows": matrix.astype(np.float64).tolist(),
-        "native_gemm_basis_and_probe_actions_xyz": [
-            native_action(matrix, vector) for vector in probes
+        "native_gemm_basis_actions_xyz": [
+            native_action(matrix, vector) for vector in np.eye(3)
         ],
         "native_matrix_to_rotation_vector_xyz_radians": reverse_rotvec.reshape(3)
         .astype(np.float64)
         .tolist(),
-        "native_reconstructed_matrix_rows": reconstructed.astype(np.float64).tolist(),
     }
+    if case_id == "mixed_a":
+        result["native_gemm_probe_action_xyz"] = native_action(matrix, probe)
+    return result
 
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--inputs", type=Path, default=DEFAULT_INPUT)
+    parser.add_argument("--inputs", type=Path, required=True)
     parser.add_argument("--output-dir", type=Path, default=DEFAULT_OUTPUT)
     options = parser.parse_args()
     input_path = options.inputs.resolve()
     inputs_bytes = input_path.read_bytes()
     inputs = json.loads(inputs_bytes.decode("utf-8"))
-    probes = np.vstack(
-        (np.eye(3), np.asarray(inputs["probe_vector_xyz"], dtype=np.float64))
-    )
+    probe = np.asarray(inputs["probe_vector_xyz"], dtype=np.float64)
     by_id = {row["case_id"]: row for row in inputs["orientations"]}
 
     observations = {"canonical_to_native": [], "native_created": [], "composition": []}
@@ -81,7 +80,7 @@ def main() -> None:
                     row["case_id"],
                     dtype_label,
                     np.asarray(row["quatops_rotation_vector_xyz_radians"]),
-                    probes,
+                    probe,
                 )
             )
 
@@ -91,11 +90,7 @@ def main() -> None:
             * native_axis["angle_radians"]
         )
         observations["native_created"].append(
-            capture_matrix(native_axis["case_id"], dtype_label, native_rotvec, probes)
-            | {
-                "constructor_input_axis_xyz": native_axis["axis_xyz"],
-                "constructor_input_angle_radians": native_axis["angle_radians"],
-            }
+            capture_matrix(native_axis["case_id"], dtype_label, native_rotvec, probe)
         )
 
         rotations = {}
@@ -115,7 +110,6 @@ def main() -> None:
         ):
             product = cv2.gemm(rotations[lhs_id], rotations[rhs_id], 1.0, None, 0.0)
             reverse_rotvec, _ = cv2.Rodrigues(product)
-            reconstructed, _ = cv2.Rodrigues(reverse_rotvec)
             observations["composition"].append(
                 {
                     "case_id": case_id,
@@ -126,8 +120,8 @@ def main() -> None:
                     "native_gemm_product_matrix_rows": np.asarray(
                         product, dtype=np.float64
                     ).tolist(),
-                    "native_gemm_basis_and_probe_actions_xyz": [
-                        native_action(product, vector) for vector in probes
+                    "native_gemm_basis_actions_xyz": [
+                        native_action(product, vector) for vector in np.eye(3)
                     ],
                     "native_matrix_to_rotation_vector_xyz_radians": np.asarray(
                         reverse_rotvec
@@ -135,9 +129,6 @@ def main() -> None:
                     .reshape(3)
                     .astype(np.float64)
                     .tolist(),
-                    "native_reconstructed_matrix_rows": np.asarray(
-                        reconstructed, dtype=np.float64
-                    ).tolist(),
                 }
             )
 
@@ -155,9 +146,7 @@ def main() -> None:
         "observations": observations,
     }
     witnesses_path.write_text(
-        json.dumps(witnesses, indent=2, allow_nan=False) + "\n",
-        encoding="utf-8",
-        newline="\n",
+        dump_evidence_json(witnesses), encoding="utf-8", newline="\n"
     )
     cv2_path = Path(cv2.__file__).resolve().parent
     native_binaries = [
@@ -189,12 +178,13 @@ def main() -> None:
             "orientation_cases_per_precision": len(inputs["orientations"]),
             "native_created_orientations_per_precision": 1,
             "noncommuting_product_orders_per_precision": 2,
-            "native_actions_per_orientation": 4,
+            "native_basis_images_per_orientation": 3,
+            "native_mixed_probe_case_id": "mixed_a",
         },
         "native_binaries": native_binaries,
         "provenance": {
             "capture_script_sha256": sha256_file(Path(__file__)),
-            "converter_input_sha256": sha256_file(input_path),
+            "prepared_inputs_sha256": sha256_file(input_path),
             "preparation_script_sha256": sha256_file(HERE / "prepare_inputs.py"),
             "preparation_spec_sha256": sha256_file(HERE / "converter_inputs.json"),
             "shared_canonical_inputs_sha256": inputs["canonical_input_sha256"],
@@ -202,8 +192,9 @@ def main() -> None:
             "requirements_sha256": sha256_file(HERE / "requirements-converter.txt"),
             "cv2_extension_directory": "site-packages/cv2",
             "invocation_template": (
-                "python experiments/converters/opencv/4.13.0/capture_native.py "
-                "--inputs tests/golden/oracles/opencv/4.13.0/converter/inputs.json"
+                "python experiments/converters/opencv/4.13.0/prepare_inputs.py "
+                "--output <temporary inputs.json>; then run capture_native.py "
+                "--inputs <temporary inputs.json>"
             ),
         },
         "reproduction": {

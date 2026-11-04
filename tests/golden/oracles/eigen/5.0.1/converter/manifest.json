@@ -3,9 +3,9 @@
   "review_state": "Pinned native Eigen harness capture; repository replay acceptance is recorded by tests",
   "execution": {
     "was_run": true,
-    "utc": "2026-11-03T07:43:57.747557+00:00",
-    "python": "3.15.1 (tags/v3.15.1:c37e74c, Oct 21 2026, 06:24:08) [MSC v.1951 64 bit (AMD64)]",
-    "platform": "Windows-11-10.0.26300-SP0",
+    "utc": "2026-11-04T03:57:20.128111+00:00",
+    "python": "3.11.9 (tags/v3.11.9:de54cf5, Apr  2 2024, 10:12:12) [MSC v.1938 64 bit (AMD64)]",
+    "platform": "Windows-10-10.0.26300-SP0",
     "architecture": "AMD64"
   },
   "target": {
@@ -19,24 +19,29 @@
     "compiler_version": "g++.exe (GCC) 15.2.0\nCopyright (C) 2025 Free Software Foundation, Inc.\nThis is free software; see the source for copying conditions.  There is NO\nwarranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.",
     "cxx_standard": "C++17",
     "compiler_flags": ["-O2", "-DNDEBUG"],
-    "native_executable_sha256": "1a14d85d5c24e14ae28beca05560555db2577404b1acf0e609b942dc6e68b7cf",
+    "native_executable_sha256": "d61583850fe095defa8789f4d169a87cbbb57c66ef3dea4c916699a8f4bb9f0b",
     "version_macros": [3, 5, 0, 1]
   },
   "selection": {
     "orientation_cases_per_scalar_profile": 8,
     "native_created_orientations_per_scalar_profile": 1,
     "noncommuting_product_orders_per_scalar_profile": 2,
-    "native_vector_actions_per_orientation": 4
+    "native_basis_images_per_orientation": 3,
+    "native_mixed_probe_case_id": "mixed_a",
+    "matrix_to_quaternion_case_ids": ["mixed_a", "nonprincipal_halfturn"],
+    "matrix_layout_case_id": "mixed_a"
   },
   "provenance": {
-    "capture_runner_sha256": "80f70ec4ad12910909c9a31462c566ca5cca63de54432ddb2cb8188d7a7bf1b6",
-    "native_cpp_source_sha256": "2e984b41bb71d6fefb2be59e5662880390d4ccc1bfa29b7a38d5d45ac48918fc",
+    "capture_runner_sha256": "69b5a82534509fb08c4f52ca8ce1a8f99727463968c6ecd1253f55a795475a70",
+    "reproduction_capture_runner_sha256": "69b5a82534509fb08c4f52ca8ce1a8f99727463968c6ecd1253f55a795475a70",
+    "native_cpp_source_sha256": "766952b362ed5a48fd6d826e90c23db4e6e6cfb86c2f6fbff2c748918368eb9b",
+    "reproduction_native_cpp_source_sha256": "766952b362ed5a48fd6d826e90c23db4e6e6cfb86c2f6fbff2c748918368eb9b",
     "contract_sha256": "80d24bf67748f0f315a99261d1b32f25f45548cb1e1bb3ce67ee3c812dfc845a",
     "converter_input_spec_sha256": "cdcecfa512477580a1b04d0f7aed32eca4512e585de8c41711fa9e84301a50b9",
     "selected_inputs_sha256": "a6f0630806b69d3b3b29a036aa10f63bfe214668329c661598951f84f8f41eec",
-    "fixture_inputs_sha256": "9a3ad531d3bc644d0a831c5f30f9410736b4a043cc92eb0e82ccaf514c3edc1a",
+    "prepared_inputs_sha256": "9a3ad531d3bc644d0a831c5f30f9410736b4a043cc92eb0e82ccaf514c3edc1a",
     "native_input_stream_sha256": "43c76320258bcef5fc7ce5d2438f8f95bee0e1c6ef0bcbacf5ec3e19eea30318",
-    "witnesses_sha256": "8591fc5643e12a52774f952dc774e23241e48132182c4740a0b4e5e3b28c33cf",
+    "witnesses_sha256": "edee93348b43688dc70baf6e9cfed1e6633a3fa546388a8accd4bf8d96e09c86",
     "eigen_source_archive_sha256": "e9c326dc8c05cd1e044c71f30f1b2e34a6161a3b6ecf445d56b53ff1669e3dec",
     "eigen_source_metadata_sha256": "3e65f2be6206692af7bcfcdf65501d34aeda9762cca895738f19f59a350bff48",
     "eigen_version_header_sha256": "3bb04dc80ede841309fc975fd3ff522a58bbdf2d591e06e49d2456676a89e759",
@@ -49,11 +54,11 @@
       "C:\\Users\\peanu\\AppData\\Local\\Temp\\quatops-captures\\eigen-5.0.1\\eigen-5.0.1",
       "C:\\Users\\peanu\\GIT\\sheepfling\\quatops\\experiments\\converters\\eigen\\5.0.1\\capture_native.cpp",
       "-o",
-      "C:\\Users\\peanu\\AppData\\Local\\Temp\\quatops-eigen-5.0.1-capture-440d25_h\\capture_eigen.exe"
+      "C:\\Users\\peanu\\AppData\\Local\\Temp\\quatops-eigen-5.0.1-capture-nvo_v268\\capture_eigen.exe"
     ],
     "native_run_command": [
-      "C:\\Users\\peanu\\AppData\\Local\\Temp\\quatops-eigen-5.0.1-capture-440d25_h\\capture_eigen.exe",
-      "C:\\Users\\peanu\\AppData\\Local\\Temp\\quatops-eigen-5.0.1-capture-440d25_h\\native-input.tsv"
+      "C:\\Users\\peanu\\AppData\\Local\\Temp\\quatops-eigen-5.0.1-capture-nvo_v268\\capture_eigen.exe",
+      "C:\\Users\\peanu\\AppData\\Local\\Temp\\quatops-eigen-5.0.1-capture-nvo_v268\\native-input.tsv"
     ],
     "exact_invocation": "C:\\Users\\peanu\\GIT\\sheepfling\\quatops\\.venv\\Scripts\\python.exe C:\\Users\\peanu\\GIT\\sheepfling\\quatops\\experiments\\converters\\eigen\\5.0.1\\capture_native.py --eigen-root C:\\Users\\peanu\\AppData\\Local\\Temp\\quatops-captures\\eigen-5.0.1\\eigen-5.0.1 --eigen-archive C:\\Users\\peanu\\AppData\\Local\\Temp\\quatops-captures\\eigen-5.0.1\\eigen-5.0.1.tar.gz --compiler g++"
   }

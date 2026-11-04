@@ -1,10 +1,9 @@
 # Shared native-capture inputs and helpers
 
-[`orientation_inputs_v1.json`](orientation_inputs_v1.json) contains only the
-selected inputs needed to replay retained native witnesses. The broader
-discovery sweep was removed after selection; its SHA-256 remains in the
-corpus' `retention.source_discovery_corpus_sha256` field. Native outputs stay
-with target-specific retained fixtures.
+[`orientation_inputs_v1.json`](orientation_inputs_v1.json) is a shared input
+corpus for mathematical oracle tests and selected ROS 2/tf2 cases. The broader
+discovery outputs are not retained per target; converter packages refer to
+the smaller selected set under `experiments/interoperability/v1/`.
 
 [`capture_io.py`](capture_io.py) provides a small standard-library capture
 envelope for native Python wrappers. It records input, output, source, runtime,

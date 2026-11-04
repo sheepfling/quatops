@@ -13,9 +13,10 @@ from tests.support.paths import REPOSITORY_ROOT
 
 ROOT = REPOSITORY_ROOT
 FIXTURE = ROOT / "tests/golden/transports/cesium/1.124.0"
+INPUTS_PATH = ROOT / "experiments/converters/cesium/1.124.0/converter_inputs.json"
 CONTRACT = json.loads((FIXTURE / "contract.json").read_text(encoding="utf-8"))
 MANIFEST = json.loads((FIXTURE / "manifest.json").read_text(encoding="utf-8"))
-INPUTS = json.loads((FIXTURE / "inputs.json").read_text(encoding="utf-8"))
+INPUTS = json.loads(INPUTS_PATH.read_text(encoding="utf-8"))
 CAPTURE = json.loads((FIXTURE / "witnesses.json").read_text(encoding="utf-8"))
 OBSERVATIONS = {row["case_id"]: row for row in CAPTURE["observations"]}
 ATOL = 2e-11
@@ -36,17 +37,45 @@ def rotation_matrix(q_wxyz):
     return Rotation.from_quat(q[[1, 2, 3, 0]]).as_matrix()
 
 
+def enu_to_ecef(origin_xyz):
+    x, y, z = origin_xyz
+    semi_major = 6_378_137.0
+    flattening = 1.0 / 298.257223563
+    semi_minor = semi_major * (1.0 - flattening)
+    up = np.array([x / semi_major**2, y / semi_major**2, z / semi_minor**2])
+    up /= np.linalg.norm(up)
+    east = np.array([-y, x, 0.0])
+    east /= np.linalg.norm(east)
+    north = np.cross(up, east)
+    return np.column_stack((east, north, up))
+
+
+def ecef_origin(longitude_degrees, latitude_degrees, height_m):
+    longitude, latitude = np.deg2rad([longitude_degrees, latitude_degrees])
+    semi_major = 6_378_137.0
+    flattening = 1.0 / 298.257223563
+    eccentricity_squared = flattening * (2.0 - flattening)
+    prime_vertical = semi_major / np.sqrt(
+        1.0 - eccentricity_squared * np.sin(latitude) ** 2
+    )
+    return np.array(
+        [
+            (prime_vertical + height_m) * np.cos(latitude) * np.cos(longitude),
+            (prime_vertical + height_m) * np.cos(latitude) * np.sin(longitude),
+            (prime_vertical * (1.0 - eccentricity_squared) + height_m)
+            * np.sin(latitude),
+        ]
+    )
+
+
 def check(actual, expected, message, *, atol=ATOL):
     np.testing.assert_allclose(actual, expected, rtol=0.0, atol=atol, err_msg=message)
 
 
 def test_cesium_capture_provenance_and_explicit_frame_contract():
-    assert (
-        MANIFEST["review_state"]
-        == (
-            "native capture retained; QuatOps replay covered by "
-            "tests/experiments/converters/cesium/test_cesium_converter.py"
-        )
+    assert MANIFEST["review_state"] == (
+        "native capture retained; QuatOps replay covered by "
+        "tests/experiments/converters/cesium/test_cesium_converter.py"
     )
     assert MANIFEST["target"]["name"] == "CesiumJS"
     assert MANIFEST["target"]["package_version"] == "1.124.0"
@@ -60,8 +89,13 @@ def test_cesium_capture_provenance_and_explicit_frame_contract():
     assert INPUTS["frame_contract"]["canonical_local"]["positive_z"] == "up"
     assert INPUTS["frame_contract"]["cesium_local"]["positive_z"] == "ellipsoid normal"
     provenance = MANIFEST["provenance"]
+    assert provenance["input_serialization_note"].startswith(
+        "JSON formatting changed only"
+    )
+    assert len(provenance["captured_converter_input_sha256"]) == 64
+    assert len(provenance["captured_geographic_inputs_sha256"]) == 64
     hash_paths = {
-        "converter_input_sha256": FIXTURE / "inputs.json",
+        "converter_input_sha256": INPUTS_PATH,
         "canonical_inputs_sha256": ROOT
         / "experiments/interoperability/v1/canonical_inputs.json",
         "witnesses_sha256": FIXTURE / "witnesses.json",
@@ -72,7 +106,7 @@ def test_cesium_capture_provenance_and_explicit_frame_contract():
     reproduction = MANIFEST["reproduction"]
     reproduction_paths = {
         "geographic_inputs_sha256": ROOT
-        / "experiments/converters/cesium/1.124.0/geographic_inputs.json",
+        / "experiments/oracles/shared/geographic_inputs_v1.json",
         "input_generator_sha256": ROOT
         / "experiments/converters/cesium/1.124.0/create_inputs.py",
         "capture_script_sha256": ROOT
@@ -84,6 +118,7 @@ def test_cesium_capture_provenance_and_explicit_frame_contract():
         "retention_script_sha256": ROOT
         / "scripts/retain_cesium_converter_witnesses.py",
         "retention_helper_sha256": ROOT / "scripts/evidence_json.py",
+        "retention_formatter_sha256": ROOT / "scripts/evidence_format.py",
     }
     for field, path in reproduction_paths.items():
         assert hashlib.sha256(path.read_bytes()).hexdigest() == reproduction[field]
@@ -102,58 +137,49 @@ def test_quatops_generated_local_quaternions_match_cesium_native_actions_and_rou
 
         local_rotation = rotation_matrix(q)
         local_translation = np.asarray(item["local_translation_xyz_m"], dtype=float)
-        check(
-            values(output["local_rotation_matrix_rows"]),
-            local_rotation,
-            f"Cesium local matrix for {case_id}",
-        )
         expected_local_images = (local_rotation @ probes.T).T
-        check(
-            values(output["local_basis_and_probe_images"]),
-            expected_local_images,
-            f"Cesium local vector action for {case_id}",
-        )
+        if case_id == "mixed_a@geo-03":
+            check(
+                values(output["local_basis_and_probe_images"]),
+                expected_local_images,
+                f"Cesium local vector action for {case_id}",
+            )
+        else:
+            assert "local_basis_and_probe_images" not in output
 
-        enu_to_ecef = np.asarray(values(output["enu_to_ecef_matrix_rows"]), dtype=float)
-        local_to_model = np.eye(4)
-        local_to_model[:3, :3] = local_rotation
-        local_to_model[:3, 3] = local_translation
-        expected_world = enu_to_ecef @ local_to_model
-        model_to_ecef = np.asarray(
-            values(output["model_to_ecef_matrix_rows"]), dtype=float
+        origin = ecef_origin(
+            item["longitude_degrees"],
+            item["latitude_degrees"],
+            item["height_m"],
         )
+        enu_rotation = enu_to_ecef(origin)
+        world_rotation = enu_rotation @ local_rotation
+        expected_world_directions = (world_rotation @ probes.T).T
+        actual_world_directions = values(output["world_directions_xyz"])
         check(
-            model_to_ecef,
-            expected_world,
-            f"Cesium ENU-to-ECEF composition for {case_id}",
-        )
-
-        local_points = (local_rotation @ probes.T).T + local_translation
-        expected_world_points = (enu_to_ecef[:3, :3] @ local_points.T).T + enu_to_ecef[
-            :3, 3
-        ]
-        check(
-            values(output["world_points_xyz_m"]),
-            expected_world_points,
-            f"Cesium ECEF point action for {case_id}",
-            atol=2e-9,
-        )
-        expected_world_directions = (enu_to_ecef[:3, :3] @ local_rotation @ probes.T).T
-        check(
-            values(output["world_directions_xyz"]),
-            expected_world_directions,
+            actual_world_directions,
+            expected_world_directions[: len(actual_world_directions)],
             f"Cesium ECEF direction action for {case_id}",
+        )
+        expected_world_probe = origin + enu_rotation @ (
+            local_rotation @ probes[-1] + local_translation
         )
         check(
             values(output["point_roundtrip_local_xyz_m"]),
-            probes,
+            [probes[-1]],
             f"Cesium ECEF/local inverse point for {case_id}",
             atol=2e-9,
         )
         check(
             values(output["ecef_origin_xyz_m"]),
-            enu_to_ecef[:3, 3],
+            origin,
             f"Cesium ENU origin for {case_id}",
+            atol=2e-9,
+        )
+        check(
+            values(output["world_points_xyz_m"]),
+            [expected_world_probe],
+            f"Cesium ECEF probe point for {case_id}",
             atol=2e-9,
         )
 
@@ -165,7 +191,7 @@ def test_quatops_generated_local_quaternions_match_cesium_native_actions_and_rou
         )
         check(
             Rotation.from_quat(world_q).as_matrix(),
-            expected_world[:3, :3],
+            world_rotation,
             f"Cesium ECEF quaternion for {case_id}",
         )
         check(

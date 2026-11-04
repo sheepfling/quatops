@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import argparse
 import hashlib
-import shutil
 from pathlib import Path
 
 from evidence_json import (
@@ -26,6 +25,18 @@ def sha256(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
+def select_numeric(item: object, index: int | None = None) -> object:
+    if not isinstance(item, dict) or "values" not in item or "dtype" not in item:
+        raise TypeError("expected a typed native numeric value")
+    values = item["values"]
+    selected = values[index] if index is not None else values[:3]
+    result = {"values": selected, "dtype": item["dtype"]}
+    if "ieee754_hex_be" in item:
+        bits = item["ieee754_hex_be"]
+        result["ieee754_hex_be"] = bits[index] if index is not None else bits[:3]
+    return result
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("capture_dir", type=Path)
@@ -42,19 +53,45 @@ def main() -> None:
         raise ValueError(
             "expected native observations for the two converter-generated nodes"
         )
+    native_entry_points = observations[0]["native_entry_points"]
+    if any(row["native_entry_points"] != native_entry_points for row in observations):
+        raise ValueError("native entry points should be shared by both node captures")
+    observations = [
+        {
+            "node": row["node"],
+            "outputs": {
+                "local_quaternion_xyzw": row["outputs"]["local_quaternion_xyzw"],
+                "local_basis_images_xyz": select_numeric(
+                    row["outputs"]["local_basis_and_probe_images"]
+                ),
+                **(
+                    {
+                        "world_basis_images_xyz": select_numeric(
+                            row["outputs"]["world_unit_directions_xyz"]
+                        ),
+                        "world_probe_point_xyz": select_numeric(
+                            row["outputs"]["world_points_xyz"], -1
+                        ),
+                        "roundtrip_probe_point_xyz": select_numeric(
+                            row["outputs"]["world_to_local_point_roundtrip_xyz"], -1
+                        ),
+                    }
+                    if row["node"] == "QuatOpsChild"
+                    else {}
+                ),
+            },
+        }
+        for row in observations
+    ]
 
     DESTINATION.mkdir(parents=True, exist_ok=True)
-    for source, name in (
-        (HERE / "converter_inputs.json", "inputs.json"),
-        (HERE / "quatops_hierarchy.gltf", "quatops_hierarchy.gltf"),
-    ):
-        shutil.copyfile(source, DESTINATION / name)
     witnesses_path = DESTINATION / "witnesses.json"
     witnesses_path.write_text(
         dump_evidence_json(
             {
                 "schema_version": "1.0",
                 "evidence_kind": native_manifest["evidence_kind"],
+                "native_entry_points": native_entry_points,
                 "observations": observations,
             }
         ),
@@ -85,8 +122,9 @@ def main() -> None:
         "scope": [
             "static node TRS serialization",
             "hierarchy composition",
-            "native loader local/world matrices",
-            "point action and inverse point round trip",
+            "native local quaternion and basis actions",
+            "native child world basis action and mixed-point action",
+            "inverse point round trip",
         ],
         "excludes": [
             "animation",
@@ -107,8 +145,8 @@ def main() -> None:
                 "target": native_manifest["target"],
                 "execution": native_manifest["execution"],
                 "provenance": {
-                    "input_sha256": sha256(DESTINATION / "inputs.json"),
-                    "asset_sha256": sha256(DESTINATION / "quatops_hierarchy.gltf"),
+                    "input_sha256": sha256(HERE / "converter_inputs.json"),
+                    "asset_sha256": sha256(HERE / "quatops_hierarchy.gltf"),
                     "native_observations_sha256": sha256(witnesses_path),
                     "full_run_manifest_sha256": sha256(capture / "manifest.json"),
                     "full_observation_sha256": sha256(capture / "observations.json"),
@@ -134,11 +172,17 @@ def main() -> None:
                     "retention_helper_sha256": sha256(
                         ROOT / "scripts/evidence_json.py"
                     ),
+                    "retention_formatter_sha256": sha256(
+                        ROOT / "scripts/evidence_format.py"
+                    ),
                 },
                 "selection": {
                     "retained_observations": len(observations),
                     "native_observations": native_manifest["observations"]["count"],
-                    "policy": "one native local/world hierarchy witness per serialized node",
+                    "policy": (
+                        "local quaternion and basis actions per node; one child world "
+                        "basis, mixed-point, and inverse-point witness"
+                    ),
                     "numeric_values": (
                         "round-trippable decimals and dtype; exact bits only for "
                         "signed-zero or nonfinite values"
@@ -150,7 +194,8 @@ def main() -> None:
         newline="\n",
     )
     print(
-        f"retained glTF converter asset and {len(observations)} Three.js loader witnesses at {DESTINATION}"
+        f"retained {len(observations)} Three.js loader witnesses at {DESTINATION}; "
+        f"asset remains at {HERE / 'quatops_hierarchy.gltf'}"
     )
 
 

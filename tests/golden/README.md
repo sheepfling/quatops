@@ -9,13 +9,6 @@ set per build. Full discovery output is temporary; the selector at
 copies the chosen native values without recomputing them and records hashes for
 the capture source, original capture, and shared input.
 
-## Operation-specific native oracles
-
-The Three.js, MuJoCo, CSPICE/SpiceyPy, and OpenUSD oracle fixtures retain small
-operation-specific witness sets with native build provenance and the digest of
-the discovery capture used to select them. Their broad passing sweeps are not
-stored as goldens.
-
 ## Converter-boundary witnesses
 
 Separate compact fixtures preserve the native side of these auxiliary proofs:
@@ -45,15 +38,20 @@ The converter replay tests are linked from the
 fixtures are auxiliary evidence; they do not add runtime dependencies or
 named transport adapters under `src/`.
 
-The shared tooling validates each package's contract, manifest, optional input,
-and witness JSON, then exposes a normalized in-memory envelope with a target
-identity and observation groups. Existing witness files may encode groups as a
-keyed object or as a record array; the envelope labels both consistently while
-retaining each target-specific JSON payload value tree. It never rewrites
-captured JSON. Run `python scripts/validate_evidence_json.py` for syntax and
-JSON-value validation across maintained captures, then
-`python scripts/validate_converter_evidence.py` for package identity and
-envelope validation.
+The shared tooling validates each package's contract, optional inputs, and
+native observations with strict target-specific Pydantic models. Where an
+input or serialized asset is already maintained beside its experiment, the
+package references that source by path and digest instead of retaining a
+second byte-identical copy. Unknown fields and malformed vector, quaternion,
+or matrix shapes fail validation. The raw capture files are never rewritten.
+Run `python scripts/validate_evidence_json.py` for syntax and JSON-value validation, then
+`python scripts/validate_converter_evidence.py` for typed validation of the
+converter packages and Unreal, Unity, Godot, and Blender versions. The
+target-neutral selected-value product is reduced in memory with
+`python scripts/crystallize_converter_evidence.py`, rather than checked in
+beside its source values. Pass `--output <path>` to export portable JSON or
+`--check --output <path>` to verify an existing export against the captures and
+retention rules.
 
 ## Retention boundary
 

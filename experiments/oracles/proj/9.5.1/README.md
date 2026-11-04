@@ -10,7 +10,10 @@ on Linux x64. This package retains the input corpus, capture helper, current
 exporter, and pinned pyproj requirement for repeat runs. Its exporter was
 reorganized for this versioned package after the selected observations were
 captured; source hashes for the historical native run and current reproducer
-are recorded separately in the fixture.
+are recorded separately in the fixture. The retained fixture keeps every
+selected binary64 value, only the origin/basis/probe outputs needed per case,
+and omits verified duplicate hexadecimal sidecars. The other former readbacks
+were checked against their source points before removal.
 
 From the repository root in PowerShell, create an isolated environment and
 write a fresh capture outside the repository:
@@ -23,8 +26,8 @@ $captureDir = Join-Path $env:TEMP 'quatops-captures\proj-9.5.1\latest'
 & (Join-Path $envDir 'Scripts\python.exe') experiments\oracles\proj\9.5.1\capture_proj.py --output $captureDir
 ```
 
-The local input file defaults to
-[`geographic_inputs.json`](geographic_inputs.json). The exporter disables
-network access and uses WGS84 without external datum grids. See
+The input file defaults to the shared
+[`geographic_inputs_v1.json`](../../shared/geographic_inputs_v1.json). The
+exporter disables network access and uses WGS84 without external datum grids. See
 [`docs/oracles/proj.md`](../../../../docs/oracles/proj.md) for the measured
 scope and numerical limits.

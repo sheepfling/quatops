@@ -3,8 +3,8 @@
 This capture executes the QuatOps-generated inputs in
 [`converter_inputs.json`](converter_inputs.json) against native CesiumJS
 1.124.0 APIs. The local package manifest and lockfile pin Cesium independently
-of other targets. [`geographic_inputs.json`](geographic_inputs.json) retains
-the selected WGS84 origin cases; canonical rotations come from the shared
+of other targets. [`geographic_inputs_v1.json`](../../../oracles/shared/geographic_inputs_v1.json)
+retains the selected WGS84 origin cases; canonical rotations come from the shared
 [`canonical_inputs.json`](../../../interoperability/v1/canonical_inputs.json).
 
 From the repository root, install the pinned Node dependencies, generate the

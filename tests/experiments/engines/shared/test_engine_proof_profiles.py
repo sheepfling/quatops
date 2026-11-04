@@ -24,7 +24,9 @@ def _load(engine, version):
 
 @pytest.mark.parametrize("engine,version", TARGETS)
 def test_contract_and_witnesses_are_versioned_small_and_provenanced(engine, version):
-    contract, witnesses, witness_path = _load(engine, version)
+    contract, _witnesses, witness_path = _load(engine, version)
+    native_witness = json.loads(witness_path.read_text(encoding="utf-8"))
+    assert set(native_witness) == {"schema_version", "canonical_interop"}
     assert contract["engine"]["version"] == version
     assert contract["engine"]["api"]
     assert contract["engine"]["native_quaternion_order"] in {"wxyz", "xyzw"}
@@ -37,7 +39,8 @@ def test_contract_and_witnesses_are_versioned_small_and_provenanced(engine, vers
     assert conversion["inverse_rule"]
     assert conversion["world_and_body_map"] == "same declared signed-axis map"
     assert conversion["input_domain"].startswith("unit Hamilton quaternion")
-    assert witnesses["provenance"]["native_build_record"]["version"].startswith(version)
+    assert contract["engine"]["version"].startswith(version)
+    assert contract["provenance"]["capture_source_sha256"]
     assert witness_path.stat().st_size < 50 * 1024
 
     expected_hashes = {
@@ -46,7 +49,7 @@ def test_contract_and_witnesses_are_versioned_small_and_provenanced(engine, vers
             (ROOT / contract["provenance"]["capture_source"]).read_bytes()
         ).hexdigest(),
         "canonical_input_sha256": hashlib.sha256(
-            (ROOT / witnesses["provenance"]["canonical_input_file"]).read_bytes()
+            (ROOT / contract["provenance"]["canonical_input_file"]).read_bytes()
         ).hexdigest(),
     }
     for key, digest in expected_hashes.items():
@@ -70,16 +73,17 @@ def test_witnesses_keep_only_discriminating_inputs_and_native_actions():
         for profile in captures.values():
             cases = {row["case_id"]: row for row in profile["orientation_cases"]}
             assert set(cases) == set(expected_inputs)
-            for case_id, expected in expected_inputs.items():
+            for case_id in expected_inputs:
                 row = cases[case_id]
-                assert row["canonical_wxyz"] == expected
                 assert len(row["native_quaternion"]) == 4
                 assert len(row["native_rotated_positive_basis_vectors_xyz"]) == 3
-                assert len(row["native_rotated_probe_vector_xyz"]) == 3
-                assert set(row) == {
+                assert ("native_rotated_probe_vector_xyz" in row) == (
+                    case_id == "mixed_a"
+                )
+                assert "canonical_wxyz" not in row
+                assert "native_input_wxyz" not in row
+                assert set(row) <= {
                     "case_id",
-                    "canonical_wxyz",
-                    "native_input_wxyz",
                     "native_quaternion",
                     "native_rotated_positive_basis_vectors_xyz",
                     "native_rotated_probe_vector_xyz",
@@ -88,3 +92,4 @@ def test_witnesses_keep_only_discriminating_inputs_and_native_actions():
                 product = profile[product_key]
                 assert len(product["native_product_quaternion"]) == 4
                 assert len(product["native_rotated_positive_basis_vectors_xyz"]) == 3
+                assert "native_rotated_probe_vector_xyz" not in product

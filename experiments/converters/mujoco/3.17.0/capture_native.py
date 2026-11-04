@@ -11,22 +11,18 @@ from datetime import datetime, timezone
 from importlib.metadata import version
 from pathlib import Path
 
-import mujoco
-import numpy as np
-
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parents[3]
-ORACLE = ROOT / "tests/golden/oracles/mujoco/3.17.0"
+sys.path.insert(0, str(ROOT))
+
+import mujoco  # pyright: ignore[reportMissingModuleSource]  # native binary API stub
+import numpy as np
+
+from scripts.evidence_format import dump_evidence_json
 
 
 def sha256_file(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
-
-
-def native_matrix(q: np.ndarray) -> np.ndarray:
-    output = np.empty(9, dtype=np.float64)
-    mujoco.mju_quat2Mat(output, q)
-    return output.reshape(3, 3)
 
 
 def native_action(vector: np.ndarray, q: np.ndarray) -> np.ndarray:
@@ -36,25 +32,26 @@ def native_action(vector: np.ndarray, q: np.ndarray) -> np.ndarray:
 
 
 def capture_quaternion(case_id: str, q: np.ndarray, probe: np.ndarray) -> dict:
-    matrix = native_matrix(q)
-    probes = np.vstack((np.eye(3), probe))
-    recovered = np.empty(4, dtype=np.float64)
-    mujoco.mju_mat2Quat(recovered, matrix.reshape(9))
-    return {
+    result = {
         "case_id": case_id,
         "native_input_wxyz": q.tolist(),
-        "native_mju_quat2Mat_rows": matrix.tolist(),
-        "native_mju_rotVecQuat_basis_and_probe_xyz": [
-            native_action(vector, q).tolist() for vector in probes
+        "native_mju_rotVecQuat_basis_xyz": [
+            native_action(vector, q).tolist() for vector in np.eye(3)
         ],
-        "native_mju_mat2Quat_roundtrip_wxyz": recovered.tolist(),
     }
+    if case_id == "mixed_a":
+        result["native_mju_rotVecQuat_probe_xyz"] = native_action(probe, q).tolist()
+    return result
 
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--inputs", type=Path, default=HERE / "converter_inputs.json")
-    parser.add_argument("--output-dir", type=Path, default=ORACLE / "converter")
+    parser.add_argument(
+        "--output-dir",
+        type=Path,
+        default=ROOT / "tests/golden/oracles/mujoco/3.17.0/converter",
+    )
     options = parser.parse_args()
     input_path = options.inputs.resolve()
     spec_bytes = input_path.read_bytes()
@@ -85,9 +82,6 @@ def main() -> None:
     native_created = {
         **native_created_capture,
         "native_constructor": "mju_axisAngle2Quat(axis, angle)",
-        "native_mju_mat2Quat_from_constructor_matrix_wxyz": list(
-            native_created_capture["native_mju_mat2Quat_roundtrip_wxyz"]
-        ),
     }
 
     pair = {
@@ -119,20 +113,12 @@ def main() -> None:
     }
 
     package_dir = Path(mujoco.__file__).resolve().parent
-    native_files = []
-    for pattern in ("*.dll", "*.pyd"):
-        native_files.extend(
-            {
-                "path": candidate.relative_to(package_dir).as_posix(),
-                "sha256": sha256_file(candidate),
-            }
-            for candidate in sorted(package_dir.rglob(pattern))
-        )
-    if not native_files:
-        raise RuntimeError(f"No MuJoCo native DLL found under {package_dir}")
+    native_library = package_dir / "mujoco.dll"
+    if not native_library.is_file():
+        raise FileNotFoundError(f"MuJoCo native DLL not found: {native_library}")
+    native_files = [{"path": "mujoco.dll", "sha256": sha256_file(native_library)}]
     out = options.output_dir.resolve()
     out.mkdir(parents=True, exist_ok=True)
-    (out / "inputs.json").write_bytes(spec_bytes)
     witnesses_path = out / "witnesses.json"
     witnesses = {
         "schema_version": "1.0",
@@ -145,9 +131,7 @@ def main() -> None:
         "observations": observations,
     }
     witnesses_path.write_text(
-        json.dumps(witnesses, indent=2, allow_nan=False) + "\n",
-        encoding="utf-8",
-        newline="\n",
+        dump_evidence_json(witnesses), encoding="utf-8", newline="\n"
     )
     manifest = {
         "schema_version": "1.0",
@@ -170,22 +154,22 @@ def main() -> None:
             "retained_orientation_cases": len(selected),
             "native_created_orientations": 1,
             "noncommuting_product_orders": 2,
-            "native_quaternion_actions_per_orientation": 4,
+            "native_basis_images_per_orientation": 3,
+            "native_mixed_probe_case_id": "mixed_a",
         },
         "native_binary_files": native_files,
         "provenance": {
             "capture_script_sha256": sha256_file(Path(__file__)),
+            "reproduction_capture_script_sha256": sha256_file(Path(__file__)),
             "contract_sha256": sha256_file(out / "contract.json"),
             "converter_input_spec_sha256": sha256_file(input_path),
             "selected_inputs_sha256": sha256_file(shared_path),
             "witnesses_sha256": sha256_file(witnesses_path),
-            "full_oracle_sha256": sha256_file(ORACLE / "native_rotation.json"),
-            "pinned_lockfile_sha256": sha256_file(
-                ROOT / "experiments/oracles/mujoco/3.17.0/uv.lock"
-            ),
+            "pinned_lockfile_sha256": sha256_file(HERE / "uv.lock"),
             "exact_invocation": (
-                "experiments/oracles/mujoco/3.17.0/.venv/Scripts/python.exe "
-                "experiments/converters/mujoco/3.17.0/capture_native.py"
+                "uv run --locked --project experiments/converters/mujoco/3.17.0 "
+                "--python 3.10.11 "
+                "python experiments/converters/mujoco/3.17.0/capture_native.py"
             ),
         },
     }

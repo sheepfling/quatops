@@ -42,11 +42,12 @@
   },
   "provenance": {
     "witness_file": "witnesses.json",
-    "witness_sha256": "aea403517bd233610e027e449ea61adba39795d808731a78cfd6355cdf20ed11",
+    "witness_sha256": "245c13b6c254734025baa87a9b3229fdc620d0dbf60dbdfa899183ab596705cb",
     "capture_source": "experiments/blender/5.1.2/capture.py",
     "capture_source_sha256": "f1997146743cef581ddaf7918c3f26b48a4c4a694165167284631acd1a940e5f",
     "original_capture_sha256": "e1a46351cf32f5a3937defb8e669458e34cb50c4a4131e03bf34c8ecb8009b76",
     "canonical_input_file": "experiments/interoperability/v1/canonical_inputs.json",
-    "canonical_input_sha256": "a6f0630806b69d3b3b29a036aa10f63bfe214668329c661598951f84f8f41eec"
+    "canonical_input_sha256": "a6f0630806b69d3b3b29a036aa10f63bfe214668329c661598951f84f8f41eec",
+    "retention_method": "selected native outputs retained losslessly; inputs linked by case ID; redundant inputs and probe actions omitted"
   }
 }

@@ -29,11 +29,51 @@ def sha256_file(path: Path) -> str:
 
 
 def write_json(path: Path, value: object) -> None:
-    path.write_text(
-        json.dumps(value, indent=2, allow_nan=False) + "\n",
-        encoding="utf-8",
-        newline="\n",
-    )
+    from scripts.evidence_json import dump_evidence_json
+
+    path.write_text(dump_evidence_json(value), encoding="utf-8", newline="\n")
+
+
+def retain_profile(profile: dict) -> dict:
+    """Drop redundant matrix views from the permanent witness set."""
+    matrix_case_ids = {"mixed_a", "nonprincipal_halfturn"}
+
+    def orientation(row: dict, *, native_created: bool = False) -> dict:
+        retained = {
+            "case_id": row["case_id"],
+            "quaternion": row["quaternion"],
+            "native_quaternion_basis_actions_xyz": row[
+                "native_quaternion_basis_actions_xyz"
+            ],
+        }
+        if row["case_id"] == "mixed_a":
+            retained["rotation_matrix"] = row["rotation_matrix"]
+        if row["case_id"] in matrix_case_ids or native_created:
+            retained["matrix_to_quaternion"] = row["matrix_to_quaternion"]
+        return retained
+
+    return {
+        "dtype": profile["dtype"],
+        "scalar_bytes": profile["scalar_bytes"],
+        "orientations": [orientation(row) for row in profile["orientations"]],
+        "native_created": [
+            orientation(row, native_created=True) | {"constructor": row["constructor"]}
+            for row in profile["native_created"]
+        ],
+        "composition": [
+            {
+                "case_id": row["case_id"],
+                "lhs_case_id": row["lhs_case_id"],
+                "rhs_case_id": row["rhs_case_id"],
+                "product_order": row["product_order"],
+                "quaternion": row["quaternion"],
+                "native_quaternion_basis_actions_xyz": row[
+                    "native_quaternion_basis_actions_xyz"
+                ],
+            }
+            for row in profile["composition"]
+        ],
+    }
 
 
 def main() -> None:
@@ -97,10 +137,12 @@ def main() -> None:
         "native_constructed_orientation": spec["native_constructed_orientation"],
         "composition": spec["composition"],
     }
+    prepared_inputs_bytes = (
+        json.dumps(inputs, indent=2, allow_nan=False) + "\n"
+    ).encode("utf-8")
+    prepared_inputs_sha256 = hashlib.sha256(prepared_inputs_bytes).hexdigest()
     output_dir = options.output_dir.resolve()
     output_dir.mkdir(parents=True, exist_ok=True)
-    inputs_path = output_dir / "inputs.json"
-    write_json(inputs_path, inputs)
 
     compiler = shutil.which(options.compiler)
     if compiler is None:
@@ -183,9 +225,14 @@ def main() -> None:
             "version": native_capture["eigen_version"],
             "version_macros": native_capture["version_macros"],
         },
-        "observations": {"profiles": native_capture["profiles"]},
+        "observations": {
+            "profiles": [
+                retain_profile(profile) for profile in native_capture["profiles"]
+            ]
+        },
     }
     write_json(witnesses_path, witnesses)
+    capture_runner_sha256 = sha256_file(Path(__file__))
     manifest = {
         "schema_version": "1.0",
         "review_state": "Pinned native Eigen harness capture; repository replay acceptance is recorded by tests",
@@ -214,15 +261,20 @@ def main() -> None:
             "orientation_cases_per_scalar_profile": len(inputs["orientations"]),
             "native_created_orientations_per_scalar_profile": 1,
             "noncommuting_product_orders_per_scalar_profile": 2,
-            "native_vector_actions_per_orientation": 4,
+            "native_basis_images_per_orientation": 3,
+            "native_mixed_probe_case_id": "mixed_a",
+            "matrix_to_quaternion_case_ids": ["mixed_a", "nonprincipal_halfturn"],
+            "matrix_layout_case_id": "mixed_a",
         },
         "provenance": {
-            "capture_runner_sha256": sha256_file(Path(__file__)),
+            "capture_runner_sha256": capture_runner_sha256,
+            "reproduction_capture_runner_sha256": capture_runner_sha256,
             "native_cpp_source_sha256": sha256_file(cpp_source),
+            "reproduction_native_cpp_source_sha256": sha256_file(cpp_source),
             "contract_sha256": sha256_file(output_dir / "contract.json"),
             "converter_input_spec_sha256": sha256_file(spec_path),
             "selected_inputs_sha256": inputs["canonical_input_sha256"],
-            "fixture_inputs_sha256": sha256_file(inputs_path),
+            "prepared_inputs_sha256": prepared_inputs_sha256,
             "native_input_stream_sha256": native_input_sha256,
             "witnesses_sha256": sha256_file(witnesses_path),
             "eigen_source_archive_sha256": sha256_file(archive_path),

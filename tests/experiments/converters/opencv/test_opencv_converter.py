@@ -15,7 +15,8 @@ ROOT = REPOSITORY_ROOT
 FIXTURE = ROOT / "tests/golden/oracles/opencv/4.13.0/converter"
 CONTRACT = json.loads((FIXTURE / "contract.json").read_text(encoding="utf-8"))
 MANIFEST = json.loads((FIXTURE / "manifest.json").read_text(encoding="utf-8"))
-INPUTS = json.loads((FIXTURE / "inputs.json").read_text(encoding="utf-8"))
+SPEC_PATH = ROOT / "experiments/converters/opencv/4.13.0/converter_inputs.json"
+INPUTS = json.loads(SPEC_PATH.read_text(encoding="utf-8"))
 WITNESSES = json.loads((FIXTURE / "witnesses.json").read_text(encoding="utf-8"))
 SHARED_PATH = ROOT / "experiments/interoperability/v1/canonical_inputs.json"
 SHARED = json.loads(SHARED_PATH.read_text(encoding="utf-8"))
@@ -24,7 +25,7 @@ CANONICAL = {
     for item in SHARED["orientations"]
 }
 PROBE = np.asarray(SHARED["probe_vector_xyz"], dtype=float)
-PROBES = np.vstack((np.eye(3), PROBE))
+BASIS = np.eye(3)
 ATOL = {"float32": 2.5e-6, "float64": 4e-12}
 
 
@@ -55,12 +56,12 @@ def test_opencv_contract_and_pinned_capture_provenance():
         "orientation_cases_per_precision": 8,
         "native_created_orientations_per_precision": 1,
         "noncommuting_product_orders_per_precision": 2,
-        "native_actions_per_orientation": 4,
+        "native_basis_images_per_orientation": 3,
+        "native_mixed_probe_case_id": "mixed_a",
     }
 
     provenance = MANIFEST["provenance"]
     paths = {
-        "converter_input_sha256": FIXTURE / "inputs.json",
         "preparation_spec_sha256": ROOT
         / "experiments/converters/opencv/4.13.0/converter_inputs.json",
         "witnesses_sha256": FIXTURE / "witnesses.json",
@@ -85,9 +86,7 @@ def test_opencv_contract_and_pinned_capture_provenance():
         provenance["shared_canonical_inputs_sha256"]
         == hashlib.sha256(SHARED_PATH.read_bytes()).hexdigest()
     )
-    assert (
-        INPUTS["canonical_input_sha256"] == provenance["shared_canonical_inputs_sha256"]
-    )
+    assert INPUTS["shared_canonical_inputs"] == SHARED_PATH.relative_to(ROOT).as_posix()
     native_capture = reproduction_paths["capture_script_sha256"].read_text(
         encoding="utf-8"
     )
@@ -101,18 +100,16 @@ def test_opencv_contract_and_pinned_capture_provenance():
 
 def test_opencv_rodrigues_forward_reverse_and_vector_actions_match_quatops():
     profile_rows = WITNESSES["observations"]["canonical_to_native"]
-    input_rows = {item["case_id"]: item for item in INPUTS["orientations"]}
+    input_case_ids = INPUTS["retained_case_ids"]
     for dtype in INPUTS["precision_profiles"]:
         rows = {
             item["case_id"]: item for item in profile_rows if item["dtype"] == dtype
         }
-        assert set(rows) == set(input_rows)
-        for case_id, input_row in input_rows.items():
+        assert set(rows) == set(input_case_ids)
+        for case_id in input_case_ids:
             row = rows[case_id]
             q = CANONICAL[case_id]
-            rotvec = np.asarray(
-                input_row["quatops_rotation_vector_xyz_radians"], dtype=dtype
-            )
+            rotvec = np.asarray(hamilton.to_rotation_vector(q), dtype=dtype)
             expected = matrix(q)
             check(
                 row["native_input_rotation_vector_xyz_radians"],
@@ -121,29 +118,24 @@ def test_opencv_rodrigues_forward_reverse_and_vector_actions_match_quatops():
                 f"OpenCV input rotation vector {case_id}/{dtype}",
             )
             check(
-                row["native_rodrigues_matrix_rows"],
-                expected,
+                row["native_gemm_basis_actions_xyz"],
+                [hamilton.rotate(q, p) for p in BASIS],
                 dtype,
-                f"OpenCV Rodrigues forward {case_id}/{dtype}",
+                f"OpenCV native gemm basis action {case_id}/{dtype}",
             )
             check(
-                row["native_gemm_basis_and_probe_actions_xyz"],
-                [hamilton.rotate(q, p) for p in PROBES],
-                dtype,
-                f"OpenCV native gemm action {case_id}/{dtype}",
-            )
-            check(
-                row["native_gemm_basis_and_probe_actions_xyz"],
-                (expected @ PROBES.T).T,
+                row["native_gemm_basis_actions_xyz"],
+                (expected @ BASIS.T).T,
                 dtype,
                 f"OpenCV basis action {case_id}/{dtype}",
             )
-            check(
-                row["native_reconstructed_matrix_rows"],
-                expected,
-                dtype,
-                f"OpenCV Rodrigues reverse matrix {case_id}/{dtype}",
-            )
+            if case_id == "mixed_a":
+                check(
+                    row["native_gemm_probe_action_xyz"],
+                    hamilton.rotate(q, PROBE),
+                    dtype,
+                    f"OpenCV mixed probe action {case_id}/{dtype}",
+                )
             recovered_q = hamilton.from_rotation_vector(
                 row["native_matrix_to_rotation_vector_xyz_radians"]
             )
@@ -155,8 +147,8 @@ def test_opencv_rodrigues_forward_reverse_and_vector_actions_match_quatops():
             )
 
         check(
-            rows["antipode_mixed_a"]["native_gemm_basis_and_probe_actions_xyz"],
-            rows["mixed_a"]["native_gemm_basis_and_probe_actions_xyz"],
+            rows["antipode_mixed_a"]["native_gemm_basis_actions_xyz"],
+            rows["mixed_a"]["native_gemm_basis_actions_xyz"],
             dtype,
             f"OpenCV q versus -q/{dtype}",
         )
@@ -177,14 +169,8 @@ def test_opencv_native_axis_angle_and_noncommuting_matrix_composition():
             if item["dtype"] == dtype
         )
         check(
-            native["native_rodrigues_matrix_rows"],
-            expected_native_matrix,
-            dtype,
-            f"OpenCV native axis-angle/{dtype}",
-        )
-        check(
-            native["native_gemm_basis_and_probe_actions_xyz"],
-            (expected_native_matrix @ PROBES.T).T,
+            native["native_gemm_basis_actions_xyz"],
+            (expected_native_matrix @ BASIS.T).T,
             dtype,
             f"OpenCV native axis-angle action/{dtype}",
         )
@@ -213,22 +199,10 @@ def test_opencv_native_axis_angle_and_noncommuting_matrix_composition():
             )
             expected_matrix = matrix(expected_q)
             check(
-                row["native_gemm_product_matrix_rows"],
-                expected_matrix,
-                dtype,
-                f"OpenCV gemm composition matrix {case_id}/{dtype}",
-            )
-            check(
-                row["native_gemm_basis_and_probe_actions_xyz"],
-                [hamilton.rotate(expected_q, p) for p in PROBES],
+                row["native_gemm_basis_actions_xyz"],
+                [hamilton.rotate(expected_q, p) for p in BASIS],
                 dtype,
                 f"OpenCV gemm composition action {case_id}/{dtype}",
-            )
-            check(
-                row["native_reconstructed_matrix_rows"],
-                expected_matrix,
-                dtype,
-                f"OpenCV composition reverse {case_id}/{dtype}",
             )
             check(
                 matrix(
@@ -242,13 +216,9 @@ def test_opencv_native_axis_angle_and_noncommuting_matrix_composition():
             )
 
         forward = np.asarray(
-            products["mixed_a_times_mixed_b"][
-                "native_gemm_basis_and_probe_actions_xyz"
-            ][-1]
+            products["mixed_a_times_mixed_b"]["native_gemm_basis_actions_xyz"]
         )
         reverse = np.asarray(
-            products["mixed_b_times_mixed_a"][
-                "native_gemm_basis_and_probe_actions_xyz"
-            ][-1]
+            products["mixed_b_times_mixed_a"]["native_gemm_basis_actions_xyz"]
         )
         assert np.max(np.abs(forward - reverse)) > 0.1

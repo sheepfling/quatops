@@ -10,7 +10,6 @@ from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parents[3]
-DEFAULT_OUT = ROOT / "tests/golden/oracles/opencv/4.13.0/converter/inputs.json"
 
 
 def sha256_file(path: Path) -> str:
@@ -22,7 +21,7 @@ def main() -> None:
     from quatops.python import hamilton
 
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--output", type=Path, default=DEFAULT_OUT)
+    parser.add_argument("--output", type=Path, required=True)
     options = parser.parse_args()
     spec_path = HERE / "converter_inputs.json"
     spec = json.loads(spec_path.read_text(encoding="utf-8"))

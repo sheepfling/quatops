@@ -17,151 +17,41 @@
       "positive_z": "backward",
       "forward": "-Z"
     },
-    "destination_axes_from_source": [
-      "x",
-      "z",
-      "-y"
-    ],
+    "destination_axes_from_source": ["x", "z", "-y"],
     "quaternion": "Hamilton active; USDA quatd real-first WXYZ",
     "matrix_action": "OpenUSD Gf/UsdGeom row vectors, captured and compared as row-major arrays"
   },
-  "probe_vectors_xyz": [
-    [
-      1.0,
-      0.0,
-      0.0
-    ],
-    [
-      0.0,
-      1.0,
-      0.0
-    ],
-    [
-      0.0,
-      0.0,
-      1.0
-    ],
-    [
-      0.25,
-      -1.5,
-      2.75
-    ]
-  ],
-  "usd_probe_vectors_xyz": [
-    [
-      1.0,
-      0.0,
-      -0.0
-    ],
-    [
-      0.0,
-      0.0,
-      -1.0
-    ],
-    [
-      0.0,
-      1.0,
-      -0.0
-    ],
-    [
-      0.25,
-      2.75,
-      1.5
-    ]
-  ],
+  "probe_vectors_xyz": [[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0], [0.25, -1.5, 2.75]],
+  "usd_probe_vectors_xyz": [[1.0, 0.0, -0.0], [0.0, 0.0, -1.0], [0.0, 1.0, -0.0], [0.25, 2.75, 1.5]],
   "nodes": [
     {
       "node": "parent",
       "canonical_case_id": "quarter_z",
-      "canonical_wxyz": [
-        0.7071067811865476,
-        0.0,
-        0.0,
-        0.7071067811865476
-      ],
-      "usd_wxyz": [
-        0.7071067811865476,
-        0.0,
-        0.7071067811865476,
-        -0.0
-      ],
-      "canonical_translation_xyz": [
-        3.0,
-        -2.0,
-        1.0
-      ],
-      "usd_translation_xyz": [
-        3.0,
-        1.0,
-        2.0
-      ]
+      "canonical_wxyz": [0.7071067811865476, 0.0, 0.0, 0.7071067811865476],
+      "usd_wxyz": [0.7071067811865476, 0.0, 0.7071067811865476, -0.0],
+      "canonical_translation_xyz": [3.0, -2.0, 1.0],
+      "usd_translation_xyz": [3.0, 1.0, 2.0]
     },
     {
       "node": "child",
       "canonical_case_id": "mixed_a",
-      "canonical_wxyz": [
-        0.8,
-        0.2,
-        -0.4,
-        0.4
-      ],
-      "usd_wxyz": [
-        0.8,
-        0.2,
-        0.4,
-        0.4
-      ],
-      "canonical_translation_xyz": [
-        1.25,
-        -2.5,
-        3.75
-      ],
-      "usd_translation_xyz": [
-        1.25,
-        3.75,
-        2.5
-      ]
+      "canonical_wxyz": [0.8, 0.2, -0.4, 0.4],
+      "usd_wxyz": [0.8, 0.2, 0.4, 0.4],
+      "canonical_translation_xyz": [1.25, -2.5, 3.75],
+      "usd_translation_xyz": [1.25, 3.75, 2.5]
     },
     {
       "node": "reset_child",
       "canonical_case_id": "quarter_x",
-      "canonical_wxyz": [
-        0.7071067811865476,
-        0.7071067811865476,
-        0.0,
-        0.0
-      ],
-      "usd_wxyz": [
-        0.7071067811865476,
-        0.7071067811865476,
-        0.0,
-        -0.0
-      ],
-      "canonical_translation_xyz": [
-        -0.75,
-        1.5,
-        2.25
-      ],
-      "usd_translation_xyz": [
-        -0.75,
-        2.25,
-        -1.5
-      ]
+      "canonical_wxyz": [0.7071067811865476, 0.7071067811865476, 0.0, 0.0],
+      "usd_wxyz": [0.7071067811865476, 0.7071067811865476, 0.0, -0.0],
+      "canonical_translation_xyz": [-0.75, 1.5, 2.25],
+      "usd_translation_xyz": [-0.75, 2.25, -1.5]
     }
   ],
   "stack_contract": {
-    "parent_ops": [
-      "xformOp:translate",
-      "xformOp:orient"
-    ],
-    "child_ops": [
-      "xformOp:translate",
-      "xformOp:orient"
-    ],
-    "reset_ops": [
-      "!resetXformStack!",
-      "xformOp:translate",
-      "xformOp:orient"
-    ]
+    "parent_ops": ["xformOp:translate", "xformOp:orient"],
+    "child_ops": ["xformOp:translate", "xformOp:orient"],
+    "reset_ops": ["!resetXformStack!", "xformOp:translate", "xformOp:orient"]
   }
 }

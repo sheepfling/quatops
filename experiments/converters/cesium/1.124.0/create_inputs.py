@@ -13,9 +13,7 @@ from quatops.python import hamilton
 ROOT = Path(__file__).resolve().parents[4]
 sys.path.insert(0, str(ROOT))
 WITNESS_INPUTS = ROOT / "experiments/interoperability/v1/canonical_inputs.json"
-GEOGRAPHIC_INPUTS = (
-    ROOT / "experiments/converters/cesium/1.124.0/geographic_inputs.json"
-)
+GEOGRAPHIC_INPUTS = ROOT / "experiments/oracles/shared/geographic_inputs_v1.json"
 OUTPUT = Path(__file__).with_name("converter_inputs.json")
 
 

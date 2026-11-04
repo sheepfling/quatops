@@ -22,8 +22,9 @@
   "scope": [
     "static node TRS serialization",
     "hierarchy composition",
-    "native loader local/world matrices",
-    "point action and inverse point round trip"
+    "native local quaternion and basis actions",
+    "native child world basis action and mixed-point action",
+    "inverse point round trip"
   ],
   "excludes": ["animation", "mesh model-forward convention", "compression extensions", "other GLTFLoader versions"]
 }

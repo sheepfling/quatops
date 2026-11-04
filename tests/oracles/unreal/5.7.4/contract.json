@@ -41,10 +41,12 @@
   },
   "provenance": {
     "witness_file": "witnesses.json",
-    "witness_sha256": "2841460aae445aadec6e439462def372dbf0b0207df8e2d0259fc8ec875ef42a",
+    "witness_sha256": "cb1976aae80c980be86d740534374fbd7a7c0bfafa03dc206892beaded3276c3",
     "capture_source": "experiments/unreal/5.7.4/Source/QuatOpsUnrealCapture/Private/QuatOpsUnrealCaptureTests.cpp",
     "capture_source_sha256": "7ed0a481c8af4a08c8eedf34609fc48339a3560e725c1b10f8c4881d45833a10",
     "original_capture_sha256": "c763289dab91ea523bc2695fc270f063b777819a5bd9dc630b095dfb0412fe00",
-    "canonical_input_sha256": "a6f0630806b69d3b3b29a036aa10f63bfe214668329c661598951f84f8f41eec"
+    "canonical_input_sha256": "a6f0630806b69d3b3b29a036aa10f63bfe214668329c661598951f84f8f41eec",
+    "retention_method": "selected native outputs retained losslessly; inputs linked by case ID; redundant inputs and probe actions omitted",
+    "canonical_input_file": "experiments/interoperability/v1/canonical_inputs.json"
   }
 }

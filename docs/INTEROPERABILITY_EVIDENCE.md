@@ -53,13 +53,12 @@ determinant parities, noncommuting composition, inverse conversion, and
 distinct world/body corrections. Passing generated outputs are not stored as
 native goldens.
 
-The Three.js, MuJoCo, and CSPICE/SpiceyPy files under
-[`tests/golden`](../tests/golden/) retain small operation-specific witness
-sets. Their provenance preserves native build details and the SHA-256 digest of
-the exact native capture from which they were retained. The game-engine
-exporters emit only selected quaternion witnesses. Other discovery exporters
-remain available for replay. OpenUSD evidence is limited to its converter stage
-proof.
+The retained native outputs under [`tests/golden`](../tests/golden/) are the
+selected witnesses for accepted converter claims. They preserve native build
+details and the SHA-256 digest of the capture run. Broad standalone math API
+sweeps for Euler conversion, integration, derivatives, and perturbations are
+outside this converter evidence set. OpenUSD evidence is limited to its
+converter stage proof.
 
 These witnesses do not imply production adapters under `src/`. Separate auxiliary
 converter proofs now compare canonical values and frame mappings against
@@ -99,7 +98,7 @@ $acceptanceTests = @(
 | [OpenCV 4.13.0](oracles/opencv.md) | Native `cv2.Rodrigues` plus `cv2.gemm` basis/probe actions, reverse rotvec conversion, noncommuting matrix composition; float32 and float64 | C++ `cv::Quat`, camera/world frames, and Jacobian adapters |
 | [Eigen 5.0.1](oracles/eigen.md) | Native C++ `Quaternionf`/`Quaterniond` WXYZ construction, XYZW coeffs, vector action, matrix conversion, `AngleAxis`, and both product orders | Application-specific frames, Sophus tangent semantics, serialization, and interpolation |
 | PROJ 9.5.1 | 11 native WGS84 probes, second Windows run, analytic ENU/ECEF basis and SciPy matrix review | Supporting frame evidence only; no PROJ quaternion or Cesium runtime claim |
-| Sophus 1.24.6 | Native `SO3d` quaternion, exp/log, action, inverse, composition, and perturbation discovery; separate SciPy comparison | First discovery set only; no float32, Jacobian, or full tangent contract |
+| Sophus 1.24.6 | Native `SO3d` capture tooling and input set; separate SciPy comparison can be regenerated | Discovery outputs are temporary; no accepted converter or float32, Jacobian, or full tangent contract |
 | OpenXR 1.1.65 | Native SDK header ABI probe for `XrQuaternionf` and `XrPosef` | No OpenXR runtime; `xrLocateSpace` and runtime frame behavior remain pending |
 
 These are auxiliary proofs and fixtures, not new runtime APIs under `src/`.
@@ -113,8 +112,9 @@ The compact converter suites are grouped by target under
 `tests/experiments/converters/`: ROS 2/tf2, Cesium, glTF, OpenUSD, SpiceyPy,
 MuJoCo, OpenCV, and Eigen. Accepted converter manifests and selected outputs
 live under `tests/golden/`; the first Sophus and OpenXR discovery
-outputs remain under `experiments/oracles/` pending their target-specific
-review gates. Passing sweep outputs are not copied into accepted witness sets.
+capture tooling remains under `experiments/oracles/` pending target-specific
+review gates. Its broad output is temporary. Passing sweep outputs are not
+copied into accepted witness sets.
 
 ## Evidence policy
 

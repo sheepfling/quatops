@@ -63,16 +63,21 @@ void write_matrix(std::ostream& out, const Matrix3<T>& matrix) {
 }
 
 template <typename T>
-void write_actions(std::ostream& out, const Quaternion<T>& q, const Vector3<double>& probe) {
-  const std::array<Vector3<T>, 4> vectors = {
-      Vector3<T>::UnitX(), Vector3<T>::UnitY(), Vector3<T>::UnitZ(),
-      probe.template cast<T>()};
+void write_basis_actions(std::ostream& out, const Quaternion<T>& q) {
+  const std::array<Vector3<T>, 3> vectors = {
+      Vector3<T>::UnitX(), Vector3<T>::UnitY(), Vector3<T>::UnitZ()};
   out << '[';
   for (std::size_t i = 0; i < vectors.size(); ++i) {
     if (i) out << ',';
     write_vec3(out, (q * vectors[i]).eval());
   }
   out << ']';
+}
+
+template <typename T>
+void write_probe_action(std::ostream& out, const Quaternion<T>& q,
+                        const Vector3<double>& probe) {
+  write_vec3(out, (q * probe.template cast<T>()).eval());
 }
 
 template <typename T>
@@ -85,8 +90,12 @@ void write_orientation(std::ostream& out, const InputCase& item, const Vector3<d
   write_quaternion(out, q);
   out << ",\"rotation_matrix\":";
   write_matrix(out, matrix);
-  out << ",\"native_quaternion_vector_actions_xyz\":";
-  write_actions(out, q, probe);
+  out << ",\"native_quaternion_basis_actions_xyz\":";
+  write_basis_actions(out, q);
+  if (item.id == "mixed_a") {
+    out << ",\"native_quaternion_probe_action_xyz\":";
+    write_probe_action(out, q, probe);
+  }
   out << ",\"matrix_to_quaternion\":";
   write_quaternion(out, recovered, false);
   out << '}';
@@ -95,8 +104,7 @@ void write_orientation(std::ostream& out, const InputCase& item, const Vector3<d
 template <typename T>
 void write_composition(std::ostream& out, const std::string& case_id,
                        const std::string& lhs_id, const std::string& rhs_id,
-                       const Quaternion<T>& lhs, const Quaternion<T>& rhs,
-                       const Vector3<double>& probe) {
+                       const Quaternion<T>& lhs, const Quaternion<T>& rhs) {
   const Quaternion<T> product = lhs * rhs;
   const Matrix3<T> matrix = product.toRotationMatrix();
   out << "{\"case_id\":\"" << case_id << "\",\"lhs_case_id\":\""
@@ -105,8 +113,8 @@ void write_composition(std::ostream& out, const std::string& case_id,
   write_quaternion(out, product, false);
   out << ",\"rotation_matrix\":";
   write_matrix(out, matrix);
-  out << ",\"native_quaternion_vector_actions_xyz\":";
-  write_actions(out, product, probe);
+  out << ",\"native_quaternion_basis_actions_xyz\":";
+  write_basis_actions(out, product);
   out << '}';
 }
 
@@ -143,8 +151,8 @@ void write_profile(std::ostream& out, const std::string& dtype,
   write_quaternion(out, native_q, false);
   out << ",\"rotation_matrix\":";
   write_matrix(out, native_matrix);
-  out << ",\"native_quaternion_vector_actions_xyz\":";
-  write_actions(out, native_q, probe);
+  out << ",\"native_quaternion_basis_actions_xyz\":";
+  write_basis_actions(out, native_q);
   out << ",\"matrix_to_quaternion\":";
   write_quaternion(out, native_recovered, false);
   out << "}]";
@@ -159,10 +167,10 @@ void write_profile(std::ostream& out, const std::string& dtype,
   }
   out << ",\"composition\":[";
   write_composition(out, "mixed_a_times_mixed_b", "mixed_a", "mixed_b",
-                    quaternions[a_index], quaternions[b_index], probe);
+                    quaternions[a_index], quaternions[b_index]);
   out << ',';
   write_composition(out, "mixed_b_times_mixed_a", "mixed_b", "mixed_a",
-                    quaternions[b_index], quaternions[a_index], probe);
+                    quaternions[b_index], quaternions[a_index]);
   out << "]}";
 }
 

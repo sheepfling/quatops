@@ -1,10 +1,12 @@
 # Auxiliary converter experiments
 
 These scripts and fixtures are evidence tools, not QuatOps runtime code. Each
-target has a versioned directory containing explicit-frame input generation
-and the smallest native capture needed for its converter boundary. Captured
-native outputs, contracts, and selected witnesses live under the matching
-versioned path in `tests/golden/`; replay tests live in `tests/`.
+target has a versioned directory containing explicit-frame inputs, generated
+transport assets, and the native capture adapter. Native outputs, contracts,
+and selected witnesses live under the matching versioned path in
+`tests/golden/`; replay tests live in `tests/`. When a retained package uses
+the exact experiment input or asset, tests reference that source instead of
+copying it into `tests/golden/`.
 
 ## Layout
 
@@ -47,7 +49,9 @@ from an engine or format name.
 
 Each native exporter, dependency pin, and runbook is kept beside its versioned
 target package. Shared inputs live in `experiments/oracles/shared/`; exact
-selected native outputs live under `tests/golden/`.
+selected native outputs live under `tests/golden/`. The common reduced view is
+generated in memory by `scripts/crystallize_converter_evidence.py` and can be
+exported on demand without retaining a second copy beside the source fixtures.
 
 To add a target version, add a new version directory and fixture directory;
 keep prior native manifests and witness values immutable. Broad discovery

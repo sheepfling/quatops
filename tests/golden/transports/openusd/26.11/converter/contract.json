@@ -24,13 +24,14 @@
     "translate+orient stacks",
     "parent/child composition",
     "resetXformStack",
-    "point and direction actions",
-    "inverse point round trip"
+    "native world basis directions and mixed-point actions",
+    "one inverse point round trip"
   ],
   "excludes": [
     "other stage up-axis choices",
     "time samples",
     "shear/nonuniform scale decomposition",
     "renderer or file import pipeline"
-  ]
+  ],
+  "native_numeric_type": "binary64 Gf.Quatd and Gf.Matrix4d"
 }

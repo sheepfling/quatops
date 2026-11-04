@@ -8,11 +8,10 @@ import sys
 from pathlib import Path
 
 import pyproj
-from pyproj import CRS, Transformer, network
+from pyproj import Transformer, network
 from pyproj.enums import TransformDirection
 
 ROOT = Path(__file__).resolve().parents[4]
-HERE = Path(__file__).resolve().parent
 
 
 def main() -> None:
@@ -25,7 +24,11 @@ def main() -> None:
     )
 
     cli = argparse.ArgumentParser(description=__doc__)
-    cli.add_argument("--geographic", type=Path, default=HERE / "geographic_inputs.json")
+    cli.add_argument(
+        "--geographic",
+        type=Path,
+        default=ROOT / "experiments/oracles/shared/geographic_inputs_v1.json",
+    )
     cli.add_argument(
         "--output", type=Path, required=True, help="New, empty capture directory"
     )
@@ -46,7 +49,7 @@ def main() -> None:
             "input": "binary64 geographic degrees/metres",
             "arithmetic": "native PROJ double",
             "output": "binary64",
-            "serialized": "JSON plus IEEE bits",
+            "serialized": "round-trip binary64 JSON values without per-value hex sidecars",
         },
         oracle_family="proj",
         native_binary=native_binary,
@@ -56,12 +59,12 @@ def main() -> None:
             "Local Cartesian point transforms only; no quaternion/HPR function is inferred.",
             "At geographic poles longitude fixes a convention; Cesium may choose another fallback.",
             "Network disabled; WGS84 ellipsoid only, with no external datum grids.",
+            "Retains the origin, three local-axis endpoints, one probe, and its inverse readback per location.",
         ],
     )
     capture.artifacts.append((args.geographic.resolve(), "geographic_input_corpus"))
 
     geocentric = Transformer.from_crs(4979, 4978, always_xy=True)
-    ellipsoid = CRS.from_epsg(4979).ellipsoid
     for item in data["locations"]:
         longitude = item["longitude_degrees"]
         latitude = item["latitude_degrees"]
@@ -83,9 +86,7 @@ def main() -> None:
             local.transform(*point, direction=TransformDirection.INVERSE, errcheck=True)
             for point in probes
         ]
-        local_readback = [
-            local.transform(*point, errcheck=True) for point in ecef_points
-        ]
+        probe_readback = local.transform(*ecef_points[-1], errcheck=True)
         capture.add(
             Observation(
                 item["case_id"],
@@ -95,31 +96,24 @@ def main() -> None:
                     units="geographic degrees; Cartesian metres",
                     frame="forward ECEF -> ENU; inverse ENU -> ECEF",
                 ),
+                {},
                 {
-                    "longitude_degrees": numeric(longitude),
-                    "latitude_degrees": numeric(latitude),
-                    "height_m": numeric(height),
-                    "pipeline": pipeline,
-                    "always_xy": True,
-                    "ellipsoid_semi_major_m": numeric(ellipsoid.semi_major_metre),
-                    "ellipsoid_inverse_flattening": numeric(
-                        ellipsoid.inverse_flattening
+                    "origin_ecef_m": numeric(list(origin), include_bits=False),
+                    "enu_basis_endpoints_ecef_m": numeric(
+                        [list(point) for point in ecef_points[1:4]],
+                        include_bits=False,
                     ),
-                    "local_probe_points": numeric(probes),
-                },
-                {
-                    "origin_ecef_m": numeric(list(origin)),
-                    "ecef_probe_points": numeric(
-                        [list(point) for point in ecef_points]
+                    "probe_endpoint_ecef_m": numeric(
+                        list(ecef_points[-1]), include_bits=False
                     ),
-                    "local_readback_points": numeric(
-                        [list(point) for point in local_readback]
+                    "probe_roundtrip_local_xyz_m": numeric(
+                        list(probe_readback), include_bits=False
                     ),
                 },
             )
         )
 
-    print(capture.finish(["FRAME"]))
+    print(capture.finish(["FRAME"], observation_role="selected_native_observations"))
 
 
 if __name__ == "__main__":

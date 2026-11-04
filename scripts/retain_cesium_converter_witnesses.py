@@ -22,6 +22,36 @@ def sha256(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
+def _vectors(value: dict, *, start: int = 0, stop: int | None = None) -> dict:
+    return {
+        "values": value["values"][start:stop],
+        "dtype": value["dtype"],
+    }
+
+
+def _retained_outputs(case_id: str, outputs: dict) -> dict:
+    retained = {
+        "model_to_ecef_quaternion_xyzw": outputs["model_to_ecef_quaternion_xyzw"],
+        "local_quaternion_recovered_from_ecef_xyzw": outputs[
+            "local_quaternion_recovered_from_ecef_xyzw"
+        ],
+        "world_directions_xyz": _vectors(
+            outputs["world_directions_xyz"],
+            stop=4 if case_id == "mixed_a@geo-03" else 3,
+        ),
+        "world_points_xyz_m": _vectors(outputs["world_points_xyz_m"], start=-1),
+        "point_roundtrip_local_xyz_m": _vectors(
+            outputs["point_roundtrip_local_xyz_m"], start=-1
+        ),
+        "ecef_origin_xyz_m": outputs["ecef_origin_xyz_m"],
+    }
+    if case_id == "mixed_a@geo-03":
+        retained["local_basis_and_probe_images"] = outputs[
+            "local_basis_and_probe_images"
+        ]
+    return compact_numeric_evidence(retained)
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("capture_dir", type=Path)
@@ -52,13 +82,11 @@ def main() -> None:
     selected_observations = [matches_by_id[case_id][0] for case_id in case_ids]
 
     DESTINATION.mkdir(parents=True, exist_ok=True)
-    inputs_path = DESTINATION / "inputs.json"
-    inputs_path.write_bytes((HERE / "converter_inputs.json").read_bytes())
     witnesses_path = DESTINATION / "witnesses.json"
     retained = [
         {
             "case_id": row["case_id"],
-            "outputs": compact_numeric_evidence(row["outputs"]),
+            "outputs": _retained_outputs(row["case_id"], row["outputs"]),
         }
         for row in selected_observations
     ]
@@ -122,7 +150,7 @@ def main() -> None:
         dump_evidence_json(contract), encoding="utf-8", newline="\n"
     )
     source_inputs = ROOT / "experiments/interoperability/v1/canonical_inputs.json"
-    geo_inputs = ROOT / "experiments/converters/cesium/1.124.0/geographic_inputs.json"
+    geo_inputs = ROOT / "experiments/oracles/shared/geographic_inputs_v1.json"
     native_numeric_helper_sha256 = run.get("numeric_helper_sha256")
     manifest = {
         "schema_version": "1.0",
@@ -135,7 +163,7 @@ def main() -> None:
         "provenance": {
             "run_manifest_sha256": sha256(capture / "manifest.json"),
             "full_observation_sha256": sha256(capture / "observations.json"),
-            "converter_input_sha256": sha256(inputs_path),
+            "converter_input_sha256": sha256(HERE / "converter_inputs.json"),
             "canonical_inputs_sha256": sha256(source_inputs),
             "geographic_inputs_sha256": sha256(geo_inputs),
             "native_capture_script_sha256": run["exporter"]["sha256"],
@@ -152,6 +180,7 @@ def main() -> None:
             ),
             "retention_script_sha256": sha256(Path(__file__)),
             "retention_helper_sha256": sha256(ROOT / "scripts/evidence_json.py"),
+            "retention_formatter_sha256": sha256(ROOT / "scripts/evidence_format.py"),
             "package_lock_sha256": sha256(HERE / "package-lock.json"),
             "geographic_inputs_sha256": sha256(geo_inputs),
         },
@@ -159,8 +188,9 @@ def main() -> None:
             "retained_observations": len(selected_observations),
             "native_observations": run["observations"]["count"],
             "policy": (
-                "retain identity, mixed orientations, an antipode, a "
-                "noncommuting composition, and four WGS84 origins"
+                "retain local basis action once; retain ECEF orientation, "
+                "world basis action, one probe point round trip, and origin "
+                "for identity, mixed, antipodal, and composed cases"
             ),
             "numeric_values": (
                 "round-trippable decimals and dtype; exact bits only for "

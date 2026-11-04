@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import argparse
 import hashlib
-import shutil
 from pathlib import Path
 
 from evidence_json import dump_evidence_json, read_evidence_document, read_evidence_rows
@@ -33,20 +32,46 @@ def main() -> None:
         raise ValueError(
             "expected parent, child, and reset-child native stage observations"
         )
+    native_entry_points = observations[0]["native_entry_points"]
+    ordered_xform_ops = observations[0]["outputs"]["ordered_xform_ops"]
+    if any(row["native_entry_points"] != native_entry_points for row in observations):
+        raise ValueError("native entry points should be shared by all node captures")
+    if any(
+        row["outputs"]["ordered_xform_ops"] != ordered_xform_ops for row in observations
+    ):
+        raise ValueError("all authored nodes should use the same xform-op order")
+    observations = [
+        {
+            "node": row["node"],
+            "prim_path": row["prim_path"],
+            "outputs": {
+                "orient_op_wxyz": row["outputs"]["orient_op_wxyz"],
+                "resets_xform_stack": row["outputs"]["resets_xform_stack"],
+                "world_basis_images_xyz": row["outputs"]["world_directions_xyz"][:3],
+                "world_probe_point_xyz": row["outputs"]["world_points_xyz"][-1],
+                **(
+                    {
+                        "roundtrip_probe_point_xyz": row["outputs"][
+                            "world_to_local_point_roundtrip_xyz"
+                        ][-1]
+                    }
+                    if row["node"] == "child"
+                    else {}
+                ),
+            },
+        }
+        for row in observations
+    ]
 
     DESTINATION.mkdir(parents=True, exist_ok=True)
-    files = (
-        (HERE / "converter_inputs.json", "inputs.json"),
-        (HERE / "quatops_hierarchy.usda", "quatops_hierarchy.usda"),
-    )
-    for source, name in files:
-        shutil.copyfile(source, DESTINATION / name)
     witnesses_path = DESTINATION / "witnesses.json"
     witnesses_path.write_text(
         dump_evidence_json(
             {
                 "schema_version": "1.0",
                 "evidence_kind": native["evidence_kind"],
+                "native_entry_points": native_entry_points,
+                "ordered_xform_ops": ordered_xform_ops,
                 "observations": observations,
             }
         ),
@@ -76,14 +101,15 @@ def main() -> None:
             "OpenUSD Gf row vectors; child world row matrix = child local row "
             "matrix * parent world row matrix"
         ),
+        "native_numeric_type": "binary64 Gf.Quatd and Gf.Matrix4d",
         "scope": [
             "file serialization and reopen",
             "quatd orient op readback",
             "translate+orient stacks",
             "parent/child composition",
             "resetXformStack",
-            "point and direction actions",
-            "inverse point round trip",
+            "native world basis directions and mixed-point actions",
+            "one inverse point round trip",
         ],
         "excludes": [
             "other stage up-axis choices",
@@ -106,8 +132,8 @@ def main() -> None:
                 "execution": native["execution"],
                 "native_binaries_sha256": native["native_binaries_sha256"],
                 "provenance": {
-                    "stage_sha256": sha256(DESTINATION / "quatops_hierarchy.usda"),
-                    "converter_input_sha256": sha256(DESTINATION / "inputs.json"),
+                    "stage_sha256": sha256(HERE / "quatops_hierarchy.usda"),
+                    "converter_input_sha256": sha256(HERE / "converter_inputs.json"),
                     "native_observations_sha256": sha256(witnesses_path),
                     "native_run_manifest_sha256": sha256(capture / "manifest.json"),
                     "full_observation_sha256": sha256(capture / "observations.json"),
@@ -116,10 +142,22 @@ def main() -> None:
                     "lockfile_sha256": native["lockfile_sha256"],
                     "contract_sha256": sha256(contract_path),
                 },
+                "reproduction": {
+                    "retention_script_sha256": sha256(Path(__file__)),
+                    "retention_helper_sha256": sha256(
+                        ROOT / "scripts/evidence_json.py"
+                    ),
+                    "retention_formatter_sha256": sha256(
+                        ROOT / "scripts/evidence_format.py"
+                    ),
+                },
                 "selection": {
                     "retained_observations": len(observations),
                     "native_observations": native["observations"]["count"],
-                    "policy": "one local/world stage observation for each authored hierarchy role",
+                    "policy": (
+                        "orient op and reset flag per role; native world basis and "
+                        "mixed point actions; one inverse point round trip"
+                    ),
                 },
             }
         ),
@@ -127,7 +165,8 @@ def main() -> None:
         newline="\n",
     )
     print(
-        f"retained QuatOps USDA stage and {len(observations)} OpenUSD witnesses at {DESTINATION}"
+        f"retained {len(observations)} OpenUSD witnesses at {DESTINATION}; "
+        f"stage remains at {HERE / 'quatops_hierarchy.usda'}"
     )
 
 

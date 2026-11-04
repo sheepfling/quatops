@@ -70,32 +70,8 @@
       "height_m": 0
     }
   ],
-  "heading_pitch_roll_radians": [
-    [
-      0,
-      0,
-      0
-    ],
-    [
-      0.3,
-      -0.4,
-      0.7
-    ],
-    [
-      -1.2,
-      0.8,
-      -0.5
-    ]
-  ],
-  "local_point_xyz_m": [
-    2,
-    -3,
-    5
-  ],
-  "local_direction_xyz": [
-    0.3,
-    -0.2,
-    0.7
-  ],
+  "heading_pitch_roll_radians": [[0, 0, 0], [0.3, -0.4, 0.7], [-1.2, 0.8, -0.5]],
+  "local_point_xyz_m": [2, -3, 5],
+  "local_direction_xyz": [0.3, -0.2, 0.7],
   "exact_pole_note": "Native fallback branch, not universal east/north directions at the poles"
 }

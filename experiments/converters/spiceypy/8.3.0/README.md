@@ -1,18 +1,21 @@
-# SpiceyPy / CSPICE 8.3.0 converter-boundary capture
+# SpiceyPy / CSPICE 8.3.0 converter capture
 
-This auxiliary proof captures direct WXYZ quaternion operations from the
-pinned SpiceyPy 8.3.0 / CSPICE_N0067 environment. It is independent of
-`src/quatops` and is limited to `q2m`, `mxv`, `m2q`, `qxq`, and the native
-`axisar` matrix/`m2q` route. It does not assert an `eul2m` convention or named
-SPICE frame mapping.
+This auxiliary capture exercises only the direct WXYZ quaternion boundary in
+SpiceyPy 8.3.0 / CSPICE_N0067: `q2m`, `mxv`, `m2q`, `qxq`, and the native
+`axisar` matrix followed by `m2q`. It does not assert an `eul2m` convention or
+named SPICE frame mapping, and it imports no QuatOps code.
 
-Run from the repository root with:
+From the repository root, install the pinned environment and capture the
+selected witnesses:
 
 ```powershell
-experiments\oracles\spiceypy\8.3.0\.venv\Scripts\python.exe experiments\converters\spiceypy\8.3.0\capture_native.py
+uv sync --locked --project experiments/converters/spiceypy/8.3.0 --python 3.10.11
+uv run --locked --project experiments/converters/spiceypy/8.3.0 --python 3.10.11 `
+  python experiments/converters/spiceypy/8.3.0/capture_native.py
 ```
 
-The capture writes only the selected witnesses and their provenance to
-`tests/golden/oracles/spiceypy/8.3.0/converter/`. The existing pinned
-environment and lockfile are under `experiments/oracles/spiceypy/8.3.0/`.
-Replay the frozen native values with `tests/experiments/converters/spiceypy/test_spiceypy_converter.py`.
+The script writes only the retained converter witnesses and run provenance to
+`tests/golden/oracles/spiceypy/8.3.0/converter/`. Replay those frozen native
+values with `tests/experiments/converters/spiceypy/test_spiceypy_converter.py`.
+Euler, derivative, named-frame, and mission-kernel behavior is outside this
+evidence package.

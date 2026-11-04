@@ -93,7 +93,7 @@ def _rows(value: object, *, context: str) -> list[JsonRecord]:
     ]
 
 
-def _quaternion(row: JsonRecord, field: str) -> list[JsonValue]:
+def _quaternion(row: JsonRecord, field: str) -> list[float]:
     value = row.get(field)
     if (
         not isinstance(value, list)
@@ -104,13 +104,14 @@ def _quaternion(row: JsonRecord, field: str) -> list[JsonValue]:
         )
     ):
         raise TypeError(f"{field} must contain four numeric coefficients")
-    return value
+    numeric_values = cast(list[int | float], value)
+    return [float(component) for component in numeric_values]
 
 
 def retain_canonical_interop(
-    canonical_interop: JsonRecord, expected_inputs: dict[str, list[JsonValue]]
+    canonical_interop: JsonRecord, expected_inputs: dict[str, list[float]]
 ) -> JsonRecord:
-    """Return retained interop data with native inputs paired to named canonicals."""
+    """Retain native outputs and reference canonical inputs by case ID."""
     canonical_interop = deepcopy(canonical_interop)
     if "precision_captures" in canonical_interop:
         profiles = _record(
@@ -118,7 +119,9 @@ def retain_canonical_interop(
         )
         retained_profiles = {
             name: _retain_profile(
-                _record(profile, context=f"precision_captures.{name}"), expected_inputs
+                _record(profile, context=f"precision_captures.{name}"),
+                expected_inputs,
+                precision=name,
             )
             for name, profile in profiles.items()
         }
@@ -126,15 +129,19 @@ def retain_canonical_interop(
             JsonRecord,
             {**canonical_interop, "precision_captures": retained_profiles},
         )
-    return _retain_profile(canonical_interop, expected_inputs)
+    return _retain_profile(canonical_interop, expected_inputs, precision="float32")
 
 
 def _retain_profile(
-    profile: JsonRecord, expected_inputs: dict[str, list[JsonValue]]
+    profile: JsonRecord,
+    expected_inputs: dict[str, list[float]],
+    *,
+    precision: str,
 ) -> JsonRecord:
     cases = _rows(profile.get("orientation_cases"), context="orientation_cases")
     seen: set[str] = set()
     retained_cases: list[JsonRecord] = []
+    input_tolerance = 2e-14 if precision == "float64" else 2e-6
     for row in cases:
         case_id = row.get("case_id")
         if not isinstance(case_id, str):
@@ -145,19 +152,45 @@ def _retain_profile(
             raise ValueError(f"duplicate native orientation case: {case_id}")
         seen.add(case_id)
         native_input = _quaternion(row, "canonical_wxyz")
-        retained_cases.append(
-            {
-                **row,
-                "native_input_wxyz": native_input,
-                "canonical_wxyz": deepcopy(expected_inputs[case_id]),
-            }
-        )
+        expected_input = expected_inputs[case_id]
+        if any(
+            abs(float(actual) - float(expected)) > input_tolerance
+            for actual, expected in zip(native_input, expected_input)
+        ):
+            raise ValueError(f"native input differs from shared case {case_id!r}")
+        retained = {
+            key: value
+            for key, value in row.items()
+            if key not in {"canonical_wxyz", "native_input_wxyz"}
+        }
+        if case_id != "mixed_a":
+            retained.pop("native_rotated_probe_vector_xyz", None)
+        retained_cases.append(cast(JsonRecord, retained))
     missing = set(expected_inputs) - seen
     if missing:
         raise ValueError(
             f"native capture is missing orientation cases: {sorted(missing)}"
         )
-    return cast(JsonRecord, {**profile, "orientation_cases": retained_cases})
+    retained_profile = {
+        key: value
+        for key, value in profile.items()
+        if key
+        not in {
+            "probe_vector_canonical_xyz",
+            "probe_vector_native_xyz",
+            "orientation_cases",
+        }
+    }
+    for product_key in ("composition", "reverse_composition"):
+        product = retained_profile.get(product_key)
+        if isinstance(product, dict):
+            retained_product = dict(product)
+            retained_product.pop("native_rotated_probe_vector_xyz", None)
+            retained_profile[product_key] = retained_product
+    return cast(
+        JsonRecord,
+        {**retained_profile, "orientation_cases": retained_cases},
+    )
 
 
 def sha256(path: Path) -> str:
@@ -179,7 +212,7 @@ def retain(engine: str, version: str, source_path: Path, output_dir: Path) -> No
     canonical_inputs = ROOT / "experiments/interoperability/v1/canonical_inputs.json"
     input_document = read_evidence_document(canonical_inputs)
     input_rows = _rows(input_document.get("orientations"), context="orientations")
-    expected_inputs: dict[str, list[JsonValue]] = {}
+    expected_inputs: dict[str, list[float]] = {}
     for row in input_rows:
         case_id = row.get("case_id")
         if not isinstance(case_id, str):
@@ -281,7 +314,7 @@ def retain(engine: str, version: str, source_path: Path, output_dir: Path) -> No
             "canonical_input_sha256": sha256(canonical_inputs),
             "native_build_record": engine_info,
             "capture_method": captured.get("capture_method"),
-            "retention_method": "selected values copied losslessly from native capture; no values regenerated",
+            "retention_method": "selected native outputs retained losslessly; shared inputs referenced by case ID; redundant input copies and probe samples removed",
         },
         "canonical_interop": canonical_interop,
     }
@@ -292,12 +325,6 @@ def retain(engine: str, version: str, source_path: Path, output_dir: Path) -> No
         output_path = shared_dir / "witnesses.json"
         shared_witness = {
             "schema_version": 1,
-            "target": {
-                key: value
-                for key, value in witness["target"].items()
-                if key not in {"version", "build"}
-            },
-            "contract": witness["contract"],
             "canonical_interop": canonical_interop,
         }
         if output_path.exists():
@@ -328,8 +355,12 @@ def retain(engine: str, version: str, source_path: Path, output_dir: Path) -> No
         }
     else:
         output_path = output_dir / "witnesses.json"
+        retained_witness = {
+            "schema_version": 1,
+            "canonical_interop": canonical_interop,
+        }
         output_path.write_text(
-            dump_evidence_json(witness), encoding="utf-8", newline="\n"
+            dump_evidence_json(retained_witness), encoding="utf-8", newline="\n"
         )
         contract_provenance = {
             "witness_file": "witnesses.json",

@@ -10,12 +10,14 @@ import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
-import numpy as np
-import spiceypy as spice
-
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parents[3]
-ORACLE = ROOT / "tests/golden/oracles/spiceypy/8.3.0"
+sys.path.insert(0, str(ROOT))
+
+import numpy as np
+import spiceypy as spice  # pyright: ignore[reportMissingModuleSource]  # native binary API stub
+
+from scripts.evidence_format import dump_evidence_json
 
 
 def sha256_file(path: Path) -> str:
@@ -24,25 +26,29 @@ def sha256_file(path: Path) -> str:
 
 def capture_quaternion(case_id: str, q: np.ndarray, probe: np.ndarray) -> dict:
     matrix = np.asarray(spice.q2m(q), dtype=np.float64)
-    probes = np.vstack((np.eye(3), probe))
-    actions = [
-        np.asarray(spice.mxv(matrix, vector), dtype=np.float64).tolist()
-        for vector in probes
-    ]
-    recovered = np.asarray(spice.m2q(matrix), dtype=np.float64)
-    return {
+    result = {
         "case_id": case_id,
         "native_input_wxyz": q.tolist(),
-        "native_q2m_rows": matrix.tolist(),
-        "native_mxv_basis_and_probe_xyz": actions,
-        "native_m2q_roundtrip_wxyz": recovered.tolist(),
+        "native_mxv_basis_xyz": [
+            np.asarray(spice.mxv(matrix, vector), dtype=np.float64).tolist()
+            for vector in np.eye(3)
+        ],
     }
+    if case_id == "mixed_a":
+        result["native_mxv_probe_xyz"] = np.asarray(
+            spice.mxv(matrix, probe), dtype=np.float64
+        ).tolist()
+    return result
 
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--inputs", type=Path, default=HERE / "converter_inputs.json")
-    parser.add_argument("--output-dir", type=Path, default=ORACLE / "converter")
+    parser.add_argument(
+        "--output-dir",
+        type=Path,
+        default=ROOT / "tests/golden/oracles/spiceypy/8.3.0/converter",
+    )
     options = parser.parse_args()
     input_path = options.inputs.resolve()
     spec_bytes = input_path.read_bytes()
@@ -73,21 +79,15 @@ def main() -> None:
     )
     qnative = np.asarray(spice.m2q(matrix), dtype=np.float64)
     q2m = np.asarray(spice.q2m(qnative), dtype=np.float64)
-    probes = np.vstack((np.eye(3), probe))
     observations["native_created"].append(
         {
             "case_id": ctor["case_id"],
             "native_constructor": "axisar(axis, angle) -> m2q(matrix)",
-            "native_axisar_matrix_rows": matrix.tolist(),
             "native_m2q_wxyz": qnative.tolist(),
-            "native_q2m_rows": q2m.tolist(),
-            "native_mxv_basis_and_probe_xyz": [
+            "native_mxv_basis_xyz": [
                 np.asarray(spice.mxv(q2m, vector), dtype=np.float64).tolist()
-                for vector in probes
+                for vector in np.eye(3)
             ],
-            "native_m2q_roundtrip_wxyz": np.asarray(
-                spice.m2q(q2m), dtype=np.float64
-            ).tolist(),
         }
     )
 
@@ -115,8 +115,6 @@ def main() -> None:
         raise FileNotFoundError(library_path)
     out = options.output_dir.resolve()
     out.mkdir(parents=True, exist_ok=True)
-    inputs_copy = out / "inputs.json"
-    inputs_copy.write_bytes(spec_bytes)
     witnesses_path = out / "witnesses.json"
     witnesses = {
         "schema_version": "1.0",
@@ -129,9 +127,7 @@ def main() -> None:
         "observations": observations,
     }
     witnesses_path.write_text(
-        json.dumps(witnesses, indent=2, allow_nan=False) + "\n",
-        encoding="utf-8",
-        newline="\n",
+        dump_evidence_json(witnesses), encoding="utf-8", newline="\n"
     )
     manifest = {
         "schema_version": "1.0",
@@ -153,23 +149,23 @@ def main() -> None:
             "retained_orientation_cases": len(selected),
             "native_created_orientations": 1,
             "noncommuting_product_orders": 2,
-            "native_quaternion_actions_per_orientation": 4,
+            "native_basis_images_per_orientation": 3,
+            "native_mixed_probe_case_id": "mixed_a",
         },
         "provenance": {
             "capture_script_sha256": sha256_file(Path(__file__)),
+            "reproduction_capture_script_sha256": sha256_file(Path(__file__)),
             "contract_sha256": sha256_file(out / "contract.json"),
             "converter_input_spec_sha256": sha256_file(input_path),
             "selected_inputs_sha256": sha256_file(shared_path),
             "witnesses_sha256": sha256_file(witnesses_path),
-            "full_oracle_sha256": sha256_file(ORACLE / "native_rotation.json"),
-            "pinned_lockfile_sha256": sha256_file(
-                ROOT / "experiments/oracles/spiceypy/8.3.0/uv.lock"
-            ),
+            "pinned_lockfile_sha256": sha256_file(HERE / "uv.lock"),
             "loaded_cspice_binary_path": str(library_path),
             "loaded_cspice_binary_sha256": sha256_file(library_path),
             "exact_invocation": (
-                "experiments/oracles/spiceypy/8.3.0/.venv/Scripts/python.exe "
-                "experiments/converters/spiceypy/8.3.0/capture_native.py"
+                "uv run --locked --project experiments/converters/spiceypy/8.3.0 "
+                "--python 3.10.11 "
+                "python experiments/converters/spiceypy/8.3.0/capture_native.py"
             ),
         },
     }

@@ -8,16 +8,19 @@
   },
   "native_baseline": {
     "manifest": "manifest.json",
-    "manifest_sha256": "5f0f198febc85b10b612dd00436a31426c70a69e9cc9b32f87fecea8569b2664",
+    "manifest_sha256": "3d24ca9c5f1bf08116753bf698ff117faf07aeeb57cec4d51ff22a196b5cfb3c",
     "observations": "observations.jsonl",
-    "observations_sha256": "d908e22625445f11e0167b136587cfe511161885f22f35fddea53b5e6069e20d",
-    "input_corpus": "experiments/oracles/proj/9.5.1/geographic_inputs.json",
+    "observations_sha256": "90e3a7dd5fc29607d4786f2cd1b76380c74abdbc07203474219c707077854d52",
+    "input_corpus": "experiments/oracles/shared/geographic_inputs_v1.json",
     "input_corpus_sha256": "ca5c70314444c14cead0cc196f319e5d189657bb818eb59751c07e55ec23ff85",
     "observation_count": 11,
     "original_manifest_sha256": "0ab8b041eac0d7dd9290bb64e3428842c3f18d76798fcbb7a02c6890a62a039c",
-    "reproduction_exporter_sha256": "34e4f826b89f19ecc3884cbf31107f73db15111e65847b2cb03321bf4f7edd2a",
+    "reproduction_exporter_sha256": "9295111b0a0d2ddf36c207ee50c7078a28202b60911a5589301299622a665a9a",
     "historical_native_exporter_sha256": "8211253a2d97a9453890b8a695af02f0c79069419deca9ce7e7dc0b4211a48b1",
-    "reproduction_exporter_path": "experiments/oracles/proj/9.5.1/capture_proj.py"
+    "reproduction_exporter_path": "experiments/oracles/proj/9.5.1/capture_proj.py",
+    "source_observations_sha256": "67adb8fcedc1cd9b6aca1b203a6109b8b57f2d8fe3f381951cbcb0dcd56e5f5a",
+    "retention": "Selected native origin, basis endpoints, and probe/inverse values retained for 11 locations; duplicate inputs, redundant readbacks, and per-value hex sidecars omitted.",
+    "original_full_capture_sha256": "d908e22625445f11e0167b136587cfe511161885f22f35fddea53b5e6069e20d"
   },
   "independent_native_reexecution": {
     "was_run": true,
@@ -55,7 +58,7 @@
     "WGS84 only; external datum grids disabled.",
     "Exact-pole longitude selects a convention.",
     "Numerical consistency is not a geodetic accuracy statement.",
-    "The Windows replay output was summarized and not retained; the original 11 native observations remain frozen.",
+    "The Windows replay output was summarized and not retained; selected native origin, basis, and probe values from the original 11 locations remain frozen.",
     "The versioned reproduction exporter is not the historical Linux exporter; both source identities are recorded."
   ],
   "generated_utc": "2026-11-03T08:12:22.362244+00:00"

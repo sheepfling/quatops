@@ -88,7 +88,9 @@ markers = [
 ]
 
 [tool.pyright]
-stubPath = "experiments/oracles/stubs"
+venvPath = "."
+venv = ".venv"
+stubPath = "experiments/converters/stubs"
 include = [
     "src",
     "tests/typing_tests/foundational_consumer.py",
@@ -96,17 +98,17 @@ include = [
     "tests/typing_tests/float32_consumer.py",
     "tests/typing_tests/numpy_consumer.py",
     "scripts/evidence_json.py",
+    "scripts/evidence_format.py",
     "scripts/converter_evidence.py",
     "scripts/validate_converter_evidence.py",
     "scripts/validate_evidence_json.py",
-    "scripts/compact_oracle_witnesses.py",
     "scripts/retain_engine_witnesses.py",
     "experiments/oracles/sophus/1.24.6/verify_scipy.py",
     "experiments/converters/cesium/1.124.0/create_inputs.py",
     "experiments/converters/eigen/5.0.1/capture_native.py",
     "experiments/converters/gltf/2.0.0/create_asset.py",
-    "experiments/oracles/mujoco/3.17.0/capture_mujoco.py",
-    "experiments/oracles/spiceypy/8.3.0/capture_spice.py",
+    "experiments/converters/mujoco/3.17.0/capture_native.py",
+    "experiments/converters/spiceypy/8.3.0/capture_native.py",
 ]
 # Package exports are assembled from runtime adapter tables and compatibility
 # modules. The namespace and component-axis tests assert the resulting exports.
