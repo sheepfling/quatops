@@ -50,6 +50,10 @@
       "source.json": "296939541a365a241696110d8ab67293e78790854f2e0c94136e606a255c4554",
       "verify_scipy.py": "548bb54929ef570477c2b6a8d17756610af610ceb41979bba369d27485d35124"
     },
+    "repair_replay_sources_sha256": {
+      "retain_witnesses.py": "3ef71e068b6d5d3fed606a2b75bdecc658e9ca5e7d720b7e2bb885ac3326fb4b",
+      "verify_scipy.py": "40a35dc0d2b93a42c5ec0072c02796c04b1b10d54ae701ffba8b909e7c891d0d"
+    },
     "input_file": "capture_inputs.tsv",
     "input_sha256": "713fece6dbad561b864c3f625c740190f92210318af4fa09f4467930a04a3048",
     "native_executable_sha256": "fd164cf8c34f1b731c8eafd6ea4bd336eb59b8941004e866edcfc3fc07016767",

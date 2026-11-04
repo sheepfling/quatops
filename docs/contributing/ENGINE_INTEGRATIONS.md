@@ -91,7 +91,7 @@ engine integration is runtime-verified:
 6. Exercise one real imported asset and confirm its model-forward and up axes
    after import. Record importer settings separately from the world-basis map.
 
-Keep this runtime evidence distinct from the SciPy oracle evidence. The current
-checkout has no Unreal, Unity, or Godot runtime test result; see issues
-[#4](https://github.com/sheepfling/quatops/issues/4) and
-[#7](https://github.com/sheepfling/quatops/issues/7).
+Keep native runtime evidence distinct from SciPy formula checks and Python
+replays of frozen outputs. See the canonical
+[interoperability evidence atlas](../INTEROPERABILITY_EVIDENCE.md) for retained
+engine captures, versioned contracts, and remaining scope.

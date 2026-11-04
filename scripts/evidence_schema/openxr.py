@@ -2,14 +2,17 @@
 
 from __future__ import annotations
 
-import math
-from collections.abc import Iterable
 from typing import Annotated, Literal, Optional
 
 from pydantic import Field, FiniteFloat
 from typing_extensions import TypeAlias
 
+from scripts.evidence_schema import primitives
 from scripts.evidence_schema.primitives import NativeCaptureModel
+
+# Keep the earlier OpenXR schema import surface while the shared helper lives
+# with the other scalar primitives.
+finite_max_abs = primitives.finite_max_abs
 
 ObservationKey: TypeAlias = Literal["A_from_B", "B_from_C", "A_from_C"]
 InputKey: TypeAlias = Literal["A", "B", "C"]
@@ -63,15 +66,3 @@ class OpenXRVerifierSummary(NativeCaptureModel):
     chain_translation_max_abs_error_m: FiniteFloat
     chain_point_max_abs_error_m: FiniteFloat
     result: Literal["pass"]
-
-
-def finite_max_abs(values: Iterable[float], label: str) -> float:
-    """Return a finite maximum absolute error; reject empty or non-finite inputs."""
-    finite_values = [float(value) for value in values]
-    if not finite_values:
-        raise ValueError(f"{label} is empty")
-    for value in finite_values:
-        if not math.isfinite(value):
-            raise ValueError(f"{label} contains a non-finite value: {value}")
-    maximum = max(abs(value) for value in finite_values)
-    return maximum

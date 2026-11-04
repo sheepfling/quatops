@@ -27,8 +27,10 @@ uv run --locked --project experiments/converters/eigen/5.0.1 --python 3.11.15 `
 
 The capture verifies the archive digest before compiling with `g++` in C++17
 mode. It keeps the small selected witnesses and build provenance under
-`tests/golden/oracles/eigen/5.0.1/converter/`. The compiler path/version and
-native executable digest are recorded in the manifest. Prepared JSON inputs
+[`tests/golden/oracles/eigen/5.0.1/converter`](../../../../tests/golden/oracles/eigen/5.0.1/converter/manifest.json).
+The compiler path/version and native executable digest are recorded in the
+manifest. Prepared JSON inputs
 are generated in memory; the native input stream and shared canonical source
 remain reproducible without a duplicate fixture file. Replay the frozen
-native outputs with `tests/experiments/converters/eigen/test_eigen_converter.py`.
+native outputs with
+[`test_eigen_converter.py`](../../../../tests/experiments/converters/eigen/test_eigen_converter.py).

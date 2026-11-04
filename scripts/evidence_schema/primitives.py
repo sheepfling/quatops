@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import math
+from collections.abc import Iterable
 from typing import Annotated
 
 from pydantic import BaseModel, ConfigDict, Field
@@ -16,6 +18,17 @@ Matrix4 = Annotated[
     Field(min_length=4, max_length=4),
 ]
 BasisImages = Annotated[list[Vector3], Field(min_length=3, max_length=3)]
+
+
+def finite_max_abs(values: Iterable[float], label: str) -> float:
+    """Return a finite maximum absolute value; reject empty/non-finite inputs."""
+    finite_values = [float(value) for value in values]
+    if not finite_values:
+        raise ValueError(f"{label} is empty")
+    for value in finite_values:
+        if not math.isfinite(value):
+            raise ValueError(f"{label} contains a non-finite value: {value}")
+    return max(abs(value) for value in finite_values)
 
 
 class StrictEvidenceModel(BaseModel):

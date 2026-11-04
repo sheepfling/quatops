@@ -18,12 +18,16 @@ retaining one copy of this broad corpus per target.
 
 ## Supporting captures
 
-- [PROJ 9.5.1](proj/9.5.1/README.md): WGS84 geodetic, ECEF, and ENU probes.
-- [Sophus 1.24.6](sophus/1.24.6/README.md): selected native `SO3f` and
-  `SO3d` construction, exp/log, composition, inverse, and perturbation
-  witnesses; no named converter is claimed.
-- [OpenXR SDK 1.1.65](openxr/1.1.65/README.md): reviewed specification
-  contract and exact native header ABI; runtime pose behavior is unmeasured.
+See the canonical [interoperability evidence atlas](../../docs/INTEROPERABILITY_EVIDENCE.md)
+for captured evidence and remaining scope. Versioned reproduction guides:
+
+- [PROJ 9.5.1](proj/9.5.1/README.md)
+- [Sophus 1.24.6](sophus/1.24.6/README.md)
+- [OpenXR SDK 1.1.65](openxr/1.1.65/README.md)
+
+The OpenXR static-space capture directly loads the Khronos software test
+runtime with synthetic time. It does not exercise the OpenXR loader path,
+a real headset, a vendor runtime, tracking, or a QuatOps adapter.
 
 Native outputs, specification-derived expectations, and independent formula
 checks are different evidence types. Only selected, reviewed observations are

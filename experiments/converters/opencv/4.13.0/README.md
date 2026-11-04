@@ -21,4 +21,4 @@ native binary hashes alongside the selected witnesses. The verbose build
 configuration and generated QuatOps input file are not retained; the shared
 source plan and exact native-observed rotation vectors remain available.
 Replay the selected boundary evidence with
-`tests/experiments/converters/opencv/test_opencv_converter.py`.
+[`test_opencv_converter.py`](../../../../tests/experiments/converters/opencv/test_opencv_converter.py).

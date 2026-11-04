@@ -19,7 +19,8 @@ Its locked project installs `spiceypy==8.3.0`; the root QuatOps environment
 does not need this native capture dependency.
 
 The script writes only the retained converter witnesses and run provenance to
-`tests/golden/oracles/spiceypy/8.3.0/converter/`. Replay those frozen native
-values with `tests/experiments/converters/spiceypy/test_spiceypy_converter.py`.
+[`tests/golden/oracles/spiceypy/8.3.0/converter`](../../../../tests/golden/oracles/spiceypy/8.3.0/converter/manifest.json).
+Replay those frozen native values with
+[`test_spiceypy_converter.py`](../../../../tests/experiments/converters/spiceypy/test_spiceypy_converter.py).
 Euler, derivative, named-frame, and mission-kernel behavior is outside this
 evidence package.
