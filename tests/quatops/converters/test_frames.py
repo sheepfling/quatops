@@ -5,10 +5,14 @@ import pytest
 from scipy.spatial.transform import Rotation
 
 from quatops.converters import (
+    CANONICAL_BODY_FRAME,
+    ECEF_FRAME,
     CoordinateFrame,
+    ECEFBodyOrientation,
     FrameCorrespondence,
     FramedOrientation,
     SemanticQuaternionMap,
+    get_converter,
 )
 from quatops.engines import OrthogonalBasisMap, SignedAxisMap
 from quatops.python import hamilton
@@ -170,6 +174,50 @@ def test_general_orthogonal_basis_maps_support_rotated_semantic_frames():
     expected = world @ Rotation.from_quat(hamilton.to_xyzw(q)).as_matrix() @ body.T
     actual = Rotation.from_quat(hamilton.to_xyzw(mapped.quaternion_wxyz)).as_matrix()
     np.testing.assert_allclose(actual, expected, rtol=0.0, atol=4e-14)
+
+
+def test_ecef_body_semantics_flow_through_hamilton_to_target_and_back():
+    target_world = CoordinateFrame(
+        "target.ecef-world",
+        ECEF_FRAME.reference,
+        ("ECEF +X", "ECEF +Y", "ECEF +Z"),
+        SignedAxisMap(("x", "y", "z")),
+    )
+    target_body = CoordinateFrame(
+        "target.body-rfu",
+        CANONICAL_BODY_FRAME.reference,
+        ("right", "forward", "up"),
+        SignedAxisMap(("x", "y", "z")),
+    )
+    mapping = SemanticQuaternionMap(
+        FrameCorrespondence(ECEF_FRAME, target_world),
+        FrameCorrespondence(CANONICAL_BODY_FRAME, target_body),
+    )
+    source_q = hamilton.from_rotvec((0.53, -0.27, 0.91))
+    semantic = ECEFBodyOrientation.from_wxyz(source_q)
+    canonical = semantic.to_framed_hamilton()
+    assert (canonical.to_frame, canonical.from_frame) == (
+        ECEF_FRAME.name,
+        CANONICAL_BODY_FRAME.name,
+    )
+
+    profile = get_converter("unity.quaternion")
+    target = profile.to_target(canonical, mapping)
+    recovered = ECEFBodyOrientation.from_framed_hamilton(
+        profile.from_target(target, mapping)
+    )
+    assert hamilton.rotations_equivalent(recovered.quaternion_wxyz, source_q)
+
+
+def test_ecef_body_semantics_reject_other_frame_pairs():
+    with pytest.raises(ValueError, match="parent frame"):
+        ECEFBodyOrientation.from_framed_hamilton(
+            FramedOrientation(
+                (1.0, 0.0, 0.0, 0.0),
+                CANONICAL_BODY_FRAME.name,
+                "local-world",
+            )
+        )
 
 
 def test_orthogonal_basis_map_rejects_nonorthogonal_and_improper_magnitudes():

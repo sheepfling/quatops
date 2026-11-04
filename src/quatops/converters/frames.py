@@ -9,6 +9,7 @@ never supply axis defaults.
 
 from __future__ import annotations
 
+from collections.abc import Iterable
 from dataclasses import dataclass, field
 from math import isfinite
 from typing import Literal
@@ -20,8 +21,19 @@ from ..engines.basis import (
     SignedAxisMap,
 )
 from ..python import hamilton as _hamilton
+from ..types import HamiltonQuaternion
 
 Handedness = Literal["right", "left"]
+
+
+def _checked_wxyz(values: Iterable[float]) -> tuple[float, float, float, float]:
+    components = tuple(float(value) for value in values)
+    if len(components) != 4:
+        raise ValueError("quaternion_wxyz must contain exactly four components")
+    w, x, y, z = components
+    if any(not isfinite(value) for value in (w, x, y, z)):
+        raise ValueError("quaternion components must be finite")
+    return w, x, y, z
 
 
 @dataclass(frozen=True)
@@ -59,6 +71,31 @@ class CoordinateFrame:
         expected_parity = 1 if self.handedness == "right" else -1
         if self.basis_to_reference.determinant != expected_parity:
             raise ValueError("frame handedness does not match basis_to_reference")
+
+
+_IDENTITY_BASIS = SignedAxisMap(("x", "y", "z"))
+
+ECEF_FRAME = CoordinateFrame(
+    name="quatops.ecef",
+    reference="quatops.ecef",
+    axes=(
+        "+X equator at prime meridian",
+        "+Y equator at 90 degrees east",
+        "+Z north pole",
+    ),
+    basis_to_reference=_IDENTITY_BASIS,
+    handedness="right",
+)
+"""QuatOps' right-handed Earth-Centered, Earth-Fixed orientation frame."""
+
+CANONICAL_BODY_FRAME = CoordinateFrame(
+    name="quatops.body.right-forward-up",
+    reference="quatops.body.right-forward-up",
+    axes=("right", "forward", "up"),
+    basis_to_reference=_IDENTITY_BASIS,
+    handedness="right",
+)
+"""QuatOps' explicit right-handed body frame: +X right, +Y forward, +Z up."""
 
 
 @dataclass(frozen=True)
@@ -154,6 +191,67 @@ class FramedOrientation:
             from_frame=self.to_frame,
             to_frame=self.from_frame,
         )
+
+
+@dataclass(frozen=True)
+class ECEFBodyOrientation:
+    """A standard Hamilton orientation ``q_ECEF_from_body``.
+
+    The child/body axes use :data:`CANONICAL_BODY_FRAME` (+X right, +Y
+    forward, +Z up); the parent axes use :data:`ECEF_FRAME`. This semantic
+    value stores the ordinary Hamilton WXYZ dataclass quaternion and can be
+    passed to a target converter after converting it to a labelled
+    :class:`FramedOrientation`.
+    """
+
+    quaternion: HamiltonQuaternion
+
+    def __post_init__(self) -> None:
+        if not isinstance(self.quaternion, HamiltonQuaternion):
+            raise TypeError("quaternion must be a HamiltonQuaternion")
+        values = _checked_wxyz(
+            (self.quaternion.w, self.quaternion.x, self.quaternion.y, self.quaternion.z)
+        )
+        object.__setattr__(self, "quaternion", HamiltonQuaternion(*values))
+
+    @classmethod
+    def from_wxyz(cls, values: Iterable[float]) -> ECEFBodyOrientation:
+        """Construct ``q_ECEF_from_body`` from Hamilton WXYZ coefficients."""
+        checked = _checked_wxyz(values)
+        return cls(HamiltonQuaternion(*checked))
+
+    @property
+    def quaternion_wxyz(self) -> tuple[float, float, float, float]:
+        """Return the stored Hamilton coefficients in canonical WXYZ order."""
+        w, x, y, z = self.quaternion
+        return w, x, y, z
+
+    def to_framed_hamilton(self) -> FramedOrientation:
+        """Expose the quaternion with its explicit ECEF/body frame labels."""
+        return FramedOrientation(
+            self.quaternion_wxyz,
+            from_frame=CANONICAL_BODY_FRAME.name,
+            to_frame=ECEF_FRAME.name,
+        )
+
+    @classmethod
+    def from_framed_hamilton(
+        cls, orientation: FramedOrientation
+    ) -> ECEFBodyOrientation:
+        """Accept a framed Hamilton value only when its labels match this type."""
+        if not isinstance(orientation, FramedOrientation):
+            raise TypeError("orientation must be a FramedOrientation")
+        if orientation.from_frame != CANONICAL_BODY_FRAME.name:
+            raise ValueError(
+                "child frame must be "
+                f"{CANONICAL_BODY_FRAME.name!r}, got {orientation.from_frame!r}"
+            )
+        if orientation.to_frame != ECEF_FRAME.name:
+            raise ValueError(
+                f"parent frame must be {ECEF_FRAME.name!r}, "
+                f"got {orientation.to_frame!r}"
+            )
+        return cls(HamiltonQuaternion(*orientation.quaternion_wxyz))
 
 
 @dataclass(frozen=True)

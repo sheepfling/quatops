@@ -6,7 +6,10 @@ never choose coordinate axes for the caller.
 """
 
 from .frames import (
+    CANONICAL_BODY_FRAME,
+    ECEF_FRAME,
     CoordinateFrame,
+    ECEFBodyOrientation,
     FrameCorrespondence,
     FramedOrientation,
     FramedOrientationBatch,
@@ -24,10 +27,13 @@ from .targets import (
 )
 
 __all__ = [
+    "CANONICAL_BODY_FRAME",
     "CONVERTERS",
+    "ECEF_FRAME",
     "TARGET_DECLARATIONS",
     "ConverterProfile",
     "CoordinateFrame",
+    "ECEFBodyOrientation",
     "FrameCorrespondence",
     "FramedOrientation",
     "FramedOrientationBatch",

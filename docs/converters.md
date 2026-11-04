@@ -93,6 +93,66 @@ with the actual world and model/body frame declarations for the data being
 converted. `OrthogonalBasisMap` supports arbitrary orthogonal rotations and
 reflections; `SignedAxisMap` is the efficient signed-permutation form.
 
+## Standard ECEF-from-body orientation
+
+For applications that use an Earth-fixed world, QuatOps provides a named
+semantic value, `ECEFBodyOrientation`, for `q_ECEF_from_body`. Its parent frame
+is the right-handed ECEF frame (+X at the equator/prime meridian, +Y at the
+equator/90° east, +Z toward the north pole). Its child frame is the explicit
+right-handed QuatOps body frame (+X right, +Y forward, +Z up). The value wraps
+the standard Hamilton WXYZ quaternion; it does not include position or a
+geodetic origin.
+
+The conversion path is explicit: semantic `ECEFBodyOrientation` → labelled
+Hamilton WXYZ → target profile. This example deliberately declares target
+world and body axes aligned to the two canonical frames. For a scene with a
+different world basis or model-forward axis, declare those maps from the
+actual scene and asset frames.
+
+```python
+from quatops.converters import (
+    CANONICAL_BODY_FRAME,
+    ECEF_FRAME,
+    CoordinateFrame,
+    ECEFBodyOrientation,
+    FrameCorrespondence,
+    SemanticQuaternionMap,
+    get_converter,
+)
+from quatops.engines import SignedAxisMap
+
+identity = SignedAxisMap(("x", "y", "z"))
+target_world = CoordinateFrame(
+    "application.world",
+    ECEF_FRAME.reference,
+    ECEF_FRAME.axes,
+    identity,
+)
+target_body = CoordinateFrame(
+    "application.body",
+    CANONICAL_BODY_FRAME.reference,
+    CANONICAL_BODY_FRAME.axes,
+    identity,
+)
+frame_map = SemanticQuaternionMap(
+    FrameCorrespondence(ECEF_FRAME, target_world),
+    FrameCorrespondence(CANONICAL_BODY_FRAME, target_body),
+)
+
+physical = ECEFBodyOrientation.from_wxyz((0.8, 0.2, -0.4, 0.4))
+canonical_hamilton = physical.to_framed_hamilton()
+unity = get_converter("unity.quaternion")
+native = unity.to_target(canonical_hamilton, frame_map)
+restored = ECEFBodyOrientation.from_framed_hamilton(
+    unity.from_target(native, frame_map)
+)
+```
+
+Use `FramedOrientation` directly when the parent frame is a local scene,
+robot, camera, or another explicitly named reference rather than ECEF. The
+same target profiles handle both forms after the semantic value is expressed
+as a labelled Hamilton orientation.
+
 ## Batch conversion
 
 Pass a labelled WXYZ batch to the same target profile. `component_axis` defaults
