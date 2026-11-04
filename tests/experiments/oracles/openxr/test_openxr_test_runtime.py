@@ -16,8 +16,9 @@ from scripts.evidence_schema.openxr import (
     OpenXRTestRuntimeCapture,
     finite_max_abs,
 )
+from tests.support.paths import REPOSITORY_ROOT
 
-ROOT = Path(__file__).resolve().parents[4]
+ROOT = REPOSITORY_ROOT
 CAPTURE_DIR = ROOT / "experiments/oracles/openxr/1.1.65"
 MANIFEST_PATH = CAPTURE_DIR / "manifest.json"
 WITNESS_PATH = CAPTURE_DIR / "witnesses/test_runtime_frame_chain.json"

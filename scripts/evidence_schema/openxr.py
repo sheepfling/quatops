@@ -4,9 +4,10 @@ from __future__ import annotations
 
 import math
 from collections.abc import Iterable
-from typing import Annotated, Literal, TypeAlias
+from typing import Annotated, Literal
 
 from pydantic import Field, FiniteFloat
+from typing_extensions import TypeAlias
 
 from scripts.evidence_schema.primitives import NativeCaptureModel
 

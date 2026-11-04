@@ -6,7 +6,7 @@ import hashlib
 import json
 
 import pytest
-from pydantic import ValidationError
+from pydantic import TypeAdapter, ValidationError
 
 from scripts.evidence_json import read_evidence_document
 from scripts.evidence_schema.shared_inputs import GeographicInputCorpus
@@ -26,9 +26,7 @@ def test_geographic_corpus_is_semantically_typed() -> None:
 def test_geographic_coordinates_reject_numeric_strings_and_booleans(
     invalid: object,
 ) -> None:
-    corpus = GeographicInputCorpus.model_validate_json(
-        CORPUS.read_bytes(), strict=True
-    ).model_dump(mode="json")
+    corpus = read_evidence_document(CORPUS)
     corpus["locations"][0]["longitude_degrees"] = invalid
 
     with pytest.raises(ValidationError):
@@ -58,16 +56,13 @@ def test_geographic_json_accepts_integer_and_float_numbers_and_round_trips() -> 
     assert capture.locations[0].longitude_degrees == -122.0
     assert capture.locations[0].latitude_degrees == 47.5
     assert capture.locations[0].height_m == 12.0
-    restored = GeographicInputCorpus.model_validate_json(
-        capture.model_dump_json(), strict=True
-    )
+    adapter = TypeAdapter(GeographicInputCorpus)
+    restored = adapter.validate_json(adapter.dump_json(capture), strict=True)
     assert restored == capture
 
 
 def test_geographic_schema_rejects_extra_fields_and_wrong_versions() -> None:
-    corpus = GeographicInputCorpus.model_validate_json(
-        CORPUS.read_bytes(), strict=True
-    ).model_dump(mode="json")
+    corpus = read_evidence_document(CORPUS)
     corpus["schema_version"] = "2.0"
     with pytest.raises(ValidationError):
         GeographicInputCorpus.model_validate(corpus, strict=True)
