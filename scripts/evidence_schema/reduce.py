@@ -100,33 +100,33 @@ def _eigen(capture: EigenCapture, inputs: EigenInputs) -> list[EvidenceWitness]:
                     ),
                 )
             )
-        for row in profile.native_created:
-            witnesses.append(
-                OrientationWitness(
-                    kind="orientation",
-                    case_id=row.case_id,
-                    precision=profile.dtype,
-                    coefficient_order="wxyz",
-                    coefficients=row.quaternion.wxyz,
-                    basis_images_xyz=row.native_quaternion_basis_actions_xyz,
-                    constructor_axis_xyz=inputs.native_constructed_orientation.axis_xyz,
-                    constructor_angle_radians=inputs.native_constructed_orientation.angle_radians,
-                )
+        witnesses.extend(
+            OrientationWitness(
+                kind="orientation",
+                case_id=row.case_id,
+                precision=profile.dtype,
+                coefficient_order="wxyz",
+                coefficients=row.quaternion.wxyz,
+                basis_images_xyz=row.native_quaternion_basis_actions_xyz,
+                constructor_axis_xyz=inputs.native_constructed_orientation.axis_xyz,
+                constructor_angle_radians=inputs.native_constructed_orientation.angle_radians,
             )
-        for row in profile.composition:
-            witnesses.append(
-                CompositionWitness(
-                    kind="composition",
-                    case_id=row.case_id,
-                    left_case_id=row.lhs_case_id,
-                    right_case_id=row.rhs_case_id,
-                    product_order=row.product_order,
-                    precision=profile.dtype,
-                    coefficient_order="wxyz",
-                    coefficients=row.quaternion.wxyz,
-                    basis_images_xyz=row.native_quaternion_basis_actions_xyz,
-                )
+            for row in profile.native_created
+        )
+        witnesses.extend(
+            CompositionWitness(
+                kind="composition",
+                case_id=row.case_id,
+                left_case_id=row.lhs_case_id,
+                right_case_id=row.rhs_case_id,
+                product_order=row.product_order,
+                precision=profile.dtype,
+                coefficient_order="wxyz",
+                coefficients=row.quaternion.wxyz,
+                basis_images_xyz=row.native_quaternion_basis_actions_xyz,
             )
+            for row in profile.composition
+        )
     return witnesses
 
 
@@ -151,19 +151,19 @@ def _mujoco(capture: MuJoCoCapture, inputs: MuJoCoInputs) -> list[EvidenceWitnes
                 ),
             )
         )
-    for row in observations.native_created:
-        witnesses.append(
-            OrientationWitness(
-                kind="orientation",
-                case_id=row.case_id,
-                precision="float64",
-                coefficient_order="wxyz",
-                coefficients=row.native_input_wxyz,
-                basis_images_xyz=row.native_mju_rotVecQuat_basis_xyz,
-                constructor_axis_xyz=inputs.native_constructed_orientation.axis_xyz,
-                constructor_angle_radians=inputs.native_constructed_orientation.angle_radians,
-            )
+    witnesses.extend(
+        OrientationWitness(
+            kind="orientation",
+            case_id=row.case_id,
+            precision="float64",
+            coefficient_order="wxyz",
+            coefficients=row.native_input_wxyz,
+            basis_images_xyz=row.native_mju_rotVecQuat_basis_xyz,
+            constructor_axis_xyz=inputs.native_constructed_orientation.axis_xyz,
+            constructor_angle_radians=inputs.native_constructed_orientation.angle_radians,
         )
+        for row in observations.native_created
+    )
     for row in observations.composition:
         left_case_id, right_case_id = _native_product_case_ids(row.case_id)
         witnesses.append(
@@ -203,30 +203,30 @@ def _opencv(capture: OpenCVCapture) -> list[EvidenceWitness]:
                 ),
             )
         )
-    for row in observations.native_created:
-        witnesses.append(
-            RotationVectorWitness(
-                kind="rotation_vector",
-                case_id=f"{row.case_id}@{row.dtype}",
-                precision=row.dtype,
-                input_rotation_vector_xyz=row.native_input_rotation_vector_xyz_radians,
-                output_rotation_vector_xyz=row.native_matrix_to_rotation_vector_xyz_radians,
-                basis_images_xyz=row.native_gemm_basis_actions_xyz,
-            )
+    witnesses.extend(
+        RotationVectorWitness(
+            kind="rotation_vector",
+            case_id=f"{row.case_id}@{row.dtype}",
+            precision=row.dtype,
+            input_rotation_vector_xyz=row.native_input_rotation_vector_xyz_radians,
+            output_rotation_vector_xyz=row.native_matrix_to_rotation_vector_xyz_radians,
+            basis_images_xyz=row.native_gemm_basis_actions_xyz,
         )
-    for row in observations.composition:
-        witnesses.append(
-            RotationVectorCompositionWitness(
-                kind="rotation_vector_composition",
-                case_id=f"{row.case_id}@{row.dtype}",
-                left_case_id=row.native_lhs_case_id,
-                right_case_id=row.native_rhs_case_id,
-                product_order=row.product_order,
-                precision=row.dtype,
-                output_rotation_vector_xyz=row.native_matrix_to_rotation_vector_xyz_radians,
-                basis_images_xyz=row.native_gemm_basis_actions_xyz,
-            )
+        for row in observations.native_created
+    )
+    witnesses.extend(
+        RotationVectorCompositionWitness(
+            kind="rotation_vector_composition",
+            case_id=f"{row.case_id}@{row.dtype}",
+            left_case_id=row.native_lhs_case_id,
+            right_case_id=row.native_rhs_case_id,
+            product_order=row.product_order,
+            precision=row.dtype,
+            output_rotation_vector_xyz=row.native_matrix_to_rotation_vector_xyz_radians,
+            basis_images_xyz=row.native_gemm_basis_actions_xyz,
         )
+        for row in observations.composition
+    )
     return witnesses
 
 
@@ -251,19 +251,19 @@ def _spiceypy(
                 ),
             )
         )
-    for row in observations.native_created:
-        witnesses.append(
-            OrientationWitness(
-                kind="orientation",
-                case_id=row.case_id,
-                precision="float64",
-                coefficient_order="wxyz",
-                coefficients=row.native_m2q_wxyz,
-                basis_images_xyz=row.native_mxv_basis_xyz,
-                constructor_axis_xyz=inputs.native_constructed_orientation.axis_xyz,
-                constructor_angle_radians=inputs.native_constructed_orientation.angle_radians,
-            )
+    witnesses.extend(
+        OrientationWitness(
+            kind="orientation",
+            case_id=row.case_id,
+            precision="float64",
+            coefficient_order="wxyz",
+            coefficients=row.native_m2q_wxyz,
+            basis_images_xyz=row.native_mxv_basis_xyz,
+            constructor_axis_xyz=inputs.native_constructed_orientation.axis_xyz,
+            constructor_angle_radians=inputs.native_constructed_orientation.angle_radians,
         )
+        for row in observations.native_created
+    )
     for row in observations.composition:
         left_case_id, right_case_id = _native_product_case_ids(row.case_id)
         witnesses.append(

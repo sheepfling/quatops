@@ -4,11 +4,7 @@ from __future__ import annotations
 
 import argparse
 import hashlib
-import sys
 from pathlib import Path
-
-ROOT = Path(__file__).resolve().parents[1]
-sys.path.insert(0, str(ROOT))
 
 from scripts.evidence_json import (
     dump_evidence_json,
@@ -16,6 +12,7 @@ from scripts.evidence_json import (
     read_evidence_rows,
 )
 
+ROOT = Path(__file__).resolve().parents[1]
 HERE = ROOT / "experiments/converters/openusd/26.11"
 DESTINATION = ROOT / "tests/golden/transports/openusd/26.11/converter"
 

@@ -7,6 +7,9 @@ captures and their pinned environments belong together under
 
 ## Shared mathematical inputs
 
+Read the [shared native capture inputs and helpers](shared/README.md) for the
+corpus and capture-envelope conventions.
+
 [`shared/orientation_inputs_v1.json`](shared/orientation_inputs_v1.json) is a
 common input corpus for the shared mathematical oracle tests. Converter
 acceptance packages use the smaller canonical witness set in

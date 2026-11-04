@@ -314,7 +314,10 @@ def retain(engine: str, version: str, source_path: Path, output_dir: Path) -> No
             "canonical_input_sha256": sha256(canonical_inputs),
             "native_build_record": engine_info,
             "capture_method": captured.get("capture_method"),
-            "retention_method": "selected native outputs retained losslessly; shared inputs referenced by case ID; redundant input copies and probe samples removed",
+            "retention_method": (
+                "selected native outputs retained losslessly; shared inputs "
+                "referenced by case ID; redundant input copies and probe samples removed"
+            ),
         },
         "canonical_interop": canonical_interop,
     }

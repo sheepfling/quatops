@@ -14,7 +14,8 @@ $captureDir = Join-Path $env:TEMP "quatops-openusd-26.11-capture"
 uv run --project experiments/converters/openusd/26.11 --locked --python 3.14.6 `
   python experiments/converters/openusd/26.11/capture_native.py `
   --output $captureDir
-python scripts/retain_openusd_converter_witnesses.py $captureDir
+uv run --no-project --python 3.14.6 --with "pydantic>=2,<3" `
+  python -m scripts.retain_openusd_converter_witnesses $captureDir
 ```
 
 The contract declares a right-handed canonical frame with +X right, +Y

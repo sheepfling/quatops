@@ -8,11 +8,6 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[4]
-sys.path.insert(0, str(ROOT))
-sys.path.insert(0, str(ROOT / "src"))
-
-from quatops.engines import QuaternionFrameMap, SignedAxisMap
-from scripts.evidence_format import dump_evidence_json
 
 CANONICAL_INPUTS = ROOT / "experiments/interoperability/v1/canonical_inputs.json"
 HERE = Path(__file__).parent
@@ -25,6 +20,11 @@ def number(value: float) -> str:
 
 
 def main() -> None:
+    sys.path.insert(0, str(ROOT))
+    sys.path.insert(0, str(ROOT / "src"))
+    from quatops.engines import QuaternionFrameMap, SignedAxisMap
+    from scripts.evidence_format import dump_evidence_json
+
     corpus = json.loads(CANONICAL_INPUTS.read_text(encoding="utf-8"))
     by_id = {row["case_id"]: row["canonical_wxyz"] for row in corpus["orientations"]}
     # Explicit right-handed USD test frame: X right, Y up, -Z forward.

@@ -10,16 +10,12 @@ import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
-HERE = Path(__file__).resolve().parent
-ROOT = HERE.parents[3]
-sys.path.insert(0, str(ROOT))
-
-import numpy as np
-
 # Installed by this target's locked project; the root typecheck uses its stub.
+import numpy as np
 import spiceypy as spice  # pyright: ignore[reportMissingModuleSource]
 
-from scripts.evidence_format import dump_evidence_json
+HERE = Path(__file__).resolve().parent
+ROOT = HERE.parents[3]
 
 
 def sha256_file(path: Path) -> str:
@@ -44,6 +40,9 @@ def capture_quaternion(case_id: str, q: np.ndarray, probe: np.ndarray) -> dict:
 
 
 def main() -> None:
+    sys.path.insert(0, str(ROOT))
+    from scripts.evidence_format import dump_evidence_json
+
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--inputs", type=Path, default=HERE / "converter_inputs.json")
     parser.add_argument(

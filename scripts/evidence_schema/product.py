@@ -123,17 +123,18 @@ def _run_details(manifest: dict[str, Any]) -> tuple[str, list[DependencyPin]]:
 
 
 def _reproduction_dependencies(manifest: dict[str, Any]) -> list[DependencyPin]:
-    result: list[DependencyPin] = []
     product = manifest.get("product")
-    if isinstance(product, dict) and isinstance(product.get("dependencies"), list):
-        for item in product["dependencies"]:
-            if (
-                isinstance(item, dict)
-                and item.get("name") in {"container image", "ROS_DISTRO"}
-                and isinstance(item.get("version"), str)
-            ):
-                result.append(DependencyPin(name=item["name"], version=item["version"]))
-    return result
+    if not isinstance(product, dict) or not isinstance(
+        product.get("dependencies"), list
+    ):
+        return []
+    return [
+        DependencyPin(name=item["name"], version=item["version"])
+        for item in product["dependencies"]
+        if isinstance(item, dict)
+        and item.get("name") in {"container image", "ROS_DISTRO"}
+        and isinstance(item.get("version"), str)
+    ]
 
 
 def _primary_native_binary(manifest: dict[str, Any], product: str) -> str | None:

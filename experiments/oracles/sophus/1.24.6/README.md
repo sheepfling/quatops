@@ -36,7 +36,9 @@ g++ -std=c++17 -O2 `
   capture_native.cpp -o capture_sophus.exe
 foreach ($profile in @('float32', 'float64')) {
   $capture = Join-Path $env:TEMP "quatops-sophus-$profile.json"
-  python -c "import pathlib,subprocess,sys; pathlib.Path(sys.argv[1]).write_bytes(subprocess.check_output(sys.argv[2:]))" `
+  $captureCopy = "import pathlib, subprocess, sys; " + `
+    "pathlib.Path(sys.argv[1]).write_bytes(subprocess.check_output(sys.argv[2:]))"
+  python -c $captureCopy `
     $capture ./capture_sophus.exe capture_inputs.tsv $profile
   uv run --no-project --python 3.12 --with-requirements requirements-reference.txt `
     python verify_scipy.py --capture $capture

@@ -1,6 +1,13 @@
-# Ignore editor output left at the version-index root after project versioning.
-/Library/
-/Logs/
-/Temp/
-/UserSettings/
-/capture.log
+# Ignore generated editor state and captures for every pinned Unity version.
+Library/
+Logs/
+Temp/
+UserSettings/
+Build/
+obj/
+MemoryCaptures/
+Recordings/
+capture.log
+native_capture.json
+**/ProjectSettings/*.asset
+**/Packages/packages-lock.json

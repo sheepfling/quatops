@@ -80,7 +80,7 @@ def test_openusd_converter_stage_provenance_and_frame_declarations():
         "native_observations_sha256": FIXTURE / "witnesses.json",
         "generator_sha256": ROOT
         / "experiments/converters/openusd/26.11/create_stage.py",
-        "checked_in_capture_runner_sha256": ROOT
+        "native_capture_script_sha256": ROOT
         / "experiments/converters/openusd/26.11/capture_native.py",
         "contract_sha256": FIXTURE / "contract.json",
     }
