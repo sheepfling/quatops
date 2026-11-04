@@ -117,6 +117,19 @@ def test_ros_capture_is_native_pinned_and_selected_values_are_lossless():
     for field, path in file_hashes.items():
         assert hashlib.sha256(path.read_bytes()).hexdigest() == reproduction[field]
 
+    archived_runner = (
+        ROOT
+        / "experiments/provenance/reproduction-v1/ros2-0.36.23/capture_native.py.txt"
+    )
+    assert (
+        hashlib.sha256(archived_runner.read_bytes()).hexdigest()
+        == (reproduction["previous_checkout_runner_sha256"])
+    )
+    assert (
+        reproduction["previous_checkout_runner_sha256"]
+        == (MANIFEST["capture_provenance"]["capture_runner_sha256"])
+    )
+
 
 def _canonical_chain():
     inputs = WITNESSES["native_inputs"]

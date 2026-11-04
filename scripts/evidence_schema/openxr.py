@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import math
 from collections.abc import Iterable
-from typing import Annotated, Literal
+from typing import Annotated, Literal, Optional
 
 from pydantic import Field, FiniteFloat
 from typing_extensions import TypeAlias
@@ -38,7 +38,8 @@ class OpenXRTestRuntimeIdentity(NativeCaptureModel):
 
 class OpenXRTestRuntimeCapture(NativeCaptureModel):
     # Native stdout predates the retained fixture envelope; if supplied, pin it.
-    schema_version: Literal["1.0"] | None = None
+    # Pydantic 2 on Python 3.9 cannot resolve PEP 604 forward references.
+    schema_version: Optional[Literal["1.0"]] = None  # noqa: UP045
     evidence_kind: Literal["native_openxr_test_runtime_frame_chain"]
     runtime: OpenXRTestRuntimeIdentity
     api_version: Annotated[list[int], Field(min_length=3, max_length=3)]
