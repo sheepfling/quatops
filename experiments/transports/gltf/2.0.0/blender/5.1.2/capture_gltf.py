@@ -27,6 +27,17 @@ class CurveRow(TypedDict):
     key_frames: list[float]
 
 
+class ActionCurves(TypedDict):
+    slot_identifiers: list[str]
+    data_path: str
+    array_indices: list[int]
+    key_count: int
+    interpolations_by_component: list[list[str]]
+    left_handle_types_by_component: list[list[str]]
+    right_handle_types_by_component: list[list[str]]
+    key_frames: list[float]
+
+
 def sha256_file(path: Path) -> str:
     digest = hashlib.sha256()
     with Path(path).open("rb") as stream:
@@ -65,7 +76,7 @@ def object_transform(object_: Any) -> dict[str, list[list[float]]]:
     }
 
 
-def action_curves(action: Any) -> dict[str, object]:
+def action_curves(action: Any) -> ActionCurves:
     rows: list[CurveRow] = []
     for layer in action.layers:
         for strip in layer.strips:
@@ -119,9 +130,12 @@ def action_curves(action: Any) -> dict[str, object]:
 def install_action(object_: Any, action: Any) -> None:
     if object_.animation_data is None:
         object_.animation_data_create()
-    object_.animation_data.action = action
+    animation_data = object_.animation_data
+    if animation_data is None:
+        raise RuntimeError("Could not create animation data for imported action")
+    animation_data.action = action
     if len(action.slots):
-        object_.animation_data.action_slot = action.slots[0]
+        animation_data.action_slot = action.slots[0]
 
 
 def require_object(name: str) -> Any:

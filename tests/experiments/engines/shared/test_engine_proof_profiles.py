@@ -55,6 +55,24 @@ def test_contract_and_witnesses_are_versioned_small_and_provenanced(engine, vers
     for key, digest in expected_hashes.items():
         assert contract["provenance"][key] == digest
 
+    reproduction_path = witness_path.parent / "reproduction.json"
+    if reproduction_path.is_file():
+        reproduction = json.loads(reproduction_path.read_text(encoding="utf-8"))
+        historical = reproduction["historical_capture"]
+        current = reproduction["reproduction"]
+        assert (
+            contract["provenance"]["capture_source"]
+            == historical["capture_source_archive"]
+        )
+        assert (
+            contract["provenance"]["capture_source_sha256"]
+            == historical["capture_source_sha256"]
+        )
+        assert (
+            hashlib.sha256((ROOT / current["capture_source"]).read_bytes()).hexdigest()
+            == current["capture_source_sha256"]
+        )
+
 
 def test_witnesses_keep_only_discriminating_inputs_and_native_actions():
     canonical_inputs = json.loads(

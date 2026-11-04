@@ -24,6 +24,32 @@ def append_f32(blob: bytearray, values: Sequence[float]) -> tuple[int, int]:
     return offset, len(values) * 4
 
 
+def flatten_accessor_values(
+    values: Sequence[float] | Sequence[Sequence[float]], type_name: str
+) -> list[float]:
+    """Validate the fixture's supported accessor shapes before float packing."""
+    flat: list[float] = []
+    if type_name == "SCALAR":
+        for value in values:
+            if isinstance(value, bool) or not isinstance(value, (int, float)):
+                raise TypeError("SCALAR accessor values must be numbers")
+            flat.append(value)
+        return flat
+    widths = {"VEC3": 3, "VEC4": 4}
+    if type_name not in widths:
+        raise ValueError(f"Unsupported fixture accessor type: {type_name!r}")
+    for element in values:
+        if not isinstance(element, Sequence):
+            raise TypeError(f"{type_name} accessor values must be sequences")
+        if len(element) != widths[type_name]:
+            raise ValueError(f"{type_name} accessor has an incorrect component count")
+        for component in element:
+            if isinstance(component, bool) or not isinstance(component, (int, float)):
+                raise TypeError(f"{type_name} accessor components must be numbers")
+            flat.append(component)
+    return flat
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--binary-output", type=Path, required=True)
@@ -61,11 +87,7 @@ def main() -> None:
         max_values: list[float] | None = None,
         target: int | None = None,
     ) -> int:
-        flat = (
-            [component for element in values for component in element]
-            if type_name != "SCALAR"
-            else values
-        )
+        flat = flatten_accessor_values(values, type_name)
         byte_offset, byte_length = append_f32(binary, flat)
         view_index = len(buffer_views)
         view = {

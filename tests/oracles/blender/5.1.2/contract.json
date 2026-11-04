@@ -43,7 +43,7 @@
   "provenance": {
     "witness_file": "witnesses.json",
     "witness_sha256": "245c13b6c254734025baa87a9b3229fdc620d0dbf60dbdfa899183ab596705cb",
-    "capture_source": "experiments/blender/5.1.2/capture.py",
+    "capture_source": "experiments/provenance/reproduction-v1/blender-5.1.2-capture.py.txt",
     "capture_source_sha256": "f61b09cbed8fe6ce3f0615745bd438d168a552d184558f8d6fc78b849e093cc4",
     "original_capture_sha256": "e1a46351cf32f5a3937defb8e669458e34cb50c4a4131e03bf34c8ecb8009b76",
     "canonical_input_file": "experiments/interoperability/v1/canonical_inputs.json",

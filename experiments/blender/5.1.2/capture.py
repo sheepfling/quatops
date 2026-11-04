@@ -39,6 +39,70 @@ class OrientationCase(TypedDict):
     native_rotated_probe_vector_xyz: list[float]
 
 
+class CompositionCase(TypedDict):
+    left_case_id: str
+    right_case_id: str
+    product_order: str
+    native_product_quaternion: list[float]
+    native_rotated_positive_basis_vectors_xyz: list[list[float]]
+    native_rotated_probe_vector_xyz: list[float]
+
+
+class CanonicalInterop(TypedDict):
+    contract_id: str
+    native_quaternion_order: str
+    frame_map_destination_axes_from_source: list[str]
+    probe_vector_canonical_xyz: list[float]
+    probe_vector_native_xyz: list[float]
+    orientation_cases: list[OrientationCase]
+    composition: CompositionCase
+    reverse_composition: CompositionCase
+
+
+class EngineMetadata(TypedDict):
+    name: str
+    version: str
+    major: int
+    minor: int
+    patch: int
+    build_hash: str
+    build_branch: str
+    platform: str
+    python_version: str
+
+
+class SourceFrame(TypedDict):
+    handedness: str
+    positive_x: str
+    positive_y: str
+    positive_z: str
+    declaration: str
+
+
+class WorldFrameProbe(TypedDict):
+    positive_x_image: list[float]
+    positive_y_image: list[float]
+    positive_z_image: list[float]
+    declared_probe_semantics: str
+    semantic_imported_object_forward_axis: str
+
+
+class AxisMap(TypedDict):
+    destination_axes_from_source: list[str]
+    determinant: int
+
+
+class Fixture(TypedDict):
+    schema_version: int
+    evidence_kind: str
+    capture_method: str
+    engine: EngineMetadata
+    source_frame: SourceFrame
+    blender_world_frame_probe: WorldFrameProbe
+    source_to_blender_axis_map: AxisMap
+    canonical_interop: CanonicalInterop
+
+
 def vector_values(value: Vector) -> list[float]:
     return [float(component) for component in value]
 
@@ -47,7 +111,7 @@ def rotated_axes(quaternion: Quaternion) -> list[list[float]]:
     return [vector_values(quaternion @ axis) for axis in AXES]
 
 
-def capture_canonical_interop() -> dict[str, object]:
+def capture_canonical_interop() -> CanonicalInterop:
     native = {case_id: Quaternion(wxyz) for case_id, wxyz in ORIENTATIONS}
     orientation_cases: list[OrientationCase] = [
         {
@@ -60,7 +124,7 @@ def capture_canonical_interop() -> dict[str, object]:
         for case_id, wxyz in ORIENTATIONS
     ]
 
-    def composition(left_id: str, right_id: str) -> dict[str, object]:
+    def composition(left_id: str, right_id: str) -> CompositionCase:
         product = native[left_id] @ native[right_id]
         return {
             "left_case_id": left_id,
@@ -83,7 +147,7 @@ def capture_canonical_interop() -> dict[str, object]:
     }
 
 
-def build_fixture() -> dict[str, object]:
+def build_fixture() -> Fixture:
     version = bpy.app.version_string
     build_hash = bpy.app.build_hash
     if isinstance(build_hash, bytes):
