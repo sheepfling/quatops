@@ -61,6 +61,19 @@ def test_geographic_json_accepts_integer_and_float_numbers_and_round_trips() -> 
     assert restored == capture
 
 
+def test_geographic_input_rejects_integer_overflow_but_preserves_binary64_rounding():
+    corpus = read_evidence_document(CORPUS)
+    corpus["locations"][0]["longitude_degrees"] = 10**1000
+    with pytest.raises(ValidationError, match="overflows the target binary64"):
+        GeographicInputCorpus.model_validate(corpus, strict=True)
+
+    corpus["locations"][0]["longitude_degrees"] = 9007199254740993
+    parsed = GeographicInputCorpus.model_validate(corpus, strict=True)
+    exact_integer = parsed.locations[0].longitude_degrees
+    assert exact_integer == 9007199254740993
+    assert float(exact_integer) == 9007199254740992.0
+
+
 def test_geographic_schema_rejects_extra_fields_and_wrong_versions() -> None:
     corpus = read_evidence_document(CORPUS)
     corpus["schema_version"] = "2.0"
@@ -96,6 +109,16 @@ def test_proj_reproduction_hashes_preserve_prior_and_current_source_identity() -
     assert (
         hashlib.sha256(requirements.read_bytes()).hexdigest()
         == reproduction["requirements_sha256"]
+    )
+    archived_helper = root / reproduction["capture_helper_archive"]
+    current_helper = root / reproduction["capture_helper_path"]
+    assert (
+        hashlib.sha256(archived_helper.read_bytes()).hexdigest()
+        == reproduction["previous_checkout_capture_helper_sha256"]
+    )
+    assert (
+        hashlib.sha256(current_helper.read_bytes()).hexdigest()
+        == reproduction["capture_helper_sha256"]
     )
     assert reproduction["previous_manifest_exporter_sha256"] == (
         "9295111b0a0d2ddf36c207ee50c7078a28202b60911a5589301299622a665a9a"

@@ -5,7 +5,11 @@
     "name": "OpenUSD",
     "distribution": "usd-core",
     "distribution_version": "26.11",
-    "openusd_version_tuple": [0, 26, 11]
+    "openusd_version_tuple": [
+      0,
+      26,
+      11
+    ]
   },
   "stage_metadata": {
     "upAxis": "Y",
@@ -40,7 +44,9 @@
   "reproduction": {
     "retention_script_sha256": "eee3356fe1911ebb7e8c5eaea14aab90d4c876b14cdeb2a26ae0c87e4781ab88",
     "retention_helper_sha256": "cbd84cc6825ea484953121efc6755c9bdd210bbce410e8c1fb0a137a3953eb1c",
-    "retention_formatter_sha256": "56961d6be101a2bdfb1b21372c823ec86dfd636547d851901b7284f2ae20e0b3"
+    "retention_formatter_sha256": "56961d6be101a2bdfb1b21372c823ec86dfd636547d851901b7284f2ae20e0b3",
+    "generator_sha256": "020d9a391efd095cdc3142f7d076c2dc3ce22d6006c48d7a27fe7e279ede3085",
+    "generator_archive": "experiments/provenance/reproduction-v1/openusd-26.11-create_stage.py.txt"
   },
   "selection": {
     "retained_observations": 3,

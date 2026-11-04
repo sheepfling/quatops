@@ -25,17 +25,6 @@ exclude = [
   # source rule cannot follow that validated data flow.
   "scripts/evidence_json.py",
   "experiments/one_off_benchmark.py",
-  # These scripts execute inside pinned native SDK environments. Keep their
-  # standard-library JSON boundary independent of a Pydantic runtime dependency;
-  # their inputs and outputs are validated by native replay tests and JSON syntax.
-  "experiments/converters/mujoco/3.17.0/capture_native.py",
-  "experiments/converters/opencv/4.13.0/capture_native.py",
-  "experiments/converters/opencv/4.13.0/prepare_inputs.py",
-  "experiments/converters/ros2/0.36.23/capture_native.py",
-  "experiments/converters/openusd/26.11/capture_native.py",
-  "experiments/converters/openusd/26.11/create_stage.py",
-  "experiments/converters/spiceypy/8.3.0/capture_native.py",
-  "experiments/oracles/proj/9.5.1/capture_proj.py",
 ]
 
 [checks.output_escaping]

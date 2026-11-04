@@ -22,7 +22,7 @@ colcon build \
   --build-base /tmp/ros-build \
   --install-base /tmp/ros-install
 source /tmp/ros-install/setup.bash
-PYTHONPATH=/workspace python3 experiments/converters/ros2/0.36.23/capture_native.py \
+PYTHONPATH=/workspace /opt/quatops-evidence/bin/python experiments/converters/ros2/0.36.23/capture_native.py \
   --repository-root /workspace \
   --corpus experiments/oracles/shared/orientation_inputs_v1.json \
   --output /captures/full \

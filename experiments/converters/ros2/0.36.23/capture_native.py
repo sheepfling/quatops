@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import argparse
-import json
 import os
 import subprocess
 import xml.etree.ElementTree as ET
@@ -17,6 +16,13 @@ from experiments.oracles.shared.capture_io import (
     contract,
     numeric,
     sha256,
+)
+from scripts.evidence_json import read_evidence_document
+from scripts.evidence_schema.ros_capture import (
+    RosFullCapture,
+    RosSelectedCorpus,
+    reject_lost_nonfinite_values,
+    validate_ros_capture_corpus_link,
 )
 
 
@@ -123,21 +129,34 @@ def main() -> None:
             f"Native ROS exporter exited {run.returncode}; see {stdout} and {stderr}"
         )
 
-    result = json.loads(run.stdout)
-    numeric_types: dict[int, NumericType] = {4: "binary32", 8: "binary64"}
-    label = numeric_types.get(result["native_scalar_bytes"])
-    if label is None:
-        raise ValueError("Unknown native scalar size")
-    if result["native_scalar_bytes"] != 8:
+    result = read_evidence_document(stdout)
+    reject_lost_nonfinite_values(result)
+    corpus_document = read_evidence_document(corpus)
+    relevant_corpus = RosSelectedCorpus.model_validate(
+        {
+            key: corpus_document[key]
+            for key in (
+                "euler_inputs",
+                "multiplication_pairs",
+                "matrix_inputs",
+                "vectors_xyz",
+            )
+        },
+        strict=True,
+    )
+    checked = RosFullCapture.model_validate(result, strict=True)
+    validate_ros_capture_corpus_link(checked, relevant_corpus)
+    if checked.native_scalar_bytes != 8:
         raise ValueError(
             "This wrapper requires double tf2Scalar; capture 32-bit fields separately"
         )
-    for item in result["observations"]:
+    label: NumericType = "binary64"
+    for item in checked.observations:
         capture.add(
             Observation(
-                item["case_id"],
-                item["operation_id"],
-                item["native_entry_point"],
+                item.case_id,
+                item.operation_id,
+                item.native_entry_point,
                 contract(
                     order="xyzw",
                     frame=(
@@ -145,8 +164,8 @@ def main() -> None:
                         "coordinates into target"
                     ),
                 ),
-                pack(item["native_inputs"], label),
-                pack(item["native_outputs"], label),
+                pack(item.native_inputs.model_dump(mode="json"), label),
+                pack(item.native_outputs.model_dump(mode="json"), label),
             )
         )
     capture.artifacts.extend(

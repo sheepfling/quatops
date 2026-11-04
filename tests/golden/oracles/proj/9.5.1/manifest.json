@@ -91,11 +91,13 @@
     "previous_manifest_exporter_sha256": "9295111b0a0d2ddf36c207ee50c7078a28202b60911a5589301299622a665a9a",
     "previous_checkout_exporter_sha256": "b1924e77c6a449b3c86af70f8fb870cb06fa2eecd160f8a1d6937b3bbe4254a6",
     "capture_helper_path": "experiments/oracles/shared/capture_io.py",
-    "capture_helper_sha256": "b690009841d5c54803381d4256c058635afd5649e3b59441bb22bb63f3cbb4ad",
+    "capture_helper_sha256": "b950a3e961649f0043bd20525e788b8953246ab9b6125d3a0feaf95ef50cfa89",
     "input_path": "experiments/oracles/shared/geographic_inputs_v1.json",
     "input_sha256": "ca5c70314444c14cead0cc196f319e5d189657bb818eb59751c07e55ec23ff85",
     "requirements_path": "experiments/oracles/proj/9.5.1/requirements.txt",
-    "requirements_sha256": "2ebfab05fa84c1997fce51031415ed2da1209595112badc09faecbeadfa3aa6a"
+    "requirements_sha256": "2ebfab05fa84c1997fce51031415ed2da1209595112badc09faecbeadfa3aa6a",
+    "previous_checkout_capture_helper_sha256": "ecdf0245b9d0318d67189c471f26b3ec58e2ef871611b6a2c5c79cbbc16963da",
+    "capture_helper_archive": "experiments/provenance/reproduction-v1/capture_io.py.txt"
   },
   "retention": {
     "source_observations_sha256": "67adb8fcedc1cd9b6aca1b203a6109b8b57f2d8fe3f381951cbcb0dcd56e5f5a",

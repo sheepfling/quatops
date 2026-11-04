@@ -5,9 +5,10 @@
 
 from __future__ import annotations
 
+import math
 from typing import Annotated, Literal, Optional, Union
 
-from pydantic import Field
+from pydantic import ConfigDict, Field, model_validator
 
 from scripts.evidence_schema.primitives import (
     SHA256,
@@ -323,6 +324,25 @@ class SpiceyPyInputs(DirectLibraryInputBase):
     shared_canonical_inputs: str
     retained_case_ids: list[str]
 
+    @model_validator(mode="after")
+    def validate_native_constructor(self) -> SpiceyPyInputs:
+        constructor = self.native_constructed_orientation
+        if constructor.case_id != SPICEYPY_CONSTRUCTOR_CASE_ID:
+            raise ValueError(
+                f"SpiceyPy constructor case_id must be {SPICEYPY_CONSTRUCTOR_CASE_ID!r}"
+            )
+        if tuple(self.retained_case_ids) != SPICEYPY_RETAINED_CASE_IDS:
+            raise ValueError(
+                "SpiceyPy inputs must retain the complete ordered recipe selection"
+            )
+        if not all(math.isfinite(value) for value in constructor.axis_xyz):
+            raise ValueError(
+                "SpiceyPy constructor axis must contain only finite values"
+            )
+        if not math.isfinite(constructor.angle_radians):
+            raise ValueError("SpiceyPy constructor angle must be finite")
+        return self
+
 
 class QuaternionValues(NativeCaptureModel):
     wxyz: Quaternion4
@@ -431,7 +451,28 @@ class OpenCVCapture(NativeCaptureModel):
     observations: OpenCVObservations
 
 
+SPICEYPY_RETAINED_CASE_IDS = (
+    "identity",
+    "quarter_x",
+    "quarter_y",
+    "quarter_z",
+    "mixed_a",
+    "mixed_b",
+    "antipode_mixed_a",
+    "nonprincipal_halfturn",
+)
+SPICEYPY_CONSTRUCTOR_CASE_ID = "native_axis_angle_mixed"
+SPICEYPY_COMPOSITION_CASE_IDS = (
+    "mixed_a_times_mixed_b",
+    "mixed_b_times_mixed_a",
+)
+
+
 class SpiceyPyOrientation(NativeCaptureModel):
+    model_config = ConfigDict(
+        extra="forbid", frozen=True, strict=True, allow_inf_nan=False
+    )
+
     case_id: str
     native_input_wxyz: Quaternion4
     native_mxv_basis_xyz: BasisActions
@@ -442,6 +483,10 @@ class SpiceyPyOrientation(NativeCaptureModel):
 
 
 class SpiceyPyConstructedOrientation(NativeCaptureModel):
+    model_config = ConfigDict(
+        extra="forbid", frozen=True, strict=True, allow_inf_nan=False
+    )
+
     case_id: str
     native_constructor: str
     native_m2q_wxyz: Quaternion4
@@ -452,6 +497,34 @@ class SpiceyPyObservations(NativeCaptureModel):
     canonical_to_native: list[SpiceyPyOrientation]
     native_created: list[SpiceyPyConstructedOrientation]
     composition: list[SpiceyPyOrientation]
+
+    @model_validator(mode="after")
+    def validate_complete_recipe(self) -> SpiceyPyObservations:
+        canonical_ids = tuple(row.case_id for row in self.canonical_to_native)
+        if canonical_ids != SPICEYPY_RETAINED_CASE_IDS:
+            raise ValueError(
+                "SpiceyPy capture must contain the complete ordered canonical selection"
+            )
+        constructed_ids = tuple(row.case_id for row in self.native_created)
+        if constructed_ids != (SPICEYPY_CONSTRUCTOR_CASE_ID,):
+            raise ValueError(
+                "SpiceyPy capture must contain its one selected constructed orientation"
+            )
+        composition_ids = tuple(row.case_id for row in self.composition)
+        if composition_ids != SPICEYPY_COMPOSITION_CASE_IDS:
+            raise ValueError(
+                "SpiceyPy capture must contain both ordered composition products"
+            )
+        for row in self.composition:
+            if (
+                row.native_lhs_wxyz is None
+                or row.native_rhs_wxyz is None
+                or row.product_order != "lhs * rhs; rhs acts first"
+            ):
+                raise ValueError(
+                    f"SpiceyPy product {row.case_id!r} lacks its ordered operands"
+                )
+        return self
 
 
 class SpiceyPyCapture(NativeCaptureModel):

@@ -60,11 +60,15 @@ int main(int argc,char** argv) {
       tf2::Quaternion q;q.setRPY(xyz.at(0).get<Native>(),xyz.at(1).get<Native>(),xyz.at(2).get<Native>());
       const tf2::Matrix3x3 m(q);Native roll{},pitch{},yaw{};m.getRPY(roll,pitch,yaw);
       const auto message=tf2::toMsg(q);tf2::Quaternion back;tf2::fromMsg(message,back);
-      json probes=json::array();
-      for(const auto& p:corpus.at("vectors_xyz"))probes.push_back(varray(tf2::quatRotate(q,tf2::Vector3(p.at(0).get<Native>(),p.at(1).get<Native>(),p.at(2).get<Native>()))));
+      json probes=json::array(),probe_inputs=json::array();
+      for(const auto& p:corpus.at("vectors_xyz")) {
+        const tf2::Vector3 native_probe(p.at(0).get<Native>(),p.at(1).get<Native>(),p.at(2).get<Native>());
+        probe_inputs.push_back(varray(native_probe));
+        probes.push_back(varray(tf2::quatRotate(q,native_probe)));
+      }
       add(item.at("case_id").get<std::string>(),"setRPY-message-action",
           "tf2::Quaternion::setRPY; Matrix3x3::getRPY; tf2::quatRotate; toMsg/fromMsg",
-          {{"roll_pitch_yaw_radians",xyz}},{{"quaternion_xyzw",qarray(q)},{"matrix_rows",matrix(m)},
+          {{"roll_pitch_yaw_radians",xyz},{"probe_vectors_xyz",probe_inputs}},{{"quaternion_xyzw",qarray(q)},{"matrix_rows",matrix(m)},
           {"readback_rpy",json::array({roll,pitch,yaw})},{"message_xyzw",json::array({message.x,message.y,message.z,message.w})},
           {"message_roundtrip_xyzw",qarray(back)},{"basis_and_probe_images",probes}});
     }

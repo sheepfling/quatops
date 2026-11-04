@@ -4,11 +4,40 @@ from __future__ import annotations
 
 import math
 from collections.abc import Iterable
-from typing import Annotated
+from typing import Annotated, Union
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import (
+    AfterValidator,
+    BaseModel,
+    ConfigDict,
+    Field,
+    FiniteFloat,
+    StrictInt,
+)
 
 Scalar = float
+
+
+def _ensure_binary64_convertible(value: object) -> object:
+    """Reject numeric source values that overflow binary64 without rounding ints."""
+    if not isinstance(value, (int, float)) or isinstance(value, bool):
+        raise TypeError("input number must be an integer or float")
+    try:
+        converted = float(value)
+    except OverflowError as error:
+        raise ValueError(
+            "input number overflows the target binary64 representation"
+        ) from error
+    if not math.isfinite(converted):
+        raise ValueError("input number overflows the target binary64 representation")
+    return value
+
+
+# Keep parsed integers intact; adapters explicitly convert to binary64 at the
+# native boundary, where ordinary binary64 rounding is part of the contract.
+FiniteInputNumber = Annotated[
+    Union[StrictInt, FiniteFloat], AfterValidator(_ensure_binary64_convertible)
+]
 SHA256 = Annotated[str, Field(pattern=r"^[0-9a-f]{64}$")]
 Vector3 = Annotated[list[Scalar], Field(min_length=3, max_length=3)]
 Quaternion4 = Annotated[list[Scalar], Field(min_length=4, max_length=4)]

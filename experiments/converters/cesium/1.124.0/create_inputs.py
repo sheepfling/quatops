@@ -10,7 +10,10 @@ from pathlib import Path
 from quatops.engines import QuaternionFrameMap, SignedAxisMap
 from quatops.python import hamilton
 from scripts.evidence_json import read_evidence_document
-from scripts.evidence_schema.shared_inputs import SharedCanonicalInputCapture
+from scripts.evidence_schema.shared_inputs import (
+    GeographicInputCorpus,
+    SharedCanonicalInputCapture,
+)
 from scripts.evidence_schema.targets import CesiumInputs
 
 
@@ -29,8 +32,16 @@ def main() -> None:
     canonical = SharedCanonicalInputCapture.model_validate(
         read_evidence_document(witness_inputs), strict=True
     )
-    geographic = read_evidence_document(geographic_inputs)
+    geographic = GeographicInputCorpus.model_validate(
+        read_evidence_document(geographic_inputs), strict=True
+    )
     by_id = {row.case_id: row.canonical_wxyz for row in canonical.orientations}
+    required_orientations = {"identity", "mixed_a", "mixed_b", "antipode_mixed_a"}
+    missing_orientations = required_orientations.difference(by_id)
+    if missing_orientations:
+        raise ValueError(
+            f"canonical input is missing Cesium cases: {sorted(missing_orientations)}"
+        )
     identity = SignedAxisMap(("x", "y", "z"))
     to_cesium_local = QuaternionFrameMap(identity, identity)
     selection = (
@@ -39,7 +50,13 @@ def main() -> None:
         ("mixed_b", "geo-04", (-3.0, 6.0, 9.0)),
         ("antipode_mixed_a", "geo-09", (0.5, 1.0, -2.0)),
     )
-    locations = {row["case_id"]: row for row in geographic["locations"]}
+    locations = {row.case_id: row for row in geographic.locations}
+    required_locations = {"geo-00", "geo-03", "geo-04", "geo-09"}
+    missing_locations = required_locations.difference(locations)
+    if missing_locations:
+        raise ValueError(
+            f"geographic input is missing Cesium cases: {sorted(missing_locations)}"
+        )
     cases = []
     for orientation_id, location_id, translation in selection:
         source = by_id[orientation_id]
@@ -54,9 +71,9 @@ def main() -> None:
                 "canonical_wxyz": list(source),
                 "quatops_cesium_local_xyzw": list(xyzw),
                 "local_translation_xyz_m": list(translation),
-                "longitude_degrees": location["longitude_degrees"],
-                "latitude_degrees": location["latitude_degrees"],
-                "height_m": location["height_m"],
+                "longitude_degrees": location.longitude_degrees,
+                "latitude_degrees": location.latitude_degrees,
+                "height_m": location.height_m,
             }
         )
     mixed_composition = hamilton.multiply(by_id["mixed_a"], by_id["mixed_b"])
@@ -74,9 +91,9 @@ def main() -> None:
                 composed[0],
             ],
             "local_translation_xyz_m": [0.0, 0.0, 0.0],
-            "longitude_degrees": locations["geo-03"]["longitude_degrees"],
-            "latitude_degrees": locations["geo-03"]["latitude_degrees"],
-            "height_m": locations["geo-03"]["height_m"],
+            "longitude_degrees": locations["geo-03"].longitude_degrees,
+            "latitude_degrees": locations["geo-03"].latitude_degrees,
+            "height_m": locations["geo-03"].height_m,
         }
     )
 

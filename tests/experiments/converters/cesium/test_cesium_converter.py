@@ -121,6 +121,9 @@ def test_cesium_capture_provenance_and_explicit_frame_contract():
     }
     for field, path in reproduction_paths.items():
         assert hashlib.sha256(path.read_bytes()).hexdigest() == reproduction[field]
+    assert hashlib.sha256(
+        (ROOT / reproduction["input_generator_archive"]).read_bytes()
+    ).hexdigest() == MANIFEST["provenance"]["captured_input_generator_sha256"]
 
 
 def test_quatops_generated_local_quaternions_match_cesium_native_actions_and_roundtrips():

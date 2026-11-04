@@ -79,7 +79,7 @@ def test_openusd_converter_stage_provenance_and_frame_declarations():
         "converter_input_sha256": INPUTS_PATH,
         "native_observations_sha256": FIXTURE / "witnesses.json",
         "generator_sha256": ROOT
-        / "experiments/converters/openusd/26.11/create_stage.py",
+        / "experiments/provenance/reproduction-v1/openusd-26.11-create_stage.py.txt",
         "native_capture_script_sha256": ROOT
         / "experiments/converters/openusd/26.11/capture_native.py",
         "contract_sha256": FIXTURE / "contract.json",
@@ -97,6 +97,9 @@ def test_openusd_converter_stage_provenance_and_frame_declarations():
         ).hexdigest()
     )
     reproduction = MANIFEST["reproduction"]
+    assert hashlib.sha256(
+        (ROOT / "experiments/converters/openusd/26.11/create_stage.py").read_bytes()
+    ).hexdigest() == reproduction["generator_sha256"]
     for field, path in {
         "retention_script_sha256": ROOT
         / "scripts/retain_openusd_converter_witnesses.py",

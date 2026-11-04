@@ -27,17 +27,20 @@
     "native_package_lock_sha256": "5e331bee862cbdff2a96dec2d325e86aa996b780821833899f4053e9476002e0",
     "witnesses_sha256": "cf56f2ed41685d79fb08f3d04ef7e36818e5fb920286758aa813d85746613ed2",
     "contract_sha256": "df361fce8d9d5311f035d51cd8e04f60718bfa3d8c869dbee4d8a69ea6488c76",
-    "input_serialization_note": "JSON formatting changed only; parsed native input values are unchanged."
+    "input_serialization_note": "JSON formatting changed only; parsed native input values are unchanged.",
+    "captured_input_generator_sha256": "b520febfabf06cac54c438ccbb7160dcc8e3df8c9f1ab3388e8ba2d837dc67b7",
+    "captured_input_generator_archive": "experiments/provenance/reproduction-v1/cesium-1.124.0-create_inputs.py.txt"
   },
   "reproduction": {
-    "input_generator_sha256": "b520febfabf06cac54c438ccbb7160dcc8e3df8c9f1ab3388e8ba2d837dc67b7",
+    "input_generator_sha256": "95c2905c48eb1013ded0b498342af991ba2b1db005ac91500cd72473eedd8bf8",
     "capture_script_sha256": "cc596d22e143b7dac96bbca8eebca8629cf4eb8dec3fe52c75a9fdd691d23b41",
     "numeric_helper_sha256": "aed1da7b180e76ff0e101a477dd6a941ed0ad076509d9716bf2bf9b6896f5fa4",
     "retention_script_sha256": "e47b773686410bf28e52223a8a6c8e4de12c53eda5bd157f58760fb006f99232",
     "retention_helper_sha256": "cbd84cc6825ea484953121efc6755c9bdd210bbce410e8c1fb0a137a3953eb1c",
     "retention_formatter_sha256": "56961d6be101a2bdfb1b21372c823ec86dfd636547d851901b7284f2ae20e0b3",
     "package_lock_sha256": "5e331bee862cbdff2a96dec2d325e86aa996b780821833899f4053e9476002e0",
-    "geographic_inputs_sha256": "619099b732593c6c45f4f7eb64714e4c7d79b2c96dcd070777522e3736e4f085"
+    "geographic_inputs_sha256": "619099b732593c6c45f4f7eb64714e4c7d79b2c96dcd070777522e3736e4f085",
+    "input_generator_archive": "experiments/provenance/reproduction-v1/cesium-1.124.0-create_inputs.py.txt"
   },
   "selection": {
     "retained_observations": 5,

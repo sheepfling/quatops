@@ -91,6 +91,9 @@ def test_spiceypy_boundary_contract_and_capture_provenance_are_explicit():
             hashlib.sha256(path.read_bytes()).hexdigest()
             == MANIFEST["provenance"][field]
         ), field
+    assert hashlib.sha256(
+        (ROOT / MANIFEST["provenance"]["capture_script_archive"]).read_bytes()
+    ).hexdigest() == MANIFEST["provenance"]["capture_script_sha256"]
     capture_source = paths["reproduction_capture_script_sha256"].read_text(
         encoding="utf-8"
     )

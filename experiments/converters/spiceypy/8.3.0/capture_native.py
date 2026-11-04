@@ -16,6 +16,15 @@ import numpy as np
 import spiceypy as spice  # pyright: ignore[reportMissingModuleSource]
 
 from scripts.evidence_format import dump_evidence_json
+from scripts.evidence_json import read_evidence_document
+from scripts.evidence_schema.shared_inputs import (
+    SharedCanonicalInputCapture,
+    resolve_orientation_selection,
+)
+from scripts.evidence_schema.spiceypy_capture import (
+    validate_spiceypy_capture_matches_inputs,
+)
+from scripts.evidence_schema.targets import SpiceyPyCapture, SpiceyPyInputs
 
 
 def sha256_file(path: Path) -> str:
@@ -51,20 +60,25 @@ def main() -> None:
     output_dir = options.output_dir or (
         repository_root / "tests/golden/oracles/spiceypy/8.3.0/converter"
     )
-    spec_bytes = input_path.read_bytes()
-    spec = json.loads(spec_bytes.decode("utf-8"))
-    shared_path = repository_root / spec["shared_canonical_inputs"]
-    shared_bytes = shared_path.read_bytes()
-    shared = json.loads(shared_bytes.decode("utf-8"))
-    by_id = {row["case_id"]: row for row in shared["orientations"]}
-    selected = [by_id[case_id] for case_id in spec["retained_case_ids"]]
-    probe = np.asarray(shared["probe_vector_xyz"], dtype=np.float64)
+    spec = SpiceyPyInputs.model_validate(
+        read_evidence_document(input_path), strict=True
+    )
+    shared_path = repository_root / spec.shared_canonical_inputs
+    shared = SharedCanonicalInputCapture.model_validate(
+        read_evidence_document(shared_path), strict=True
+    )
+    selected = resolve_orientation_selection(
+        shared,
+        spec.retained_case_ids,
+        required_case_ids={"mixed_a", "mixed_b"},
+    )
+    probe = np.asarray(shared.probe_vector_xyz, dtype=np.float64)
 
     observations = {
         "canonical_to_native": [
             capture_quaternion(
-                row["case_id"],
-                np.asarray(row["canonical_wxyz"], dtype=np.float64),
+                row.case_id,
+                np.asarray(row.canonical_wxyz, dtype=np.float64),
                 probe,
             )
             for row in selected
@@ -72,16 +86,14 @@ def main() -> None:
         "native_created": [],
         "composition": [],
     }
-    ctor = spec["native_constructed_orientation"]
-    axis = np.asarray(ctor["axis_xyz"], dtype=np.float64)
-    matrix = np.asarray(
-        spice.axisar(axis, float(ctor["angle_radians"])), dtype=np.float64
-    )
+    ctor = spec.native_constructed_orientation
+    axis = np.asarray(ctor.axis_xyz, dtype=np.float64)
+    matrix = np.asarray(spice.axisar(axis, float(ctor.angle_radians)), dtype=np.float64)
     qnative = np.asarray(spice.m2q(matrix), dtype=np.float64)
     q2m = np.asarray(spice.q2m(qnative), dtype=np.float64)
     observations["native_created"].append(
         {
-            "case_id": ctor["case_id"],
+            "case_id": ctor.case_id,
             "native_constructor": "axisar(axis, angle) -> m2q(matrix)",
             "native_m2q_wxyz": qnative.tolist(),
             "native_mxv_basis_xyz": [
@@ -92,7 +104,7 @@ def main() -> None:
     )
 
     pair = {
-        row["case_id"]: np.asarray(row["canonical_wxyz"], dtype=np.float64)
+        row.case_id: np.asarray(row.canonical_wxyz, dtype=np.float64)
         for row in selected
     }
     a, b = pair["mixed_a"], pair["mixed_b"]
@@ -126,8 +138,14 @@ def main() -> None:
         },
         "observations": observations,
     }
+    checked_witnesses = SpiceyPyCapture.model_validate(witnesses, strict=True)
+    validate_spiceypy_capture_matches_inputs(checked_witnesses, spec, shared)
     witnesses_path.write_text(
-        dump_evidence_json(witnesses), encoding="utf-8", newline="\n"
+        dump_evidence_json(
+            checked_witnesses.model_dump(mode="json", exclude_none=True)
+        ),
+        encoding="utf-8",
+        newline="\n",
     )
     manifest = {
         "schema_version": "1.0",

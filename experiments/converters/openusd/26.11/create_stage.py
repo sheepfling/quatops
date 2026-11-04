@@ -4,12 +4,13 @@ from __future__ import annotations
 
 import argparse
 import hashlib
-import json
 from pathlib import Path
 
 from quatops.engines import QuaternionFrameMap, SignedAxisMap
 from scripts.evidence_format import dump_evidence_json
-from scripts.evidence_schema.targets import OpenUsdInputs
+from scripts.evidence_json import read_evidence_document
+from scripts.evidence_schema.shared_inputs import SharedCanonicalInputCapture
+from scripts.evidence_schema.targets import OpenUsdInputNode, OpenUsdInputs
 
 
 def number(value: float) -> str:
@@ -26,8 +27,16 @@ def main() -> None:
     )
     inputs_out = target_dir / "converter_inputs.json"
     stage_out = target_dir / "quatops_hierarchy.usda"
-    corpus = json.loads(canonical_inputs.read_text(encoding="utf-8"))
-    by_id = {row["case_id"]: row["canonical_wxyz"] for row in corpus["orientations"]}
+    corpus = SharedCanonicalInputCapture.model_validate(
+        read_evidence_document(canonical_inputs), strict=True
+    )
+    by_id = {row.case_id: row.canonical_wxyz for row in corpus.orientations}
+    required_cases = {"quarter_z", "mixed_a", "quarter_x"}
+    missing_cases = required_cases.difference(by_id)
+    if missing_cases:
+        raise ValueError(
+            f"canonical input is missing OpenUSD cases: {sorted(missing_cases)}"
+        )
     # Explicit right-handed USD test frame: X right, Y up, -Z forward.
     frame = SignedAxisMap(("x", "z", "-y"))
     convert = QuaternionFrameMap(frame, frame)
@@ -79,7 +88,7 @@ def main() -> None:
             [1.0, 0.0, 0.0],
             [0.0, 1.0, 0.0],
             [0.0, 0.0, 1.0],
-            corpus["probe_vector_xyz"],
+            corpus.probe_vector_xyz,
         ],
         "usd_probe_vectors_xyz": [
             list(frame.vector(v))
@@ -87,7 +96,7 @@ def main() -> None:
                 (1.0, 0.0, 0.0),
                 (0.0, 1.0, 0.0),
                 (0.0, 0.0, 1.0),
-                corpus["probe_vector_xyz"],
+                corpus.probe_vector_xyz,
             )
         ],
         "nodes": rows,
@@ -104,13 +113,13 @@ def main() -> None:
         newline="\n",
     )
 
-    def orient(row):
-        return ", ".join(number(v) for v in row["usd_wxyz"])
+    def orient(row: OpenUsdInputNode) -> str:
+        return ", ".join(number(v) for v in row.usd_wxyz)
 
-    def translate(row):
-        return ", ".join(number(v) for v in row["usd_translation_xyz"])
+    def translate(row: OpenUsdInputNode) -> str:
+        return ", ".join(number(v) for v in row.usd_translation_xyz)
 
-    parent, child, reset = rows
+    parent, child, reset = checked_inputs.nodes
     stage = f"""#usda 1.0
 (
     defaultPrim = "Scene"
