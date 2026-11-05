@@ -162,6 +162,8 @@ def _basis_map_from_matrix(matrix: tuple[tuple[float, ...], ...]) -> BasisMap:
 
 
 def _same_frame_definition(left: CoordinateFrame, right: CoordinateFrame) -> bool:
+    if left is right:
+        return True
     if (
         left.name != right.name
         or left.reference != right.reference
@@ -175,12 +177,10 @@ def _same_frame_definition(left: CoordinateFrame, right: CoordinateFrame) -> boo
         )
     ):
         return False
+    left_basis = left.basis_to_reference.matrix
+    right_basis = right.basis_to_reference.matrix
     return all(
-        abs(
-            left.basis_to_reference.matrix[row][column]
-            - right.basis_to_reference.matrix[row][column]
-        )
-        <= 1e-12
+        abs(left_basis[row][column] - right_basis[row][column]) <= 1e-12
         for row in range(3)
         for column in range(3)
     )

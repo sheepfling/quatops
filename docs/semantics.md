@@ -17,7 +17,11 @@ frame. The stored value is a standard active Hamilton WXYZ quaternion.
 - Parent and child frames must have matching handedness so the represented
   physical mapping is a proper rotation.
 - The quaternion must be unit length within `1e-6`. `.normalized()` is an
-  explicit operation; conversion never silently normalizes or changes sign.
+  explicit operation; constructing the value does not silently normalize or
+  change its sign. Direct quaternion-to-quaternion frame conversions preserve
+  the global sign. A conversion through a principal rotation vector loses that
+  information: `q` and `-q` represent the same vector, and converting back
+  returns one canonical quaternion representative.
 
 `PhysicalOrientation.compose()` checks that the intermediate frame
 definitions agree before multiplying. `PhysicalOrientation.inverse()` swaps

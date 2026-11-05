@@ -462,6 +462,8 @@ parent/world and child/body maps, then applies a declared target profile.
 Profiles specify native component order, representation, evidence scope, and
 version. No target frame is inferred; older frame APIs remain re-exported for
 compatibility.
+For practical engine, geospatial, and glTF examples, see
+[converter integrations](converter-examples.md).
 
 NumPy Euler functions accept independent `angle_axis` and `component_axis`
 arguments, each defaulting to `-1` in trailing-component modules and `0` in

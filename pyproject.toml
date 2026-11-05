@@ -64,10 +64,13 @@ typecheck = ["pyright[nodejs]==1.1.414"]
 
 [tool.setuptools]
 package-dir = { "" = "src" }
-include-package-data = true
+# Keep local runtime caches and other discovered files out of wheels; the
+# package-data table below explicitly retains only typing metadata and stubs.
+include-package-data = false
 
 [tool.setuptools.packages.find]
 where = ["src"]
+exclude = ["quatops.__pycache__", "quatops.*.__pycache__"]
 
 [tool.setuptools.package-data]
 quatops = ["py.typed", "**/*.pyi"]
@@ -93,6 +96,7 @@ venv = ".venv"
 stubPath = "experiments/converters/stubs"
 include = [
     "src",
+    "examples/**/*.py",
     "tests/typing_tests/foundational_consumer.py",
     "tests/typing_tests/consumer.py",
     "tests/typing_tests/float32_consumer.py",

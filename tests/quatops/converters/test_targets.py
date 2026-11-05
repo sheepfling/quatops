@@ -71,6 +71,32 @@ def test_declared_profiles_convert_and_recover_framed_orientations(converter_id)
     assert hamilton.rotations_equivalent(recovered.quaternion_wxyz, source_q)
 
 
+@pytest.mark.parametrize("converter_id", tuple(CONVERTERS))
+def test_profile_antipode_policy_is_explicit_in_its_representation(converter_id):
+    profile = get_converter(converter_id)
+    frame_map = _identity_map()
+    quaternion = (0.8, 0.2, -0.4, 0.4)
+    antipode = tuple(-value for value in quaternion)
+    source = FramedOrientation(quaternion, "canonical.body", "canonical.world")
+    opposite = FramedOrientation(antipode, "canonical.body", "canonical.world")
+
+    target = profile.to_target(source, frame_map)
+    antipodal_target = profile.to_target(opposite, frame_map)
+    restored = profile.from_target(target, frame_map)
+    antipodal_restored = profile.from_target(antipodal_target, frame_map)
+
+    if profile.representation == "quaternion":
+        assert antipodal_target.values == tuple(-value for value in target.values)
+        assert restored.quaternion_wxyz == quaternion
+        assert antipodal_restored.quaternion_wxyz == antipode
+    else:
+        assert antipodal_target.values == target.values
+        assert antipodal_restored.quaternion_wxyz == restored.quaternion_wxyz
+        assert hamilton.rotations_equivalent(
+            antipodal_restored.quaternion_wxyz, antipode
+        )
+
+
 def test_target_profiles_preserve_declared_scope_and_acceptance_state():
     assert get_converter("blender.mathutils.quaternion").evidence_status == (
         "accepted_converter"

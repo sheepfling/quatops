@@ -10,7 +10,7 @@ orchestration_files = [
 
 [files]
 include = [
-  "src/**/*.py", "tests/**/*.py", "experiments/**/*.py", "scripts/**/*.py",
+  "src/**/*.py", "tests/**/*.py", "examples/**/*.py", "experiments/**/*.py", "scripts/**/*.py",
   "*.md", "**/*.md", "*.json", "**/*.json", "*.yaml", "**/*.yaml",
   "*.yml", "**/*.yml", "*.toml", "**/*.toml",
 ]

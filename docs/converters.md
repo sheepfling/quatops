@@ -19,15 +19,48 @@ engine, transport, or library profile
 
 The gateway and target profiles live in `quatops.converters`. Older
 frame-oriented imports from that package remain available for compatibility.
+For application examples, see [converter integrations](converter-examples.md).
 
 ## Canonical orientation contract
 
 `PhysicalOrientation` means an active Hamilton WXYZ `q_parent_from_child`,
-requires a unit quaternion within `1e-6`, and preserves its sign. Its parent
-and child frame definitions determine separate world and body coordinate maps.
-Both maps must have matching determinant parity so the converted value remains
-a proper rotation. See [physical frame semantics](semantics.md) for frame
-conventions, composition, and the lower-level non-unit `FramedOrientation`.
+requires a finite unit quaternion within `1e-6`, and retains its supplied sign.
+Its parent and child frame definitions determine separate world and body
+coordinate maps. Both maps must have matching determinant parity so the
+converted value remains a proper rotation. See
+[physical frame semantics](semantics.md) for frame conventions, composition,
+and the lower-level `FramedOrientation`.
+
+### Sign and information preservation
+
+Quaternion-to-quaternion profiles reorder coefficients and apply the linear
+frame map, so they preserve the global sign: converting `q` and `-q` yields
+target values that are antipodes. Their reverse conversion preserves the same
+representative, subject to the target's numeric precision.
+
+`opencv.rodrigues` converts through a principal rotation vector. That
+representation identifies `q` and `-q`; the reverse conversion returns one
+canonical quaternion representative. For this profile, round-trip correctness
+means rotation equivalence, not coefficient equality. This is a property of
+the represented orientation, not a failed round trip.
+
+### Input and precision policy
+
+The `PhysicalOrientation` gateway accepts only finite, unit Hamilton
+quaternions whose norm differs from one by at most `1e-6`. It rejects other
+values; call `.normalized()` explicitly if normalization is intended. Reverse
+scalar and batch conversion applies the same physical-unit check to the
+recovered value. The lower-level `ConverterProfile` methods accept
+`FramedOrientation` values and leave unit-domain responsibility to their
+caller.
+
+Scalar target values contain Python `float` coefficients and do not simulate
+rounding to a target's float32 storage type. Assign or cast them through the
+target API to obtain its native precision. NumPy batches must contain real,
+finite values and meet the same `1e-6` unit tolerance. A signed-axis
+quaternion map preserves the input batch dtype; general parent/body basis
+corrections and rotation-vector conversion use float64 kernels. Shape and
+component-axis behavior are documented in [Batch conversion](#batch-conversion).
 
 ## One conversion gateway
 

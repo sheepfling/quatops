@@ -35,6 +35,13 @@ def test_physical_orientation_requires_unit_hamilton_quaternion():
             (2.0, 0.0, 0.0, 0.0), parent_frame=world, child_frame=body
         )
 
+    for invalid in (
+        (float("nan"), 0.0, 0.0, 0.0),
+        (float("inf"), 0.0, 0.0, 0.0),
+    ):
+        with pytest.raises(ValueError, match="finite"):
+            PhysicalOrientation.from_wxyz(invalid, parent_frame=world, child_frame=body)
+
 
 def test_physical_orientation_compose_and_inverse_check_frame_definitions():
     world = CANONICAL_WORLD_RFU.bind("test.world", "test.world.axes")
