@@ -44,6 +44,7 @@ from .targets import (
     TargetDeclaration,
     TargetOrientation,
     TargetOrientationBatch,
+    accepted_converters,
     get_converter,
     get_target_declaration,
 )
@@ -78,6 +79,7 @@ __all__ = [
     "TargetDeclaration",
     "TargetOrientation",
     "TargetOrientationBatch",
+    "accepted_converters",
     "convert_orientation_batch_from_target",
     "convert_orientation_batch_to_target",
     "convert_orientation_from_target",

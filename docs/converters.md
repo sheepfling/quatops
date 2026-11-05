@@ -54,6 +54,12 @@ recovered value. The lower-level `ConverterProfile` methods accept
 `FramedOrientation` values and leave unit-domain responsibility to their
 caller.
 
+`TargetOrientation` retains the complete target `CoordinateFrame` objects for
+its child and parent frames. Reverse conversion requires those definitions to
+match the converter context, including their basis coefficients and reference
+convention. When constructing a value received from a native API, supply both
+frame definitions; frame-name strings alone are not an interpretation.
+
 Scalar target values contain Python `float` coefficients and do not simulate
 rounding to a target's float32 storage type. Assign or cast them through the
 target API to obtain its native precision. NumPy batches must contain real,
@@ -144,8 +150,11 @@ compiled `SemanticQuaternionMap`.
 `PhysicalOrientationBatch` attaches the same parent and child frame definitions
 to an array of WXYZ values. The batch gateway accepts a configurable component
 axis, checks that each input is unit length within `1e-6`, and uses the same
-target profile and frame map as scalar conversion. NumPy loads only when a
-batch method is called.
+target profile and frame map as scalar conversion. `TargetOrientationBatch`
+retains the target frame definitions and normalized component axis. Reverse
+conversion uses that axis by default; an explicit override must identify the
+same axis, even when a shape such as `(4, 4)` makes both axes look valid. NumPy
+loads only when a batch method is called.
 
 ```python
 import numpy as np
@@ -170,23 +179,17 @@ package is imported by QuatOps.
 
 ## Declared target boundaries and evidence status
 
-`quatops.converters.CONVERTERS` contains immutable typed target profiles. The
-common gateway routes all accepted, declared, and supporting profiles through
-the same conversion rules; evidence status limits the claim for each target.
+The immutable `CONVERTERS` mapping contains every declared orientation
+profile. Use `accepted_converters()` to discover only profiles accepted for
+their captured scope. `get_converter()` remains available for all profiles,
+including those whose evidence is declared or supporting-only. An
+`OrientationConverter` exposes the selected profile's `evidence_status`; using
+a profile does not upgrade its evidence claim.
 
-| Profile group | Declared boundary | Evidence state and scope |
-| --- | --- | --- |
-| Unreal, Unity, Godot, Blender | `unreal.fquat`, `unity.quaternion`, `godot.quaternion`, `blender.mathutils.quaternion` | Accepted for captured versions and frame contracts. Blender's quaternion profile is separate from importer observations. |
-| CesiumJS, glTF, Three.js, OpenUSD, ROS 2/tf2 | `cesium.quaternion`, `gltf.rotation`, `threejs.quaternion`, `openusd.gfquatd`, `ros2.geometry-msgs-quaternion` | Accepted within captured ENU/ECEF, static asset, transform-stack, and static frame-chain scopes. Translation, serialization, and dynamic runtime behavior remain separate operations. |
-| SpiceyPy/CSPICE, MuJoCo, Eigen | `spiceypy.cspice-q`, `mujoco.quaternion`, `eigen.quaternion-constructor`, `eigen.quaternion-coeffs` | Accepted for captured numeric probe frames and operations. Application-specific frames remain caller-declared. |
-| OpenCV | `opencv.rodrigues` | Accepted for the captured radians-based vector/matrix boundary. Camera extrinsics remain separate. |
-| OpenXR | `openxr.xrquaternionf` | Declared from the 1.1.65 contract and Khronos test runtime. No vendor runtime or hardware behavior is claimed. |
-| Sophus | `sophus.so3-params` | Supporting mathematical oracle only; no application-frame converter acceptance claim. |
-
-PROJ is indexed as frame-transform evidence, the Khronos validator as format
-validation, and Blender/VTK/Trimesh captures as loader observations. Their
-roles are explicit in `TARGET_DECLARATIONS`; none is presented as a quaternion
-converter.
+The full, generated [converter and evidence-target registry](converter-registry.md)
+is derived from these source declarations. It includes the target API, version,
+layout, evidence state, and scope for converters, frame providers, format
+validators, and loader observations.
 
 These orientation profiles do not implement target object construction,
 serialized asset authoring, pose translation, time sampling, or runtime

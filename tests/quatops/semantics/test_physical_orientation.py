@@ -84,6 +84,20 @@ def test_physical_orientation_compose_and_inverse_check_frame_definitions():
         )
 
 
+def test_near_unit_composition_requires_explicit_normalization():
+    frame = CANONICAL_WORLD_RFU.bind("test.frame", "test.frame.axes")
+    near_unit = PhysicalOrientation.from_wxyz(
+        (1.0 + 0.75e-6, 0.0, 0.0, 0.0), frame, frame
+    )
+
+    with pytest.raises(ValueError, match="unit quaternion"):
+        near_unit.compose(near_unit)
+
+    normalized = near_unit.normalized()
+    product = normalized.compose(normalized)
+    assert product.quaternion_wxyz == (1.0, 0.0, 0.0, 0.0)
+
+
 def test_physical_orientation_rejects_mixed_handed_frame_pair():
     world = CANONICAL_WORLD_RFU.bind("test.world", "test.world.axes")
     left_handed_body = CoordinateFrame(

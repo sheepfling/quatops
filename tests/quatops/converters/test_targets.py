@@ -9,13 +9,20 @@ from quatops.converters import (
     CoordinateFrame,
     FrameCorrespondence,
     FramedOrientation,
+    OrientationConverter,
     SemanticQuaternionMap,
     TargetOrientation,
+    accepted_converters,
     get_converter,
     get_target_declaration,
 )
 from quatops.engines import SignedAxisMap
 from quatops.python import hamilton
+from quatops.semantics import (
+    CANONICAL_BODY_RFU,
+    CANONICAL_WORLD_RFU,
+    PhysicalOrientation,
+)
 
 
 def _identity_map():
@@ -62,7 +69,10 @@ def test_declared_profiles_convert_and_recover_framed_orientations(converter_id)
 
     native = profile.to_target(source, frame_map)
     assert native.converter_id == converter_id
-    assert (native.from_frame, native.to_frame) == ("target.body", "target.world")
+    assert (native.from_frame.name, native.to_frame.name) == (
+        "target.body",
+        "target.world",
+    )
     recovered = profile.from_target(native, frame_map)
     assert (recovered.from_frame, recovered.to_frame) == (
         "canonical.body",
@@ -107,6 +117,32 @@ def test_target_profiles_preserve_declared_scope_and_acceptance_state():
     assert (
         get_converter("sophus.so3-params").evidence_status == "supporting_oracle_only"
     )
+    accepted = accepted_converters()
+    assert len(accepted) == 14
+    assert all(
+        profile.evidence_status == "accepted_converter" for profile in accepted.values()
+    )
+
+
+def test_orientation_converter_exposes_nonaccepted_profile_states():
+    source_world = CANONICAL_WORLD_RFU.bind("source.world", "world-reference")
+    source_body = CANONICAL_BODY_RFU.bind("source.body", "body-reference")
+    declared_openxr = OrientationConverter(
+        "openxr.xrquaternionf", source_world, source_body, source_world, source_body
+    )
+    supporting_sophus = OrientationConverter(
+        "sophus.so3-params", source_world, source_body, source_world, source_body
+    )
+
+    assert declared_openxr.evidence_status == "declared_contract"
+    assert supporting_sophus.evidence_status == "supporting_oracle_only"
+    physical = PhysicalOrientation.from_wxyz(
+        (0.8, 0.2, -0.4, 0.4), source_world, source_body
+    )
+    assert declared_openxr.to_target(physical).converter_id == "openxr.xrquaternionf"
+    assert supporting_sophus.to_target(physical).converter_id == "sophus.so3-params"
+    assert declared_openxr.evidence_status == "declared_contract"
+    assert supporting_sophus.evidence_status == "supporting_oracle_only"
 
 
 def test_target_index_distinguishes_converters_from_supporting_evidence():
@@ -124,8 +160,8 @@ def test_converter_rejects_wrong_profile_or_frame_pair():
         values=(0.0, 0.0, 0.0, 1.0),
         representation="quaternion",
         component_order="xyzw",
-        from_frame="target.body",
-        to_frame="target.world",
+        from_frame=frame_map.body.destination,
+        to_frame=frame_map.world.destination,
     )
     with pytest.raises(ValueError, match="different converter"):
         profile.from_target(wrong_profile_value, frame_map)
@@ -147,8 +183,20 @@ def test_converter_rejects_wrong_profile_or_frame_pair():
                 values=(1.0, 0.0, 0.0, 0.0),
                 representation="quaternion",
                 component_order="xyzw",
-                from_frame="other.body",
-                to_frame="other.world",
+                from_frame=frame_map.body.destination,
+                to_frame=frame_map.world.destination,
             ),
             frame_map,
+        )
+
+
+def test_manual_native_target_requires_declared_frame_definitions():
+    with pytest.raises(TypeError, match="CoordinateFrame definition"):
+        TargetOrientation(
+            converter_id="unity.quaternion",
+            values=(0.0, 0.0, 0.0, 1.0),
+            representation="quaternion",
+            component_order="xyzw",
+            from_frame="native.body",
+            to_frame="native.world",
         )

@@ -462,6 +462,13 @@ parent/world and child/body maps, then applies a declared target profile.
 Profiles specify native component order, representation, evidence scope, and
 version. No target frame is inferred; older frame APIs remain re-exported for
 compatibility.
+Use `accepted_converters()` to discover profiles accepted within their
+captured scope. `get_converter()` can retrieve every declared profile, and an
+`OrientationConverter` exposes its selected `evidence_status`; declared or
+supporting-only profiles do not gain acceptance through use. Target values
+retain their full frame definitions, and batch target values retain their
+component axis for reverse conversion. See the generated
+[converter registry](converter-registry.md) for the complete target index.
 For practical engine, geospatial, and glTF examples, see
 [converter integrations](converter-examples.md).
 

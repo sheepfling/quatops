@@ -29,6 +29,7 @@ These are the same checks used by CI:
 .venv/bin/ruff check src tests examples experiments
 .venv/bin/python -m scripts.validate_evidence_json --repository-root .
 .venv/bin/python -m scripts.validate_converter_evidence --repository-root .
+.venv/bin/python -m scripts.render_converter_registry --repository-root . --check
 .venv/bin/ruff check --select B,C4,E4,PERF,RUF,SIM,UP \
     experiments/oracles experiments/converters scripts
 .venv/bin/ruff format --check experiments scripts
@@ -50,9 +51,9 @@ The pinned Alphus quality review runs on pushes and pull requests as a separate
 workflow.
 
 The package job also builds both distribution formats, installs the wheel into
-an isolated target directory, and imports the scalar API and converter registry
-without optional dependencies. Wheel contents are expected to exclude local
-Numba cache files.
+an isolated target directory, checks scalar conversion without optional
+dependencies, then installs NumPy and checks a float32 batch round trip. Wheel
+contents are expected to exclude local Numba cache files.
 
 ## Run opt-in benchmarks
 

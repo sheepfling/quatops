@@ -107,6 +107,25 @@ class CoordinateFrame:
             self, other
         )
 
+    def has_identical_definition(self, other: object) -> bool:
+        """Return whether every declared frame field and basis coefficient match.
+
+        This strict comparison is used when a native value carries the frame
+        definitions under which it was produced. Unlike
+        :meth:`has_same_definition`, it requires the optional reference
+        convention to match exactly and compares basis coefficients exactly.
+        """
+        return (
+            isinstance(other, CoordinateFrame)
+            and self.name == other.name
+            and self.reference == other.reference
+            and self.axes == other.axes
+            and self.handedness == other.handedness
+            and self.role == other.role
+            and self.reference_convention == other.reference_convention
+            and self.basis_to_reference.matrix == other.basis_to_reference.matrix
+        )
+
 
 @dataclass(frozen=True)
 class FrameCorrespondence:
@@ -315,7 +334,13 @@ class PhysicalOrientation:
         )
 
     def compose(self, right: PhysicalOrientation) -> PhysicalOrientation:
-        """Compose ``self * right`` after matching the intermediate frame."""
+        """Compose ``self * right`` after matching the intermediate frame.
+
+        Each input is checked against the unit tolerance independently. Their
+        product can fall outside that tolerance; in that case this method
+        raises instead of normalizing. Call ``normalized()`` explicitly on
+        the operands before composing when that is intended.
+        """
         if not isinstance(right, PhysicalOrientation):
             raise TypeError("right must be a PhysicalOrientation")
         if not self.child_frame.has_same_definition(right.parent_frame):

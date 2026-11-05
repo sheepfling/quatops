@@ -6,6 +6,7 @@ and their evidence status limits the claim that may be made for that target.
 
 from __future__ import annotations
 
+import operator
 from collections.abc import Mapping
 from dataclasses import dataclass
 from math import isfinite
@@ -14,6 +15,7 @@ from typing import Literal, cast
 
 from ..python import hamilton as _hamilton
 from ..semantics.frames import (
+    CoordinateFrame,
     FramedOrientation,
     FramedOrientationBatch,
     SemanticQuaternionMap,
@@ -36,14 +38,18 @@ TargetRole = Literal[
 
 @dataclass(frozen=True)
 class TargetOrientation:
-    """A target value that retains its converter and frame labels."""
+    """A target value bound to its converter and complete target frames.
+
+    Construct a value received from a native API with the explicit frame
+    definitions that give its coefficients meaning.
+    """
 
     converter_id: str
     values: tuple[float, ...]
     representation: Representation
     component_order: ComponentOrder | None
-    from_frame: str
-    to_frame: str
+    from_frame: CoordinateFrame
+    to_frame: CoordinateFrame
 
     def __post_init__(self) -> None:
         if self.representation not in ("quaternion", "rotation_vector"):
@@ -66,25 +72,39 @@ class TargetOrientation:
             raise ValueError("rotation vectors do not have quaternion component order")
         if not self.converter_id:
             raise ValueError("converter_id must not be empty")
-        if not self.from_frame or not self.to_frame:
-            raise ValueError("target orientation must retain both frame labels")
+        if not isinstance(self.from_frame, CoordinateFrame):
+            raise TypeError("from_frame must be a CoordinateFrame definition")
+        if not isinstance(self.to_frame, CoordinateFrame):
+            raise TypeError("to_frame must be a CoordinateFrame definition")
         object.__setattr__(self, "values", values)
 
 
 @dataclass(frozen=True)
 class TargetOrientationBatch:
-    """A target array with its converter, layout, and frame labels attached."""
+    """A target array with frame definitions and component layout attached."""
 
     converter_id: str
     values: object
     representation: Representation
     component_order: ComponentOrder | None
-    from_frame: str
-    to_frame: str
+    from_frame: CoordinateFrame
+    to_frame: CoordinateFrame
+    component_axis: int
 
     def __post_init__(self) -> None:
-        if not self.converter_id or not self.from_frame or not self.to_frame:
-            raise ValueError("target batch must retain converter and frame labels")
+        if not self.converter_id:
+            raise ValueError("target batch must retain a converter ID")
+        if not isinstance(self.from_frame, CoordinateFrame):
+            raise TypeError("from_frame must be a CoordinateFrame definition")
+        if not isinstance(self.to_frame, CoordinateFrame):
+            raise TypeError("to_frame must be a CoordinateFrame definition")
+        if isinstance(self.component_axis, bool):
+            raise TypeError("component_axis must be an integer")
+        try:
+            component_axis = operator.index(self.component_axis)
+        except TypeError as exc:
+            raise TypeError("component_axis must be an integer") from exc
+        object.__setattr__(self, "component_axis", component_axis)
 
 
 @dataclass(frozen=True)
@@ -138,8 +158,8 @@ class ConverterProfile:
             values=values,
             representation=self.representation,
             component_order=self.component_order,
-            from_frame=mapped.from_frame,
-            to_frame=mapped.to_frame,
+            from_frame=frame_map.body.destination,
+            to_frame=frame_map.world.destination,
         )
 
     def from_target(
@@ -157,8 +177,16 @@ class ConverterProfile:
             or orientation.component_order != self.component_order
         ):
             raise ValueError("target orientation layout does not match this converter")
+        if not orientation.from_frame.has_identical_definition(
+            frame_map.body.destination
+        ) or not orientation.to_frame.has_identical_definition(
+            frame_map.world.destination
+        ):
+            raise ValueError(
+                "target orientation frame definitions do not match this converter"
+            )
         frame_map.validate_destination_labels(
-            orientation.from_frame, orientation.to_frame
+            orientation.from_frame.name, orientation.to_frame.name
         )
         if self.representation == "rotation_vector":
             quaternion_wxyz = _hamilton.from_rotation_vector(orientation.values)
@@ -169,8 +197,8 @@ class ConverterProfile:
             quaternion_wxyz = orientation.values
         destination = FramedOrientation(
             cast(tuple[float, float, float, float], tuple(quaternion_wxyz)),
-            from_frame=orientation.from_frame,
-            to_frame=orientation.to_frame,
+            from_frame=orientation.from_frame.name,
+            to_frame=orientation.to_frame.name,
         )
         return frame_map.from_destination(destination)
 
@@ -189,7 +217,7 @@ class ConverterProfile:
         self,
         orientations: TargetOrientationBatch,
         frame_map: SemanticQuaternionMap,
-        component_axis: int = -1,
+        component_axis: int | None = None,
     ) -> FramedOrientationBatch:
         """Convert a target NumPy batch back through this profile."""
         from .numpy import from_target_array
@@ -404,6 +432,24 @@ _PROFILES = {
 
 CONVERTERS: Mapping[str, ConverterProfile] = MappingProxyType(_PROFILES)
 """Immutable converter declarations keyed by concrete native boundary."""
+
+_ACCEPTED_CONVERTERS: Mapping[str, ConverterProfile] = MappingProxyType(
+    {
+        converter_id: profile
+        for converter_id, profile in _PROFILES.items()
+        if profile.evidence_status == "accepted_converter"
+    }
+)
+
+
+def accepted_converters() -> Mapping[str, ConverterProfile]:
+    """Return only profiles whose captured evidence accepts converter use.
+
+    Use :func:`get_converter` to inspect declared or supporting profiles when
+    their narrower evidence state is appropriate for the application.
+    """
+    return _ACCEPTED_CONVERTERS
+
 
 _TARGET_DECLARATIONS = {
     declaration.target_id: declaration

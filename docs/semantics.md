@@ -24,8 +24,12 @@ frame. The stored value is a standard active Hamilton WXYZ quaternion.
   returns one canonical quaternion representative.
 
 `PhysicalOrientation.compose()` checks that the intermediate frame
-definitions agree before multiplying. `PhysicalOrientation.inverse()` swaps
-the parent and child frames. `PhysicalOrientationBatch` carries the same frame
+definitions agree before multiplying. Each input is checked against the unit
+tolerance separately, so the product of two accepted near-unit values can fall
+outside the tolerance. Composition then raises rather than silently
+normalizing. Call `.normalized()` on the operands explicitly when normalization
+before composition is intended. `PhysicalOrientation.inverse()` swaps the
+parent and child frames. `PhysicalOrientationBatch` carries the same frame
 definitions for array values; the NumPy gateway checks each quaternion's unit
 length when converting a batch.
 

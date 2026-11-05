@@ -6,6 +6,8 @@
   selection.
 - [API contract](API.md): conventions, representations, layouts, operations,
   validation, and numerical limits.
+- [Converter registry](converter-registry.md): generated index of registered
+  converter profiles and supporting evidence targets.
 - [Game-engine guides](engines/README.md): Unreal, Unity, Godot, and Blender
   API notes, coordinate maps, and quaternion trajectory conversion.
 - [Interoperability evidence atlas](INTEROPERABILITY_EVIDENCE.md): consolidated

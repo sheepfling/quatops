@@ -22,20 +22,27 @@ def _component_array(
     values: Any, axis: int, length: int, name: str
 ) -> tuple[np.ndarray, int]:
     array = np.asarray(values)
-    if array.ndim == 0:
+    normalized_axis = _normalized_component_axis(axis, array.ndim, name)
+    moved = np.moveaxis(array, normalized_axis, -1)
+    if moved.shape[-1] != length:
+        raise ValueError(f"component axis must have length {length}")
+    return moved, normalized_axis
+
+
+def _normalized_component_axis(axis: int, ndim: int, name: str) -> int:
+    if ndim == 0:
         raise ValueError(f"{name} must have a quaternion or rotation-vector axis")
+    if isinstance(axis, bool):
+        raise TypeError("component_axis must be an integer")
     try:
         normalized_axis = operator.index(axis)
     except TypeError as exc:
         raise TypeError("component_axis must be an integer") from exc
     if normalized_axis < 0:
-        normalized_axis += array.ndim
-    if not 0 <= normalized_axis < array.ndim:
+        normalized_axis += ndim
+    if not 0 <= normalized_axis < ndim:
         raise ValueError("component_axis is out of range for the input")
-    moved = np.moveaxis(array, normalized_axis, -1)
-    if moved.shape[-1] != length:
-        raise ValueError(f"component axis must have length {length}")
-    return moved, normalized_axis
+    return normalized_axis
 
 
 def _require_unit_quaternion_batch(values: Any, component_axis: int) -> None:
@@ -115,8 +122,9 @@ def to_target_array(
         values=values,
         representation=profile.representation,
         component_order=profile.component_order,
-        from_frame=frame_map.body.destination.name,
-        to_frame=frame_map.world.destination.name,
+        from_frame=frame_map.body.destination,
+        to_frame=frame_map.world.destination,
+        component_axis=axis,
     )
 
 
@@ -124,7 +132,7 @@ def from_target_array(
     profile: ConverterProfile,
     orientations: TargetOrientationBatch,
     frame_map: SemanticQuaternionMap,
-    component_axis: int = -1,
+    component_axis: int | None = None,
 ) -> FramedOrientationBatch:
     """Convert a target batch to canonical active Hamilton WXYZ values."""
     if not isinstance(orientations, TargetOrientationBatch):
@@ -136,13 +144,33 @@ def from_target_array(
         or orientations.component_order != profile.component_order
     ):
         raise ValueError("target batch layout does not match this converter")
+    if not orientations.from_frame.has_identical_definition(
+        frame_map.body.destination
+    ) or not orientations.to_frame.has_identical_definition(
+        frame_map.world.destination
+    ):
+        raise ValueError("target batch frame definitions do not match this converter")
     frame_map.validate_destination_labels(
-        orientations.from_frame, orientations.to_frame
+        orientations.from_frame.name, orientations.to_frame.name
     )
 
     component_count = 3 if profile.representation == "rotation_vector" else 4
+    array = np.asarray(orientations.values)
+    stored_axis = _normalized_component_axis(
+        orientations.component_axis, array.ndim, "orientations"
+    )
+    if component_axis is None:
+        resolved_axis = stored_axis
+    else:
+        resolved_axis = _normalized_component_axis(
+            component_axis, array.ndim, "orientations"
+        )
+        if resolved_axis != stored_axis:
+            raise ValueError(
+                "component_axis override does not match target batch metadata"
+            )
     moved, axis = _component_array(
-        orientations.values, component_axis, component_count, "orientations"
+        array, resolved_axis, component_count, "orientations"
     )
     if profile.representation == "rotation_vector":
         destination_wxyz = _hamilton.from_rotation_vector(moved)

@@ -77,7 +77,7 @@ def test_scalar_gateway_matches_explicit_basis_action_and_roundtrips():
     )
     expected_xyzw = (-source_wxyz[1], -source_wxyz[3], -source_wxyz[2], source_wxyz[0])
     np.testing.assert_allclose(target.values, expected_xyzw, rtol=0.0, atol=1e-15)
-    assert (target.from_frame, target.to_frame) == (
+    assert (target.from_frame.name, target.to_frame.name) == (
         target_body.name,
         target_world.name,
     )
@@ -311,8 +311,9 @@ def test_batch_gateway_preserves_component_axis_and_roundtrips():
         component_axis=0,
     )
     assert native.values.shape == source_values.shape
-    assert native.from_frame == target_body.name
-    assert native.to_frame == target_world.name
+    assert native.from_frame is target_body
+    assert native.to_frame is target_world
+    assert native.component_axis == 0
 
     recovered = convert_orientation_batch_from_target(
         native,
@@ -321,11 +322,82 @@ def test_batch_gateway_preserves_component_axis_and_roundtrips():
         source_body,
         target_world,
         target_body,
-        component_axis=0,
     )
     assert recovered.values.shape == source_values.shape
     for actual, expected in zip(recovered.values.T, source_values.T):
         assert hamilton.rotations_equivalent(actual, expected, atol=2e-12)
+
+
+@pytest.mark.parametrize(
+    ("shape", "component_axis"),
+    [((4, 4), 0), ((2, 4, 4), 1)],
+)
+def test_ambiguous_batch_shapes_keep_component_axis_on_reverse(shape, component_axis):
+    source_world, source_body, target_world, target_body, _ = (
+        _source_and_target_frames()
+    )
+    hadamard = np.asarray(
+        (
+            (0.5, 0.5, 0.5, 0.5),
+            (0.5, -0.5, 0.5, -0.5),
+            (0.5, 0.5, -0.5, -0.5),
+            (0.5, -0.5, -0.5, 0.5),
+        ),
+        dtype=np.float64,
+    )
+    values = hadamard if len(shape) == 2 else np.stack((hadamard, hadamard))
+    if len(shape) == 3:
+        values = np.moveaxis(values, -1, 1)
+    assert values.shape == shape
+
+    converter = OrientationConverter(
+        "unity.quaternion", source_world, source_body, target_world, target_body
+    )
+    physical = PhysicalOrientationBatch(values, source_world, source_body)
+    native = converter.to_target_batch(physical, component_axis=component_axis)
+
+    assert native.component_axis == component_axis
+    recovered = converter.from_target_batch(native)
+    np.testing.assert_array_equal(recovered.values, values)
+    with pytest.raises(ValueError, match="component_axis override"):
+        converter.from_target_batch(native, component_axis=-1)
+
+
+def test_target_orientation_rejects_rebinding_to_different_frame_definitions():
+    source_world, source_body, target_world, target_body, _ = (
+        _source_and_target_frames()
+    )
+    source = PhysicalOrientation.from_wxyz(
+        (0.8, 0.2, -0.4, 0.4), source_world, source_body
+    )
+    original = OrientationConverter(
+        "unity.quaternion", source_world, source_body, target_world, target_body
+    )
+    native = original.to_target(source)
+    alternate_world = CoordinateFrame(
+        target_world.name,
+        target_world.reference,
+        target_world.axes,
+        OrthogonalBasisMap(((0.0, 1.0, 0.0), (1.0, 0.0, 0.0), (0.0, 0.0, 1.0))),
+        target_world.handedness,
+        target_world.role,
+        target_world.reference_convention,
+    )
+    rebound = OrientationConverter(
+        "unity.quaternion", source_world, source_body, alternate_world, target_body
+    )
+
+    assert native.to_frame.name == alternate_world.name
+    assert not native.to_frame.has_identical_definition(alternate_world)
+    with pytest.raises(ValueError, match="frame definitions"):
+        rebound.from_target(native)
+
+    batch = PhysicalOrientationBatch(
+        np.asarray((source.quaternion_wxyz,)), source_world, source_body
+    )
+    native_batch = original.to_target_batch(batch)
+    with pytest.raises(ValueError, match="frame definitions"):
+        rebound.from_target_batch(native_batch)
 
 
 def test_batch_gateway_rejects_non_unit_physical_values():
@@ -397,6 +469,7 @@ def test_reverse_gateway_rejects_non_unit_target_quaternion_values():
         component_order=scalar.component_order,
         from_frame=scalar.from_frame,
         to_frame=scalar.to_frame,
+        component_axis=-1,
     )
     with pytest.raises(ValueError, match="unit quaternions"):
         converter.from_target_batch(invalid_batch)

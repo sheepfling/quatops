@@ -73,7 +73,8 @@ contract.
 The [converter guide](converters.md) indexes every profile with its acceptance
 state. OpenXR has a declared field converter but no vendor-runtime acceptance;
 Sophus remains a mathematical oracle, and PROJ remains frame-transform
-evidence.
+evidence. The generated [converter registry](converter-registry.md) is the
+single target/API/version/layout/state index.
 
 Run the converter acceptance set with:
 

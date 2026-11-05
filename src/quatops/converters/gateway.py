@@ -14,6 +14,7 @@ from ..semantics import (
 )
 from .targets import (
     ConverterProfile,
+    EvidenceStatus,
     TargetOrientation,
     TargetOrientationBatch,
     get_converter,
@@ -76,6 +77,11 @@ class OrientationConverter:
         """Return the resolved target profile ID."""
         return self._profile.converter_id
 
+    @property
+    def evidence_status(self) -> EvidenceStatus:
+        """Return the selected profile's acceptance state without upgrading it."""
+        return self._profile.evidence_status
+
     def to_target(self, orientation: PhysicalOrientation) -> TargetOrientation:
         """Convert one orientation after checking its configured source frames."""
         if not isinstance(orientation, PhysicalOrientation):
@@ -111,7 +117,7 @@ class OrientationConverter:
     def from_target_batch(
         self,
         orientations: TargetOrientationBatch,
-        component_axis: int = -1,
+        component_axis: int | None = None,
     ) -> PhysicalOrientationBatch:
         """Convert a target batch into the configured physical source frames."""
         canonical = self._profile.from_target_array(
@@ -119,7 +125,10 @@ class OrientationConverter:
         )
         from .numpy import _require_unit_quaternion_batch
 
-        _require_unit_quaternion_batch(canonical.values, component_axis)
+        _require_unit_quaternion_batch(
+            canonical.values,
+            orientations.component_axis if component_axis is None else component_axis,
+        )
         return PhysicalOrientationBatch(
             values=canonical.values,
             parent_frame=self.source_parent,
@@ -194,7 +203,7 @@ def convert_orientation_batch_from_target(
     source_child: CoordinateFrame,
     target_parent: CoordinateFrame,
     target_child: CoordinateFrame,
-    component_axis: int = -1,
+    component_axis: int | None = None,
 ) -> PhysicalOrientationBatch:
     """Convert a target batch to a frame-complete physical orientation batch."""
     return OrientationConverter(
