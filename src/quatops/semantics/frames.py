@@ -97,6 +97,16 @@ class CoordinateFrame:
         if self.basis_to_reference.determinant != expected_parity:
             raise ValueError("frame handedness does not match basis_to_reference")
 
+    def has_same_definition(self, other: object) -> bool:
+        """Return whether ``other`` declares this same named physical frame.
+
+        Basis matrices are compared within ``1e-12`` so equivalent signed-axis
+        and general orthogonal maps can be used interchangeably.
+        """
+        return isinstance(other, CoordinateFrame) and _same_frame_definition(
+            self, other
+        )
+
 
 @dataclass(frozen=True)
 class FrameCorrespondence:
@@ -308,7 +318,7 @@ class PhysicalOrientation:
         """Compose ``self * right`` after matching the intermediate frame."""
         if not isinstance(right, PhysicalOrientation):
             raise TypeError("right must be a PhysicalOrientation")
-        if not _same_frame_definition(self.child_frame, right.parent_frame):
+        if not self.child_frame.has_same_definition(right.parent_frame):
             raise ValueError(
                 "composition requires the same intermediate frame definition"
             )

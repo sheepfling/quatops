@@ -5,6 +5,7 @@ import pytest
 from scipy.spatial.transform import Rotation
 
 from quatops.converters import (
+    OrientationConverter,
     convert_orientation_batch_from_target,
     convert_orientation_batch_to_target,
     convert_orientation_from_target,
@@ -96,6 +97,54 @@ def test_scalar_gateway_matches_explicit_basis_action_and_roundtrips():
     assert recovered.parent_frame == source_world
     assert recovered.child_frame == source_body
     assert hamilton.rotations_equivalent(recovered.quaternion_wxyz, source_wxyz)
+
+
+def test_reusable_converter_binds_frames_and_serves_scalar_and_batch_values():
+    source_world, source_body, target_world, target_body, _ = (
+        _source_and_target_frames()
+    )
+    converter = OrientationConverter(
+        "unity.quaternion",
+        source_parent=source_world,
+        source_child=source_body,
+        target_parent=target_world,
+        target_child=target_body,
+    )
+    scalar = PhysicalOrientation(
+        HamiltonQuaternion(0.8, 0.2, -0.4, 0.4), source_world, source_body
+    )
+    native_scalar = converter.to_target(scalar)
+    recovered_scalar = converter.from_target(native_scalar)
+    assert converter.converter_id == "unity.quaternion"
+    assert hamilton.rotations_equivalent(
+        recovered_scalar.quaternion_wxyz, scalar.quaternion_wxyz
+    )
+
+    batch = PhysicalOrientationBatch(
+        np.asarray([scalar.quaternion_wxyz, scalar.quaternion_wxyz]),
+        source_world,
+        source_body,
+    )
+    native_batch = converter.to_target_batch(batch)
+    recovered_batch = converter.from_target_batch(native_batch)
+    assert recovered_batch.values.shape == (2, 4)
+    for actual in recovered_batch.values:
+        assert hamilton.rotations_equivalent(actual, scalar.quaternion_wxyz)
+
+    alternate_world = CoordinateFrame(
+        source_world.name,
+        source_world.reference,
+        source_world.axes,
+        OrthogonalBasisMap(((0.0, -1.0, 0.0), (1.0, 0.0, 0.0), (0.0, 0.0, 1.0))),
+        source_world.handedness,
+        source_world.role,
+        source_world.reference_convention,
+    )
+    different_source = PhysicalOrientation(
+        scalar.quaternion, alternate_world, source_body
+    )
+    with pytest.raises(ValueError, match="parent frame does not match"):
+        converter.to_target(different_source)
 
 
 def test_batch_gateway_preserves_component_axis_and_roundtrips():

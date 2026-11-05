@@ -31,6 +31,7 @@ from ..semantics import (
     SemanticQuaternionMap,
 )
 from .gateway import (
+    OrientationConverter,
     convert_orientation_batch_from_target,
     convert_orientation_batch_to_target,
     convert_orientation_from_target,
@@ -70,6 +71,7 @@ __all__ = [
     "FrameRole",
     "FramedOrientation",
     "FramedOrientationBatch",
+    "OrientationConverter",
     "PhysicalOrientation",
     "PhysicalOrientationBatch",
     "SemanticQuaternionMap",

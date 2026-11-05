@@ -37,8 +37,7 @@ same scalar and batch entry points.
 
 ```python
 from quatops.converters import (
-    convert_orientation_from_target,
-    convert_orientation_to_target,
+    OrientationConverter,
 )
 from quatops.engines import OrthogonalBasisMap
 from quatops.semantics import (
@@ -83,23 +82,25 @@ physical = PhysicalOrientation(
     parent_frame=canonical_world,
     child_frame=canonical_body,
 )
-native = convert_orientation_to_target(
-    physical, "unity.quaternion", target_world, target_body
-)
-recovered = convert_orientation_from_target(
-    native,
+unity = OrientationConverter(
     "unity.quaternion",
-    canonical_world,
-    canonical_body,
-    target_world,
-    target_body,
+    source_parent=canonical_world,
+    source_child=canonical_body,
+    target_parent=target_world,
+    target_child=target_body,
 )
+native = unity.to_target(physical)
+recovered = unity.from_target(native)
 ```
 
 This example's basis is an application declaration, not a Unity default. Use
 the engine's captured convention for its world frame and an independent
 asset/model convention for the child frame. The gateway rejects mismatched
-reference identities and invalid frame pairs.
+reference identities and invalid frame pairs. The `OrientationConverter`
+checks that each input uses the configured source frames and reuses its
+compiled frame map for scalar and batch values. The one-shot
+`convert_orientation_to_target` and `convert_orientation_from_target`
+functions remain available for occasional conversions.
 
 The lower-level `ConverterProfile.to_target` and `from_target` methods remain
 available when an application already owns a `FramedOrientation` and a
@@ -115,7 +116,6 @@ batch method is called.
 
 ```python
 import numpy as np
-from quatops.converters import convert_orientation_batch_to_target
 from quatops.semantics import PhysicalOrientationBatch
 
 keys = PhysicalOrientationBatch(
@@ -125,10 +125,10 @@ keys = PhysicalOrientationBatch(
     parent_frame=canonical_world,
     child_frame=canonical_body,
 )
-native_keys = convert_orientation_batch_to_target(
-    keys, "unity.quaternion", target_world, target_body
-)
+native_keys = unity.to_target_batch(keys)
 ```
+
+Use `unity.from_target_batch(native_keys)` to recover the physical batch.
 
 For a signed-axis map, quaternion batch conversion is component selection and
 sign changes and preserves the input dtype. General world/body corrections and
