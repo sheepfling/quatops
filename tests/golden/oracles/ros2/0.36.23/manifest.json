@@ -1,0 +1,118 @@
+{
+  "schema_version": "1.0",
+  "evidence_kind": "native_runtime_selected_witnesses",
+  "review_state": "native tf2 capture retained; QuatOps frame-chain replay passed",
+  "product": {
+    "name": "ROS 2 tf2",
+    "version": "0.36.23",
+    "source_revision": null,
+    "binary_sha256": "020dfc03b71b41af8ab70101801202a06a4456491bda47c993a93003d2bc004f",
+    "binary_identity_note": "/tmp/ros-install/quatops_ros_capture/lib/quatops_ros_capture/capture_ros",
+    "dependencies": [
+      {
+        "name": "ROS_DISTRO",
+        "version": "jazzy"
+      },
+      {
+        "name": "container image",
+        "version": "ros:jazzy-ros-base@sha256:8eed0a4669bbf43ee331878a4c39bd8ebddea8e3312a58b4fae8edb14526b617"
+      },
+      {
+        "name": "tf2",
+        "version": "0.36.23",
+        "package_xml_sha256": "a4aa5ea795e6375f07e1322c191c30e11ce1f85525a1be16643ebe97c8c26eae"
+      },
+      {
+        "name": "tf2_geometry_msgs",
+        "version": "0.36.23",
+        "package_xml_sha256": "e3231888f8ac6bcdaf74ce800497a95b59955201c8107fe311d470b21f7a36db"
+      },
+      {
+        "name": "geometry_msgs",
+        "version": "5.3.8",
+        "package_xml_sha256": "879da7003d6d2952701aa23146f0d78096143d5107dd6e775a23e591c2c376a0"
+      },
+      {
+        "name": "nlohmann-json3-dev",
+        "version": "3.11.3-1"
+      },
+      {
+        "name": "ros-jazzy-tf2-geometry-msgs",
+        "version": "0.36.23-1noble.20260915.174516"
+      }
+    ]
+  },
+  "execution": {
+    "was_run": true,
+    "utc": "2026-11-04T08:43:00.586915+00:00",
+    "argv": [
+      "/usr/bin/python3",
+      "experiments/converters/ros2/0.36.23/capture_native.py",
+      "--repository-root",
+      "/workspace",
+      "--corpus",
+      "experiments/oracles/shared/orientation_inputs_v1.json",
+      "--output",
+      "/captures/full",
+      "--executable",
+      "/tmp/ros-install/quatops_ros_capture/lib/quatops_ros_capture/capture_ros",
+      "--runtime-image",
+      "ros:jazzy-ros-base@sha256:8eed0a4669bbf43ee331878a4c39bd8ebddea8e3312a58b4fae8edb14526b617"
+    ],
+    "exit_code": 0,
+    "platform": "Linux-6.18.33.2-microsoft-standard-WSL2-x86_64-with-glibc2.39",
+    "architecture": "x86_64",
+    "runtime": "3.12.3 (main, Aug 31 2026, 10:18:26) [GCC 13.3.0]",
+    "compiler_flags": [],
+    "compiler_flags_note": "Vendor native flags not inferred from host Python"
+  },
+  "precision": {
+    "input": "native tf2Scalar; geometry_msgs double fields",
+    "arithmetic": "tf2Scalar as measured by compiled executable",
+    "output": "native scalar and message doubles; inspect native_scalar_bytes",
+    "serialized": "JSON plus native scalar IEEE bits"
+  },
+  "native_build": {
+    "native_scalar_bytes": 8,
+    "compiler": "13.3.0",
+    "cpp_standard": 202002,
+    "flags": "CMake: -Wall -Wextra -Wpedantic -fno-fast-math; C++20"
+  },
+  "capture_provenance": {
+    "full_observation_sha256": "81e826627d153b2cd0583991656f0a3df4ced74963df46c80df0f854cbc04aae",
+    "native_stdout_sha256": "61be3a4b3463e17257f50aa5c657ff0ba4581d0a14d34deda9e85f074a351b75",
+    "capture_manifest_sha256": "bf44939672eca6ad7c12678c3a06c766132f4aee57a8e3fa67d36337ae2cd0eb",
+    "corpus_sha256": "4af272e762f402cb4b3a60ff063bcc2ef1b79aa82e6890207abfa1bf16890db7",
+    "exporter_source_sha256": "3d8374d3e3dede9d14e06ae5fb5667504cc41787ca7451eb989c914a68e2f41d",
+    "capture_runner_sha256": "be4047a273917756c9f0f9154a0990b8318797048744be360457a391e80c8d7b",
+    "capture_helper_sha256": "ecdf0245b9d0318d67189c471f26b3ec58e2ef871611b6a2c5c79cbbc16963da",
+    "dockerfile_sha256": "e2214f02b11168ad25ab6e88a86b428d67e940a0555574dae328391aed91ee52",
+    "build_recipe_sha256": "65e75f02b743ef65eab8f0041ba8f286c767a60e3e02a64921e1a822af00e835",
+    "selected_witnesses_sha256": "a6e2569b79295b44c3598decc70efba233f1ddd20e420c22c0673ee3aee64920",
+    "reproduction": {
+      "exporter_source_sha256": "756e3f521b43faaade5a139ca14574cddf42187ec1b3c185e5cd815e9bdde4f2",
+      "runner_sha256": "ceac57e127746594aef46a369a8aa42574c7c7b453376037b7be58d8eb9e16dd",
+      "previous_checkout_runner_sha256": "be4047a273917756c9f0f9154a0990b8318797048744be360457a391e80c8d7b",
+      "capture_helper_sha256": "a0fa76c3f4aab85c1d5ec8f78634cd2f02c064f020c6779501d7780f2c232277",
+      "retention_script_sha256": "b7e89fac342c57846b18cbdb9394226d4c28e0e698ca5ed300cf34768a78596e",
+      "retention_helper_sha256": "8a0dd9379b0e50726685f2254a881d5836f444845b05e22ec892db9e828ee9a1",
+      "retention_formatter_sha256": "56961d6be101a2bdfb1b21372c823ec86dfd636547d851901b7284f2ae20e0b3",
+      "dockerfile_sha256": "70cd2720db531d2debdb37ea6d41ac12095b2f3912baa0e3b22bc522dd941e25",
+      "build_recipe_sha256": "65e75f02b743ef65eab8f0041ba8f286c767a60e3e02a64921e1a822af00e835",
+      "corpus_sha256": "4af272e762f402cb4b3a60ff063bcc2ef1b79aa82e6890207abfa1bf16890db7",
+      "input_serialization_note": "JSON formatting changed only; parsed replay input values are unchanged.",
+      "runner_identity_note": "Current reproduction runner adds numeric type annotations; capture_runner_sha256 preserves the historical runner used for the recorded capture.",
+      "previous_checkout_capture_helper_sha256": "ecdf0245b9d0318d67189c471f26b3ec58e2ef871611b6a2c5c79cbbc16963da",
+      "capture_helper_archive": "experiments/provenance/reproduction-v1/capture_io.py.txt",
+      "previous_checkout_exporter_source_sha256": "3d8374d3e3dede9d14e06ae5fb5667504cc41787ca7451eb989c914a68e2f41d",
+      "exporter_source_archive": "experiments/provenance/reproduction-v1/ros2-0.36.23/capture_ros.cpp.txt",
+      "exporter_source_identity_note": "The current reproduction exporter records the ordered probe vectors after conversion to tf2Scalar. The archived source hash is the producer identity for the retained capture; the current exporter has not been rebuilt or recaptured."
+    }
+  },
+  "selection": {
+    "retained_observations": 2,
+    "full_capture_observations": 9,
+    "policy": "retain both lookup directions; store shared edge inputs once and keep one forward message, point action, and round trip",
+    "numeric_values": "round-trippable decimals and dtype; exact bits only for signed-zero or nonfinite values"
+  }
+}

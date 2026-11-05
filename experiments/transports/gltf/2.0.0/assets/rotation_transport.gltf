@@ -1,0 +1,302 @@
+{
+  "asset": {
+    "version": "2.0",
+    "generator": "QuatOps stdlib fixture builder"
+  },
+  "scene": 0,
+  "scenes": [
+    {
+      "nodes": [
+        0,
+        6,
+        7,
+        8,
+        9
+      ]
+    }
+  ],
+  "nodes": [
+    {
+      "name": "parent_frame",
+      "translation": [
+        1.25,
+        -2.5,
+        0.75
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        0.19866933079506122,
+        0.9800665778412416
+      ],
+      "children": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ]
+    },
+    {
+      "name": "animated_step",
+      "mesh": 0,
+      "rotation": [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    },
+    {
+      "name": "animated_linear",
+      "mesh": 0,
+      "rotation": [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    },
+    {
+      "name": "animated_cubic",
+      "mesh": 0,
+      "rotation": [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    },
+    {
+      "name": "static_trs",
+      "mesh": 0,
+      "translation": [
+        2.0,
+        1.0,
+        -1.0
+      ],
+      "rotation": [
+        0.49999999999999994,
+        0.0,
+        0.0,
+        0.8660254037844387
+      ],
+      "scale": [
+        2.0,
+        1.0,
+        0.5
+      ]
+    },
+    {
+      "name": "static_matrix",
+      "mesh": 0,
+      "matrix": [
+        2.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.5000000000000001,
+        0.8660254037844386,
+        0.0,
+        0.0,
+        -0.4330127018922193,
+        0.25000000000000006,
+        0.0,
+        2.0,
+        1.0,
+        -1.0,
+        1.0
+      ]
+    },
+    {
+      "name": "source_axis_origin",
+      "mesh": 0,
+      "translation": [
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "name": "source_axis_x",
+      "mesh": 0,
+      "translation": [
+        1.0,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "name": "source_axis_y",
+      "mesh": 0,
+      "translation": [
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    {
+      "name": "source_axis_z",
+      "mesh": 0,
+      "translation": [
+        0.0,
+        0.0,
+        1.0
+      ]
+    }
+  ],
+  "meshes": [
+    {
+      "name": "proof_triangle",
+      "primitives": [
+        {
+          "attributes": {
+            "POSITION": 4
+          }
+        }
+      ]
+    }
+  ],
+  "animations": [
+    {
+      "name": "rotation_step",
+      "samplers": [
+        {
+          "input": 0,
+          "output": 1,
+          "interpolation": "STEP"
+        }
+      ],
+      "channels": [
+        {
+          "sampler": 0,
+          "target": {
+            "node": 1,
+            "path": "rotation"
+          }
+        }
+      ]
+    },
+    {
+      "name": "rotation_linear",
+      "samplers": [
+        {
+          "input": 0,
+          "output": 2,
+          "interpolation": "LINEAR"
+        }
+      ],
+      "channels": [
+        {
+          "sampler": 0,
+          "target": {
+            "node": 2,
+            "path": "rotation"
+          }
+        }
+      ]
+    },
+    {
+      "name": "rotation_cubic",
+      "samplers": [
+        {
+          "input": 0,
+          "output": 3,
+          "interpolation": "CUBICSPLINE"
+        }
+      ],
+      "channels": [
+        {
+          "sampler": 0,
+          "target": {
+            "node": 3,
+            "path": "rotation"
+          }
+        }
+      ]
+    }
+  ],
+  "buffers": [
+    {
+      "uri": "rotation_transport.bin",
+      "byteLength": 288
+    }
+  ],
+  "bufferViews": [
+    {
+      "buffer": 0,
+      "byteOffset": 0,
+      "byteLength": 12
+    },
+    {
+      "buffer": 0,
+      "byteOffset": 12,
+      "byteLength": 48
+    },
+    {
+      "buffer": 0,
+      "byteOffset": 60,
+      "byteLength": 48
+    },
+    {
+      "buffer": 0,
+      "byteOffset": 108,
+      "byteLength": 144
+    },
+    {
+      "buffer": 0,
+      "byteOffset": 252,
+      "byteLength": 36,
+      "target": 34962
+    }
+  ],
+  "accessors": [
+    {
+      "bufferView": 0,
+      "componentType": 5126,
+      "count": 3,
+      "type": "SCALAR",
+      "min": [
+        0.0
+      ],
+      "max": [
+        1.9
+      ]
+    },
+    {
+      "bufferView": 1,
+      "componentType": 5126,
+      "count": 3,
+      "type": "VEC4"
+    },
+    {
+      "bufferView": 2,
+      "componentType": 5126,
+      "count": 3,
+      "type": "VEC4"
+    },
+    {
+      "bufferView": 3,
+      "componentType": 5126,
+      "count": 9,
+      "type": "VEC4"
+    },
+    {
+      "bufferView": 4,
+      "componentType": 5126,
+      "count": 3,
+      "type": "VEC3",
+      "min": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "max": [
+        1.0,
+        1.0,
+        0.0
+      ]
+    }
+  ]
+}

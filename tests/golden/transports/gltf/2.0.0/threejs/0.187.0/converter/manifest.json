@@ -1,0 +1,45 @@
+{
+  "schema_version": "1.0",
+  "review_state": "QuatOps-generated asset loaded by pinned native GLTFLoader; replay tests passed",
+  "target": {
+    "name": "Three.js GLTFLoader",
+    "package_version": "0.187.0",
+    "revision": "187"
+  },
+  "execution": {
+    "was_run": true,
+    "utc": "2026-11-04T08:58:42.267Z",
+    "node": "v24.21.0",
+    "v8": "13.6.233.17-node.53",
+    "platform": "win32",
+    "architecture": "x64"
+  },
+  "provenance": {
+    "input_sha256": "8ec38f9d31281867bd5f966fb1548624b5a07e0091bf1dd38faa2a7b0bffb876",
+    "captured_input_sha256": "8ec38f9d31281867bd5f966fb1548624b5a07e0091bf1dd38faa2a7b0bffb876",
+    "asset_sha256": "f025f3eff21755051d8fb7962756f34db9598b62c70ca1bdadf85e597db2b29e",
+    "native_observations_sha256": "691bb98ad41404e7e90cc8713dad55ec38f78e62e9d3181feb7d0a5b1d7d82f1",
+    "full_run_manifest_sha256": "0c3ef7c6abcd98d107f2314aad0efc765a2d49547961224051f13d7d4031e857",
+    "full_observation_sha256": "7b39bad5f58e8d7e90df3314922c305d617851e5e1d5a4593580963d6e79545e",
+    "native_loader_script_sha256": "6ee56db73b1765ebe477c921b7108b2ee76605f446b900aed9e09db6d99d89a1",
+    "native_package_lock_sha256": "cede45573d60150ede075f768f955da9890935dfb78764b3cd0b0029cd48365d",
+    "native_numeric_helper_sha256": "aed1da7b180e76ff0e101a477dd6a941ed0ad076509d9716bf2bf9b6896f5fa4",
+    "contract_sha256": "357cf09c4ff560f7b40ed482a710c39603cf0f779248fc22fbea6c7f3dcbf07c",
+    "input_serialization_note": "JSON formatting changed only; parsed native input values are unchanged."
+  },
+  "reproduction": {
+    "generator_sha256": "ea123e52b51a3e9cfcec606ef9789084e677a3708e60627cf51fcb1b66bdd2ed",
+    "loader_script_sha256": "6ee56db73b1765ebe477c921b7108b2ee76605f446b900aed9e09db6d99d89a1",
+    "package_lock_sha256": "cede45573d60150ede075f768f955da9890935dfb78764b3cd0b0029cd48365d",
+    "numeric_helper_sha256": "aed1da7b180e76ff0e101a477dd6a941ed0ad076509d9716bf2bf9b6896f5fa4",
+    "retention_script_sha256": "458890a1b44283f3cd9cb004188f834102216468d0fa77083cb7eb0d34e529f1",
+    "retention_helper_sha256": "8a0dd9379b0e50726685f2254a881d5836f444845b05e22ec892db9e828ee9a1",
+    "retention_formatter_sha256": "56961d6be101a2bdfb1b21372c823ec86dfd636547d851901b7284f2ae20e0b3"
+  },
+  "selection": {
+    "retained_observations": 2,
+    "native_observations": 2,
+    "policy": "local quaternion and basis actions per node; one child world basis, mixed-point, and inverse-point witness",
+    "numeric_values": "round-trippable decimals and dtype; exact bits only for signed-zero or nonfinite values"
+  }
+}

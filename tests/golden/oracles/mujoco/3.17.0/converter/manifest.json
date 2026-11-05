@@ -1,0 +1,41 @@
+{
+  "schema_version": "1.0",
+  "review_state": "Pinned native capture only; replay acceptance is recorded by repository tests",
+  "execution": {
+    "was_run": true,
+    "utc": "2026-11-04T08:52:49.219398+00:00",
+    "python": "3.10.11 (tags/v3.10.11:7d4cc5a, Apr  5 2023, 00:38:17) [MSC v.1929 64 bit (AMD64)]",
+    "platform": "Windows-10-10.0.26300-SP0",
+    "architecture": "AMD64"
+  },
+  "target": {
+    "name": "MuJoCo",
+    "package_version": "3.17.0",
+    "engine_version": "3.17.0",
+    "numpy_version": "2.2.6",
+    "native_scalar_dtype": "float64"
+  },
+  "selection": {
+    "retained_orientation_cases": 8,
+    "native_created_orientations": 1,
+    "noncommuting_product_orders": 2,
+    "native_basis_images_per_orientation": 3,
+    "native_mixed_probe_case_id": "mixed_a"
+  },
+  "native_binary_files": [
+    {
+      "path": "mujoco.dll",
+      "sha256": "c395db1b3f5110a730c4b0c31b7a4f29881af459c8a74a03e14b7683f022d57f"
+    }
+  ],
+  "provenance": {
+    "capture_script_sha256": "ab00e29d284624426f46e88e65a7f2faa964d8e21fdbac08cb7f80a0be3af60e",
+    "reproduction_capture_script_sha256": "ab00e29d284624426f46e88e65a7f2faa964d8e21fdbac08cb7f80a0be3af60e",
+    "contract_sha256": "6a2de9e8a58581109663850419dc39c01b7ae2674e60b969bdebe1fbeacefe8a",
+    "converter_input_spec_sha256": "cfc5dbbc1729c6d22b9f0c2e8f7d3f335ff0b32a65a968f2f48f65a4aaa0eb82",
+    "selected_inputs_sha256": "a6f0630806b69d3b3b29a036aa10f63bfe214668329c661598951f84f8f41eec",
+    "witnesses_sha256": "5e9d4cadbc1db1a0abd4a1c6642f0fa4e0e6af2cd0c1b32e32ae001eabeccfa4",
+    "pinned_lockfile_sha256": "9043b65cd8be3132dc0302638cc5d80886951cbee64fbc0612c3437acd0070a8",
+    "exact_invocation": "uv run --locked --project experiments/converters/mujoco/3.17.0 --python 3.10.11 python experiments/converters/mujoco/3.17.0/capture_native.py --repository-root <repository>"
+  }
+}

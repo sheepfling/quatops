@@ -1,0 +1,54 @@
+{
+  "schema_version": "1.0",
+  "review_state": "Pinned native OpenCV converter capture; replay acceptance is recorded by repository tests",
+  "execution": {
+    "was_run": true,
+    "utc": "2026-11-04T08:42:10.082235+00:00",
+    "python": "3.13.14 (main, Jun 23 2026, 15:19:27) [MSC v.1944 64 bit (AMD64)]",
+    "platform": "Windows-11-10.0.26300-SP0",
+    "architecture": "AMD64"
+  },
+  "target": {
+    "name": "OpenCV",
+    "version": "4.13.0",
+    "distribution": "opencv-python-headless",
+    "distribution_version": "4.13.0.92",
+    "numpy_version": "2.3.5",
+    "native_scalar_profiles": ["float32", "float64"]
+  },
+  "selection": {
+    "orientation_cases_per_precision": 8,
+    "native_created_orientations_per_precision": 1,
+    "noncommuting_product_orders_per_precision": 2,
+    "native_basis_images_per_orientation": 3,
+    "native_mixed_probe_case_id": "mixed_a"
+  },
+  "native_binaries": [
+    {
+      "path": "cv2.pyd",
+      "sha256": "90034927004e4a4ebf29360480d609c8a8d2ca07c93f8b89dff86399e8534b2a"
+    },
+    {
+      "path": "opencv_videoio_ffmpeg4130_64.dll",
+      "sha256": "fcc614672159094a35815b7ea2819a648cbf86c30d90c57e8c6ba1432f594548"
+    }
+  ],
+  "provenance": {
+    "capture_script_sha256": "ce6df5cbbbb0983633e7ee64df2b39219b7c8e1a69731a480b152f780fda499b",
+    "prepared_inputs_sha256": "81dae4a755dba80a2a432925ff09a7d32690f6bd9ba22e6e16c5e4ed23212d2e",
+    "preparation_script_sha256": "d48c5017e46355a72fdf4ce96b1a66c8c78779ecbd15edb4b3a430de46c6ac92",
+    "preparation_spec_sha256": "9f17f3eafd3186d3460488eff91e0f50771f2ee7c5e6d42409b1e93df5fc084e",
+    "shared_canonical_inputs_sha256": "a6f0630806b69d3b3b29a036aa10f63bfe214668329c661598951f84f8f41eec",
+    "witnesses_sha256": "1dd125262a81c17136eb8a99ac0926b1d94d5d2960a669b8e85bf099f4458766",
+    "lockfile_sha256": "8288ebf7e36753cc45b10f2fa0594bd5b55aee6b6405055ee8f8a972ce6ac9bf",
+    "cv2_extension_directory": "site-packages/cv2",
+    "invocation_template": "python experiments/converters/opencv/4.13.0/prepare_inputs.py --output <temporary inputs.json>; then run capture_native.py --inputs <temporary inputs.json>"
+  },
+  "reproduction": {
+    "capture_script_sha256": "34131beae7c2e98b6029f6db1a01e9e19571a6325194967e7ba624e6e1546c93",
+    "previous_checkout_capture_script_sha256": "ce6df5cbbbb0983633e7ee64df2b39219b7c8e1a69731a480b152f780fda499b",
+    "preparation_script_sha256": "d48c5017e46355a72fdf4ce96b1a66c8c78779ecbd15edb4b3a430de46c6ac92",
+    "lockfile_sha256": "8288ebf7e36753cc45b10f2fa0594bd5b55aee6b6405055ee8f8a972ce6ac9bf",
+    "capture_script_identity_note": "The reproduction script now uses equivalent list extension; provenance.capture_script_sha256 preserves the historical producer used for the retained capture."
+  }
+}

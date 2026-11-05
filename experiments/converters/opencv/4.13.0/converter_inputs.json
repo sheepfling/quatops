@@ -1,0 +1,21 @@
+{
+  "schema_version": "1.0",
+  "contract_id": "quatops-opencv-4.13.0-rodrigues-boundary-v1",
+  "shared_canonical_inputs": "experiments/interoperability/v1/canonical_inputs.json",
+  "retained_case_ids": [
+    "identity",
+    "quarter_x",
+    "quarter_y",
+    "quarter_z",
+    "mixed_a",
+    "mixed_b",
+    "antipode_mixed_a",
+    "nonprincipal_halfturn"
+  ],
+  "native_constructed_orientation": {
+    "case_id": "native_axis_angle_mixed",
+    "axis_xyz": [0.2672612419124244, -0.5345224838248488, 0.8017837257372732],
+    "angle_radians": 1.123
+  },
+  "precision_profiles": ["float32", "float64"]
+}

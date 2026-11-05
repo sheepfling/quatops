@@ -5,6 +5,17 @@ runtime package. For the user-facing documentation, start with the
 [project README](../README.md); for development checks, see
 [contributor verification](../docs/contributing/VERIFICATION.md).
 
+## Evidence capture indexes
+
+- [Engine captures](blender/README.md): Blender authoring and native rotation capture.
+- [Converter-boundary captures](converters/README.md): auxiliary canonical-to-target proofs.
+- [Godot captures](godot/README.md): versioned native runtime evidence.
+- [Shared orientation inputs](interoperability/README.md): stable discovery and witness inputs.
+- [Math-library captures](oracles/README.md): independently implemented rotation APIs.
+- [Transport captures](transports/README.md): glTF assets and loader runs.
+- [Unity captures](unity/README.md): versioned native runtime evidence.
+- [Unreal captures](unreal/README.md): versioned native runtime evidence.
+
 Run from the repository root with the local `.venv`. List the experiment
 commands with:
 

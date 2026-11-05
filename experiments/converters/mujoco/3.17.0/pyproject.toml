@@ -1,0 +1,12 @@
+[project]
+name = "quatops-mujoco-oracle"
+version = "0.1.0"
+description = "Pinned MuJoCo low-level rotation capture"
+requires-python = ">=3.10,<3.11"
+dependencies = ["quatops-experiments[mujoco]"]
+
+[tool.uv]
+package = false
+
+[tool.uv.sources]
+quatops-experiments = { path = "../../../", editable = true }

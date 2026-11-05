@@ -26,17 +26,34 @@ These are the same checks used by CI:
 .venv/bin/python -m mypy tests/typing_tests/foundational_consumer.py \
     tests/typing_tests/consumer.py tests/typing_tests/float32_consumer.py
 .venv/bin/pyright --pythonpath .venv/bin/python
-.venv/bin/ruff check src tests experiments
+.venv/bin/ruff check src tests examples experiments
+.venv/bin/python -m scripts.validate_evidence_json --repository-root .
+.venv/bin/python -m scripts.validate_converter_evidence --repository-root .
+.venv/bin/python -m scripts.render_converter_registry --repository-root . --check
+.venv/bin/ruff check --select B,C4,E4,PERF,RUF,SIM,UP \
+    experiments/oracles experiments/converters scripts
+.venv/bin/ruff format --check experiments scripts
+.venv/bin/python -m build
 ```
 
 Pytest's default configuration skips opt-in performance cases. The routine
 suite covers API behavior, conventions, numerical edge cases, scalar and NumPy
 surfaces, and independent SciPy and numpy-quaternion references. The detailed
-test map is in [oracle coverage](ORACLE_COVERAGE.md).
+test map is in [oracle coverage](ORACLE_COVERAGE.md). The evidence validators
+parse every maintained capture JSON without rewriting native values, then
+check cross-file identity and a normalized Pydantic view for converter
+packages. Raw target-specific observations remain intact in their fixtures.
 
 CI runs the declared Python compatibility matrix. Check the workflow results
 for the current branch when confirming a change; this page intentionally does
 not preserve old pass counts or environment snapshots.
+The pinned Alphus quality review runs on pushes and pull requests as a separate
+workflow.
+
+The package job also builds both distribution formats, installs the wheel into
+an isolated target directory, checks scalar conversion without optional
+dependencies, then installs NumPy and checks a float32 batch round trip. Wheel
+contents are expected to exclude local Numba cache files.
 
 ## Run opt-in benchmarks
 
@@ -46,6 +63,16 @@ Install the declared development dependencies, then run the benchmark suite:
 .venv/bin/python -m pytest tests/benchmarks -m benchmark --benchmark-only \
     --benchmark-group-by=group --benchmark-columns=median \
     --benchmark-json=/tmp/quatops-benchmarks.json
+```
+
+To measure reusable versus one-shot scalar and 10k-item orientation conversion
+calls specifically, run:
+
+```sh
+.venv/bin/python -m pytest \
+    tests/benchmarks/quatops/test_orientation_converter.py \
+    -m benchmark --benchmark-only --benchmark-group-by=group \
+    --benchmark-columns=median
 ```
 
 The benchmark cases check correctness before timing and warm optional Numba
@@ -68,3 +95,8 @@ The report distinguishes direct Numba paths, compositions that reuse compiled
 kernels, and ordinary NumPy vectorization. The compatibility tests also check
 that registered dispatchers compile when Numba is installed. Correctness tests
 remain runnable without Numba through the NumPy fallbacks.
+
+## Interoperability evidence
+
+See the [interoperability evidence atlas](../INTEROPERABILITY_EVIDENCE.md) for
+the consolidated engine, oracle, transport, and native-capture coverage matrix.

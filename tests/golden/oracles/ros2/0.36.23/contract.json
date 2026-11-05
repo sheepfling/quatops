@@ -1,0 +1,55 @@
+{
+  "contract_id": "quatops-ros2-tf2-frame-chain-v1",
+  "target": {
+    "name": "ROS 2 tf2",
+    "distro": "jazzy",
+    "tf2_version": "0.36.23",
+    "native_scalar_bytes": 8,
+    "native_scalar_dtype": "float64"
+  },
+  "native_api": [
+    "tf2::BufferCore::setTransform",
+    "tf2::BufferCore::lookupTransform",
+    "tf2::Transform",
+    "geometry_msgs/msg/TransformStamped",
+    "tf2::fromMsg"
+  ],
+  "rotation": {
+    "algebra": "Hamilton",
+    "native_order": "xyzw",
+    "action": "active source-point to target-point transform",
+    "units": "radians"
+  },
+  "frames": {
+    "canonical_axes": {
+      "handedness": "right",
+      "positive_x": "right/east",
+      "positive_y": "forward/north",
+      "positive_z": "up"
+    },
+    "ros_world_from_canonical_world": ["x", "y", "z"],
+    "ros_base_from_canonical_base": ["y", "-x", "z"],
+    "ros_sensor_optical_from_canonical_sensor": ["x", "-z", "y"],
+    "interpretation": "Each signed-axis map maps canonical frame-coordinate components into the named ROS frame. The maps are fixture declarations, not inferred from frame IDs."
+  },
+  "frame_direction": "lookupTransform(target, source) returns target_from_source; its rotation and translation map source point coordinates into target coordinates",
+  "conversion": "For each edge, convert native target_from_source quaternion with QuaternionFrameMap(world_map=target_map, body_map=source_map).from_destination_wxyz(); map translation with target_map.inverse().vector(). Compose labelled edges world_from_base and base_from_sensor in that order.",
+  "inverse_conversion": "Apply the same operation to the reverse lookup using its declared target/source maps; equivalently invert the canonical forward rigid transform.",
+  "input_domain": "unit rotations, finite translations, static transforms at one exact timestamp; native double tf2Scalar",
+  "scope": [
+    "named-frame direction",
+    "two-edge noncommuting chain",
+    "both lookup directions",
+    "TransformStamped message fields and fromMsg round trip",
+    "point action"
+  ],
+  "exclusions": [
+    "DDS/CDR wire encoding",
+    "live network",
+    "time interpolation/extrapolation",
+    "dynamic broadcasters",
+    "CovarianceStamped",
+    "ROS model-forward assumptions"
+  ],
+  "native_witnesses": "witnesses.json"
+}

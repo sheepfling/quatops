@@ -1,0 +1,51 @@
+{
+  "schema_version": "1.0",
+  "review_state": "native capture retained; QuatOps replay covered by tests/experiments/converters/cesium/test_cesium_converter.py",
+  "target": {
+    "name": "CesiumJS",
+    "package_version": "1.124.0",
+    "api_version": "1.124",
+    "package_entry_sha256": "7520b29545f5803c1f690650545d84d1bf5c25ce3c47ca65a43059604cdf1f58"
+  },
+  "execution": {
+    "was_run": true,
+    "utc": "2026-11-04T08:58:45.847Z",
+    "node": "v24.21.0",
+    "v8": "13.6.233.17-node.53",
+    "platform": "win32",
+    "architecture": "x64"
+  },
+  "provenance": {
+    "run_manifest_sha256": "f40bc6729825b3d95ff98c6b3fd4152a034c4a88cbf39e6bbe8659f89de44776",
+    "full_observation_sha256": "25deabd662a8fca8e2ff710ab3f4017a043fe63a123ef5ab75fd4b75cc4f740a",
+    "converter_input_sha256": "0fea339670bff7808650325f8b2d9d94c7c7b8e583c1b9287ccc34227a867a31",
+    "captured_converter_input_sha256": "0fea339670bff7808650325f8b2d9d94c7c7b8e583c1b9287ccc34227a867a31",
+    "canonical_inputs_sha256": "a6f0630806b69d3b3b29a036aa10f63bfe214668329c661598951f84f8f41eec",
+    "geographic_inputs_sha256": "619099b732593c6c45f4f7eb64714e4c7d79b2c96dcd070777522e3736e4f085",
+    "native_capture_script_sha256": "cc596d22e143b7dac96bbca8eebca8629cf4eb8dec3fe52c75a9fdd691d23b41",
+    "native_numeric_helper_sha256": "aed1da7b180e76ff0e101a477dd6a941ed0ad076509d9716bf2bf9b6896f5fa4",
+    "native_package_lock_sha256": "5e331bee862cbdff2a96dec2d325e86aa996b780821833899f4053e9476002e0",
+    "witnesses_sha256": "cf56f2ed41685d79fb08f3d04ef7e36818e5fb920286758aa813d85746613ed2",
+    "contract_sha256": "df361fce8d9d5311f035d51cd8e04f60718bfa3d8c869dbee4d8a69ea6488c76",
+    "input_serialization_note": "JSON formatting changed only; parsed native input values are unchanged.",
+    "captured_input_generator_sha256": "b520febfabf06cac54c438ccbb7160dcc8e3df8c9f1ab3388e8ba2d837dc67b7",
+    "captured_input_generator_archive": "experiments/provenance/reproduction-v1/cesium-1.124.0-create_inputs.py.txt"
+  },
+  "reproduction": {
+    "input_generator_sha256": "95c2905c48eb1013ded0b498342af991ba2b1db005ac91500cd72473eedd8bf8",
+    "capture_script_sha256": "cc596d22e143b7dac96bbca8eebca8629cf4eb8dec3fe52c75a9fdd691d23b41",
+    "numeric_helper_sha256": "aed1da7b180e76ff0e101a477dd6a941ed0ad076509d9716bf2bf9b6896f5fa4",
+    "retention_script_sha256": "d4fb85da817803d5b38aa4d93937b9dfac6118ff87d8e3b2a23488aca464ee98",
+    "retention_helper_sha256": "8a0dd9379b0e50726685f2254a881d5836f444845b05e22ec892db9e828ee9a1",
+    "retention_formatter_sha256": "56961d6be101a2bdfb1b21372c823ec86dfd636547d851901b7284f2ae20e0b3",
+    "package_lock_sha256": "5e331bee862cbdff2a96dec2d325e86aa996b780821833899f4053e9476002e0",
+    "geographic_inputs_sha256": "619099b732593c6c45f4f7eb64714e4c7d79b2c96dcd070777522e3736e4f085",
+    "input_generator_archive": "experiments/provenance/reproduction-v1/cesium-1.124.0-create_inputs.py.txt"
+  },
+  "selection": {
+    "retained_observations": 5,
+    "native_observations": 5,
+    "policy": "retain local basis action once; retain ECEF orientation, world basis action, one probe point round trip, and origin for identity, mixed, antipodal, and composed cases",
+    "numeric_values": "round-trippable decimals and dtype; exact bits only for signed-zero or nonfinite values"
+  }
+}

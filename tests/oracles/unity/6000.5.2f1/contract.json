@@ -1,0 +1,51 @@
+{
+  "engine": {
+    "engine": "Unity Editor",
+    "api": "UnityEngine.Quaternion(x,y,z,w); Quaternion * Vector3",
+    "version": "6000.5.2f1",
+    "build": null,
+    "platform": "WindowsEditor",
+    "native_scalar_profiles": ["float32"],
+    "native_quaternion_order": "xyzw",
+    "native_algebra": "Hamilton",
+    "native_vector_action": "active quaternion sandwich / engine vector rotation API"
+  },
+  "conversion": {
+    "contract_id": "quatops-canonical-hamilton-wxyz-active-rh-v1",
+    "canonical_algebra": "Hamilton",
+    "canonical_order": "wxyz",
+    "canonical_action": "active",
+    "canonical_frame": {
+      "handedness": "right-handed",
+      "positive_x": "right",
+      "positive_y": "forward",
+      "positive_z": "up"
+    },
+    "native_frame": {
+      "handedness": "left-handed",
+      "positive_x": "right",
+      "positive_y": "up",
+      "positive_z": "forward"
+    },
+    "destination_axes_from_source": ["x", "z", "y"],
+    "conversion_rule": "native_xyzw=(-x,-z,-y,w)",
+    "inverse_rule": "canonical_wxyz=(W,-X,-Z,-Y)",
+    "world_and_body_map": "same declared signed-axis map",
+    "input_domain": "unit Hamilton quaternion; adapters preserve magnitude and do not normalize",
+    "native_precision_tolerance": {
+      "float32": 2e-06
+    },
+    "scope": "unit quaternion coefficient and physical-action conversion",
+    "excludes": ["asset model-forward defaults", "scene import", "animation transport", "Euler adapters"]
+  },
+  "provenance": {
+    "witness_file": "witnesses.json",
+    "witness_sha256": "9348b1af1de7ad7482e5f19157ae13396038bffbb46a9de7b54046ec11e3a22f",
+    "capture_source": "experiments/unity/6000.5.2f1/Assets/Editor/QuatOpsEngineCapture.cs",
+    "capture_source_sha256": "1b04a9b7bbd7897c8b0ca0da816af711ccfd4e89b4f11c2981f59351dc29f98f",
+    "original_capture_sha256": "d94da828fc5d905bad9797475f14a44bcd771c0024f4154186cb3ef5fbb57267",
+    "canonical_input_sha256": "a6f0630806b69d3b3b29a036aa10f63bfe214668329c661598951f84f8f41eec",
+    "retention_method": "selected native outputs retained losslessly; inputs linked by case ID; redundant inputs and probe actions omitted",
+    "canonical_input_file": "experiments/interoperability/v1/canonical_inputs.json"
+  }
+}

@@ -1,0 +1,52 @@
+{
+  "schema_version": "1.0",
+  "contract_id": "quatops-mujoco-3.17.0-direct-quaternion-boundary-v1",
+  "target": {
+    "name": "MuJoCo",
+    "version": "3.17.0",
+    "native_scalar_dtype": "float64",
+    "entry_points": ["mju_quat2Mat", "mju_rotVecQuat", "mju_mat2Quat", "mju_mulQuat", "mju_axisAngle2Quat"]
+  },
+  "canonical": {
+    "algebra": "Hamilton",
+    "coefficient_order": "WXYZ",
+    "rotation_action": "active: q * (0, v) * conjugate(q)",
+    "matrix_action": "column vectors",
+    "handedness": "right-handed",
+    "normalization": "unit quaternion",
+    "frame": {
+      "positive_x": "right",
+      "positive_y": "forward",
+      "positive_z": "up"
+    }
+  },
+  "target_boundary": {
+    "coefficient_order": "WXYZ",
+    "observed_quat2mat_vector_action": "active; mju_rotVecQuat(q, vector)",
+    "observed_product": "mju_mulQuat(lhs, rhs) matches Hamilton lhs * rhs; rhs acts first",
+    "source_to_target_coordinate_map": ["x", "y", "z"],
+    "probe_frame_assignment": {
+      "positive_x": "right",
+      "positive_y": "forward",
+      "positive_z": "up",
+      "meaning": "explicit test frame assignment for these numeric APIs; not a model or simulator frame claim"
+    },
+    "native_matrix_layout": "flat row-major 9 coefficients returned by mju_quat2Mat, reshaped to 3x3",
+    "canonical_to_native": "identity on WXYZ coefficients for the declared shared probe frame",
+    "native_to_canonical": "identity on WXYZ coefficients for the declared shared probe frame",
+    "reverse_matrix_route": "mju_mat2Quat(mju_quat2Mat(q)) is rotation-equivalent to q"
+  },
+  "scope": [
+    "direct unit-quaternion mju_quat2Mat and mju_rotVecQuat action",
+    "direct quaternion-to-matrix-to-quaternion round trip",
+    "native mju_axisAngle2Quat constructor route",
+    "native noncommuting mju_mulQuat products in both operand orders",
+    "native action on three basis vectors and one asymmetric probe"
+  ],
+  "excludes": [
+    "Euler argument-sequence behavior",
+    "simulation model, body, joint, camera, and robot link frame assignments",
+    "viewer, rendering, physics stepping, and integration behavior",
+    "single-precision MuJoCo builds or non-unit quaternion policy"
+  ]
+}

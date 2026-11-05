@@ -1,0 +1,20 @@
+{
+  "schema_version": "1.0",
+  "product": "Khronos OpenXR SDK",
+  "sdk_version": "1.1.65",
+  "specification_version": "1.1.65",
+  "repository": "https://github.com/KhronosGroup/OpenXR-SDK.git",
+  "tag": "release-1.1.65",
+  "commit": "24a1f2b92d212501a2b1b8d30ffd53abf55fcfa8",
+  "compiler_standard": "C++17",
+  "test_runtime": {
+    "product": "Khronos OpenXR-SDK-Source test_runtime",
+    "version": "1.1.65",
+    "repository": "https://github.com/KhronosGroup/OpenXR-SDK-Source.git",
+    "tag": "release-1.1.65",
+    "commit": "a9f14c416e383d05c142f5a2539a91fe3931b52a",
+    "source": "src/tests/test_runtimes/runtime_test.cpp",
+    "scope": "Khronos mock runtime used to observe static reference-space offset relations; no hardware or vendor runtime behavior"
+  },
+  "scope": "OpenXR 1.1.65 specification pose/frame facts, pinned XrQuaternionf/XrPosef header ABI, and a headless Khronos test-runtime frame-chain capture"
+}

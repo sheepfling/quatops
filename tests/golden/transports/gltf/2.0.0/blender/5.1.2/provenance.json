@@ -1,0 +1,24 @@
+{
+  "schema_version": 1,
+  "evidence_kind": "native_capture_source_reproduction_record",
+  "target": {
+    "name": "Blender glTF importer",
+    "version": "5.1.2"
+  },
+  "historical_capture": {
+    "artifact": "tests/golden/transports/gltf/2.0.0/blender/5.1.2/native_rotation.json",
+    "exporter_sha256": "81fec5fb7fff574714086bf7958aabae62dc4d9c88758cfe374b9b613f3b0cac",
+    "exporter_archive": "experiments/provenance/reproduction-v1/gltf-blender-5.1.2-captured-capture_gltf.py.txt"
+  },
+  "reproduction": {
+    "capture_source": "experiments/transports/gltf/2.0.0/blender/5.1.2/capture_gltf.py",
+    "capture_source_sha256": "92350a1fb9a5b0a73bda2c492586ef9aa32b7e032077efde0f60035d3885e2fb",
+    "previous_checked_in_capture_source_sha256": "4c697aaa7c47fcf9e7e4c67290275ff95b728d9c5c6cf269999084f7c22b3501",
+    "previous_checked_in_capture_source_commit": "39fcb3d4dd78a732120b5a6c49f8d4482d1cbc99",
+    "asset_builder_source": "experiments/transports/gltf/2.0.0/assets/build_asset.py",
+    "asset_builder_source_sha256": "aa018e88672d828465a34454a6deea916563016f608d219be53a70deaefe9d33",
+    "previous_asset_builder_source_sha256": "bef952bc4d6721685b4adea8ae4638fd346dbaf3c1f14459c023a941f581a254",
+    "previous_asset_builder_source_commit": "39fcb3d4dd78a732120b5a6c49f8d4482d1cbc99",
+    "identity_note": "The current capture source adds typed action records and checks animation data after creation; the asset builder adds accessor-shape validation. Neither current source was run in Blender. The retained native exporter SHA-256 remains the archived historical producer identity."
+  }
+}

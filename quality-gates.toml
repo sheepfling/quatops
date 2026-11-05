@@ -10,17 +10,22 @@ orchestration_files = [
 
 [files]
 include = [
-  "src/**/*.py", "tests/**/*.py", "experiments/**/*.py", "scripts/**/*.py",
+  "src/**/*.py", "tests/**/*.py", "examples/**/*.py", "experiments/**/*.py", "scripts/**/*.py",
   "*.md", "**/*.md", "*.json", "**/*.json", "*.yaml", "**/*.yaml",
   "*.yml", "**/*.yml", "*.toml", "**/*.toml",
 ]
-exclude = []
-
 [checks.json_structure]
 extensions = [".py"]
 # Test decoders consume controlled fixtures; the benchmark reads its own
 # pytest-benchmark report, whose schema belongs to that local tool.
-exclude = ["tests/**", "experiments/one_off_benchmark.py"]
+exclude = [
+  "tests/**",
+  # This reader rejects duplicate keys and non-finite/non-standard values,
+  # then validates the decoded tree through Pydantic RootModels. Alphus's
+  # source rule cannot follow that validated data flow.
+  "scripts/evidence_json.py",
+  "experiments/one_off_benchmark.py",
+]
 
 [checks.output_escaping]
 extensions = [".py"]
@@ -28,9 +33,13 @@ exclude = []
 
 [checks.path_discovery]
 extensions = [".py"]
-# These checkout-local tools intentionally discover the source tree.
-exclude = ["experiments/one_off_benchmark.py", "experiments/run.py"]
-inspection_exclude = ["tests/**"]
+# The experiment launcher intentionally installs its configured source paths;
+# test support locates checked-in fixture roots for replay tests.
+exclude = [
+  "experiments/run.py",
+  "tests/support/paths.py",
+]
+inspection_exclude = []
 
 [checks.line_length]
 exclude = []
@@ -44,7 +53,11 @@ code_limit = 3000
 hard_limit = 5000
 initializer_name = "__init__.py"
 initializer_limit = 100
-exclude = []
+# These two JSON files are generated input corpora with stable case IDs. They
+# remain under JSON syntax and consumer checks; line count is not code size.
+exclude = [
+  "experiments/oracles/shared/orientation_inputs_v1.json",
+]
 
 [checks.numeric_literals]
 extensions = [".py"]
@@ -73,7 +86,11 @@ report_validator_fallthrough = true
 report_field_positional_default = true
 report_custom_init = true
 report_unconstrained_any = true
-public_model_paths = ["src/**/*.py"]
+public_model_paths = [
+  "src/**/*.py",
+  "scripts/converter_evidence.py",
+  "scripts/evidence_json.py",
+]
 
 [orchestration]
 default_profile = "review"

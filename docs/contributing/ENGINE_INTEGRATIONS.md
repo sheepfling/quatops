@@ -45,7 +45,7 @@ correction outside the quaternion-only map.
 
 ## Establish mathematical correctness
 
-The [SciPy oracle](../../tests/test_engine_basis_oracle.py) independently
+The [SciPy oracle](../../tests/quatops/engines/test_engine_basis_oracle.py) independently
 constructs the basis matrix from the declared axes, obtains source rotation
 matrices from SciPy, and compares the result with `B R B^T`. It covers all 48
 signed axis permutations, Hamilton and JPL source values, both coefficient
@@ -62,7 +62,7 @@ choice explicit.
 Run the focused and complete suites when changing implementation code:
 
 ```sh
-.venv/bin/python -m pytest -q tests/test_engine_basis_oracle.py
+.venv/bin/python -m pytest -q tests/quatops/engines/test_engine_basis_oracle.py
 .venv/bin/python -m pytest -q
 ```
 
@@ -91,7 +91,7 @@ engine integration is runtime-verified:
 6. Exercise one real imported asset and confirm its model-forward and up axes
    after import. Record importer settings separately from the world-basis map.
 
-Keep this runtime evidence distinct from the SciPy oracle evidence. The current
-checkout has no Unreal, Unity, or Godot runtime test result; see issues
-[#4](https://github.com/sheepfling/quatops/issues/4) and
-[#7](https://github.com/sheepfling/quatops/issues/7).
+Keep native runtime evidence distinct from SciPy formula checks and Python
+replays of frozen outputs. See the canonical
+[interoperability evidence atlas](../INTEROPERABILITY_EVIDENCE.md) for retained
+engine captures, versioned contracts, and remaining scope.

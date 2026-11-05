@@ -1,0 +1,169 @@
+{
+  "schema_version": "1.0",
+  "evidence_kind": "native_discovery_capture",
+  "target": "Khronos OpenXR SDK 1.1.65 and SDK-Source test_runtime",
+  "pin": {
+    "schema_version": "1.0",
+    "product": "Khronos OpenXR SDK",
+    "sdk_version": "1.1.65",
+    "specification_version": "1.1.65",
+    "repository": "https://github.com/KhronosGroup/OpenXR-SDK.git",
+    "tag": "release-1.1.65",
+    "commit": "24a1f2b92d212501a2b1b8d30ffd53abf55fcfa8",
+    "compiler_standard": "C++17",
+    "test_runtime_dependency": {
+      "product": "Khronos OpenXR-SDK-Source",
+      "version": "1.1.65",
+      "repository": "https://github.com/KhronosGroup/OpenXR-SDK-Source.git",
+      "tag": "release-1.1.65",
+      "commit": "a9f14c416e383d05c142f5a2539a91fe3931b52a",
+      "source": "src/tests/test_runtimes/runtime_test.cpp"
+    },
+    "scope": "OpenXR specification pose/frame facts, pinned header ABI, and static LOCAL-space relations from the Khronos headless test runtime; no hardware or vendor runtime"
+  },
+  "execution": {
+    "was_run": true,
+    "scope": "header ABI probe only",
+    "utc": "2026-11-04T07:10:09+00:00",
+    "platform": "Windows-11-10.0.26300-SP0",
+    "architecture": "AMD64",
+    "compiler": "g++ (GCC) 15.2.0",
+    "command": [
+      "g++",
+      "-std=c++17",
+      "-O2",
+      "-I",
+      "<OpenXR-SDK 1.1.65>/include",
+      "capture_header_abi.cpp",
+      "-o",
+      "<temporary capture executable>"
+    ],
+    "system_or_vendor_runtime_configured": false,
+    "runtime_functions_called": false
+  },
+  "test_runtime_execution": {
+    "was_run": true,
+    "utc": "2026-11-04T07:10:09+00:00",
+    "platform": "Windows-11-10.0.26300-SP0",
+    "architecture": "AMD64",
+    "compiler": "g++ (GCC) 15.2.0",
+    "runtime_kind": "Khronos software test runtime; loaded directly, not registered as a system runtime",
+    "test_runtime_build_command": [
+      "g++",
+      "-std=c++17",
+      "-shared",
+      "-I",
+      "<OpenXR-SDK 1.1.65>/include",
+      "-I",
+      "<OpenXR-SDK-Source 1.1.65>/src",
+      "-I",
+      "<OpenXR-SDK-Source 1.1.65>/src/common",
+      "src/tests/test_runtimes/runtime_test.cpp",
+      "src/tests/test_runtimes/test_runtime.def",
+      "-o",
+      "<temporary test_runtime.dll>"
+    ],
+    "capture_build_command": [
+      "g++",
+      "-std=c++17",
+      "-O2",
+      "-I",
+      "<OpenXR-SDK 1.1.65>/include",
+      "capture_test_runtime.cpp",
+      "-o",
+      "<temporary capture executable>"
+    ],
+    "enabled_extension": "XR_MND_headless",
+    "api_version": [1, 1, 65],
+    "runtime_functions_called": [
+      "xrNegotiateLoaderRuntimeInterface",
+      "xrEnumerateInstanceExtensionProperties",
+      "xrCreateInstance",
+      "xrGetSystem",
+      "xrCreateSession",
+      "xrCreateReferenceSpace",
+      "xrLocateSpace",
+      "xrDestroySpace",
+      "xrDestroySession",
+      "xrDestroyInstance"
+    ],
+    "capture_time_is_synthetic": true,
+    "capture_time_xr_time": 1,
+    "hardware_tracking_observed": false,
+    "capture_command": ["capture_openxr_test_runtime.exe", "<temporary test_runtime.dll>"],
+    "scipy_reference": {
+      "python_version": "3.12.13",
+      "numpy_version": "2.4.6",
+      "scipy_version": "1.18.1",
+      "pydantic_version": "2.14.2",
+      "requirements_reference": "requirements-reference.txt",
+      "requirements_reference_sha256": "9008876dcb5c9692eb33a765e022b59de2cdff5aec907a013f1814dee7976d23",
+      "tolerance": 2e-06,
+      "native_formula_max_errors": {
+        "A_from_B": 1.6768191096749874e-07,
+        "B_from_C": 3.784265460993197e-07,
+        "A_from_C": 2.8608841562416387e-07
+      },
+      "chain_rotation_matrix_max_abs_error": 4.861438435144194e-08,
+      "chain_translation_max_abs_error_m": 2.8987753575293596e-07,
+      "chain_point_max_abs_error_m": 3.421565324401854e-07,
+      "quatops_executed": false,
+      "result": "pass"
+    }
+  },
+  "artifacts": {
+    "capture_sources_sha256": {
+      "capture_header_abi.cpp": "074a48c31e4ad0c856427cddfa1455a44a95dd5f425ad5d3edcb30559389cec3",
+      "capture_test_runtime.cpp": "6efe5eacf86556bda79d749a7c8c6a7866b1b974a25bbcf55850f56233f5dcde",
+      "requirements-reference.txt": "9008876dcb5c9692eb33a765e022b59de2cdff5aec907a013f1814dee7976d23",
+      "source.json": "d91745c6bf6d99503fe2d91da2996d2fe7703eb68cc5a2d4b63aa1476c5bebe0",
+      "verify_test_runtime.py": "e118aa3f80525f45c5bfd8671fbe6ce0f4cec60bc350a1f34ae8849be416d424"
+    },
+    "input_sha256": null,
+    "native_executable_sha256": "f4584c5f26a147cc396d171f2fffb2853d3bb7a0f38be26a5f44ac15f4a112fd",
+    "native_output": "header_abi.json",
+    "native_output_sha256": "dfd5d5f0914e078f096aea3b25400c53758e52062112a5c911fcd39c564fc2ac",
+    "native_output_matches_stdout": true,
+    "pinned_sdk_headers_sha256": {
+      "openxr.h": "a1882433318c34f7b52995d7f2a1ee5827f4bd56373e0b7fd7c1ef97eec8ad31",
+      "openxr_platform_defines.h": "7dc30ad27f1082a71f84f5f5adf10762558fc9fe57fdc7628d796d22be3b0dbe"
+    },
+    "test_runtime_frame_chain": {
+      "native_stdout": "temporary, retained observations minimized to witnesses/test_runtime_frame_chain.json",
+      "native_stdout_sha256": "2b6fd85ce08f1ce225bac520f13d317872df437c55b7f7c7a95b72e7b0aba39e",
+      "witness_file": "witnesses/test_runtime_frame_chain.json",
+      "witness_sha256": "8eecbeb483cdbf62aee5d359bf8905e081b9bd47e1fef5af1cc712235880372c",
+      "native_executable_sha256": "69571d1b059fbe3c9f92ee1df83a4e4a3ed71682a848e06b15271f895912923b",
+      "test_runtime_dll_sha256": "3ce3378cc5993915ea906c47e7bb6704a82abcea854b70aa447325f8f809ac6c",
+      "test_runtime_source_sha256": "1ab9f9e7ae170c7a1896ae51c6535a60f9eae5c8d2eef52bddd4ae5e369c50be",
+      "test_runtime_export_def_sha256": "af512b797de324c47ce66c84c47b14d96c93c8838cf44dd16fef616966e99879",
+      "loader_negotiation_header_sha256": "3dca4239643a8505355de010c6d9e18dd05eae91c9b976add2fc878ac416890f"
+    }
+  },
+  "replay": {
+    "verifier_script_sha256": "387601f1b8915f38aec8f074fbe52f95e8b8235749c93acb8c193247336b2a54",
+    "test_module": "tests/experiments/oracles/openxr/test_openxr_test_runtime.py"
+  },
+  "review": {
+    "state": "header_abi_spec_contract_and_khronos_test_runtime_frame_chain_reviewed",
+    "specification_facts_reviewed": [
+      "XrQuaternionf is a unit quaternion with float x, y, z, w members.",
+      "XrPosef stores orientation and position; position is in meters and orientation is applied before translation.",
+      "xrLocateSpace returns the pose of space in baseSpace at the requested time; results may change as reference-space origins are revised.",
+      "VIEW, LOCAL, and LOCAL_FLOOR use +X right, +Y up, -Z forward; STAGE uses +Y up with runtime-defined XZ bounds and optional support."
+    ],
+    "frame_direction_interpretation": "The specification defines xrLocateSpace(target, baseSpace) as the pose of target in baseSpace; the test-runtime witness natively exercises that argument direction and frame chain.",
+    "specification_sources": [
+      "https://registry.khronos.org/OpenXR/specs/1.1/man/html/XrQuaternionf.html",
+      "https://registry.khronos.org/OpenXR/specs/1.1/man/html/XrPosef.html",
+      "https://registry.khronos.org/OpenXR/specs/1.1/man/html/xrLocateSpace.html",
+      "https://registry.khronos.org/OpenXR/specs/1.1/man/html/XrReferenceSpaceType.html"
+    ],
+    "limitations": [
+      "No system or vendor OpenXR runtime was installed or registered; the pinned Khronos software test runtime was loaded directly.",
+      "The test runtime uses static supplied reference-space offsets; this does not establish headset tracking, vendor behavior, or real-time pose location.",
+      "The synthetic XrTime value is specific to the test runtime capture and is not a production display-time example.",
+      "OpenXR does not define a universal world frame, and this capture does not validate a QuatOps adapter."
+    ]
+  }
+}

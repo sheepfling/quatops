@@ -1,0 +1,17 @@
+# Native-capture manifests hash raw source and output bytes. Preserve these
+# auxiliary artifacts exactly across Windows and Unix checkouts.
+experiments/oracles/** -text
+experiments/transports/** -text
+tests/golden/oracles/** -text
+tests/golden/transports/** -text
+experiments/blender/** -text
+experiments/godot/** -text
+experiments/interoperability/** -text
+experiments/unity/** -text
+experiments/unreal/** -text
+experiments/converters/** -text
+experiments/provenance/** -text
+tests/oracles/** -text
+scripts/evidence_json.py -text
+scripts/compact_oracle_witnesses.py -text
+scripts/retain_*_witnesses.py -text

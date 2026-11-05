@@ -1,0 +1,109 @@
+{
+  "schema_version": "1.0",
+  "capture_id": "proj-geographic",
+  "oracle_id": "proj_geographic",
+  "oracle_family": "proj",
+  "evidence_kind": "native_runtime",
+  "product": {
+    "name": "PROJ via pyproj",
+    "version": "9.5.1",
+    "source_revision": null,
+    "binary_sha256": "49dd659f375b93cf4916d7612ca47dca960d6d5d7347bfc53b4ab673d78e29c3",
+    "binary_identity_note": "/opt/pyvenv/lib/python3.13/site-packages/pyproj/_transformer.cpython-313-x86_64-linux-gnu.so",
+    "dependencies": [
+      {
+        "name": "pyproj",
+        "version": "3.7.2"
+      }
+    ]
+  },
+  "execution": {
+    "was_run": true,
+    "utc": "2026-11-03T02:53:07.613026+00:00",
+    "argv": [
+      "python",
+      "<historical PROJ capture exporter; workspace-specific path removed>",
+      "--output",
+      "<temporary capture directory>"
+    ],
+    "exit_code": 0,
+    "platform": "Linux-6.18.57-x86_64-with-glibc2.41",
+    "architecture": "x86_64",
+    "runtime": "3.13.5 (main, Jul 15 2026, 20:25:40) [GCC 14.2.0]",
+    "compiler_flags": [],
+    "compiler_flags_note": "Vendor native flags not inferred from host Python",
+    "argv_note": "The historical exporter SHA-256 is preserved; the versioned package now contains a portable reproduction exporter."
+  },
+  "precision": {
+    "input": "binary64 geographic degrees/metres",
+    "arithmetic": "native PROJ double",
+    "output": "binary64",
+    "serialized": "Round-trip binary64 JSON values; duplicate per-value IEEE-754 sidecars are omitted."
+  },
+  "exporter": {
+    "path": "historical native exporter source not retained; see SHA-256",
+    "sha256": "8211253a2d97a9453890b8a695af02f0c79069419deca9ce7e7dc0b4211a48b1",
+    "commit": null,
+    "role": "historical native-run exporter; original source path was removed during evidence curation"
+  },
+  "corpus": {
+    "path": "experiments/oracles/shared/geographic_inputs_v1.json",
+    "sha256": "ca5c70314444c14cead0cc196f319e5d189657bb818eb59751c07e55ec23ff85"
+  },
+  "artifacts": [
+    {
+      "path": "observations.jsonl",
+      "sha256": "90e3a7dd5fc29607d4786f2cd1b76380c74abdbc07203474219c707077854d52",
+      "role": "selected_native_observations",
+      "source_capture_sha256": "67adb8fcedc1cd9b6aca1b203a6109b8b57f2d8fe3f381951cbcb0dcd56e5f5a"
+    },
+    {
+      "path": "experiments/oracles/shared/geographic_inputs_v1.json",
+      "sha256": "ca5c70314444c14cead0cc196f319e5d189657bb818eb59751c07e55ec23ff85",
+      "role": "geographic_input_corpus"
+    }
+  ],
+  "coverage": {
+    "profiles": [
+      "FRAME"
+    ],
+    "independent_input_count": 11,
+    "native_observation_count": 11,
+    "quatops_replay_count": 0,
+    "status_counts": {
+      "ok": 11
+    },
+    "record_count": 11
+  },
+  "review": {
+    "state": "captured_not_reviewed",
+    "reviewer": null,
+    "limitations": [
+      "This is PROJ execution, NOT Cesium execution.",
+      "Local Cartesian point transforms only; no quaternion/HPR function is inferred from these outputs.",
+      "At geographic poles longitude fixes a convention; Cesium may choose a different exact-pole fallback.",
+      "Network disabled; WGS84 ellipsoid only, no external datum grids."
+    ]
+  },
+  "reproduction": {
+    "exporter_path": "experiments/oracles/proj/9.5.1/capture_proj.py",
+    "exporter_sha256": "f86b895fc655e39d04032ff46dfd3693a0c498b8aa5cf360bf16070eaec29f29",
+    "previous_manifest_exporter_sha256": "9295111b0a0d2ddf36c207ee50c7078a28202b60911a5589301299622a665a9a",
+    "previous_checkout_exporter_sha256": "b1924e77c6a449b3c86af70f8fb870cb06fa2eecd160f8a1d6937b3bbe4254a6",
+    "capture_helper_path": "experiments/oracles/shared/capture_io.py",
+    "capture_helper_sha256": "a0fa76c3f4aab85c1d5ec8f78634cd2f02c064f020c6779501d7780f2c232277",
+    "input_path": "experiments/oracles/shared/geographic_inputs_v1.json",
+    "input_sha256": "ca5c70314444c14cead0cc196f319e5d189657bb818eb59751c07e55ec23ff85",
+    "requirements_path": "experiments/oracles/proj/9.5.1/requirements.txt",
+    "requirements_sha256": "2ebfab05fa84c1997fce51031415ed2da1209595112badc09faecbeadfa3aa6a",
+    "previous_checkout_capture_helper_sha256": "ecdf0245b9d0318d67189c471f26b3ec58e2ef871611b6a2c5c79cbbc16963da",
+    "capture_helper_archive": "experiments/provenance/reproduction-v1/capture_io.py.txt"
+  },
+  "retention": {
+    "source_observations_sha256": "67adb8fcedc1cd9b6aca1b203a6109b8b57f2d8fe3f381951cbcb0dcd56e5f5a",
+    "original_full_capture_sha256": "d908e22625445f11e0167b136587cfe511161885f22f35fddea53b5e6069e20d",
+    "selection": "For each of 11 locations, retain native ECEF origin, three ENU unit-axis endpoints, one mixed-point ECEF endpoint, and its local inverse readback. Inputs resolve by case ID in the shared geographic corpus.",
+    "verified_inverse_readbacks": "All five prior local readbacks at each location were checked against their source points within 1e-8 m before retaining the mixed-point readback.",
+    "verified_hex_values_removed": 583
+  }
+}

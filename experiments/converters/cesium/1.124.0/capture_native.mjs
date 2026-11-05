@@ -1,0 +1,83 @@
+/** Execute QuatOps-generated inputs against CesiumJS 1.124 native APIs. */
+import fs from 'node:fs';
+import path from 'node:path';
+import crypto from 'node:crypto';
+import os from 'node:os';
+import { fileURLToPath, pathToFileURL } from 'node:url';
+import { numeric } from '../../shared/numeric_evidence.mjs';
+
+const here = path.dirname(fileURLToPath(import.meta.url));
+const packageRoot = here;
+const C = await import(pathToFileURL(path.join(packageRoot, 'node_modules/cesium/Source/Cesium.js')));
+const inputPath = path.join(here, 'converter_inputs.json');
+const outputPath = process.argv[2];
+if (!outputPath) throw new Error('Usage: node capture_native.mjs OUTPUT_DIRECTORY');
+if (fs.existsSync(outputPath) && fs.readdirSync(outputPath).length) throw new Error('Refusing to overwrite output directory');
+fs.mkdirSync(outputPath, { recursive: true });
+const input = JSON.parse(fs.readFileSync(inputPath, 'utf8'));
+const sha = file => crypto.createHash('sha256').update(fs.readFileSync(file)).digest('hex');
+const rows3 = matrix => Array.from({ length: 3 }, (_, r) => Array.from({ length: 3 }, (_, c) => matrix[c * 3 + r]));
+const rows4 = matrix => Array.from({ length: 4 }, (_, r) => Array.from({ length: 4 }, (_, c) => matrix[c * 4 + r]));
+const qv = q => [q.x, q.y, q.z, q.w];
+const xyz = v => [v.x, v.y, v.z];
+const quat = xyzw => new C.Quaternion(xyzw[0], xyzw[1], xyzw[2], xyzw[3]);
+const points = input.probe_vectors_xyz.map(p => C.Cartesian3.fromArray(p));
+const observations = [];
+
+for (const item of input.cases) {
+  const origin = C.Cartesian3.fromDegrees(item.longitude_degrees, item.latitude_degrees, item.height_m, C.Ellipsoid.WGS84);
+  const enuToEcef = C.Transforms.eastNorthUpToFixedFrame(origin, C.Ellipsoid.WGS84, new C.Matrix4());
+  const localQ = quat(item.quatops_cesium_local_xyzw);
+  const localR = C.Matrix3.fromQuaternion(localQ, new C.Matrix3());
+  const localM = C.Matrix4.fromRotationTranslation(localR, C.Cartesian3.fromArray(item.local_translation_xyz_m), new C.Matrix4());
+  const worldM = C.Matrix4.multiply(enuToEcef, localM, new C.Matrix4());
+  const worldInverse = C.Matrix4.inverseTransformation(worldM, new C.Matrix4());
+  const localImages = points.map(p => xyz(C.Matrix3.multiplyByVector(localR, p, new C.Cartesian3())));
+  const worldPoints = points.map(p => xyz(C.Matrix4.multiplyByPoint(worldM, p, new C.Cartesian3())));
+  const worldDirections = points.map(p => xyz(C.Matrix4.multiplyByPointAsVector(worldM, p, new C.Cartesian3())));
+  const localFromWorldPoints = worldPoints.map(p => xyz(C.Matrix4.multiplyByPoint(worldInverse, C.Cartesian3.fromArray(p), new C.Cartesian3())));
+
+  const ecefRotation = C.Matrix4.getMatrix3(worldM, new C.Matrix3());
+  const enuRotation = C.Matrix4.getMatrix3(enuToEcef, new C.Matrix3());
+  const ecefQ = C.Quaternion.fromRotationMatrix(ecefRotation, new C.Quaternion());
+  const enuQ = C.Quaternion.fromRotationMatrix(enuRotation, new C.Quaternion());
+  const recoveredLocalQ = C.Quaternion.multiply(C.Quaternion.conjugate(enuQ, new C.Quaternion()), ecefQ, new C.Quaternion());
+
+  observations.push({
+    case_id: item.case_id,
+    native_entry_points: ['Cartesian3.fromDegrees', 'Transforms.eastNorthUpToFixedFrame', 'Matrix3.fromQuaternion', 'Matrix4.fromRotationTranslation', 'Matrix4.multiply', 'Matrix4.inverseTransformation'],
+    inputs: item,
+    outputs: {
+      enu_to_ecef_matrix_rows: numeric(rows4(enuToEcef)),
+      local_rotation_matrix_rows: numeric(rows3(localR)),
+      local_basis_and_probe_images: numeric(localImages),
+      model_to_ecef_matrix_rows: numeric(rows4(worldM)),
+      model_to_ecef_quaternion_xyzw: numeric(qv(ecefQ)),
+      local_quaternion_recovered_from_ecef_xyzw: numeric(qv(recoveredLocalQ)),
+      world_points_xyz_m: numeric(worldPoints),
+      world_directions_xyz: numeric(worldDirections),
+      point_roundtrip_local_xyz_m: numeric(localFromWorldPoints),
+      ecef_origin_xyz_m: numeric(xyz(origin)),
+    },
+  });
+}
+
+const rowsPath = path.join(outputPath, 'observations.json');
+fs.writeFileSync(rowsPath, JSON.stringify(observations, null, 2) + '\n');
+const lockPath = path.join(packageRoot, 'package-lock.json');
+const packageJsonPath = path.join(packageRoot, 'node_modules/cesium/package.json');
+const packageVersion = JSON.parse(fs.readFileSync(packageJsonPath, 'utf8')).version;
+const exporterPath = fileURLToPath(import.meta.url);
+const manifest = {
+  schema_version: '1.0', evidence_kind: 'native_cesium_quatops_converter_capture',
+  target: { name: 'CesiumJS', package_version: packageVersion, api_version: C.VERSION, package_entry_sha256: sha(path.join(packageRoot, 'node_modules/cesium/Build/Cesium/Cesium.js')) },
+  execution: { was_run: true, utc: new Date().toISOString(), node: process.version, v8: process.versions.v8, platform: os.platform(), architecture: os.arch() },
+  inputs: { path: path.relative(here, inputPath), sha256: sha(inputPath), kind: 'QuatOps-generated explicit-frame converter inputs' },
+  exporter: { path: path.relative(here, exporterPath), sha256: sha(exporterPath) },
+  package_lock_sha256: sha(lockPath),
+  numeric_helper_sha256: sha(path.resolve(here, '../../shared/numeric_evidence.mjs')),
+  observations: { path: 'observations.json', sha256: sha(rowsPath), count: observations.length },
+  output: path.resolve(outputPath),
+};
+fs.writeFileSync(path.join(outputPath, 'manifest.json'), JSON.stringify(manifest, null, 2) + '\n');
+console.log(JSON.stringify({ output: outputPath, observations: observations.length, cesium: C.VERSION, node: process.version }));

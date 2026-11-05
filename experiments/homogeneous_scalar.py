@@ -39,8 +39,7 @@ def _sum_products(*terms: tuple[int, float, float]) -> float:
     return math.fsum(parts)
 
 
-def _dot(a: float, b: float, c: float, x: float, y: float,
-         z: float) -> float:
+def _dot(a: float, b: float, c: float, x: float, y: float, z: float) -> float:
     terms = sorted((a * x, b * y, c * z), key=abs, reverse=True)
     if (terms[0] > 0 and terms[1] > 0 and terms[2] < 0) or (
         terms[0] < 0 and terms[1] < 0 and terms[2] > 0

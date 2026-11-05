@@ -1,0 +1,50 @@
+{
+  "schema_version": "1.0",
+  "evidence_kind": "native_openusd_quatops_converter_capture",
+  "native_entry_points": [
+    "Usd.Stage.Open",
+    "UsdGeom.Xformable.GetOrderedXformOps",
+    "GetLocalTransformation",
+    "UsdGeom.XformCache.GetLocalToWorldTransform",
+    "Gf.Matrix4d.Transform",
+    "Gf.Matrix4d.TransformDir"
+  ],
+  "ordered_xform_ops": ["xformOp:translate", "xformOp:orient"],
+  "observations": [
+    {
+      "node": "parent",
+      "prim_path": "/Scene/Parent",
+      "outputs": {
+        "orient_op_wxyz": [0.7071067811865476, 0.0, 0.7071067811865476, -0.0],
+        "resets_xform_stack": false,
+        "world_basis_images_xyz": [[-2.220446049250313e-16, 0.0, -1.0000000000000002], [-1.0000000000000002, 0.0, 2.220446049250313e-16], [0.0, 1.0, 0.0]],
+        "world_probe_point_xyz": [4.5, 3.75, 1.7499999999999996]
+      }
+    },
+    {
+      "node": "child",
+      "prim_path": "/Scene/Parent/Child",
+      "outputs": {
+        "orient_op_wxyz": [0.8, 0.2, 0.4, 0.4],
+        "resets_xform_stack": false,
+        "world_basis_images_xyz": [
+          [-0.48000000000000015, 0.7999999999999998, -0.36000000000000026],
+          [-0.6000000000000001, 1.1102230246251565e-16, 0.8000000000000002],
+          [0.64, 0.6000000000000002, 0.4799999999999999]
+        ],
+        "world_probe_point_xyz": [8.04, 6.6000000000000005, 0.7799999999999987],
+        "roundtrip_probe_point_xyz": [0.2499999999999999, 2.75, 1.4999999999999991]
+      }
+    },
+    {
+      "node": "reset_child",
+      "prim_path": "/Scene/Parent/ResetChild",
+      "outputs": {
+        "orient_op_wxyz": [0.7071067811865476, 0.7071067811865476, 0.0, -0.0],
+        "resets_xform_stack": true,
+        "world_basis_images_xyz": [[1.0, 0.0, 0.0], [0.0, 1.0000000000000002, 2.220446049250313e-16], [0.0, -2.220446049250313e-16, 1.0000000000000002]],
+        "world_probe_point_xyz": [-0.5, 0.7499999999999989, 1.25]
+      }
+    }
+  ]
+}

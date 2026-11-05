@@ -1,0 +1,122 @@
+{
+  "schema_version": "1.0",
+  "evidence_kind": "native_discovery_capture",
+  "target": "Sophus 1.24.6 SO3f and SO3d / Eigen 5.0.1",
+  "pin": {
+    "schema_version": "1.0",
+    "product": "Sophus",
+    "version": "1.24.6",
+    "repository": "https://github.com/strasdat/Sophus.git",
+    "tag": "1.24.6",
+    "commit": "d0b7315a0d90fc6143defa54596a3a95d9fa10ec",
+    "dependency": {
+      "product": "Eigen",
+      "version": "5.0.1",
+      "repository": "https://gitlab.com/libeigen/eigen.git",
+      "tag": "5.0.1",
+      "commit": "bc3b39870ecb690a623a3f49149a358b95c5781d"
+    },
+    "compiler_standard": "C++17",
+    "scope": "SO3f and SO3d quaternion construction, exp/log, action, inverse, product order, and perturbation side"
+  },
+  "execution": {
+    "was_run": true,
+    "utc": "2026-11-04T05:07:38+00:00",
+    "platform": "Windows-11-10.0.26300-SP0",
+    "architecture": "AMD64",
+    "compiler": "g++ (GCC) 15.2.0",
+    "compile_command": [
+      "g++",
+      "-std=c++17",
+      "-O2",
+      "-I",
+      "<Eigen 5.0.1 source root>",
+      "-I",
+      "<Sophus 1.24.6 source root>",
+      "capture_native.cpp",
+      "-o",
+      "<temporary capture executable>"
+    ],
+    "capture_commands": [
+      ["capture_sophus.exe", "capture_inputs.tsv", "float32"],
+      ["capture_sophus.exe", "capture_inputs.tsv", "float64"]
+    ]
+  },
+  "artifacts": {
+    "capture_sources_sha256": {
+      "capture_native.cpp": "ddca77146aabc8d53b6f1c3f17ba71f4fcf48f602acdc0b21f2faad1700309b3",
+      "retain_witnesses.py": "fddfc43013379acfa60201d41f4608da27b057c3c1daf0d26695fe68c1c3ddc5",
+      "requirements-reference.txt": "9008876dcb5c9692eb33a765e022b59de2cdff5aec907a013f1814dee7976d23",
+      "source.json": "296939541a365a241696110d8ab67293e78790854f2e0c94136e606a255c4554",
+      "verify_scipy.py": "548bb54929ef570477c2b6a8d17756610af610ceb41979bba369d27485d35124"
+    },
+    "repair_replay_sources_sha256": {
+      "retain_witnesses.py": "3ef71e068b6d5d3fed606a2b75bdecc658e9ca5e7d720b7e2bb885ac3326fb4b",
+      "verify_scipy.py": "40a35dc0d2b93a42c5ec0072c02796c04b1b10d54ae701ffba8b909e7c891d0d"
+    },
+    "input_file": "capture_inputs.tsv",
+    "input_sha256": "713fece6dbad561b864c3f625c740190f92210318af4fa09f4467930a04a3048",
+    "native_executable_sha256": "fd164cf8c34f1b731c8eafd6ea4bd336eb59b8941004e866edcfc3fc07016767",
+    "pinned_dependency_headers_sha256": {
+      "Sophus/sophus/so3.hpp": "6fe2514122e4d1b11d73b1d4a97d1d731973da9539663b56cab8d4fc94c6ba53",
+      "Eigen/Eigen/Core": "d3a1c990223d4806cba32702786f499f6e40f9b743fb55eb4be06b9bcde68609",
+      "Eigen/Eigen/Geometry": "de4e37a7a005405a2a04cf93d2687753594a7095e38cff2e0c6ecc94339a6ba2"
+    },
+    "scalar_profiles": {
+      "float32": {
+        "raw_capture_sha256": "e0b3cea54fbe2770376143a3ce9c82ddfc3c6c275397b43c4eb71c0d7856710a",
+        "raw_capture_retained": false,
+        "selected_witness_file": "witnesses/float32.json",
+        "selected_witness_sha256": "5e955c6c7c075dff454ff6ebefac93b758433ef38a77ec502b96fc92486f3691"
+      },
+      "float64": {
+        "raw_capture_sha256": "f2a9caf8dd60c37e4f344f852ccf74afc4714702ff81980d7445600d9749378f",
+        "raw_capture_retained": false,
+        "selected_witness_file": "witnesses/float64.json",
+        "selected_witness_sha256": "000002c68ffad82d1bfcdb9787219bf4a9635036a21a1f56890d5280a2d0b8b4"
+      }
+    }
+  },
+  "review": {
+    "state": "selected_native_discovery_witnesses_reviewed",
+    "native_findings": [
+      "Both scalar profiles normalize non-unit Eigen::Quaternion construction; constructor arguments are WXYZ and SO3::params() exposes XYZW.",
+      "Both profiles preserve opposite stored signs for antipodes while producing equivalent native vector actions.",
+      "Both profiles capture exp/log through the selected near-zero, exact-pi, and above-pi cases.",
+      "Both profiles capture noncommuting product orders, inverse, and distinct left/right perturbation products with native vector actions."
+    ],
+    "derived_reference_review_by_profile": {
+      "float32": {
+        "evidence_kind": "derived_reference",
+        "library": "SciPy Rotation",
+        "version": "1.18.1",
+        "python_version": "3.12.13",
+        "numpy_version": "2.4.6",
+        "pydantic_version": "2.14.2",
+        "requirements_sha256": "9008876dcb5c9692eb33a765e022b59de2cdff5aec907a013f1814dee7976d23",
+        "quatops_executed": false,
+        "absolute_tolerance": 2e-6,
+        "maximum_absolute_error": 9.500000008877407e-7,
+        "result": "pass"
+      },
+      "float64": {
+        "evidence_kind": "derived_reference",
+        "library": "SciPy Rotation",
+        "version": "1.18.1",
+        "python_version": "3.12.13",
+        "numpy_version": "2.4.6",
+        "pydantic_version": "2.14.2",
+        "requirements_sha256": "9008876dcb5c9692eb33a765e022b59de2cdff5aec907a013f1814dee7976d23",
+        "quatops_executed": false,
+        "absolute_tolerance": 2e-14,
+        "maximum_absolute_error": 1.7763568394002505e-15,
+        "result": "pass"
+      }
+    },
+    "limitations": [
+      "This is supporting SO(3) evidence, not an accepted QuatOps converter.",
+      "Jacobian and tangent-derivative behavior was not captured.",
+      "The assigned probe frame is explicit for these experiments and is not a universal Sophus frame."
+    ]
+  }
+}
