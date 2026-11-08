@@ -1,8 +1,11 @@
 # Converter and evidence-target registry
 
-This generated view comes from `quatops.converters.CONVERTERS` and
+This generated view comes from `quatops.experimental.converters.CONVERTERS` and
 `TARGET_DECLARATIONS`. Edit the registry definitions, then regenerate
 this page with `python -m scripts.render_converter_registry --repository-root .`.
+
+These APIs are experimental. Evidence acceptance is not API stability;
+see [the experimental policy](experimental.md).
 
 | ID | Target API | Version | Role | Representation / order | Evidence state | Scope |
 | --- | --- | --- | --- | --- | --- | --- |

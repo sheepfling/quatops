@@ -1,89 +1,29 @@
-"""Frame-aware conversion to declared target representations.
+"""Deprecated compatibility path; use ``quatops.experimental.converters`` instead."""
 
-The scalar front has no mandatory optional dependencies. NumPy batch methods
-load NumPy only when called. Target profiles document the evidence scope and
-never choose coordinate axes for the caller. Physical frame semantics live in
-``quatops.semantics``; these imports remain available for compatibility.
-"""
+import warnings as _warnings
+from importlib import import_module as _import_module
 
-from ..semantics import (
-    AEROSPACE_BODY_FRD,
-    CANONICAL_BODY_FRAME,
-    CANONICAL_BODY_RFU,
-    CANONICAL_WORLD_FRAME,
-    CANONICAL_WORLD_RFU,
-    ECEF_FRAME,
-    ECEF_WORLD,
-    OPENXR_SPACE_RUB,
-    ROS_BODY_FLU,
-    ROS_CAMERA_OPTICAL,
-    WORLD_ENU,
-    WORLD_NED,
-    CoordinateFrame,
-    ECEFBodyOrientation,
-    FrameConvention,
-    FrameCorrespondence,
-    FramedOrientation,
-    FramedOrientationBatch,
-    FrameRole,
-    PhysicalOrientation,
-    PhysicalOrientationBatch,
-    SemanticQuaternionMap,
+from ..experimental.converters import *  # noqa: F403
+
+_implementation = _import_module("quatops.experimental.converters")
+__all__ = list(
+    getattr(
+        _implementation,
+        "__all__",
+        [name for name in vars(_implementation) if not name.startswith("_")],
+    )
 )
-from .gateway import (
-    OrientationConverter,
-    convert_orientation_batch_from_target,
-    convert_orientation_batch_to_target,
-    convert_orientation_from_target,
-    convert_orientation_to_target,
-)
-from .targets import (
-    CONVERTERS,
-    TARGET_DECLARATIONS,
-    ConverterProfile,
-    TargetDeclaration,
-    TargetOrientation,
-    TargetOrientationBatch,
-    accepted_converters,
-    get_converter,
-    get_target_declaration,
+_warnings.warn(
+    "converters is experimental; use quatops.experimental.converters. "
+    "This compatibility path is deprecated and may be removed before 0.1.0.",
+    DeprecationWarning,
+    stacklevel=2,
 )
 
-__all__ = [
-    "AEROSPACE_BODY_FRD",
-    "CANONICAL_BODY_FRAME",
-    "CANONICAL_BODY_RFU",
-    "CANONICAL_WORLD_FRAME",
-    "CANONICAL_WORLD_RFU",
-    "CONVERTERS",
-    "ECEF_FRAME",
-    "ECEF_WORLD",
-    "OPENXR_SPACE_RUB",
-    "ROS_BODY_FLU",
-    "ROS_CAMERA_OPTICAL",
-    "TARGET_DECLARATIONS",
-    "WORLD_ENU",
-    "WORLD_NED",
-    "ConverterProfile",
-    "CoordinateFrame",
-    "ECEFBodyOrientation",
-    "FrameConvention",
-    "FrameCorrespondence",
-    "FrameRole",
-    "FramedOrientation",
-    "FramedOrientationBatch",
-    "OrientationConverter",
-    "PhysicalOrientation",
-    "PhysicalOrientationBatch",
-    "SemanticQuaternionMap",
-    "TargetDeclaration",
-    "TargetOrientation",
-    "TargetOrientationBatch",
-    "accepted_converters",
-    "convert_orientation_batch_from_target",
-    "convert_orientation_batch_to_target",
-    "convert_orientation_from_target",
-    "convert_orientation_to_target",
-    "get_converter",
-    "get_target_declaration",
-]
+
+def __getattr__(name: str):
+    return getattr(_implementation, name)
+
+
+def __dir__() -> list[str]:
+    return sorted(set(globals()) | set(dir(_implementation)))

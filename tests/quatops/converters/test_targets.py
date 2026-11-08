@@ -2,7 +2,8 @@
 
 import pytest
 
-from quatops.converters import (
+from quatops.engines import SignedAxisMap
+from quatops.experimental.converters import (
     CONVERTERS,
     TARGET_DECLARATIONS,
     ConverterProfile,
@@ -16,13 +17,12 @@ from quatops.converters import (
     get_converter,
     get_target_declaration,
 )
-from quatops.engines import SignedAxisMap
-from quatops.python import hamilton
-from quatops.semantics import (
+from quatops.experimental.semantics import (
     CANONICAL_BODY_RFU,
     CANONICAL_WORLD_RFU,
     PhysicalOrientation,
 )
+from quatops.python import hamilton
 
 
 def _identity_map():

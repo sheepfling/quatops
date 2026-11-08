@@ -1,11 +1,14 @@
 # Changelog
 
-## 0.1.0rc1
+## Unreleased
 
-Release candidate for the first frame-aware quaternion interoperability
-release.
+Frame-aware interoperability is experimental, not a release candidate.
+The alpha source fallback remains unchanged; this change does not publish a release.
 
-The intended release tag is `v0.1.0rc1`; the source fallback version matches.
+- Places the new runtime APIs under `quatops.experimental` and preserves the
+  earlier PR import paths as deprecated compatibility facades.
+- Keeps native captures and evidence intact. Evidence acceptance describes
+  captured operations, not API stability.
 
 - Adds a shared physical-orientation converter with explicit parent and child
   frame definitions across the registered target profiles.
@@ -31,6 +34,6 @@ Initial alpha release of QuatOps.
   separately derived mathematical references.
 - Documents and benchmarks the public APIs and runnable experiments.
 
-At the 0.1.0a0 release, the commit was tagged `v0.1.0a0` and that release's
-source fallback was `0.1.0a0`. The alpha allowed API details to change before
-the 0.1.0 release.
+The source fallback is `0.1.0a0`. A release tag and publication are separate
+actions; this changelog is not proof of publication. This alpha may change API
+details before 0.1.0.

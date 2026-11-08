@@ -7,7 +7,8 @@ import numpy as np
 import pytest
 from scipy.spatial.transform import Rotation, Slerp
 
-from quatops.engines import (
+from quatops.engines import numpy as engine_numpy
+from quatops.experimental.engines import (
     QuaternionFrameMap,
     SignedAxisMap,
     blender,
@@ -16,7 +17,6 @@ from quatops.engines import (
     unity,
     unreal,
 )
-from quatops.engines import numpy as engine_numpy
 from quatops.numpy.hamilton import xyzw as hamilton_xyzw
 from quatops.types.hamilton_dataclass import Quaternion as HamiltonDataclass
 from quatops.types.hamilton_namedtuple import Quaternion as HamiltonNamedTuple

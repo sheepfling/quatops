@@ -1,5 +1,7 @@
 # Converter integration examples
 
+Experimental API: see the [compatibility and removal policy](experimental.md).
+
 These examples show frame declarations at the call site. Target names select a
 coefficient/API profile; they do not select world axes, asset axes, or an
 origin. See [the converter contract](converters.md) for sign, input, and
@@ -29,9 +31,9 @@ columns are the ENU frame's unit axes expressed in ECEF. Rebuild the context if
 the origin or reference epoch changes.
 
 ```python
-from quatops.converters import OrientationConverter
-from quatops.engines import OrthogonalBasisMap
-from quatops.semantics import (
+from quatops.experimental.converters import OrientationConverter
+from quatops.experimental.engines import OrthogonalBasisMap
+from quatops.experimental.semantics import (
     CANONICAL_BODY_FRAME,
     ECEF_FRAME,
     WORLD_ENU,

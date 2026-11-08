@@ -1,31 +1,29 @@
-"""Explicit Unreal ``FQuat`` boundary conversion helpers.
+"""Deprecated compatibility path; use ``quatops.experimental.engines.unreal`` instead."""
 
-These functions encode Hamilton XYZW component storage only. Callers must pass
-a precompiled :class:`QuaternionFrameMap` whose world and body mappings describe
-the particular frames being converted; Unreal axes are not inferred here.
-"""
+import warnings as _warnings
+from importlib import import_module as _import_module
 
-from __future__ import annotations
+from ..experimental.engines.unreal import *  # noqa: F403
 
-from collections.abc import Iterable
-
-from ._adapter import from_xyzw as _from_xyzw
-from ._adapter import to_xyzw as _to_xyzw
-from .basis import QuaternionFrameMap
-
-
-def to_unreal(
-    q_source_wxyz: Iterable[float], frame_map: QuaternionFrameMap
-) -> tuple[float, float, float, float]:
-    """Map canonical Hamilton WXYZ into explicitly framed Unreal XYZW."""
-    return _to_xyzw(q_source_wxyz, frame_map)
-
-
-def from_unreal(
-    q_unreal_xyzw: Iterable[float], frame_map: QuaternionFrameMap
-) -> tuple[float, float, float, float]:
-    """Map explicitly framed Unreal Hamilton XYZW into canonical WXYZ."""
-    return _from_xyzw(q_unreal_xyzw, frame_map)
+_implementation = _import_module("quatops.experimental.engines.unreal")
+__all__ = list(
+    getattr(
+        _implementation,
+        "__all__",
+        [name for name in vars(_implementation) if not name.startswith("_")],
+    )
+)
+_warnings.warn(
+    "engines.unreal is experimental; use quatops.experimental.engines.unreal. "
+    "This compatibility path is deprecated and may be removed before 0.1.0.",
+    DeprecationWarning,
+    stacklevel=2,
+)
 
 
-__all__ = ["from_unreal", "to_unreal"]
+def __getattr__(name: str):
+    return getattr(_implementation, name)
+
+
+def __dir__() -> list[str]:
+    return sorted(set(globals()) | set(dir(_implementation)))

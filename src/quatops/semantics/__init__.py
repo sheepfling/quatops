@@ -1,53 +1,29 @@
-"""Physical frame semantics, independent of target-engine encodings."""
+"""Deprecated compatibility path; use ``quatops.experimental.semantics`` instead."""
 
-from .conventions import (
-    AEROSPACE_BODY_FRD,
-    CANONICAL_BODY_FRAME,
-    CANONICAL_BODY_RFU,
-    CANONICAL_WORLD_FRAME,
-    CANONICAL_WORLD_RFU,
-    ECEF_FRAME,
-    ECEF_WORLD,
-    OPENXR_SPACE_RUB,
-    ROS_BODY_FLU,
-    ROS_CAMERA_OPTICAL,
-    WORLD_ENU,
-    WORLD_NED,
-    ECEFBodyOrientation,
-    FrameConvention,
+import warnings as _warnings
+from importlib import import_module as _import_module
+
+from ..experimental.semantics import *  # noqa: F403
+
+_implementation = _import_module("quatops.experimental.semantics")
+__all__ = list(
+    getattr(
+        _implementation,
+        "__all__",
+        [name for name in vars(_implementation) if not name.startswith("_")],
+    )
 )
-from .frames import (
-    CoordinateFrame,
-    FrameCorrespondence,
-    FramedOrientation,
-    FramedOrientationBatch,
-    FrameRole,
-    PhysicalOrientation,
-    PhysicalOrientationBatch,
-    SemanticQuaternionMap,
+_warnings.warn(
+    "semantics is experimental; use quatops.experimental.semantics. "
+    "This compatibility path is deprecated and may be removed before 0.1.0.",
+    DeprecationWarning,
+    stacklevel=2,
 )
 
-__all__ = [
-    "AEROSPACE_BODY_FRD",
-    "CANONICAL_BODY_FRAME",
-    "CANONICAL_BODY_RFU",
-    "CANONICAL_WORLD_FRAME",
-    "CANONICAL_WORLD_RFU",
-    "ECEF_FRAME",
-    "ECEF_WORLD",
-    "OPENXR_SPACE_RUB",
-    "ROS_BODY_FLU",
-    "ROS_CAMERA_OPTICAL",
-    "WORLD_ENU",
-    "WORLD_NED",
-    "CoordinateFrame",
-    "ECEFBodyOrientation",
-    "FrameConvention",
-    "FrameCorrespondence",
-    "FrameRole",
-    "FramedOrientation",
-    "FramedOrientationBatch",
-    "PhysicalOrientation",
-    "PhysicalOrientationBatch",
-    "SemanticQuaternionMap",
-]
+
+def __getattr__(name: str):
+    return getattr(_implementation, name)
+
+
+def __dir__() -> list[str]:
+    return sorted(set(globals()) | set(dir(_implementation)))

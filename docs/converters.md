@@ -1,6 +1,8 @@
 # Target converters
 
-Physical frame meaning lives in [`quatops.semantics`](semantics.md). This page
+Experimental API: see the [compatibility and removal policy](experimental.md).
+
+Physical frame meaning lives in [`quatops.experimental.semantics`](semantics.md). This page
 covers the shared gateway from a frame-labelled physical orientation to a
 declared target representation:
 
@@ -17,7 +19,7 @@ common conversion gateway (parent/body basis maps + target representation)
 engine, transport, or library profile
 ```
 
-The gateway and target profiles live in `quatops.converters`. Older
+The gateway and target profiles live in `quatops.experimental.converters`. Older
 frame-oriented imports from that package remain available for compatibility.
 For application examples, see [converter integrations](converter-examples.md).
 
@@ -75,11 +77,11 @@ and the caller-declared target frames. All registered target profiles use the
 same scalar and batch entry points.
 
 ```python
-from quatops.converters import (
+from quatops.experimental.converters import (
     OrientationConverter,
 )
-from quatops.engines import OrthogonalBasisMap
-from quatops.semantics import (
+from quatops.experimental.engines import OrthogonalBasisMap
+from quatops.experimental.semantics import (
     CANONICAL_BODY_RFU,
     CANONICAL_WORLD_RFU,
     CoordinateFrame,
@@ -158,7 +160,7 @@ loads only when a batch method is called.
 
 ```python
 import numpy as np
-from quatops.semantics import PhysicalOrientationBatch
+from quatops.experimental.semantics import PhysicalOrientationBatch
 
 keys = PhysicalOrientationBatch(
     values=np.asarray(

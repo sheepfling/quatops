@@ -108,3 +108,14 @@ tests to the source package and evidence products.
 
 The package retains alternative import paths for compatibility. Use the
 canonical paths in the API contract for new code.
+
+## Experimental interoperability
+
+The frame-aware converters, physical-frame semantics, and general frame-map
+adapters live under `quatops.experimental`. They ship in the wheel but require
+explicit imports and may change or be removed. They are not a stable API or a
+release candidate. Existing scalar/NumPy quaternion backends and
+`quatops.engines.SignedAxisMap` remain independent of this area. See the
+[experimental API policy](docs/experimental.md) for compatibility, verification,
+and removal guidance. Captured evidence is retained without implying broader
+verification or API stability.

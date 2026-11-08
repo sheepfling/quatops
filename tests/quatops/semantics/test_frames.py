@@ -4,10 +4,9 @@ import numpy as np
 import pytest
 from scipy.spatial.transform import Rotation
 
-from quatops.converters import get_converter
-from quatops.engines import OrthogonalBasisMap, SignedAxisMap
-from quatops.python import hamilton
-from quatops.semantics import (
+from quatops.experimental.converters import get_converter
+from quatops.experimental.engines import OrthogonalBasisMap, SignedAxisMap
+from quatops.experimental.semantics import (
     CANONICAL_BODY_FRAME,
     ECEF_FRAME,
     CoordinateFrame,
@@ -16,6 +15,7 @@ from quatops.semantics import (
     FramedOrientation,
     SemanticQuaternionMap,
 )
+from quatops.python import hamilton
 
 
 def _frame_map():

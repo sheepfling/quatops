@@ -3,14 +3,14 @@
 import numpy as np
 from scipy.spatial.transform import Rotation
 
-from quatops.converters import (
+from quatops.experimental.converters import (
     CoordinateFrame,
     FrameCorrespondence,
     FramedOrientationBatch,
     SemanticQuaternionMap,
     get_converter,
 )
-from quatops.engines import OrthogonalBasisMap, SignedAxisMap
+from quatops.experimental.engines import OrthogonalBasisMap, SignedAxisMap
 from quatops.python import hamilton
 
 

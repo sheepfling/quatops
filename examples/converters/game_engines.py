@@ -5,15 +5,15 @@ right-forward-up probe frames. They are not inferred from an engine name and
 do not define imported model axes.
 """
 
-from quatops.converters import OrientationConverter
 from quatops.engines import SignedAxisMap
-from quatops.python import hamilton
-from quatops.semantics import (
+from quatops.experimental.converters import OrientationConverter
+from quatops.experimental.semantics import (
     CANONICAL_BODY_RFU,
     CANONICAL_WORLD_RFU,
     CoordinateFrame,
     PhysicalOrientation,
 )
+from quatops.python import hamilton
 
 SOURCE_WORLD = CANONICAL_WORLD_RFU.bind(
     "application.world.rfu", "application.world.axes"

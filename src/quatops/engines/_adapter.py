@@ -1,50 +1,29 @@
-"""Shared storage/frame plumbing for explicitly configured engine adapters."""
+"""Deprecated compatibility path; use ``quatops.experimental.engines._adapter`` instead."""
 
-from __future__ import annotations
+import warnings as _warnings
+from importlib import import_module as _import_module
 
-from collections.abc import Iterable
+from ..experimental.engines._adapter import *  # noqa: F403
 
-from ..python import hamilton
-from .basis import QuaternionFrameMap
-
-
-def to_xyzw(
-    q_source_wxyz: Iterable[float], frame_map: QuaternionFrameMap
-) -> tuple[float, float, float, float]:
-    """Convert canonical Hamilton WXYZ to a mapped Hamilton XYZW boundary."""
-    if not isinstance(frame_map, QuaternionFrameMap):
-        raise TypeError("frame_map must be a precompiled QuaternionFrameMap")
-    destination_wxyz = frame_map.to_destination_wxyz(
-        hamilton.from_wxyz(q_source_wxyz)
+_implementation = _import_module("quatops.experimental.engines._adapter")
+__all__ = list(
+    getattr(
+        _implementation,
+        "__all__",
+        [name for name in vars(_implementation) if not name.startswith("_")],
     )
-    return hamilton.to_xyzw(destination_wxyz)
+)
+_warnings.warn(
+    "engines._adapter is experimental; use quatops.experimental.engines._adapter. "
+    "This compatibility path is deprecated and may be removed before 0.1.0.",
+    DeprecationWarning,
+    stacklevel=2,
+)
 
 
-def from_xyzw(
-    q_destination_xyzw: Iterable[float], frame_map: QuaternionFrameMap
-) -> tuple[float, float, float, float]:
-    """Convert mapped Hamilton XYZW boundary values to canonical WXYZ."""
-    if not isinstance(frame_map, QuaternionFrameMap):
-        raise TypeError("frame_map must be a precompiled QuaternionFrameMap")
-    destination_wxyz = hamilton.from_xyzw(q_destination_xyzw)
-    return frame_map.from_destination_wxyz(destination_wxyz)
+def __getattr__(name: str):
+    return getattr(_implementation, name)
 
 
-def to_wxyz(
-    q_source_wxyz: Iterable[float], frame_map: QuaternionFrameMap
-) -> tuple[float, float, float, float]:
-    """Convert canonical Hamilton WXYZ to a mapped Hamilton WXYZ boundary."""
-    if not isinstance(frame_map, QuaternionFrameMap):
-        raise TypeError("frame_map must be a precompiled QuaternionFrameMap")
-    return frame_map.to_destination_wxyz(hamilton.from_wxyz(q_source_wxyz))
-
-
-def from_wxyz(
-    q_destination_wxyz: Iterable[float], frame_map: QuaternionFrameMap
-) -> tuple[float, float, float, float]:
-    """Convert mapped Hamilton WXYZ boundary values to canonical WXYZ."""
-    if not isinstance(frame_map, QuaternionFrameMap):
-        raise TypeError("frame_map must be a precompiled QuaternionFrameMap")
-    return frame_map.from_destination_wxyz(
-        hamilton.from_wxyz(q_destination_wxyz)
-    )
+def __dir__() -> list[str]:
+    return sorted(set(globals()) | set(dir(_implementation)))

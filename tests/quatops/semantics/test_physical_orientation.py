@@ -3,9 +3,8 @@
 import numpy as np
 import pytest
 
-from quatops.engines import OrthogonalBasisMap, SignedAxisMap
-from quatops.python import hamilton
-from quatops.semantics import (
+from quatops.experimental.engines import OrthogonalBasisMap, SignedAxisMap
+from quatops.experimental.semantics import (
     AEROSPACE_BODY_FRD,
     CANONICAL_BODY_RFU,
     CANONICAL_WORLD_RFU,
@@ -18,6 +17,7 @@ from quatops.semantics import (
     PhysicalOrientation,
     PhysicalOrientationBatch,
 )
+from quatops.python import hamilton
 from quatops.types import HamiltonQuaternion
 
 

@@ -4,7 +4,7 @@ import numpy as np
 import pytest
 from scipy.spatial.transform import Rotation
 
-from quatops.converters import (
+from quatops.experimental.converters import (
     CONVERTERS,
     OrientationConverter,
     TargetOrientation,
@@ -14,15 +14,15 @@ from quatops.converters import (
     convert_orientation_from_target,
     convert_orientation_to_target,
 )
-from quatops.engines import OrthogonalBasisMap, SignedAxisMap
-from quatops.python import hamilton
-from quatops.semantics import (
+from quatops.experimental.engines import OrthogonalBasisMap, SignedAxisMap
+from quatops.experimental.semantics import (
     CANONICAL_BODY_RFU,
     CANONICAL_WORLD_RFU,
     CoordinateFrame,
     PhysicalOrientation,
     PhysicalOrientationBatch,
 )
+from quatops.python import hamilton
 from quatops.types import HamiltonQuaternion
 
 

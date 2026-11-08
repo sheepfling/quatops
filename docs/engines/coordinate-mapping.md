@@ -49,12 +49,12 @@ source axes and target scene/model axes.
 `quatops.engines.SignedAxisMap.matrix` exposes the row-major matrix for a
 caller-declared signed permutation. `.inverse()` returns its transpose and
 reverses vector or quaternion conversion. For a general orthogonal basis,
-`quatops.engines.OrthogonalBasisMap` validates and stores the row-major 3x3
+`quatops.experimental.engines.OrthogonalBasisMap` validates and stores the row-major 3x3
 map. Use
-`quatops.engines.change_rotation_basis(rotation, world_map, body_map)` for the
+`quatops.experimental.engines.change_rotation_basis(rotation, world_map, body_map)` for the
 two-map matrix expression; omitting `body_map` uses the same map on both sides.
 For quaternion-valued two-frame changes, compile a
-`quatops.engines.QuaternionFrameMap` once and pass it to the named target
+`quatops.experimental.engines.QuaternionFrameMap` once and pass it to the named target
 boundary (`to_unreal`/`from_unreal`, `to_unity`/`from_unity`,
 `to_godot`/`from_godot`, or `to_blender`/`from_blender`). Unreal, Unity, and
 Godot boundaries use Hamilton XYZW storage; Blender uses Hamilton WXYZ. These
@@ -67,7 +67,7 @@ maps and all 48-by-48 world/body map pairs in
 [`test_engine_basis_oracle.py`](../../tests/quatops/engines/test_engine_basis_oracle.py).
 
 For semantic frame IDs, axis descriptions, and common physical conventions,
-use `quatops.semantics`. The common [`quatops.converters` gateway](../converters.md)
+use `quatops.experimental.semantics`. The common [`quatops.experimental.converters` gateway](../converters.md)
 derives a map from the declared parent and child bases, then converts the
 canonical Hamilton orientation to the selected target profile.
 

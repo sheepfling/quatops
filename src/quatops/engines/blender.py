@@ -1,32 +1,29 @@
-"""Explicit Blender ``mathutils.Quaternion`` boundary conversion helpers.
+"""Deprecated compatibility path; use ``quatops.experimental.engines.blender`` instead."""
 
-Blender exposes Hamilton coefficients in WXYZ order. These functions encode
-that storage only. Callers must pass a precompiled :class:`QuaternionFrameMap`
-for the specific world and body frames; Blender axes and mesh-forward direction
-are not inferred here.
-"""
+import warnings as _warnings
+from importlib import import_module as _import_module
 
-from __future__ import annotations
+from ..experimental.engines.blender import *  # noqa: F403
 
-from collections.abc import Iterable
-
-from ._adapter import from_wxyz as _from_wxyz
-from ._adapter import to_wxyz as _to_wxyz
-from .basis import QuaternionFrameMap
-
-
-def to_blender(
-    q_source_wxyz: Iterable[float], frame_map: QuaternionFrameMap
-) -> tuple[float, float, float, float]:
-    """Map canonical Hamilton WXYZ into explicitly framed Blender WXYZ."""
-    return _to_wxyz(q_source_wxyz, frame_map)
-
-
-def from_blender(
-    q_blender_wxyz: Iterable[float], frame_map: QuaternionFrameMap
-) -> tuple[float, float, float, float]:
-    """Map explicitly framed Blender Hamilton WXYZ into canonical WXYZ."""
-    return _from_wxyz(q_blender_wxyz, frame_map)
+_implementation = _import_module("quatops.experimental.engines.blender")
+__all__ = list(
+    getattr(
+        _implementation,
+        "__all__",
+        [name for name in vars(_implementation) if not name.startswith("_")],
+    )
+)
+_warnings.warn(
+    "engines.blender is experimental; use quatops.experimental.engines.blender. "
+    "This compatibility path is deprecated and may be removed before 0.1.0.",
+    DeprecationWarning,
+    stacklevel=2,
+)
 
 
-__all__ = ["from_blender", "to_blender"]
+def __getattr__(name: str):
+    return getattr(_implementation, name)
+
+
+def __dir__() -> list[str]:
+    return sorted(set(globals()) | set(dir(_implementation)))

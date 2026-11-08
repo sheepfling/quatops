@@ -7,7 +7,7 @@ import json
 
 import numpy as np
 
-from quatops.engines import QuaternionFrameMap, SignedAxisMap
+from quatops.experimental.engines import QuaternionFrameMap, SignedAxisMap
 from quatops.python import hamilton
 from tests.support.paths import REPOSITORY_ROOT
 

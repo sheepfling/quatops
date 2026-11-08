@@ -10,7 +10,7 @@ readme = "README.md"
 requires-python = ">=3.9"
 license = "MIT"
 classifiers = [
-    "Development Status :: 4 - Beta",
+    "Development Status :: 3 - Alpha",
     "Operating System :: OS Independent",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3 :: 3.9",
@@ -76,7 +76,7 @@ exclude = ["quatops.__pycache__", "quatops.*.__pycache__"]
 quatops = ["py.typed", "**/*.pyi"]
 
 [tool.setuptools_scm]
-fallback_version = "0.1.0rc1"
+fallback_version = "0.1.0a0"
 version_scheme = "no-guess-dev"
 local_scheme = "no-local-version"
 

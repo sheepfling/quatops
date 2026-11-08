@@ -1,31 +1,29 @@
-"""Backward-compatible imports for frame semantics now in ``quatops.semantics``."""
+"""Deprecated compatibility path; use ``quatops.experimental.converters.frames`` instead."""
 
-from ..semantics import (
-    CANONICAL_BODY_FRAME,
-    CANONICAL_WORLD_FRAME,
-    ECEF_FRAME,
-    CoordinateFrame,
-    ECEFBodyOrientation,
-    FrameCorrespondence,
-    FramedOrientation,
-    FramedOrientationBatch,
-    FrameRole,
-    PhysicalOrientation,
-    PhysicalOrientationBatch,
-    SemanticQuaternionMap,
+import warnings as _warnings
+from importlib import import_module as _import_module
+
+from ..experimental.converters.frames import *  # noqa: F403
+
+_implementation = _import_module("quatops.experimental.converters.frames")
+__all__ = list(
+    getattr(
+        _implementation,
+        "__all__",
+        [name for name in vars(_implementation) if not name.startswith("_")],
+    )
+)
+_warnings.warn(
+    "converters.frames is experimental; use quatops.experimental.converters.frames. "
+    "This compatibility path is deprecated and may be removed before 0.1.0.",
+    DeprecationWarning,
+    stacklevel=2,
 )
 
-__all__ = [
-    "CANONICAL_BODY_FRAME",
-    "CANONICAL_WORLD_FRAME",
-    "ECEF_FRAME",
-    "CoordinateFrame",
-    "ECEFBodyOrientation",
-    "FrameCorrespondence",
-    "FrameRole",
-    "FramedOrientation",
-    "FramedOrientationBatch",
-    "PhysicalOrientation",
-    "PhysicalOrientationBatch",
-    "SemanticQuaternionMap",
-]
+
+def __getattr__(name: str):
+    return getattr(_implementation, name)
+
+
+def __dir__() -> list[str]:
+    return sorted(set(globals()) | set(dir(_implementation)))

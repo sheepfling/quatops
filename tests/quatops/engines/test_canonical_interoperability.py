@@ -6,7 +6,7 @@ import numpy as np
 import pytest
 from scipy.spatial.transform import Rotation
 
-from quatops.engines import (
+from quatops.experimental.engines import (
     QuaternionFrameMap,
     SignedAxisMap,
     blender,

@@ -451,13 +451,13 @@ methods accept Hamilton or JPL coefficients in either order; the optional
 component axis. These conversions preserve magnitude and keyframe signs; they
 do not normalize or choose interpolation paths.
 
-For physical frame semantics, use `quatops.semantics`. Its `PhysicalOrientation`
+For physical frame semantics, use `quatops.experimental.semantics`. Its `PhysicalOrientation`
 is a Hamilton WXYZ value labelled `q_parent_from_child`, and its
 `FrameConvention` presets describe common world, body, sensor, navigation, and
 XR axis meanings. Bind presets to explicit frame/reference identities.
 
 For named target conversion across scalar and batch values, use
-[`quatops.converters`](converters.md). The common gateway derives separate
+[`quatops.experimental.converters`](converters.md). The common gateway derives separate
 parent/world and child/body maps, then applies a declared target profile.
 Profiles specify native component order, representation, evidence scope, and
 version. No target frame is inferred; older frame APIs remain re-exported for

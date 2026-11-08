@@ -7,15 +7,15 @@ Run with ``python -m pytest tests/benchmarks/quatops/test_orientation_converter.
 import numpy as np
 import pytest
 
-from quatops.converters import (
+from quatops.experimental.converters import (
     OrientationConverter,
     convert_orientation_batch_from_target,
     convert_orientation_batch_to_target,
     convert_orientation_from_target,
     convert_orientation_to_target,
 )
-from quatops.engines import OrthogonalBasisMap
-from quatops.semantics import (
+from quatops.experimental.engines import OrthogonalBasisMap
+from quatops.experimental.semantics import (
     CANONICAL_BODY_RFU,
     CANONICAL_WORLD_RFU,
     CoordinateFrame,

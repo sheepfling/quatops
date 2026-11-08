@@ -8,7 +8,7 @@ import json
 import numpy as np
 from scipy.spatial.transform import Rotation
 
-from quatops.engines import QuaternionFrameMap, SignedAxisMap
+from quatops.experimental.engines import QuaternionFrameMap, SignedAxisMap
 from tests.support.paths import REPOSITORY_ROOT
 
 ROOT = REPOSITORY_ROOT

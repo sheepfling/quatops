@@ -1,6 +1,8 @@
 # Physical frame semantics
 
-`quatops.semantics` describes what a rotation means independently of an engine,
+Experimental API: see the [compatibility and removal policy](experimental.md).
+
+`quatops.experimental.semantics` describes what a rotation means independently of an engine,
 transport, or quaternion coefficient layout. Its common form is a directed
 orientation `q_parent_from_child` with an explicit parent frame and child
 frame. The stored value is a standard active Hamilton WXYZ quaternion.
