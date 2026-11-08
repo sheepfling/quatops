@@ -9,7 +9,6 @@ The alpha source fallback remains unchanged; this change does not publish a rele
   earlier PR import paths as deprecated compatibility facades.
 - Keeps native captures and evidence intact. Evidence acceptance describes
   captured operations, not API stability.
-
 - Adds a shared physical-orientation converter with explicit parent and child
   frame definitions across the registered target profiles.
 - Retains full target frame definitions and NumPy component axes in conversion

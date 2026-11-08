@@ -9,7 +9,9 @@ from pathlib import Path
 
 import pytest
 
-SOURCE = Path(__file__).resolve().parents[3] / "src"
+from tests.support.paths import REPOSITORY_ROOT
+
+SOURCE = REPOSITORY_ROOT / "src"
 
 
 def _run(code: str, source: Path = SOURCE, *, no_site: bool = False) -> None:
@@ -135,7 +137,8 @@ def test_core_operates_when_experimental_package_is_physically_absent(tmp_path):
         from quatops.python import hamilton
         assert importlib.util.find_spec("quatops.experimental") is None
         axis_map = SignedAxisMap(("x", "y", "z"))
-        np.testing.assert_array_equal(engine_numpy.map_hamilton_wxyz(np.array([[1., 0., 0., 0.]]), axis_map), [[0., 0., 0., 1.]])
+        mapped = engine_numpy.map_hamilton_wxyz(np.array([[1., 0., 0., 0.]]), axis_map)
+        np.testing.assert_array_equal(mapped, [[0., 0., 0., 1.]])
         assert hamilton.multiply((1, 0, 0, 0), (1, 0, 0, 0)) == (1, 0, 0, 0)
         assert not any(name.startswith("quatops.experimental") for name in sys.modules)
     """,

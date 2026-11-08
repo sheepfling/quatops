@@ -4,7 +4,6 @@
 
 - [Experimental API policy](experimental.md): opt-in runtime surface,
   compatibility, evidence scope, and removal.
-
 - [Project README](../README.md): installation, short examples, and backend
   selection.
 - [API contract](API.md): conventions, representations, layouts, operations,
