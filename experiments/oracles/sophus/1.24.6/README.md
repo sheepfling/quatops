@@ -10,17 +10,20 @@ declares the representation facts, that fixture-only probe frame, both scalar
 profiles, and their SciPy formula tolerances. The reducer and reference checker
 load it through strict Pydantic models and verify its manifest SHA-256. This
 remains supporting SO(3) evidence, not an accepted application-frame converter.
-The reducer emits the same typed witness schema used by replay tests; its
-current source and schema hashes are recorded separately from the historical
-capture sources.
+The native exporter now emits selected rows directly, and the Python validator
+checks them against the typed witness schema and pinned inputs. The historical
+native source and capture hashes remain separate from the direct replay run.
+The direct run reproduced every selected value, including signed zero, for
+both scalar profiles. The older raw run also emitted temporary matrices and
+duplicate coefficient views; the direct capture does not repeat those checks.
 
 [`witnesses/float32.json`](witnesses/float32.json) and
 [`witnesses/float64.json`](witnesses/float64.json) each retain eight
 quaternion-construction cases, six `exp`/`log` cases, both orders of one
 noncommuting product, the inverse, and both perturbation sides. They keep
 native quaternion outputs and basis-vector images. Table columns are declared
-once; duplicate matrices and quaternion views are omitted. Full capture output
-is regenerated temporarily and is not checked in.
+once; duplicate matrices and quaternion views are omitted. Direct capture
+output is generated temporarily and is not checked in.
 
 Both scalar profiles normalize non-unit `Eigen::Quaternion` construction,
 take constructor arguments in WXYZ order, expose XYZW through `SO3::params()`,
@@ -56,9 +59,14 @@ foreach ($profile in @('float32', 'float64')) {
   uv run --no-project --python 3.12 --with-requirements requirements-reference.txt `
     python verify_scipy.py --capture $capture
   uv run --no-project --python 3.12 --with-requirements requirements-reference.txt `
-    python retain_witnesses.py --capture $capture --output "witnesses/$profile.json"
+    python retain_witnesses.py --capture $capture `
+      --output (Join-Path $env:TEMP "quatops-sophus-$profile-selected.json")
 }
 ```
+
+The selected values match the historical fixture, but the direct capture's
+raw-output hash is different. Keep its regenerated output separate from the
+historical witness files unless deliberately recording a new capture.
 
 The manifest records profile-specific native capture hashes, selected witness
 hashes, source and dependency identities, and SciPy tolerances. Jacobians and

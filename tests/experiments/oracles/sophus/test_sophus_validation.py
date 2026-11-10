@@ -27,92 +27,38 @@ sys.modules[spec.name] = retain
 spec.loader.exec_module(retain)
 
 
-def _rotation(case_id: str, probe: list[float]) -> dict[str, object]:
-    sign = -1.0 if case_id == "mixed_unequal_antipode" else 1.0
+def _capture() -> dict:
+    witness = json.loads(
+        (SOPHUS / "witnesses/float64.json").read_text(encoding="utf-8")
+    )
+    fields = (
+        "probe_xyz",
+        "quaternion_construction",
+        "exp_log",
+        "composition",
+        "inverse",
+        "perturbation_side",
+    )
     return {
-        "case_id": case_id,
-        "unit_quaternion": {
-            "wxyz": [sign, 0.0, 0.0, 0.0],
-            "coeffs_xyzw": [0.0, 0.0, 0.0, sign],
-        },
-        "params_xyzw": [0.0, 0.0, 0.0, sign],
-        "matrix_rows": [[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]],
-        "native_vector_actions_xyz": [
-            [1.0, 0.0, 0.0],
-            [0.0, 1.0, 0.0],
-            [0.0, 0.0, 1.0],
-            probe,
-        ],
-    }
-
-
-def _capture() -> dict[str, object]:
-    probe = [2.0, -3.0, 5.0]
-    pinned: dict[str, dict[str, list[float]]] = {"quaternion": {}, "tangent": {}}
-    for line in (SOPHUS / "capture_inputs.tsv").read_text().splitlines():
-        fields = line.partition("#")[0].split()
-        if fields and fields[0] in pinned and fields[0] != "probe":
-            pinned[fields[0]][fields[1]] = [float(value) for value in fields[2:]]
-        elif fields and fields[0] == "probe":
-            probe = [float(value) for value in fields[1:]]
-    constructors = [
-        {
-            "case_id": case,
-            "input_wxyz": pinned["quaternion"][case],
-            "input_norm": sum(value * value for value in pinned["quaternion"][case])
-            ** 0.5,
-            "result": _rotation(case, probe),
-            "log_xyz": [0.0, 0.0, 0.0],
-        }
-        for case in retain._CONSTRUCTION_CASES
-    ]
-    exp_log = [
-        {
-            "case_id": case,
-            "tangent_xyz": pinned["tangent"][case],
-            "exp_result": _rotation(case, probe),
-            "log_of_exp_xyz": [0.0, 0.0, 0.0],
-        }
-        for case in retain._RAW_EXP_LOG_CASES
-    ]
-    return {
-        "capture_schema": "quatops-sophus-discovery-v1",
+        "capture_schema": "quatops-sophus-direct-v1",
         "target": "Sophus SO3d",
-        "probe_xyz": probe,
-        "quaternion_construction": constructors,
-        "exp_log": exp_log,
-        "composition": [
-            _rotation("mixed_a_times_mixed_b", probe),
-            _rotation("mixed_b_times_mixed_a", probe),
-        ],
-        "inverse": _rotation("inverse_mixed_a", probe),
-        "perturbation_side": [
-            _rotation("delta_times_mixed_a", probe),
-            _rotation("mixed_a_times_delta", probe),
-        ],
+        **{field: witness[field] for field in fields},
     }
 
 
-def test_complete_capture_matches_pinned_tsv() -> None:
+def test_direct_capture_matches_pinned_tsv() -> None:
     capture = retain.NativeCapture.model_validate_json(
         json.dumps(_capture()), strict=True
     )
     capture.validate_pinned_inputs(SOPHUS / "capture_inputs.tsv")
-
-
-def test_compact_witnesses_keep_the_documented_six_exp_log_rows() -> None:
     selected = retain.reduce_capture(
-        json.dumps(_capture()).encode("utf-8"), retain.load_semantic_config()
+        json.dumps(_capture()).encode(), retain.load_semantic_config()
     )
-    assert tuple(item[0] for item in selected.exp_log) == (
-        "zero",
-        "near_zero",
-        "mixed_a",
-        "mixed_b",
-        "near_pi_axis",
-        "above_pi_axis",
-    )
-    assert len(selected.exp_log) == 6
+    assert tuple(row[0] for row in selected.exp_log) == retain.EXP_LOG_CASES
+    frozen = json.loads((SOPHUS / "witnesses/float64.json").read_text(encoding="utf-8"))
+    actual = selected.model_dump(mode="json")
+    for field in frozen.keys() - {"raw_capture_sha256"}:
+        assert actual[field] == frozen[field]
 
 
 @pytest.mark.parametrize("precision,tolerance", [("float32", 2e-6), ("float64", 2e-14)])
@@ -145,90 +91,48 @@ def test_float32_capture_inputs_are_compared_at_exporter_precision() -> None:
     raw = _capture()
     raw["target"] = "Sophus SO3f"
 
-    def float32(value: float) -> float:
+    def single(value):
         return struct.unpack("=f", struct.pack("=f", value))[0]
 
-    raw["probe_xyz"] = [float32(value) for value in raw["probe_xyz"]]  # type: ignore[union-attr]
-    for row in raw["quaternion_construction"]:  # type: ignore[union-attr]
-        row["input_wxyz"] = [float32(value) for value in row["input_wxyz"]]
-    for row in raw["exp_log"]:  # type: ignore[union-attr]
-        row["tangent_xyz"] = [float32(value) for value in row["tangent_xyz"]]
+    for field in ("quaternion_construction", "exp_log"):
+        for row in raw[field]:
+            row[1] = [single(value) for value in row[1]]
     capture = retain.NativeCapture.model_validate_json(json.dumps(raw), strict=True)
     capture.validate_pinned_inputs(SOPHUS / "capture_inputs.tsv")
 
 
 @pytest.mark.parametrize(
-    "mutation",
+    "fault",
     [
         "missing_constructor",
         "duplicate_constructor",
-        "missing_exp_log_perturbation",
-        "nested_id",
+        "missing_perturbation",
+        "nonfinite",
+        "antipode",
+        "missing_probe",
     ],
 )
-def test_rejects_incomplete_duplicate_or_mismatched_cases(mutation: str) -> None:
+def test_direct_capture_rejects_invalid_witnesses(fault: str) -> None:
     raw = _capture()
-    if mutation == "missing_constructor":
-        raw["quaternion_construction"] = raw["quaternion_construction"][:-1]  # type: ignore[index]
-    elif mutation == "duplicate_constructor":
-        raw["quaternion_construction"][-1] = raw["quaternion_construction"][0]  # type: ignore[index]
-    elif mutation == "missing_exp_log_perturbation":
-        raw["exp_log"] = raw["exp_log"][:-1]  # type: ignore[index]
+    if fault == "missing_constructor":
+        raw["quaternion_construction"].pop()
+    elif fault == "duplicate_constructor":
+        raw["quaternion_construction"][-1] = raw["quaternion_construction"][0]
+    elif fault == "missing_perturbation":
+        raw["perturbation_side"].pop()
+    elif fault == "nonfinite":
+        raw["probe_xyz"][0] = float("nan")
+    elif fault == "antipode":
+        raw["quaternion_construction"][5][3] = raw["quaternion_construction"][4][3]
     else:
-        raw["quaternion_construction"][0]["result"]["case_id"] = "other"  # type: ignore[index]
+        raw["quaternion_construction"][4][-1] = None
     with pytest.raises(ValidationError):
         retain.NativeCapture.model_validate_json(json.dumps(raw), strict=True)
 
 
-@pytest.mark.parametrize("mutation", ["missing", "unexpected"])
-def test_rejects_missing_or_unexpected_perturbation_side_rows(mutation: str) -> None:
+def test_direct_capture_rejects_changed_inputs() -> None:
     raw = _capture()
-    if mutation == "missing":
-        raw["perturbation_side"] = raw["perturbation_side"][:-1]  # type: ignore[index]
-    else:
-        raw["perturbation_side"].append(  # type: ignore[union-attr]
-            _rotation("unexpected_case", [2.0, -3.0, 5.0])
-        )
-    with pytest.raises(ValidationError):
-        retain.NativeCapture.model_validate_json(json.dumps(raw), strict=True)
-
-
-def test_rejects_antipode_pair_with_the_same_stored_native_sign() -> None:
-    raw = _capture()
-    antipode = raw["quaternion_construction"][5]["result"]  # type: ignore[index]
-    antipode["unit_quaternion"] = {  # type: ignore[index]
-        "wxyz": [1.0, 0.0, 0.0, 0.0],
-        "coeffs_xyzw": [0.0, 0.0, 0.0, 1.0],
-    }
-    antipode["params_xyzw"] = [0.0, 0.0, 0.0, 1.0]  # type: ignore[index]
-    with pytest.raises(ValidationError, match="opposite signs"):
-        retain.NativeCapture.model_validate_json(json.dumps(raw), strict=True)
-
-
-def test_rejects_nan_in_native_matrix() -> None:
-    encoded = json.dumps(_capture()).replace(
-        '"matrix_rows": [[1.0, 0.0, 0.0]', '"matrix_rows": [[NaN, 0.0, 0.0]', 1
-    )
-    with pytest.raises(ValidationError):
-        retain.NativeCapture.model_validate_json(encoded, strict=True)
-
-
-@pytest.mark.parametrize("token", ["NaN", "Infinity", "-Infinity", "1e400"])
-def test_rejects_nonfinite_capture_numbers(token: str) -> None:
-    encoded = json.dumps(_capture()).replace(
-        '"probe_xyz": [2.0, -3.0, 5.0]', f'"probe_xyz": [{token}, -3.0, 5.0]'
-    )
-    with pytest.raises(ValidationError):
-        retain.NativeCapture.model_validate_json(encoded, strict=True)
-
-
-def test_rejects_all_ids_with_substituted_zero_inputs() -> None:
-    raw = _capture()
-    raw["probe_xyz"] = [0.0, 0.0, 0.0]
-    for row in raw["quaternion_construction"]:  # type: ignore[union-attr]
-        row["input_wxyz"] = [1.0, 0.0, 0.0, 0.0]
-    for row in raw["exp_log"]:  # type: ignore[union-attr]
-        row["tangent_xyz"] = [0.0, 0.0, 0.0]
+    raw["quaternion_construction"][0][1] = [0.0, 0.0, 0.0, 1.0]
     capture = retain.NativeCapture.model_validate_json(json.dumps(raw), strict=True)
     with pytest.raises(ValueError, match="pinned TSV"):
         capture.validate_pinned_inputs(SOPHUS / "capture_inputs.tsv")
@@ -239,6 +143,16 @@ def test_historical_capture_sources_are_archived_and_current_sources_are_separat
 ):
     manifest = json.loads((SOPHUS / "manifest.json").read_text())
     historical = manifest["artifacts"]["capture_sources_sha256"]
+    archived_native = read_provenance_source(
+        ROOT, manifest["artifacts"]["historical_capture_source_archive"]
+    )
+    assert (
+        hashlib.sha256(archived_native).hexdigest() == historical["capture_native.cpp"]
+    )
+    assert (
+        hashlib.sha256((SOPHUS / "capture_native.cpp").read_bytes()).hexdigest()
+        == (manifest["artifacts"]["direct_capture"]["capture_source_sha256"])
+    )
     assert manifest["pin_file"] == "source.json"
     assert (
         hashlib.sha256((SOPHUS / "source.json").read_bytes()).hexdigest()

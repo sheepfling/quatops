@@ -36,7 +36,7 @@
       "verify_scipy.py": "548bb54929ef570477c2b6a8d17756610af610ceb41979bba369d27485d35124"
     },
     "repair_replay_sources_sha256": {
-      "retain_witnesses.py": "54ac049c808bf51136969777c8eb35938a6e35ac6b42fb3e8b85be86395784c5",
+      "retain_witnesses.py": "447105da9cb0e44883444f094d98b31027dff1cf148f996dc38f66fd3735fe4d",
       "verify_scipy.py": "1866df20f16ac74d591c5557a677f35505ab78060526776cac22a076ae6f7940"
     },
     "input_file": "capture_inputs.tsv",
@@ -61,7 +61,19 @@
         "selected_witness_sha256": "25124f291a5ab5f21d61e17c27cb3ab58f8ebc2f608870e210b6bee04648f3ef"
       }
     },
-    "retained_schema_sha256": "aeb357ff68f63a90192d7ee045ce2cb4357612ff0c39e0e4c69064becdfd8ce0"
+    "retained_schema_sha256": "aeb357ff68f63a90192d7ee045ce2cb4357612ff0c39e0e4c69064becdfd8ce0",
+    "historical_capture_source_archive": "experiments/provenance/reproduction-v1.zip#sophus-1.24.6-capture_native.cpp",
+    "direct_capture": {
+      "capture_source_sha256": "8be75eabba0aaea0599f220c49e9ee7bb5756b9ec6d95332f9471c5c81c10ae5",
+      "native_executable_sha256": "eda839c68facf70fde3bb06f1e4d2a95bac01709c083c9316ba9c59a6741e752",
+      "compiler": "g++ (GCC) 15.2.0",
+      "raw_capture_sha256": {
+        "float32": "2935c089fe81dca26f70d71fba7ba04bf07828ae7f43c4531baca3203d9ca899",
+        "float64": "a59cc25ae952e9ede89499d7cfdb6c9f223abc5815106082b9a39287e7e1ba1a"
+      },
+      "selected_values": "All selected values match the historical fixtures exactly, including signed zero.",
+      "scope_note": "Direct capture omits the previously temporary matrices and duplicate coefficient views."
+    }
   },
   "review": {
     "state": "selected_native_discovery_witnesses_reviewed",
