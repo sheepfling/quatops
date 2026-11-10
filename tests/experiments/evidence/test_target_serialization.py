@@ -12,7 +12,11 @@ from scripts.converter_evidence import (
     load_converter_evidence,
 )
 from scripts.evidence_json import read_evidence_document
-from scripts.evidence_schema.converter_captures import EigenInputs, EigenOrientation
+from scripts.evidence_schema.converter_captures import (
+    EigenCapture,
+    EigenInputs,
+    EigenOrientation,
+)
 from scripts.evidence_schema.crystallized import (
     FrameChainContract,
     FrameChainWitness,
@@ -24,6 +28,7 @@ from scripts.evidence_schema.crystallized import (
 )
 from scripts.evidence_schema.engine_evidence import load_engine_package
 from scripts.evidence_schema.normalizer import normalize_capture
+from scripts.evidence_schema.semantic_serializers.eigen import serialize_eigen_witnesses
 from scripts.evidence_schema.shared_inputs import (
     SharedCanonicalInputCapture,
     crystallize_shared_inputs,
@@ -189,6 +194,36 @@ def test_eigen_storage_view_is_typed_and_matches_native_accessors():
             witness.coefficients[3],
             witness.coefficients[0],
         ]
+
+
+@pytest.mark.parametrize("precision", ["float32", "float64"])
+@pytest.mark.parametrize("coefficients", [None, [0.0, 0.0, 0.0, 1.0]])
+def test_eigen_rejects_missing_or_incorrect_native_storage(precision, coefficients):
+    directory = ROOT / "tests/golden/oracles/eigen/5.0.1/converter"
+    package = load_converter_evidence(directory, repository_root=ROOT)
+    assert isinstance(package.inputs, EigenInputs)
+    document = read_evidence_document(directory / "witnesses.json")
+    profiles = document["observations"]["profiles"]
+    changed_profiles = [
+        {
+            **profile,
+            "orientations": [
+                {
+                    **row,
+                    "quaternion": {**row["quaternion"], "coeffs_xyzw": coefficients},
+                }
+                if profile["dtype"] == precision and row["case_id"] == "mixed_a"
+                else row
+                for row in profile["orientations"]
+            ],
+        }
+        for profile in profiles
+    ]
+    capture = EigenCapture.model_validate(
+        {**document, "observations": {"profiles": changed_profiles}}, strict=True
+    )
+    with pytest.raises(ValueError, match="coeffs\\(\\)"):
+        serialize_eigen_witnesses(capture, package.inputs)
 
 
 def test_target_serializers_reject_malformed_native_vectors():
