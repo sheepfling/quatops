@@ -6,25 +6,7 @@
     "sha256": "9f4ba0970dd69d825ac5038bf10660167b55f14172cad0fe0b892732f7bbc7eb"
   },
   "target": "Khronos OpenXR SDK 1.1.65 and SDK-Source test_runtime",
-  "pin": {
-    "schema_version": "1.0",
-    "product": "Khronos OpenXR SDK",
-    "sdk_version": "1.1.65",
-    "specification_version": "1.1.65",
-    "repository": "https://github.com/KhronosGroup/OpenXR-SDK.git",
-    "tag": "release-1.1.65",
-    "commit": "24a1f2b92d212501a2b1b8d30ffd53abf55fcfa8",
-    "compiler_standard": "C++17",
-    "test_runtime_dependency": {
-      "product": "Khronos OpenXR-SDK-Source",
-      "version": "1.1.65",
-      "repository": "https://github.com/KhronosGroup/OpenXR-SDK-Source.git",
-      "tag": "release-1.1.65",
-      "commit": "a9f14c416e383d05c142f5a2539a91fe3931b52a",
-      "source": "src/tests/test_runtimes/runtime_test.cpp"
-    },
-    "scope": "OpenXR specification pose/frame facts, pinned header ABI, and static LOCAL-space relations from the Khronos headless test runtime; no hardware or vendor runtime"
-  },
+  "pin_file": "source.json",
   "execution": {
     "was_run": true,
     "scope": "header ABI probe only",

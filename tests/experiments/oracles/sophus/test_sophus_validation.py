@@ -239,6 +239,11 @@ def test_historical_capture_sources_are_archived_and_current_sources_are_separat
 ):
     manifest = json.loads((SOPHUS / "manifest.json").read_text())
     historical = manifest["artifacts"]["capture_sources_sha256"]
+    assert manifest["pin_file"] == "source.json"
+    assert (
+        hashlib.sha256((SOPHUS / "source.json").read_bytes()).hexdigest()
+        == historical["source.json"]
+    )
     for source_name, archive_name in (
         ("retain_witnesses.py", "sophus-1.24.6-retain_witnesses.py"),
         ("verify_scipy.py", "sophus-1.24.6-verify_scipy.py"),

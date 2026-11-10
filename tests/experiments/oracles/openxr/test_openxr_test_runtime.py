@@ -32,6 +32,11 @@ def _capture_document() -> dict:
 
 def test_openxr_producer_hash_and_current_replay_identity_are_distinct() -> None:
     manifest = read_evidence_document(MANIFEST_PATH)
+    assert manifest["pin_file"] == "source.json"
+    assert (
+        hashlib.sha256((CAPTURE_DIR / "source.json").read_bytes()).hexdigest()
+        == (manifest["artifacts"]["capture_sources_sha256"]["source.json"])
+    )
     historical_hash = manifest["artifacts"]["capture_sources_sha256"][
         "verify_test_runtime.py"
     ]

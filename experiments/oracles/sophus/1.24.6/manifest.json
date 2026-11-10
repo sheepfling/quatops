@@ -6,23 +6,7 @@
     "sha256": "03565b08512484d0bb5c2fc8199cec0a06dc6ba5d7908667effd57a073a66c52"
   },
   "target": "Sophus 1.24.6 SO3f and SO3d / Eigen 5.0.1",
-  "pin": {
-    "schema_version": "1.0",
-    "product": "Sophus",
-    "version": "1.24.6",
-    "repository": "https://github.com/strasdat/Sophus.git",
-    "tag": "1.24.6",
-    "commit": "d0b7315a0d90fc6143defa54596a3a95d9fa10ec",
-    "dependency": {
-      "product": "Eigen",
-      "version": "5.0.1",
-      "repository": "https://gitlab.com/libeigen/eigen.git",
-      "tag": "5.0.1",
-      "commit": "bc3b39870ecb690a623a3f49149a358b95c5781d"
-    },
-    "compiler_standard": "C++17",
-    "scope": "SO3f and SO3d quaternion construction, exp/log, action, inverse, product order, and perturbation side"
-  },
+  "pin_file": "source.json",
   "execution": {
     "was_run": true,
     "utc": "2026-11-04T05:07:38+00:00",
