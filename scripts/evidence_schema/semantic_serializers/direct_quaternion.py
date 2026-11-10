@@ -105,19 +105,19 @@ def serialize(
                 )
             )
     else:
-        for row in capture.observations.native_created:
-            witnesses.append(
-                OrientationWitness(
-                    kind="orientation",
-                    case_id=row.case_id,
-                    precision="float64",
-                    coefficient_order="wxyz",
-                    coefficients=row.native_m2q_wxyz,
-                    basis_images_xyz=row.native_mxv_basis_xyz,
-                    constructor_axis_xyz=constructor.axis_xyz,
-                    constructor_angle_radians=constructor.angle_radians,
-                )
+        witnesses.extend(
+            OrientationWitness(
+                kind="orientation",
+                case_id=row.case_id,
+                precision="float64",
+                coefficient_order="wxyz",
+                coefficients=row.native_m2q_wxyz,
+                basis_images_xyz=row.native_mxv_basis_xyz,
+                constructor_axis_xyz=constructor.axis_xyz,
+                constructor_angle_radians=constructor.angle_radians,
             )
+            for row in capture.observations.native_created
+        )
 
     for row in observations.composition:
         if row.product_order is None:
