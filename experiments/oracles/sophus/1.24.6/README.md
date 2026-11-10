@@ -31,7 +31,10 @@ composition order; left and right perturbation results are distinct.
 
 Separate SciPy 1.18.1 `Rotation` checks passed: float64 at `2e-14` tolerance
 with maximum error `1.78e-15`, and float32 at `2e-6` tolerance with maximum
-error `9.5e-7`. These are formula checks, not QuatOps execution.
+error `9.5e-7`. Those historical results cover the full original capture.
+The current reference checker reduces a fresh capture to the selected native
+witnesses first, then checks their constructor, actions, exp/log, composition,
+inverse, and perturbation cases. These are formula checks, not QuatOps execution.
 
 ## Reproduce
 

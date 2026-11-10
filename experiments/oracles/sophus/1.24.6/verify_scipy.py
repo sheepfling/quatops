@@ -1,324 +1,181 @@
-"""Compare the frozen native Sophus SO(3) output with separate SciPy formulas."""
+"""Compare selected native Sophus witnesses with independent SciPy rotations."""
 
 from __future__ import annotations
 
 import argparse
-import hashlib
 import json
-from datetime import datetime, timezone
+import struct
+from collections.abc import Sequence
 from pathlib import Path
-from typing import Annotated, Literal
 
 import numpy as np
 import scipy
-from numpy.typing import NDArray
-from pydantic import BaseModel, ConfigDict, Field, FiniteFloat
-from retain_witnesses import (
-    ExpLog,
-    NativeCapture,
-    NativeRotation,
-    load_semantic_config,
-    profile_for_capture,
-)
+from retain_witnesses import _PINNED_INPUT_SHA256, load_semantic_config, reduce_capture
 from scipy.spatial.transform import Rotation
 
 from scripts.evidence_schema.primitives import finite_max_abs
+from scripts.evidence_schema.sophus import SophusDiscoveryWitnessSet
+from scripts.evidence_schema.utilities import sha256_file
 
-FloatArray = NDArray[np.float64]
-StrictFiniteFloat = Annotated[FiniteFloat, Field(strict=True)]
 
-
-class MaxAbsErrors(BaseModel):
-    """Named SciPy comparison maxima, serialized as a stable evidence object."""
-
-    model_config = ConfigDict(extra="forbid", strict=True, validate_assignment=True)
-
-    quaternion_construction_matrix: StrictFiniteFloat = 0.0
-    rotation_vector_action: StrictFiniteFloat = 0.0
-    quaternion_construction_input_norm: StrictFiniteFloat = 0.0
-    rotation_quaternion_xyzw: StrictFiniteFloat = 0.0
-    quaternion_log_rotation: StrictFiniteFloat = 0.0
-    quaternion_log_rotvec: StrictFiniteFloat = 0.0
-    exp_matrix: StrictFiniteFloat = 0.0
-    log_rotvec: StrictFiniteFloat = 0.0
-    composition_matrix: StrictFiniteFloat = 0.0
-    inverse_matrix: StrictFiniteFloat = 0.0
-    perturbation_matrix: StrictFiniteFloat = 0.0
-
-    def exceeds(self, tolerance: float) -> bool:
-        """Return whether any named matrix/action comparison exceeds tolerance."""
-        return (
-            max(
-                self.quaternion_construction_matrix,
-                self.rotation_vector_action,
-                self.quaternion_construction_input_norm,
-                self.rotation_quaternion_xyzw,
-                self.quaternion_log_rotation,
-                self.quaternion_log_rotvec,
-                self.exp_matrix,
-                self.log_rotvec,
-                self.composition_matrix,
-                self.inverse_matrix,
-                self.perturbation_matrix,
-            )
-            > tolerance
+def verify(witnesses: SophusDiscoveryWitnessSet, tolerance: float) -> float:
+    """Check retained native coefficient, basis-action and SO(3) observations."""
+    maximum = 0.0
+    input_path = Path(__file__).with_name("capture_inputs.tsv")
+    if sha256_file(input_path) != _PINNED_INPUT_SHA256:
+        raise ValueError(
+            "pinned Sophus input TSV hash differs from the recorded corpus"
         )
+    input_rows = [
+        line.split()
+        for line in input_path.read_text(encoding="utf-8").splitlines()
+        if line and not line.startswith("#")
+    ]
 
+    def precision(values: Sequence[str | float]) -> tuple[float, ...]:
+        numbers = tuple(float(value) for value in values)
+        if "SO3f" in witnesses.target:
+            return tuple(
+                struct.unpack("=f", struct.pack("=f", value))[0] for value in numbers
+            )
+        return numbers
 
-class ReferenceIdentity(BaseModel):
-    """Version of the independent reference implementation."""
+    corpus = {
+        (row[0], row[1]): precision(row[2:]) for row in input_rows if row[0] != "probe"
+    }
+    probe = next(precision(row[1:]) for row in input_rows if row[0] == "probe")
+    if (
+        precision(witnesses.probe_xyz) != probe
+        or any(
+            precision(row[1]) != corpus[("quaternion", row[0])]
+            for row in witnesses.quaternion_construction
+        )
+        or any(
+            precision(row[1]) != corpus[("tangent", row[0])]
+            for row in witnesses.exp_log
+        )
+    ):
+        raise ValueError("selected witness inputs differ from the pinned Sophus corpus")
 
-    model_config = ConfigDict(extra="forbid", strict=True)
+    def compare(actual: object, expected: object, label: str) -> None:
+        nonlocal maximum
+        with np.errstate(over="ignore", invalid="ignore"):
+            difference = np.asarray(actual, dtype=float) - np.asarray(
+                expected, dtype=float
+            )
+        error = finite_max_abs(difference.flat, label)
+        maximum = max(maximum, error)
+        if error > tolerance:
+            raise AssertionError(f"{label} exceeds {tolerance}: {error}")
 
-    library: Literal["SciPy Rotation"]
-    version: str
+    def rotation(row: tuple, expected: Rotation) -> None:
+        case_id, xyzw, basis, probe = row
+        native = np.asarray(xyzw, dtype=float)
+        reference = expected.as_quat()
+        compare(
+            native,
+            reference if np.dot(native, reference) >= 0.0 else -reference,
+            f"{case_id} coefficients",
+        )
+        compare(basis, expected.apply(np.eye(3)), f"{case_id} basis actions")
+        if probe is not None:
+            compare(probe, expected.apply(witnesses.probe_xyz), f"{case_id} probe")
 
+    constructors = {row[0]: row for row in witnesses.quaternion_construction}
+    for case_id, wxyz, norm, xyzw, basis, log, probe in constructors.values():
+        values = np.asarray(wxyz, dtype=float)
+        compare([norm], [np.linalg.norm(values)], f"{case_id} input norm")
+        expected = Rotation.from_quat(values[[1, 2, 3, 0]])
+        rotation((case_id, xyzw, basis, probe), expected)
+        compare(
+            Rotation.from_rotvec(log).as_matrix(),
+            expected.as_matrix(),
+            f"{case_id} log action",
+        )
+        if case_id != "half_turn_axis":
+            compare(log, expected.as_rotvec(), f"{case_id} log")
+    if (
+        np.dot(
+            constructors["mixed_unequal"][3], constructors["mixed_unequal_antipode"][3]
+        )
+        >= 0
+    ):
+        raise AssertionError("native antipodes must retain opposite coefficient signs")
 
-class SciPyReview(BaseModel):
-    """Typed SciPy-only comparison report for one frozen native capture."""
+    tangents: dict[str, Rotation] = {}
+    for case_id, tangent, xyzw, basis, log, probe in witnesses.exp_log:
+        expected = Rotation.from_rotvec(tangent)
+        rotation((case_id, xyzw, basis, probe), expected)
+        compare(log, expected.as_rotvec(), f"{case_id} log")
+        tangents[case_id] = expected
 
-    model_config = ConfigDict(extra="forbid", strict=True)
-
-    schema_version: Literal["1.0"]
-    evidence_kind: Literal["derived_reference"]
-    native_capture: str
-    native_capture_sha256: str
-    reference_script: Literal["verify_scipy.py"]
-    reference_script_sha256: str
-    quatops_executed: Literal[False]
-    reference: ReferenceIdentity
-    native_target: str
-    checks: tuple[str, ...]
-    absolute_tolerance: StrictFiniteFloat
-    max_abs_errors: MaxAbsErrors
-    result: Literal["pass"]
-    generated_utc: str
-
-
-def _sha256(path: Path) -> str:
-    return hashlib.sha256(path.read_bytes()).hexdigest()
-
-
-def _rotation_matrix(item: NativeRotation) -> FloatArray:
-    return np.asarray(item.matrix_rows, dtype=np.float64)
-
-
-def _native_rotvec(item: ExpLog) -> FloatArray:
-    return np.asarray(item.log_of_exp_xyz, dtype=np.float64)
-
-
-def _quaternion_xyzw(item: NativeRotation) -> FloatArray:
-    return np.asarray(item.unit_quaternion.coeffs_xyzw, dtype=np.float64)
-
-
-def _max_difference(left: FloatArray, right: FloatArray, label: str) -> float:
-    with np.errstate(over="ignore", invalid="ignore"):
-        difference = np.subtract(left, right)
-    return finite_max_abs(difference.flat, label)
-
-
-def _rotation_differences(
-    item: NativeRotation, expected: Rotation, probes: FloatArray, label: str
-) -> tuple[float, float, float]:
-    """Check matrix, quaternion meaning, and all captured vector actions."""
-    matrix_error = _max_difference(
-        _rotation_matrix(item), expected.as_matrix(), f"{label} matrix error"
+    a, b = tangents["mixed_a"], tangents["mixed_b"]
+    expected_products = (
+        ("mixed_a_times_mixed_b", a * b),
+        ("mixed_b_times_mixed_a", b * a),
     )
-    actions = np.asarray(item.native_vector_actions_xyz, dtype=np.float64)
-    action_error = _max_difference(
-        actions, expected.apply(probes), f"{label} action error"
+    for row, (case_id, expected) in zip(witnesses.composition, expected_products):
+        if row[0] != case_id:
+            raise ValueError("native composition order differs from the input contract")
+        rotation(row, expected)
+    if witnesses.inverse[0] != "inverse_mixed_a":
+        raise ValueError("native inverse case differs from the input contract")
+    rotation(witnesses.inverse, a.inv())
+
+    # The perturbation input is in the pinned corpus; it is not an extra golden.
+    delta = Rotation.from_rotvec(corpus[("tangent", "perturbation")])
+    expected_deltas = (
+        ("delta_times_mixed_a", delta * a),
+        ("mixed_a_times_delta", a * delta),
     )
-    quaternion = _quaternion_xyzw(item)
-    expected_quaternion = expected.as_quat()
-    positive_error = _max_difference(
-        quaternion, expected_quaternion, f"{label} quaternion error"
-    )
-    negative_error = _max_difference(
-        quaternion, -expected_quaternion, f"{label} antipodal quaternion error"
-    )
-    return matrix_error, action_error, min(positive_error, negative_error)
+    for row, (case_id, expected) in zip(witnesses.perturbation_side, expected_deltas):
+        if row[0] != case_id:
+            raise ValueError(
+                "native perturbation order differs from the input contract"
+            )
+        rotation(row, expected)
+    return maximum
 
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--capture", required=True, type=Path)
-    parser.add_argument("--output", type=Path)
-    options = parser.parse_args()
-    input_path = options.capture.resolve()
-    capture = NativeCapture.model_validate_json(input_path.read_bytes(), strict=True)
+    group = parser.add_mutually_exclusive_group(required=True)
+    group.add_argument(
+        "--capture", type=Path, help="full native capture to reduce and verify"
+    )
+    group.add_argument(
+        "--witnesses", type=Path, help="retained selected native witnesses"
+    )
+    parser.add_argument("--output", type=Path, help="optional comparison report")
+    args = parser.parse_args()
     config = load_semantic_config()
-    profile = profile_for_capture(config, capture)
-    capture.validate_pinned_inputs(Path(__file__).with_name("capture_inputs.tsv"))
-    tolerance = profile.scipy_tolerance
-    maxima = MaxAbsErrors()
-    probes = np.asarray(
-        [
-            [1.0, 0.0, 0.0],
-            [0.0, 1.0, 0.0],
-            [0.0, 0.0, 1.0],
-            config.probe_xyz,
-        ],
-        dtype=np.float64,
+    witnesses = (
+        reduce_capture(args.capture.read_bytes(), config)
+        if args.capture is not None
+        else SophusDiscoveryWitnessSet.model_validate_json(
+            args.witnesses.read_bytes(), strict=True
+        )
     )
-
-    for item in capture.quaternion_construction:
-        raw_wxyz = np.asarray(item.input_wxyz, dtype=np.float64)
-        maxima.quaternion_construction_input_norm = max(
-            maxima.quaternion_construction_input_norm,
-            _max_difference(
-                np.asarray([item.input_norm], dtype=np.float64),
-                np.asarray([float(np.linalg.norm(raw_wxyz))], dtype=np.float64),
-                f"constructor {item.case_id} input norm error",
-            ),
-        )
-        expected = Rotation.from_quat(raw_wxyz[[1, 2, 3, 0]])
-        native = item.result
-        matrix_error, action_error, quaternion_error = _rotation_differences(
-            native, expected, probes, f"constructor {item.case_id}"
-        )
-        maxima.quaternion_construction_matrix = max(
-            maxima.quaternion_construction_matrix,
-            matrix_error,
-        )
-        maxima.rotation_vector_action = max(
-            maxima.rotation_vector_action,
-            action_error,
-        )
-        maxima.rotation_quaternion_xyzw = max(
-            maxima.rotation_quaternion_xyzw,
-            quaternion_error,
-        )
-        native_log = np.asarray(item.log_xyz, dtype=np.float64)
-        expected_log = expected.as_rotvec()
-        maxima.quaternion_log_rotation = max(
-            maxima.quaternion_log_rotation,
-            _max_difference(
-                Rotation.from_rotvec(native_log).as_matrix(),
-                expected.as_matrix(),
-                "constructor quaternion log rotation error",
-            ),
-        )
-        if item.case_id != "half_turn_axis":
-            maxima.quaternion_log_rotvec = max(
-                maxima.quaternion_log_rotvec,
-                _max_difference(
-                    native_log, expected_log, "constructor log vector error"
-                ),
-            )
-
-    rotations_by_tangent: dict[str, Rotation] = {}
-    for item in capture.exp_log:
-        tangent = np.asarray(item.tangent_xyz, dtype=np.float64)
-        expected = Rotation.from_rotvec(tangent)
-        matrix_error, action_error, quaternion_error = _rotation_differences(
-            item.exp_result, expected, probes, f"exp/log {item.case_id}"
-        )
-        maxima.exp_matrix = max(
-            maxima.exp_matrix,
-            matrix_error,
-        )
-        maxima.rotation_vector_action = max(maxima.rotation_vector_action, action_error)
-        maxima.rotation_quaternion_xyzw = max(
-            maxima.rotation_quaternion_xyzw, quaternion_error
-        )
-        maxima.log_rotvec = max(
-            maxima.log_rotvec,
-            _max_difference(
-                _native_rotvec(item), expected.as_rotvec(), "log vector error"
-            ),
-        )
-        rotations_by_tangent[item.case_id] = expected
-
-    composition_cases = (
-        (
-            "mixed_a_times_mixed_b",
-            rotations_by_tangent["mixed_a"] * rotations_by_tangent["mixed_b"],
-        ),
-        (
-            "mixed_b_times_mixed_a",
-            rotations_by_tangent["mixed_b"] * rotations_by_tangent["mixed_a"],
-        ),
+    profile = next(
+        item
+        for item in config.scalar_profiles
+        if item.witness_target == witnesses.target
     )
-    for item, (case_id, expected) in zip(capture.composition, composition_cases):
-        if item.case_id != case_id:
-            raise ValueError(
-                "native composition case order does not match the input contract"
-            )
-        matrix_error, action_error, quaternion_error = _rotation_differences(
-            item, expected, probes, f"composition {case_id}"
-        )
-        maxima.composition_matrix = max(
-            maxima.composition_matrix,
-            matrix_error,
-        )
-        maxima.rotation_vector_action = max(maxima.rotation_vector_action, action_error)
-        maxima.rotation_quaternion_xyzw = max(
-            maxima.rotation_quaternion_xyzw, quaternion_error
-        )
-
-    inverse_expected_rotation = rotations_by_tangent["mixed_a"].inv()
-    inverse_matrix, inverse_action, inverse_quaternion = _rotation_differences(
-        capture.inverse, inverse_expected_rotation, probes, "inverse"
+    maximum = verify(witnesses, profile.scipy_tolerance)
+    report = json.dumps(
+        {
+            "result": "pass",
+            "native_target": witnesses.target,
+            "reference": f"SciPy {scipy.__version__}",
+            "quatops_executed": False,
+            "absolute_tolerance": profile.scipy_tolerance,
+            "max_abs_error": maximum,
+        }
     )
-    maxima.inverse_matrix = max(maxima.inverse_matrix, inverse_matrix)
-    maxima.rotation_vector_action = max(maxima.rotation_vector_action, inverse_action)
-    maxima.rotation_quaternion_xyzw = max(
-        maxima.rotation_quaternion_xyzw, inverse_quaternion
-    )
-    delta = rotations_by_tangent["perturbation"]
-    base = rotations_by_tangent["mixed_a"]
-    expected_perturbations = (delta * base, base * delta)
-    for item, expected in zip(capture.perturbation_side, expected_perturbations):
-        matrix_error, action_error, quaternion_error = _rotation_differences(
-            item, expected, probes, f"perturbation {item.case_id}"
-        )
-        maxima.perturbation_matrix = max(
-            maxima.perturbation_matrix,
-            matrix_error,
-        )
-        maxima.rotation_vector_action = max(maxima.rotation_vector_action, action_error)
-        maxima.rotation_quaternion_xyzw = max(
-            maxima.rotation_quaternion_xyzw, quaternion_error
-        )
-
-    if maxima.exceeds(tolerance):
-        raise AssertionError(
-            f"SciPy formula differences exceed {tolerance}: "
-            f"{maxima.model_dump(mode='json')}"
-        )
-
-    review = SciPyReview(
-        schema_version="1.0",
-        evidence_kind="derived_reference",
-        native_capture=input_path.name,
-        native_capture_sha256=_sha256(input_path),
-        reference_script="verify_scipy.py",
-        reference_script_sha256=_sha256(Path(__file__)),
-        quatops_executed=False,
-        reference=ReferenceIdentity(
-            library="SciPy Rotation", version=scipy.__version__
-        ),
-        native_target=capture.target,
-        checks=(
-            "SO3 constructor normalization, matrix action, XYZW storage, and quaternion log",
-            "SO3 exp/log including near-zero and greater-than-pi inputs",
-            "noncommuting product orders, inverse, and left/right perturbations",
-        ),
-        absolute_tolerance=tolerance,
-        max_abs_errors=maxima,
-        result="pass",
-        generated_utc=datetime.now(timezone.utc).isoformat(),
-    )
-    serialized = review.model_dump(mode="json")
-    if options.output is not None:
-        output_path = options.output.resolve()
-        output_path.parent.mkdir(parents=True, exist_ok=True)
-        output_path.write_text(
-            json.dumps(serialized, indent=2, allow_nan=False) + "\n",
-            encoding="utf-8",
-            newline="\n",
-        )
-    print(json.dumps(serialized, indent=2, allow_nan=False))
+    if args.output is not None:
+        args.output.parent.mkdir(parents=True, exist_ok=True)
+        args.output.write_text(report + "\n", encoding="utf-8", newline="\n")
+    print(report)
 
 
 if __name__ == "__main__":

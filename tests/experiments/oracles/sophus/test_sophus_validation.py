@@ -7,8 +7,6 @@ import importlib.util
 import json
 import struct
 import sys
-from pathlib import Path
-from typing import Any, cast
 
 import pytest
 from pydantic import ValidationError
@@ -92,116 +90,6 @@ def _capture() -> dict[str, object]:
             _rotation("delta_times_mixed_a", probe),
             _rotation("mixed_a_times_delta", probe),
         ],
-    }
-
-
-def _scientific_capture(rotation_api: Any, np: Any, target: str) -> dict[str, Any]:
-    """Build a complete synthetic native-shaped capture for verifier replay."""
-    is_float32 = target == "Sophus SO3f"
-
-    def scalar(value: float) -> float:
-        return float(np.float32(value)) if is_float32 else float(value)
-
-    def vector(values: Any) -> list[float]:
-        return [scalar(float(value)) for value in values]
-
-    fixture = cast(dict[str, Any], _capture())
-    probe = vector(fixture["probe_xyz"])
-    basis_and_probe = np.asarray(
-        [[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0], probe],
-        dtype=np.float64,
-    )
-    rotations: dict[str, Any] = {}
-    constructors: list[dict[str, Any]] = []
-    for item in fixture["quaternion_construction"]:
-        input_wxyz = vector(item["input_wxyz"])
-        expected = rotation_api.from_quat(
-            np.asarray(input_wxyz, dtype=np.float64)[[1, 2, 3, 0]]
-        )
-        rotations[item["case_id"]] = expected
-        stored_xyzw = vector(expected.as_quat())
-        if item["case_id"] == "mixed_unequal_antipode":
-            mixed_xyzw = constructors[4]["result"]["params_xyzw"]
-            if float(np.dot(stored_xyzw, mixed_xyzw)) >= 0.0:
-                stored_xyzw = [-value for value in stored_xyzw]
-        constructors.append(
-            {
-                "case_id": item["case_id"],
-                "input_wxyz": input_wxyz,
-                "input_norm": scalar(float(np.linalg.norm(input_wxyz))),
-                "result": _rotation_payload(
-                    item["case_id"], expected, basis_and_probe, stored_xyzw, vector
-                ),
-                "log_xyz": vector(expected.as_rotvec()),
-            }
-        )
-
-    exp_log: list[dict[str, Any]] = []
-    for item in fixture["exp_log"]:
-        tangent = vector(item["tangent_xyz"])
-        expected = rotation_api.from_rotvec(tangent)
-        rotations[f"exp_{item['case_id']}"] = expected
-        exp_log.append(
-            {
-                "case_id": item["case_id"],
-                "tangent_xyz": tangent,
-                "exp_result": _rotation_payload(
-                    item["case_id"], expected, basis_and_probe, None, vector
-                ),
-                "log_of_exp_xyz": vector(expected.as_rotvec()),
-            }
-        )
-
-    mixed_a = rotations["exp_mixed_a"]
-    mixed_b = rotations["exp_mixed_b"]
-    delta = rotations["exp_perturbation"]
-    return {
-        "capture_schema": fixture["capture_schema"],
-        "target": target,
-        "probe_xyz": probe,
-        "quaternion_construction": constructors,
-        "exp_log": exp_log,
-        "composition": [
-            _rotation_payload(
-                "mixed_a_times_mixed_b",
-                mixed_a * mixed_b,
-                basis_and_probe,
-                None,
-                vector,
-            ),
-            _rotation_payload(
-                "mixed_b_times_mixed_a",
-                mixed_b * mixed_a,
-                basis_and_probe,
-                None,
-                vector,
-            ),
-        ],
-        "inverse": _rotation_payload(
-            "inverse_mixed_a", mixed_a.inv(), basis_and_probe, None, vector
-        ),
-        "perturbation_side": [
-            _rotation_payload(
-                "delta_times_mixed_a", delta * mixed_a, basis_and_probe, None, vector
-            ),
-            _rotation_payload(
-                "mixed_a_times_delta", mixed_a * delta, basis_and_probe, None, vector
-            ),
-        ],
-    }
-
-
-def _rotation_payload(
-    case_id: str, rotation: Any, probes: Any, stored_xyzw: Any, vector: Any
-) -> dict[str, Any]:
-    xyzw = stored_xyzw if stored_xyzw is not None else vector(rotation.as_quat())
-    wxyz = [xyzw[3], xyzw[0], xyzw[1], xyzw[2]]
-    return {
-        "case_id": case_id,
-        "unit_quaternion": {"wxyz": wxyz, "coeffs_xyzw": xyzw},
-        "params_xyzw": xyzw,
-        "matrix_rows": [vector(row) for row in rotation.as_matrix()],
-        "native_vector_actions_xyz": [vector(row) for row in rotation.apply(probes)],
     }
 
 
@@ -391,119 +279,70 @@ def test_finite_max_abs_rejects_empty_input() -> None:
         finite_max_abs([], "Sophus residual")
 
 
-def test_scipy_rotation_comparison_checks_every_action_and_quaternion(
+@pytest.mark.parametrize("precision", ["float32", "float64"])
+@pytest.mark.parametrize(
+    "fault", ["input", "coefficients", "constructor_basis", "perturbation_basis"]
+)
+def test_scipy_cli_checks_retained_native_witnesses_and_rejects_corruption(
+    precision: str,
+    fault: str,
     monkeypatch: pytest.MonkeyPatch,
-) -> None:
-    scipy = pytest.importorskip("scipy")
-    _ = scipy
-    verify_path = SOPHUS / "verify_scipy.py"
-    verify_spec = importlib.util.spec_from_file_location(
-        "sophus_verify_scipy", verify_path
-    )
-    assert verify_spec is not None and verify_spec.loader is not None
-    monkeypatch.setitem(sys.modules, "retain_witnesses", retain)
-    verifier = importlib.util.module_from_spec(verify_spec)
-    monkeypatch.setitem(sys.modules, verify_spec.name, verifier)
-    verify_spec.loader.exec_module(verifier)
-    model = retain.NativeCapture.model_validate_json(
-        json.dumps(_capture()), strict=True
-    )
-    expected = verifier.Rotation.identity()
-    probes = verifier.np.asarray(
-        [[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0], model.probe_xyz]
-    )
-    with pytest.raises(ValueError, match="non-finite"):
-        verifier._max_difference(
-            verifier.np.asarray([-1e308]),
-            verifier.np.asarray([1e308]),
-            "overflowed error",
-        )
-    corrupt = model.composition[0].model_copy(
-        update={
-            "params_xyzw": (0.0, 0.0, 0.0, 0.0),
-            "unit_quaternion": model.composition[0].unit_quaternion.model_copy(
-                update={
-                    "coeffs_xyzw": (0.0, 0.0, 0.0, 0.0),
-                    "wxyz": (0.0, 0.0, 0.0, 0.0),
-                }
-            ),
-        }
-    )
-    matrix_error, action_error, quaternion_error = verifier._rotation_differences(
-        corrupt, expected, probes, "corrupt test"
-    )
-    assert matrix_error == 0.0
-    assert action_error == 0.0
-    assert quaternion_error > 0.5
-    bad_actions = model.exp_log[2].exp_result.model_copy(
-        update={"native_vector_actions_xyz": ((0.0, 0.0, 0.0),) * 4}
-    )
-    _, action_error, _ = verifier._rotation_differences(
-        bad_actions, expected, probes, "corrupt actions"
-    )
-    assert action_error > 0.5
-    bad_perturbation = model.perturbation_side[0].model_copy(
-        update={"native_vector_actions_xyz": ((0.0, 0.0, 0.0),) * 4}
-    )
-    _, action_error, _ = verifier._rotation_differences(
-        bad_perturbation, expected, probes, "corrupt perturbation row"
-    )
-    assert action_error > 0.5
-
-
-@pytest.mark.parametrize("target", ["Sophus SO3f", "Sophus SO3d"])
-def test_scipy_cli_accepts_complete_synthetic_pinned_capture(
-    target: str,
-    monkeypatch: pytest.MonkeyPatch,
-    tmp_path: Path,
     capsys: pytest.CaptureFixture[str],
 ) -> None:
-    np = pytest.importorskip("numpy")
-    scipy_spatial = pytest.importorskip("scipy.spatial.transform")
-    raw = _scientific_capture(scipy_spatial.Rotation, np, target)
-    capture_path = tmp_path / f"{target.replace(' ', '_')}.json"
-    capture_path.write_text(json.dumps(raw, allow_nan=False), encoding="utf-8")
-    monkeypatch.setitem(sys.modules, "retain_witnesses", retain)
+    pytest.importorskip("scipy")
     verify_spec = importlib.util.spec_from_file_location(
         "sophus_verify_scipy", SOPHUS / "verify_scipy.py"
     )
     assert verify_spec is not None and verify_spec.loader is not None
+    monkeypatch.setitem(sys.modules, "retain_witnesses", retain)
     verifier = importlib.util.module_from_spec(verify_spec)
     monkeypatch.setitem(sys.modules, verify_spec.name, verifier)
     verify_spec.loader.exec_module(verifier)
+    witness_path = SOPHUS / "witnesses" / f"{precision}.json"
     monkeypatch.setattr(
-        sys, "argv", ["verify_scipy.py", "--capture", str(capture_path)]
+        sys, "argv", ["verify_scipy.py", "--witnesses", str(witness_path)]
     )
-
     verifier.main()
-    report = json.loads(capsys.readouterr().out)
-    assert report["result"] == "pass"
-    assert report["native_target"] == target
+    assert json.loads(capsys.readouterr().out)["result"] == "pass"
 
-
-@pytest.mark.parametrize("target", ["Sophus SO3f", "Sophus SO3d"])
-def test_scipy_cli_rejects_finite_perturbation_action_corruption(
-    target: str,
-    monkeypatch: pytest.MonkeyPatch,
-    tmp_path: Path,
-) -> None:
-    np = pytest.importorskip("numpy")
-    scipy_spatial = pytest.importorskip("scipy.spatial.transform")
-    raw = _scientific_capture(scipy_spatial.Rotation, np, target)
-    raw["perturbation_side"][0]["native_vector_actions_xyz"][0] = [0.0, 0.0, 0.0]
-    capture_path = tmp_path / f"{target.replace(' ', '_')}_corrupt.json"
-    capture_path.write_text(json.dumps(raw, allow_nan=False), encoding="utf-8")
-    monkeypatch.setitem(sys.modules, "retain_witnesses", retain)
-    verify_spec = importlib.util.spec_from_file_location(
-        "sophus_verify_scipy", SOPHUS / "verify_scipy.py"
+    native = SophusDiscoveryWitnessSet.model_validate_json(
+        witness_path.read_bytes(), strict=True
     )
-    assert verify_spec is not None and verify_spec.loader is not None
-    verifier = importlib.util.module_from_spec(verify_spec)
-    monkeypatch.setitem(sys.modules, verify_spec.name, verifier)
-    verify_spec.loader.exec_module(verifier)
-    monkeypatch.setattr(
-        sys, "argv", ["verify_scipy.py", "--capture", str(capture_path)]
+    zero_basis = ((0.0, 0.0, 0.0),) * 3
+    if fault == "perturbation_basis":
+        row = native.perturbation_side[0]
+        corrupted_row = (row[0], row[1], zero_basis, row[3])
+        changed = {"perturbation_side": (corrupted_row, native.perturbation_side[1])}
+        message = "basis actions exceeds"
+    else:
+        row = native.quaternion_construction[4]
+        corrupted_row = (
+            row[0],
+            (1.0, 0.0, 0.0, 0.0) if fault == "input" else row[1],
+            row[2],
+            (0.0, 0.0, 0.0, 1.0) if fault == "coefficients" else row[3],
+            zero_basis if fault == "constructor_basis" else row[4],
+            *row[5:],
+        )
+        changed = {
+            "quaternion_construction": (
+                *native.quaternion_construction[:4],
+                corrupted_row,
+                *native.quaternion_construction[5:],
+            )
+        }
+        message = (
+            "pinned Sophus corpus"
+            if fault == "input"
+            else "coefficients exceeds"
+            if fault == "coefficients"
+            else "basis actions exceeds"
+        )
+    corrupted = SophusDiscoveryWitnessSet.model_validate_json(
+        json.dumps({**json.loads(witness_path.read_text(encoding="utf-8")), **changed}),
+        strict=True,
     )
-
-    with pytest.raises(AssertionError, match="exceed"):
-        verifier.main()
+    with pytest.raises(
+        ValueError if fault == "input" else AssertionError, match=message
+    ):
+        verifier.verify(corrupted, 2e-6 if precision == "float32" else 2e-14)

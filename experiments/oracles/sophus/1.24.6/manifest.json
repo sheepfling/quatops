@@ -53,8 +53,9 @@
     },
     "repair_replay_sources_sha256": {
       "retain_witnesses.py": "15009d7abfc8e5774f1d6c0eeeb2e2ca33b8983516c957f21e0a54e351a9ac8d",
-      "verify_scipy.py": "f979939ccaaad092de2c0f97c8bca93ed9fb0169dd6c3e0e0b7e400139d14b86"
+      "verify_scipy.py": "1866df20f16ac74d591c5557a677f35505ab78060526776cac22a076ae6f7940"
     },
+    "previous_repair_replay_verifier_sha256": "f979939ccaaad092de2c0f97c8bca93ed9fb0169dd6c3e0e0b7e400139d14b86",
     "input_file": "capture_inputs.tsv",
     "input_sha256": "713fece6dbad561b864c3f625c740190f92210318af4fa09f4467930a04a3048",
     "native_executable_sha256": "fd164cf8c34f1b731c8eafd6ea4bd336eb59b8941004e866edcfc3fc07016767",
