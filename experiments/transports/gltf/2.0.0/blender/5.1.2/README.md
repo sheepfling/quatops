@@ -1,6 +1,6 @@
 # Blender 5.1.2 glTF importer
 
-The Blender embedded-Python capture imports the same frozen glTF 2.0 asset as
+The Blender embedded-Python capture imports the same reproducible glTF 2.0 asset as
 the Three.js loader, then samples scene objects and imported rotation actions.
 It records Blender's build and executable hashes, embedded Python version,
 importer source hashes, operator arguments, scene FPS, matrices, F-curves, and
@@ -8,7 +8,8 @@ the explicit axis-translation probes.
 
 ## Reproduce
 
-From the repository root in PowerShell:
+First [generate the input assets](../../README.md#reproducible-asset). Then run
+from the repository root in PowerShell:
 
 ```powershell
 & 'C:\Program Files\Blender Foundation\Blender 5.1\blender.exe' `

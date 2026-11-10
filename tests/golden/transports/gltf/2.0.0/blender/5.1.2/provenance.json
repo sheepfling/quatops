@@ -16,9 +16,9 @@
     "previous_checked_in_capture_source_sha256": "4c697aaa7c47fcf9e7e4c67290275ff95b728d9c5c6cf269999084f7c22b3501",
     "previous_checked_in_capture_source_commit": "39fcb3d4dd78a732120b5a6c49f8d4482d1cbc99",
     "asset_builder_source": "experiments/transports/gltf/2.0.0/assets/build_asset.py",
-    "asset_builder_source_sha256": "aa018e88672d828465a34454a6deea916563016f608d219be53a70deaefe9d33",
+    "asset_builder_source_sha256": "67df2b51c62ad3f9d9bc99a21e23effaf53703e99d482fe6c5a2d0f7fa2f2dc0",
     "previous_asset_builder_source_sha256": "bef952bc4d6721685b4adea8ae4638fd346dbaf3c1f14459c023a941f581a254",
     "previous_asset_builder_source_commit": "39fcb3d4dd78a732120b5a6c49f8d4482d1cbc99",
-    "identity_note": "The current capture source constructs resolved dataclass records and checks animation data after creation; the asset builder adds accessor-shape validation. Neither current source was run in Blender. The retained native exporter SHA-256 remains the archived historical producer identity."
+    "identity_note": "The current capture source constructs resolved dataclass records and checks animation data after creation; the asset builder validates accessor shapes and reproduces the captured input bytes across hosts. The retained native exporter SHA-256 remains the archived historical producer identity."
   }
 }

@@ -9,3 +9,5 @@ dist/
 .ruff_cache/
 node_modules/
 /log/
+/experiments/transports/gltf/2.0.0/assets/rotation_transport.gltf
+/experiments/transports/gltf/2.0.0/assets/rotation_transport.bin

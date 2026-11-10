@@ -220,10 +220,9 @@ def main() -> None:
     args.binary_output.parent.mkdir(parents=True, exist_ok=True)
     args.gltf_output.parent.mkdir(parents=True, exist_ok=True)
     args.binary_output.write_bytes(binary)
-    args.gltf_output.write_text(
-        json.dumps(asset, indent=2, separators=(",", ": ")) + "\n",
-        encoding="utf-8",
-    )
+    # Preserve the Windows capture's exact text bytes on every host.
+    text = json.dumps(asset, indent=2, separators=(",", ": ")) + "\n"
+    args.gltf_output.write_bytes(text.replace("\n", "\r\n").encode("utf-8"))
 
 
 if __name__ == "__main__":

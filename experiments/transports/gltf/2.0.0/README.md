@@ -5,12 +5,13 @@ composition, and `STEP`, `LINEAR`, and `CUBICSPLINE` quaternion animation on
 nonuniform key times. The spec does not itself run a sampler; each named loader
 has a distinct version directory and frozen observations.
 
-## Frozen asset
+## Reproducible asset
 
-- [`rotation_transport.gltf`](assets/rotation_transport.gltf)
-- [`rotation_transport.bin`](assets/rotation_transport.bin)
-- [`build_asset.py`](assets/build_asset.py) rebuilds the two source files using
-  Python's standard library only. It imports no QuatOps, SciPy, or NumPy code.
+[`build_asset.py`](assets/build_asset.py) generates the two input files using
+Python's standard library only. It imports no QuatOps, SciPy, or NumPy code.
+The output reproduces the captured glTF and buffer byte hashes on every host;
+the generated files are not checked in. The selected native observations and
+their original input hashes remain in the loader fixtures.
 
 Run the builder with explicit output paths from any working directory:
 

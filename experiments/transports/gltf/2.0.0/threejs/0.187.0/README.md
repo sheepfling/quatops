@@ -1,12 +1,13 @@
 # Three.js GLTFLoader 0.187.0
 
-This is a named loader run over the frozen glTF 2.0 assets in the sibling
+This is a named loader run over the reproducible glTF 2.0 assets in the sibling
 `assets/` directory. It uses the exact Three.js package pin and Khronos
 validator pin in this directory's `package-lock.json`.
 
 ## Reproduce
 
-From this directory:
+First [generate the input assets](../../README.md#reproducible-asset). Then,
+from this directory:
 
 ```powershell
 npm ci

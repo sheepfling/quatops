@@ -3,6 +3,10 @@
 import hashlib
 import json
 import struct
+import subprocess
+import sys
+import tempfile
+from pathlib import Path
 
 import numpy as np
 import pytest
@@ -19,8 +23,6 @@ from tests.support.paths import REPOSITORY_ROOT, TESTS_ROOT
 
 ROOT = REPOSITORY_ROOT
 ASSET_DIR = ROOT / "experiments" / "transports" / "gltf" / "2.0.0" / "assets"
-GLTF_PATH = ASSET_DIR / "rotation_transport.gltf"
-BINARY_PATH = ASSET_DIR / "rotation_transport.bin"
 THREE_PATH = (
     TESTS_ROOT
     / "golden"
@@ -41,12 +43,32 @@ BLENDER_PATH = (
     / "5.1.2"
     / "native_rotation.json"
 )
-ASSET = json.loads(GLTF_PATH.read_text(encoding="utf-8"))
+
+
+def _build_asset():
+    with tempfile.TemporaryDirectory() as directory:
+        gltf = Path(directory) / "rotation_transport.gltf"
+        binary = Path(directory) / "rotation_transport.bin"
+        subprocess.run(
+            [
+                sys.executable,
+                str(ASSET_DIR / "build_asset.py"),
+                "--gltf-output",
+                str(gltf),
+                "--binary-output",
+                str(binary),
+            ],
+            check=True,
+        )
+        return gltf.read_bytes(), binary.read_bytes()
+
+
+GLTF_BYTES, BINARY = _build_asset()
+ASSET = json.loads(GLTF_BYTES)
 THREE = json.loads(THREE_PATH.read_text(encoding="utf-8"))
 BLENDER = BlenderGltfCapture.model_validate_json(
     BLENDER_PATH.read_text(encoding="utf-8"), strict=True
 )
-BINARY = BINARY_PATH.read_bytes()
 TOLERANCE = 3e-7
 
 
@@ -130,15 +152,9 @@ def test_gltf_assets_and_loader_versions_are_frozen_and_valid():
     assert BLENDER.evidence_kind == "native_blender_gltf_importer_capture"
     assert BLENDER.loader.name == "Blender glTF importer"
     assert BLENDER.loader.version == "5.1.2"
-    assert (
-        THREE["provenance"]["gltf_sha256"]
-        == hashlib.sha256(GLTF_PATH.read_bytes()).hexdigest()
-    )
+    assert THREE["provenance"]["gltf_sha256"] == hashlib.sha256(GLTF_BYTES).hexdigest()
     assert THREE["provenance"]["binary_sha256"] == hashlib.sha256(BINARY).hexdigest()
-    assert (
-        BLENDER.provenance.gltf_sha256
-        == hashlib.sha256(GLTF_PATH.read_bytes()).hexdigest()
-    )
+    assert BLENDER.provenance.gltf_sha256 == hashlib.sha256(GLTF_BYTES).hexdigest()
     assert BLENDER.provenance.binary_sha256 == hashlib.sha256(BINARY).hexdigest()
     validation = THREE["validation"]
     assert validation["evidence_kind"].startswith("Khronos glTF Validator")
@@ -323,8 +339,7 @@ def test_blender_importer_axis_mapping_and_quaternion_animation_profiles_are_fro
         index = min(
             max(
                 int(
-                    np.searchsorted(source_times, sample.time_seconds, side="right")
-                    - 1
+                    np.searchsorted(source_times, sample.time_seconds, side="right") - 1
                 ),
                 0,
             ),

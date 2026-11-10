@@ -73,16 +73,16 @@ class GltfAssetBuilderTests(unittest.TestCase):
         )
         self.assertEqual(
             hashlib.sha256(
-                read_provenance_source(REPOSITORY_ROOT, gltf_history["exporter_archive"])
+                read_provenance_source(
+                    REPOSITORY_ROOT, gltf_history["exporter_archive"]
+                )
             ).hexdigest(),
             gltf_history["exporter_sha256"],
         )
         for field in ("capture_source", "asset_builder_source"):
             self.assertEqual(
                 hashlib.sha256(
-                    read_provenance_source(
-                        REPOSITORY_ROOT, gltf["reproduction"][field]
-                    )
+                    read_provenance_source(REPOSITORY_ROOT, gltf["reproduction"][field])
                 ).hexdigest(),
                 gltf["reproduction"][f"{field}_sha256"],
             )
@@ -148,13 +148,16 @@ class GltfAssetBuilderTests(unittest.TestCase):
                 hashlib.sha256(binary.read_bytes()).hexdigest(),
                 "335c8c8ca1d09faae363ddab206ec1abd04c94c044889f92c501edbf772f2ed7",
             )
-            # Text is compared in canonical LF form: production write_text
-            # deliberately retains the host platform newline behavior.
+            # Compare both the canonical text and exact native-capture bytes.
             self.assertEqual(
                 hashlib.sha256(
                     gltf.read_text(encoding="utf-8").encode("utf-8")
                 ).hexdigest(),
                 "0463b0bcb558a1bc1814e91d94a9cb6b3836555d6e07eb2e178ec98adacfa49a",
+            )
+            self.assertEqual(
+                hashlib.sha256(gltf.read_bytes()).hexdigest(),
+                "fdfb41df6dba25b0af3452b85310887e7e4f0060b017fad025c930a9de7c0bb3",
             )
             asset = json.loads(gltf.read_text(encoding="utf-8"))
             self.assertEqual(len(asset["accessors"]), 5)
