@@ -1,6 +1,7 @@
 """Native vector-action acceptance checks for the canonical frame adapters."""
 
 import json
+from itertools import permutations, product
 
 import numpy as np
 import pytest
@@ -14,6 +15,7 @@ from quatops.experimental.engines import (
     unity,
     unreal,
 )
+from scripts.evidence_schema.engine_captures import ENGINE_RETAINED_CASE_IDS
 from tests.support.native_engine_support import load_versioned_engine_witness
 from tests.support.paths import REPOSITORY_ROOT
 
@@ -101,6 +103,48 @@ def _basis_matrix_images(images):
 
 
 @pytest.mark.parametrize("engine,version,tolerance", TARGETS)
+def test_mixed_native_actions_distinguish_signed_axis_maps(engine, version, tolerance):
+    """Two mixed rotations identify the quaternion map among signed permutations."""
+    metadata, captures = _capture_rows(_fixture(engine, version))
+    declared = np.asarray(_frame_map(metadata).world_map.matrix, dtype=float)
+    declared_axial = round(np.linalg.det(declared)) * declared
+    inputs = {row["case_id"]: row["canonical_wxyz"] for row in INPUTS["orientations"]}
+    for precision, capture in captures.items():
+        atol = 2.0e-14 if precision == "float64" else tolerance
+        cases = {row["case_id"]: row for row in capture["orientation_cases"]}
+        matching_axial_maps = []
+        for axes in permutations("xyz"):
+            for signs in product((1, -1), repeat=3):
+                labels = tuple(
+                    ("-" if sign < 0 else "") + axis for axis, sign in zip(axes, signs)
+                )
+                matrix = np.asarray(SignedAxisMap(labels).matrix, dtype=float)
+                axial = round(np.linalg.det(matrix)) * matrix
+                if all(
+                    np.allclose(
+                        Rotation.from_quat(
+                            np.r_[
+                                axial @ np.asarray(inputs[case_id][1:]),
+                                inputs[case_id][0],
+                            ]
+                        ).as_matrix(),
+                        _basis_matrix_images(
+                            cases[case_id]["native_rotated_positive_basis_vectors_xyz"]
+                        ),
+                        rtol=0.0,
+                        atol=atol,
+                    )
+                    for case_id in ("mixed_a", "mixed_b")
+                ):
+                    matching_axial_maps.append(axial)
+        # B and -B necessarily induce the same quaternion map in three dimensions.
+        assert len(matching_axial_maps) == 2
+        assert all(
+            np.array_equal(matrix, declared_axial) for matrix in matching_axial_maps
+        )
+
+
+@pytest.mark.parametrize("engine,version,tolerance", TARGETS)
 def test_fixture_declares_the_canonical_contract_and_explicit_frame_map(
     engine, version, tolerance
 ):
@@ -141,9 +185,11 @@ def test_canonical_to_native_and_native_to_canonical_preserve_physical_action(
     for precision, capture in captures.items():
         precision_tolerance = 2.0e-14 if precision == "float64" else tolerance
         cases = {case["case_id"]: case for case in capture["orientation_cases"]}
-        assert set(cases) == {row["case_id"] for row in INPUTS["orientations"]}
+        assert set(cases) == set(ENGINE_RETAINED_CASE_IDS)
 
         for input_case in INPUTS["orientations"]:
+            if input_case["case_id"] not in cases:
+                continue
             case = cases[input_case["case_id"]]
             canonical_wxyz = np.asarray(input_case["canonical_wxyz"], dtype=float)
             canonical_xyzw = _wxyz_to_xyzw(canonical_wxyz)
@@ -317,7 +363,7 @@ def test_unity_to_godot_native_cross_transfer_matches_both_captured_actions():
     unity_cases = {row["case_id"]: row for row in unity["orientation_cases"]}
     godot_cases = {row["case_id"]: row for row in godot["orientation_cases"]}
 
-    case_ids = [row["case_id"] for row in INPUTS["orientations"]]
+    case_ids = ENGINE_RETAINED_CASE_IDS
     for case_id in case_ids:
         unity_native = _native_components(unity_cases[case_id]["native_quaternion"])
         godot_native = _native_components(godot_cases[case_id]["native_quaternion"])

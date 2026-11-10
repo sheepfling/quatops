@@ -1,10 +1,9 @@
 # Semantic evidence serialization
 
-The interoperability product has three separate stages. Native output stays
+Evidence validation has three stages. Native output stays
 target-specific; a target adapter gives it explicit mathematical and frame
 meaning; the common normalizer accepts only a compatible contract and witness
-set. The normalized record shape is version 2; native capture package schemas
-remain versioned independently.
+set. Native capture package schemas remain versioned independently.
 
 ```text
 native capture + experiment-owned semantic contract
@@ -15,7 +14,7 @@ one concrete serialization model
                  ->
 shared normalizer
                  ->
-CrystallizedCapture / EvidenceProduct
+validated frame contract and native witnesses
 ```
 
 ## Responsibilities
@@ -28,7 +27,7 @@ The typed input models and normalization boundaries are indexed in the
   shared physical meaning to them.
 - Each pinned experiment owns `semantic_contract.json` beside its capture
   code and inputs. Its retained manifest carries the repository-relative path
-  and SHA-256 digest; the normalized provenance points back to that file.
+  and SHA-256 digest, which the loader checks before normalization.
 - `scripts/evidence_schema/semantic_serializers/` contains one adapter for
   each converter experiment: Eigen, MuJoCo, OpenCV, SpiceyPy, ROS 2, Cesium,
   glTF/Three.js, and OpenUSD. Each adapter owns its evidence layer, contract,
@@ -49,15 +48,15 @@ The typed input models and normalization boundaries are indexed in the
   semantic serializer. The pinned engine captures share one typed witness
   format, and each version's explicit frame contract supplies its own axes,
   coefficient order, precision, and authority. `engine_evidence.py` loads those
-  captures and attaches provenance before calling the shared normalizer.
+  captures and checks their provenance references.
 - `scripts/evidence_schema/normalizer.py` checks coefficient orders, scene
-  roles, and named frames against the serialized contract before it emits a
-  `CrystallizedCapture`. The concrete serialization model has already rejected
+  roles, and named frames against the serialized contract. The concrete
+  serialization model has already rejected
   incompatible layers, contracts, and witness families. The normalizer also
   checks that signed basis maps imply the declared destination handedness and
   that witness precision appears in target metadata.
-- `scripts/evidence_schema/product.py` assembles the normalized records and
-  provenance. It does not reinterpret target axes or repair target values.
+- `scripts/evidence_schema/validation.py` coordinates the loaders, target
+  serializers, shared normalizer, and provenance checks in memory.
 
 Native capture programs do not import the common normalizer. They run in their
 pinned target environment, preserve native output, and identify the experiment

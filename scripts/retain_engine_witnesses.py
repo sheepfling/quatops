@@ -18,6 +18,7 @@ if __package__:
         read_evidence_document,
     )
     from scripts.evidence_schema.engine_captures import (
+        ENGINE_RETAINED_CASE_IDS,
         EngineCanonicalFrame,
         EngineFrame,
         EngineSemanticConfig,
@@ -29,6 +30,7 @@ else:
         read_evidence_document,
     )
     from evidence_schema.engine_captures import (
+        ENGINE_RETAINED_CASE_IDS,
         EngineCanonicalFrame,
         EngineFrame,
         EngineSemanticConfig,
@@ -117,6 +119,36 @@ def _quaternion(row: JsonRecord, field: str) -> list[float]:
     return [float(component) for component in numeric_values]
 
 
+def _native_vector(value: JsonValue) -> list[JsonValue]:
+    """Keep the three captured components in a compact, ordered vector."""
+    if isinstance(value, dict):
+        if set(value) != {"x", "y", "z"}:
+            raise ValueError("native vector object must contain only x, y and z")
+        value = [value["x"], value["y"], value["z"]]
+    if (
+        not isinstance(value, list)
+        or len(value) != 3
+        or any(isinstance(x, bool) or not isinstance(x, (int, float)) for x in value)
+    ):
+        raise ValueError("native vector must have three numeric components")
+    return value
+
+
+def compact_native_vectors(row: JsonRecord) -> JsonRecord:
+    """Store native basis images as rows while retaining their exact values."""
+    result = dict(row)
+    basis_key = "native_rotated_positive_basis_vectors_xyz"
+    if basis_key in result:
+        basis = result[basis_key]
+        if not isinstance(basis, list) or len(basis) != 3:
+            raise ValueError("native basis action must contain three vectors")
+        result[basis_key] = [_native_vector(value) for value in basis]
+    probe_key = "native_rotated_probe_vector_xyz"
+    if probe_key in result:
+        result[probe_key] = _native_vector(result[probe_key])
+    return result
+
+
 def retain_canonical_interop(
     canonical_interop: JsonRecord, expected_inputs: dict[str, list[float]]
 ) -> JsonRecord:
@@ -174,7 +206,8 @@ def _retain_profile(
         }
         if case_id != "mixed_a":
             retained.pop("native_rotated_probe_vector_xyz", None)
-        retained_cases.append(cast(JsonRecord, retained))
+        if case_id in ENGINE_RETAINED_CASE_IDS:
+            retained_cases.append(compact_native_vectors(cast(JsonRecord, retained)))
     missing = set(expected_inputs) - seen
     if missing:
         raise ValueError(
@@ -195,7 +228,7 @@ def _retain_profile(
         if isinstance(product, dict):
             retained_product = dict(product)
             retained_product.pop("native_rotated_probe_vector_xyz", None)
-            retained_profile[product_key] = retained_product
+            retained_profile[product_key] = compact_native_vectors(retained_product)
     return cast(
         JsonRecord,
         {**retained_profile, "orientation_cases": retained_cases},
@@ -315,9 +348,6 @@ def retain(
             "native_algebra": semantic_config.engine.native_algebra,
             "native_vector_action": semantic_config.engine.native_vector_action,
         },
-        "contract": semantic_config.conversion.model_dump(
-            mode="json", exclude_none=True
-        ),
         "provenance": {
             "original_capture_sha256": hashlib.sha256(original_bytes).hexdigest(),
             "capture_source": capture_source_name,
@@ -389,7 +419,6 @@ def retain(
 
     contract = {
         "engine": witness["target"],
-        "conversion": witness["contract"],
         "provenance": {
             **contract_provenance,
             "semantic_contract_file": semantic_config_path.relative_to(

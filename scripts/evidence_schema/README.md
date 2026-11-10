@@ -9,11 +9,11 @@ contract:
   models.
 - `semantic_serializers/` maps each target's validated models into the shared
   semantic witness types in `crystallized.py`.
-- `normalizer.py` checks those witnesses against canonical inputs and returns
-  the resolved common capture type.
+- `normalizer.py` checks those witnesses against canonical inputs and their
+  declared frame contracts.
 - [`scripts/converter_evidence.py`](../converter_evidence.py) and
-  `engine_evidence.py` load versioned packages, verify their provenance, and
-  call the right serializer.
+  `engine_evidence.py` load versioned packages and verify their provenance.
+- `validation.py` invokes the target serializers and shared normalizer.
 - `tolerances.py` contains the numeric acceptance thresholds used for each
   converter target.
 

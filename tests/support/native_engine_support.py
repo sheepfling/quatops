@@ -1,5 +1,6 @@
 """Shared QuatOps helpers for comparisons with native engine captures."""
 
+import hashlib
 import json
 from pathlib import Path
 
@@ -18,6 +19,16 @@ def load_versioned_engine_witness(repository_root, engine, version):
     """Load a version contract and resolve its immutable witness reference."""
     base = Path(repository_root) / "tests" / "oracles" / engine / version
     contract = json.loads((base / "contract.json").read_text(encoding="utf-8"))
+    config_path = (
+        Path(repository_root) / contract["provenance"]["semantic_contract_file"]
+    )
+    config_bytes = config_path.read_bytes()
+    if (
+        hashlib.sha256(config_bytes).hexdigest()
+        != contract["provenance"]["semantic_contract_sha256"]
+    ):
+        raise ValueError("engine semantic contract digest differs from provenance")
+    contract["conversion"] = json.loads(config_bytes)["conversion"]
     witness_path = (base / contract["provenance"]["witness_file"]).resolve()
     witness = json.loads(witness_path.read_text(encoding="utf-8"))
     target = witness.get("target", {})

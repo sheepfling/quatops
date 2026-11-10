@@ -3,10 +3,64 @@
 from __future__ import annotations
 
 from copy import deepcopy
+from math import copysign
 
 import pytest
 
-from scripts.retain_engine_witnesses import retain_canonical_interop
+from scripts.evidence_schema.engine_captures import ENGINE_RETAINED_CASE_IDS
+from scripts.retain_engine_witnesses import (
+    compact_native_vectors,
+    retain_canonical_interop,
+)
+
+
+def test_retention_selects_the_reviewed_engine_cases():
+    inputs = {
+        case_id: [1.0, 0.0, 0.0, 0.0]
+        for case_id in (
+            *ENGINE_RETAINED_CASE_IDS,
+            "quarter_x",
+            "quarter_y",
+            "quarter_z",
+        )
+    }
+    capture = {
+        "orientation_cases": [
+            {"case_id": case_id, "canonical_wxyz": value}
+            for case_id, value in inputs.items()
+        ]
+    }
+    retained = retain_canonical_interop(capture, inputs)
+    assert {row["case_id"] for row in retained["orientation_cases"]} == set(
+        ENGINE_RETAINED_CASE_IDS
+    )
+
+
+def test_native_basis_vectors_are_compacted_without_changing_components():
+    original = {
+        "native_rotated_positive_basis_vectors_xyz": [
+            {"x": -0.0, "y": 0.25, "z": -0.75},
+            [0.5, 0.0, 1.0],
+            {"x": 1.0, "y": 2.0, "z": 3.0},
+        ],
+        "native_rotated_probe_vector_xyz": {"x": 0.5, "y": -1.0, "z": 2.0},
+    }
+    retained = compact_native_vectors(original)
+    assert retained["native_rotated_positive_basis_vectors_xyz"] == [
+        [-0.0, 0.25, -0.75],
+        [0.5, 0.0, 1.0],
+        [1.0, 2.0, 3.0],
+    ]
+    assert (
+        copysign(1.0, retained["native_rotated_positive_basis_vectors_xyz"][0][0])
+        == -1.0
+    )
+    assert retained["native_rotated_probe_vector_xyz"] == [0.5, -1.0, 2.0]
+    assert isinstance(original["native_rotated_positive_basis_vectors_xyz"][0], dict)
+    with pytest.raises(ValueError, match="only x, y and z"):
+        compact_native_vectors(
+            {"native_rotated_probe_vector_xyz": {"x": 1, "y": 2, "z": 3, "w": 4}}
+        )
 
 
 def test_precision_profiles_are_rebuilt_without_mutating_capture_rows():

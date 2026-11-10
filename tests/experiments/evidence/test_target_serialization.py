@@ -1,4 +1,4 @@
-"""Target Pydantic models reduce captured packages into the common product."""
+"""Target Pydantic models normalize independently captured native witnesses."""
 
 from __future__ import annotations
 
@@ -9,13 +9,11 @@ import pytest
 from pydantic import ValidationError
 
 from scripts.converter_evidence import (
-    converter_fixture_directories,
     load_converter_evidence,
 )
+from scripts.evidence_json import read_evidence_document
 from scripts.evidence_schema.converter_captures import EigenInputs, EigenOrientation
 from scripts.evidence_schema.crystallized import (
-    CrystallizedEvidence,
-    EvidenceProduct,
     FrameChainContract,
     FrameChainWitness,
     GeographicContract,
@@ -24,21 +22,26 @@ from scripts.evidence_schema.crystallized import (
     RotationVectorBoundaryContract,
     SceneTransportContract,
 )
-from scripts.evidence_schema.engine_evidence import ENGINE_VERSIONS, load_engine_package
-from scripts.evidence_schema.product import (
-    build_evidence_product,
-    render_evidence_product,
+from scripts.evidence_schema.engine_evidence import load_engine_package
+from scripts.evidence_schema.normalizer import normalize_capture
+from scripts.evidence_schema.shared_inputs import (
+    SharedCanonicalInputCapture,
+    crystallize_shared_inputs,
+)
+from scripts.evidence_schema.validation import (
+    validate_evidence_packages,
+    verify_capture_provenance,
 )
 from tests.support.paths import REPOSITORY_ROOT
 
 ROOT = REPOSITORY_ROOT
 EXPECTED_WITNESS_COUNTS = MappingProxyType(
     {
-        ("Unreal Engine", "5.7.4"): 18,
-        ("Unity Editor", "6000.5.2f1"): 9,
-        ("Godot Engine", "4.7-stable"): 9,
-        ("Godot Engine", "4.8-dev1"): 9,
-        ("Blender", "5.1.2"): 9,
+        ("Unreal Engine", "5.7.4"): 14,
+        ("Unity Editor", "6000.5.2f1"): 7,
+        ("Godot Engine", "4.7-stable"): 7,
+        ("Godot Engine", "4.8-dev1"): 7,
+        ("Blender", "5.1.2"): 7,
         ("Eigen", "5.0.1"): 20,
         ("MuJoCo", "3.17.0"): 10,
         ("OpenCV", "4.13.0"): 20,
@@ -65,107 +68,103 @@ def test_converter_rejects_changed_shared_contract(tmp_path):
         load_converter_evidence(tmp_path / fixture, repository_root=tmp_path)
 
 
-def test_target_specific_captures_reduce_to_reproducible_compact_product():
-    product = build_evidence_product(ROOT)
+def test_engine_rejects_changed_shared_contract(tmp_path):
+    fixture = "tests/oracles/unity/6000.5.2f1"
+    contract = "experiments/unity/6000.5.2f1/semantic_contract.json"
+    shutil.copytree(ROOT / fixture, tmp_path / fixture)
+    (tmp_path / contract).parent.mkdir(parents=True)
+    shutil.copy2(ROOT / contract, tmp_path / contract)
+    package = load_engine_package(tmp_path, "unity", "6000.5.2f1")
+    assert package.semantic_config_path == tmp_path / contract
+    with (tmp_path / contract).open("ab") as stream:
+        stream.write(b"\n")
+    with pytest.raises(ValueError, match="semantic config digest differs"):
+        load_engine_package(tmp_path, "unity", "6000.5.2f1")
 
-    assert isinstance(product, EvidenceProduct)
-    assert len(product.records) == len(EXPECTED_WITNESS_COUNTS)
-    assert len(product.witness_sets) == 12
-    assert len(product.canonical_inputs.orientations) == 8
-    assert product.canonical_inputs.product_order == "lhs * rhs; rhs acts first"
-    rendered = render_evidence_product(product)
-    assert EvidenceProduct.model_validate_json(rendered, strict=True) == product
 
-    records = {(row.target.product, row.target.version): row for row in product.records}
-    witness_sets = {row.witness_set_id: row for row in product.witness_sets}
+def test_converter_rejects_modified_native_witness(tmp_path):
+    fixture = "tests/golden/oracles/mujoco/3.17.0/converter"
+    experiment = "experiments/converters/mujoco/3.17.0"
+    shutil.copytree(ROOT / fixture, tmp_path / fixture)
+    (tmp_path / experiment).mkdir(parents=True)
+    for name in ("semantic_contract.json", "capture_native.py"):
+        shutil.copy2(ROOT / experiment / name, tmp_path / experiment / name)
+    package = load_converter_evidence(tmp_path / fixture, repository_root=tmp_path)
+    verify_capture_provenance(package, tmp_path / fixture)
+    with (tmp_path / fixture / "witnesses.json").open("ab") as stream:
+        stream.write(b"\n")
+    with pytest.raises(ValueError, match="native witness digest differs"):
+        verify_capture_provenance(package, tmp_path / fixture)
+
+
+def test_target_specific_captures_normalize_to_shared_witnesses():
+    captures = validate_evidence_packages(ROOT)
+    records = {(row.target, row.version): row for row in captures}
     assert set(records) == set(EXPECTED_WITNESS_COUNTS)
+    for key, count in EXPECTED_WITNESS_COUNTS.items():
+        assert len(records[key].serialization.witnesses) == count
+    first_godot = records[("Godot Engine", "4.7-stable")]
+    second_godot = records[("Godot Engine", "4.8-dev1")]
+    assert first_godot.witness_path == second_godot.witness_path
+    assert first_godot.serialization.witnesses == second_godot.serialization.witnesses
 
-    source_capture_paths = {
-        ROOT / "experiments/interoperability/v1/canonical_inputs.json"
-    }
-    for directory in converter_fixture_directories(ROOT):
-        package = load_converter_evidence(directory, repository_root=ROOT)
-        key = (package.target.name, package.target.version)
-        record = records[key]
-        assert isinstance(record, CrystallizedEvidence)
-        assert (
-            len(witness_sets[record.witness_set_id].witnesses)
-            == (EXPECTED_WITNESS_COUNTS[key])
-        )
-        assert record.provenance.witnesses_sha256
-        source_capture_paths.update(
-            directory / name
-            for name in ("manifest.json", "witnesses.json")
-            if (directory / name).is_file()
-        )
-        source_capture_paths.add(package.contract_source_path)
-        if package.inputs_source_path is not None:
-            source_capture_paths.add(package.inputs_source_path)
-
-    for engine, version in ENGINE_VERSIONS:
-        package = load_engine_package(ROOT, engine, version)
-        key = (package.capture.target.engine, package.capture.target.version or version)
-        record = records[key]
-        assert (
-            len(witness_sets[record.witness_set_id].witnesses)
-            == (EXPECTED_WITNESS_COUNTS[key])
-        )
-        assert record.provenance.witnesses_sha256
-        source_capture_paths.update((package.contract_path, package.witness_path))
-
-    source_capture_bytes = sum(path.stat().st_size for path in source_capture_paths)
-
-    assert len(rendered.encode("utf-8")) < source_capture_bytes
-
-    assert all(not hasattr(record, "witnesses") for record in product.records)
-    eigen_contract = records[("Eigen", "5.0.1")].contract
+    eigen_contract = records[("Eigen", "5.0.1")].serialization.contract
     assert isinstance(eigen_contract, QuaternionBoundaryContract)
     assert eigen_contract.native_order == "wxyz"
     assert eigen_contract.native_storage_order == "xyzw"
     assert eigen_contract.destination_axes_from_source == ["x", "y", "z"]
-
     assert isinstance(
-        records[("OpenCV", "4.13.0")].contract,
+        records[("OpenCV", "4.13.0")].serialization.contract,
         RotationVectorBoundaryContract,
     )
-    ros_contract = records[("ROS 2 tf2", "0.36.23")].contract
+    ros_contract = records[("ROS 2 tf2", "0.36.23")].serialization.contract
     assert isinstance(ros_contract, FrameChainContract)
     assert [frame.frame for frame in ros_contract.frame_mappings] == [
         "world",
         "base",
         "sensor",
     ]
-    assert isinstance(records[("CesiumJS", "1.124.0")].contract, GeographicContract)
-    assert isinstance(records[("OpenUSD", "26.11")].contract, SceneTransportContract)
+    assert isinstance(
+        records[("CesiumJS", "1.124.0")].serialization.contract, GeographicContract
+    )
+    assert isinstance(
+        records[("OpenUSD", "26.11")].serialization.contract, SceneTransportContract
+    )
 
 
 def test_concrete_serialization_rejects_mismatched_layer_and_witness_family():
-    product = build_evidence_product(ROOT)
-    records = {(row.target.product, row.target.version): row for row in product.records}
-    witness_sets = {row.witness_set_id: row for row in product.witness_sets}
-    eigen_record = records[("Eigen", "5.0.1")]
-    eigen_witnesses = witness_sets[eigen_record.witness_set_id].witnesses
-    orientation = next(row for row in eigen_witnesses if row.kind == "orientation")
-    ros_record = records[("ROS 2 tf2", "0.36.23")]
-    frame_chain = witness_sets[ros_record.witness_set_id].witnesses[0]
-
-    assert isinstance(eigen_record.contract, QuaternionBoundaryContract)
+    records = {
+        (row.target, row.version): row for row in validate_evidence_packages(ROOT)
+    }
+    eigen = records[("Eigen", "5.0.1")].serialization
+    orientation = next(row for row in eigen.witnesses if row.kind == "orientation")
+    frame_chain = records[("ROS 2 tf2", "0.36.23")].serialization.witnesses[0]
+    assert isinstance(eigen.contract, QuaternionBoundaryContract)
     assert isinstance(frame_chain, FrameChainWitness)
+    inputs = crystallize_shared_inputs(
+        SharedCanonicalInputCapture.model_validate(
+            read_evidence_document(
+                ROOT / "experiments/interoperability/v1/canonical_inputs.json"
+            ),
+            strict=True,
+        )
+    )
+    with pytest.raises(ValueError, match="precision is absent"):
+        normalize_capture(eigen, inputs, native_precision=[])
     with pytest.raises(ValidationError):
         NativeQuaternionApiSerialization.model_validate(
             {
                 "layer": "engine-quaternion",
-                "contract": eigen_record.contract,
+                "contract": eigen.contract,
                 "witnesses": [orientation],
             },
             strict=True,
         )
-
     with pytest.raises(ValidationError):
         NativeQuaternionApiSerialization.model_validate(
             {
                 "layer": "native-quaternion-api",
-                "contract": eigen_record.contract,
+                "contract": eigen.contract,
                 "witnesses": [frame_chain],
             },
             strict=True,
@@ -173,16 +172,12 @@ def test_concrete_serialization_rejects_mismatched_layer_and_witness_family():
 
 
 def test_eigen_storage_view_is_typed_and_matches_native_accessors():
-    product = build_evidence_product(ROOT)
-    record = next(row for row in product.records if row.target.product == "Eigen")
-    witness_set = next(
-        row
-        for row in product.witness_sets
-        if row.witness_set_id == record.witness_set_id
+    capture = next(
+        row for row in validate_evidence_packages(ROOT) if row.target == "Eigen"
     )
     mixed = [
         witness
-        for witness in witness_set.witnesses
+        for witness in capture.serialization.witnesses
         if witness.kind == "orientation" and witness.case_id == "mixed_a"
     ]
     assert len(mixed) == 2

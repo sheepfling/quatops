@@ -5,11 +5,9 @@ from __future__ import annotations
 import argparse
 from pathlib import Path
 
-from scripts.converter_evidence import (
-    converter_fixture_directories,
-    load_converter_evidence,
-)
-from scripts.evidence_schema.engine_evidence import ENGINE_VERSIONS, load_engine_package
+from scripts.converter_evidence import converter_fixture_directories
+from scripts.evidence_schema.engine_evidence import ENGINE_VERSIONS
+from scripts.evidence_schema.validation import validate_evidence_packages
 
 
 def main() -> None:
@@ -20,21 +18,16 @@ def main() -> None:
     if not directories:
         raise RuntimeError("no converter evidence packages were found")
 
-    for directory in directories:
-        package = load_converter_evidence(directory, repository_root=repository_root)
-        print(
-            f"PASS {package.target.name} {package.target.version}: "
-            f"{package.observation_group_count} typed observation groups "
-            f"({package.evidence_kind})"
-        )
-    for engine, version in ENGINE_VERSIONS:
-        package = load_engine_package(repository_root, engine, version)
-        print(
-            f"PASS {package.capture.target.engine} {version}: typed native witness package"
-        )
+    captures = validate_evidence_packages(repository_root)
+    for capture in captures:
+        print(f"PASS {capture.target} {capture.version}: normalized native evidence")
+    unique_witnesses = {
+        capture.witness_path: capture.serialization for capture in captures
+    }
     print(
         f"Validated {len(directories)} converter packages and "
-        f"{len(ENGINE_VERSIONS)} engine version packages"
+        f"{len(ENGINE_VERSIONS)} engine version packages; "
+        f"{sum(len(item.witnesses) for item in unique_witnesses.values())} native witnesses"
     )
 
 

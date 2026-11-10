@@ -41,9 +41,8 @@ target adapter after the native runtime has exited. Capture exporters use
 shared input files and typed evidence models where the target runtime permits
 them. Version-specific locks keep native environments reproducible without
 putting their dependencies in QuatOps' regular install.
-The reduced evidence product is generated on
-demand by [`crystallize_converter_evidence.py`](../../scripts/crystallize_converter_evidence.py);
-the repository does not keep a second copy of its derived output.
+`python -m scripts.validate_converter_evidence --repository-root .` checks the
+normalized evidence in memory without generating a second data product.
 
 To find a target runbook, inspect the README beside that target's capture
 script. The directory names and optional dependency groups in

@@ -15,6 +15,6 @@ if ($LASTEXITCODE -ne 0) { throw "Blender capture failed: $LASTEXITCODE" }
   $witnesses tests\oracles\blender\5.1.2 --repository-root .
 ```
 
-The retained record contains eight canonical inputs, exact native WXYZ
+The retained record contains five canonical inputs, exact native WXYZ
 quaternions, basis and mixed-vector actions, both orders of a noncommuting
 product, the assigned identity probe frame, and capture/build provenance.

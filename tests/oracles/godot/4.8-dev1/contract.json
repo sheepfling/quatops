@@ -5,54 +5,15 @@
     "version": "4.8-dev1",
     "build": "official",
     "platform": "Windows",
-    "native_scalar_profiles": [
-      "float32"
-    ],
+    "native_scalar_profiles": ["float32"],
     "native_quaternion_order": "xyzw",
     "native_algebra": "Hamilton",
     "native_vector_action": "active quaternion sandwich / engine vector rotation API"
   },
-  "conversion": {
-    "contract_id": "quatops-canonical-hamilton-wxyz-active-rh-v1",
-    "canonical_algebra": "Hamilton",
-    "canonical_order": "wxyz",
-    "canonical_action": "active",
-    "canonical_frame": {
-      "handedness": "right-handed",
-      "positive_x": "right",
-      "positive_y": "forward",
-      "positive_z": "up"
-    },
-    "native_frame": {
-      "forward_direction": "negative_z",
-      "handedness": "right-handed",
-      "positive_x": "right",
-      "positive_y": "up",
-      "positive_z": "backward"
-    },
-    "destination_axes_from_source": [
-      "x",
-      "z",
-      "-y"
-    ],
-    "conversion_rule": "native_xyzw=(x,z,-y,w)",
-    "inverse_rule": "canonical_wxyz=(W,X,-Z,Y)",
-    "world_and_body_map": "same declared signed-axis map",
-    "input_domain": "unit Hamilton quaternion; adapters preserve magnitude and do not normalize",
-    "native_precision_tolerance": {
-      "float32": 2e-06
-    },
-    "scope": "unit quaternion coefficient and physical-action conversion",
-    "excludes": [
-      "asset model-forward defaults",
-      "scene import",
-      "animation transport",
-      "Euler adapters"
-    ]
-  },
   "provenance": {
     "witness_file": "../shared/witnesses.json",
-    "witness_sha256": "918fd07acd669639123da5622b7cce569bf9b8a6f54742bd9cd7c7eef9fed807",
+    "witness_sha256": "96c0dbc6fb0c3a650bba748b7bf536c25534bdbc553b12f55a151ad38f143747",
+    "previous_witness_sha256": "918fd07acd669639123da5622b7cce569bf9b8a6f54742bd9cd7c7eef9fed807",
     "capture_source": "experiments/godot/capture.gd",
     "capture_source_sha256": "e9ffcd08ef64471a2016894576059f1be3ed2e1d12a549562c4f0b6351013c61",
     "original_capture_sha256": "87b2ae2ab1fa4d15a9c5eead13828c6afcae76f4fca84e8e5b1acc421ae69f8f",

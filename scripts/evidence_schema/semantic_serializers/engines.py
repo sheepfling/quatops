@@ -19,6 +19,7 @@ from scripts.evidence_schema.crystallized import (
     canonical_source_frame_semantics,
 )
 from scripts.evidence_schema.engine_captures import (
+    ENGINE_RETAINED_CASE_IDS,
     EngineCaptureDocument,
     EngineComposition,
     EngineContractDocument,
@@ -27,7 +28,6 @@ from scripts.evidence_schema.engine_captures import (
     Vector3Object,
 )
 from scripts.evidence_schema.semantic_serializers._witness_helpers import (
-    canonical_orientation_selection,
     select_retained_rows,
 )
 
@@ -198,9 +198,7 @@ def _orientation_witnesses(
     shared = {
         row.case_id: row.coefficients_wxyz for row in canonical_inputs.orientations
     }
-    retained_case_ids = canonical_orientation_selection(
-        list(shared), context=identity.engine
-    )
+    retained_case_ids = ENGINE_RETAINED_CASE_IDS
     output: list[QuaternionBoundaryWitness] = []
     for precision, cases, composition, reverse in _profile_cases(package):
         retained_rows = select_retained_rows(

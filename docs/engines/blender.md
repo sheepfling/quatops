@@ -20,8 +20,8 @@ universal Blender world axes or an imported asset's local forward direction.
 For canonical Hamilton `q_C=(w,x,y,z)`, the adapter emits the same WXYZ values
 `q_B=(w,x,y,z)`. The inverse preserves that order and those values.
 
-The native witnesses include identity, three positive quarter-turns, two
-unequal mixed rotations, an antipode, a nonprincipal half-turn, both
+The native witnesses include identity, two unequal mixed rotations, an
+antipode, a nonprincipal half-turn, both
 noncommuting product orders, and the native action on each basis vector. The
 selected goldens and provenance are in
 [`tests/oracles/blender/5.1.2`](../../tests/oracles/blender/5.1.2/contract.json).

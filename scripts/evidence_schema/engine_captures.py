@@ -18,6 +18,14 @@ from scripts.evidence_schema.primitives import (
 
 NativeVector3 = Union[Vector3, "Vector3Object"]
 
+ENGINE_RETAINED_CASE_IDS = (
+    "identity",
+    "mixed_a",
+    "mixed_b",
+    "antipode_mixed_a",
+    "nonprincipal_halfturn",
+)
+
 
 class Vector3Object(NativeCaptureModel):
     x: float
@@ -113,6 +121,7 @@ class EngineProvenance(NativeCaptureModel):
     retention_method: Optional[str] = None
     witness_file: Optional[str] = None
     witness_sha256: Optional[SHA256] = None
+    previous_witness_sha256: Optional[SHA256] = None
 
 
 class EngineContractDocument(NativeCaptureModel):

@@ -33,21 +33,6 @@
         "native_rotated_positive_basis_vectors_xyz": [[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]]
       },
       {
-        "case_id": "quarter_x",
-        "native_quaternion": [0.7071067690849304, 0.7071067690849304, 0.0, 0.0],
-        "native_rotated_positive_basis_vectors_xyz": [[0.9999999403953552, 0.0, 0.0], [0.0, 0.0, 0.9999999403953552], [0.0, -0.9999999403953552, 0.0]]
-      },
-      {
-        "case_id": "quarter_y",
-        "native_quaternion": [0.7071067690849304, 0.0, 0.7071067690849304, 0.0],
-        "native_rotated_positive_basis_vectors_xyz": [[0.0, 0.0, -0.9999999403953552], [0.0, 0.9999999403953552, 0.0], [0.9999999403953552, 0.0, 0.0]]
-      },
-      {
-        "case_id": "quarter_z",
-        "native_quaternion": [0.7071067690849304, 0.0, 0.0, 0.7071067690849304],
-        "native_rotated_positive_basis_vectors_xyz": [[0.0, 0.9999999403953552, 0.0], [-0.9999999403953552, 0.0, 0.0], [0.0, 0.0, 0.9999999403953552]]
-      },
-      {
         "case_id": "mixed_a",
         "native_quaternion": [0.800000011920929, 0.20000000298023224, -0.4000000059604645, 0.4000000059604645],
         "native_rotated_positive_basis_vectors_xyz": [

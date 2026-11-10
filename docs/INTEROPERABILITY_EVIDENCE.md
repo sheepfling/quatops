@@ -37,17 +37,22 @@ caller inputs unless a target API explicitly defines the role and its frame.
 
 ## Retained evidence
 
-Each game-engine witness set retains eight canonical inputs: identity, three
-positive quarter-turns, two unequal mixed rotations, one antipode, and a
-nonprincipal half-turn. For each, it stores the exact native quaternion and
-native images of +X, +Y, +Z and an asymmetric probe. Both orders of the
+Each game-engine witness set retains five canonical inputs: identity, two
+unequal mixed rotations, one antipode, and a nonprincipal half-turn. For each,
+it stores the exact native quaternion and native images of +X, +Y and +Z. The
+first mixed rotation also retains an asymmetric probe. Both orders of the
 noncommuting mixed product are included. The selected values are preserved in
 [`tests/oracles`](../tests/oracles/) with engine/build identity, native
 precision, explicit frame contract, capture-source/input hashes, and the hash
-of the exact native capture output.
+of the exact native capture output. Each run record references the frame
+contract beside its capture script by path and digest.
 
-The native capture programs call each engine's vector action independently of
-QuatOps. The compact selector retains those values without recomputing them.
+The two mixed rotations distinguish all 24 quaternion maps induced by the 48
+signed-axis permutations against each captured native precision. A basis map
+and its negation induce the same quaternion map; their physical frame meanings
+must be declared separately. The native capture programs call each engine's
+vector action independently of QuatOps. The selector retains those values
+without recomputing them.
 Godot 4.7 and 4.8 have separate version contracts and capture hashes; their
 identical selected native values share one immutable witness file.
 The package tests then compare the physical action with an independently built

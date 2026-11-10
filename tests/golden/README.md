@@ -47,14 +47,10 @@ beside its experiment, the package references that source by path and digest
 instead of retaining a second byte-identical copy. Unknown fields and malformed
 vector, quaternion, or matrix shapes fail validation. Native observations are
 never rewritten.
-Run `python -m scripts.validate_evidence_json --repository-root .` for syntax and JSON-value validation, then
-`python -m scripts.validate_converter_evidence --repository-root .` for typed validation of the
-converter packages and Unreal, Unity, Godot, and Blender versions. The
-target-neutral selected-value product is reduced in memory with
-`python -m scripts.crystallize_converter_evidence --repository-root .`, rather than checked in
-beside its source values. Pass `--output <path>` to export portable JSON or
-`--check --output <path>` to verify an existing export against the captures and
-retention rules.
+Run `python -m scripts.validate_evidence_json --repository-root .` for syntax
+and JSON-value validation, then run
+`python -m scripts.validate_converter_evidence --repository-root .` to validate
+and normalize converter and game-engine packages in memory.
 
 ## Retention boundary
 

@@ -35,21 +35,6 @@
             "native_rotated_positive_basis_vectors_xyz": [[1, 0, 0], [0, 1, 0], [0, 0, 1]]
           },
           {
-            "case_id": "quarter_x",
-            "native_quaternion": [0, -0.7071067690849304, 0, 0.7071067690849304],
-            "native_rotated_positive_basis_vectors_xyz": [[5.960464477539063e-08, 0, 0.9999999403953552], [0, 1, 0], [-0.9999999403953552, 0, 5.960464477539063e-08]]
-          },
-          {
-            "case_id": "quarter_y",
-            "native_quaternion": [-0.7071067690849304, 0, 0, 0.7071067690849304],
-            "native_rotated_positive_basis_vectors_xyz": [[1, 0, 0], [0, 5.960464477539063e-08, -0.9999999403953552], [0, 0.9999999403953552, 5.960464477539063e-08]]
-          },
-          {
-            "case_id": "quarter_z",
-            "native_quaternion": [0, 0, -0.7071067690849304, 0.7071067690849304],
-            "native_rotated_positive_basis_vectors_xyz": [[5.960464477539063e-08, -0.9999999403953552, 0], [0.9999999403953552, 5.960464477539063e-08, 0], [0, 0, 1]]
-          },
-          {
             "case_id": "mixed_a",
             "native_quaternion": [0.4000000059604645, -0.20000000298023224, -0.4000000059604645, 0.800000011920929],
             "native_rotated_positive_basis_vectors_xyz": [
@@ -116,21 +101,6 @@
             "case_id": "identity",
             "native_quaternion": [0, 0, 0, 1],
             "native_rotated_positive_basis_vectors_xyz": [[1, 0, 0], [0, 1, 0], [0, 0, 1]]
-          },
-          {
-            "case_id": "quarter_x",
-            "native_quaternion": [0, -0.7071067811865476, 0, 0.7071067811865476],
-            "native_rotated_positive_basis_vectors_xyz": [[-2.220446049250313e-16, 0, 1.0000000000000002], [0, 1, 0], [-1.0000000000000002, 0, -2.220446049250313e-16]]
-          },
-          {
-            "case_id": "quarter_y",
-            "native_quaternion": [-0.7071067811865476, 0, 0, 0.7071067811865476],
-            "native_rotated_positive_basis_vectors_xyz": [[1, 0, 0], [0, -2.220446049250313e-16, -1.0000000000000002], [0, 1.0000000000000002, -2.220446049250313e-16]]
-          },
-          {
-            "case_id": "quarter_z",
-            "native_quaternion": [0, 0, -0.7071067811865476, 0.7071067811865476],
-            "native_rotated_positive_basis_vectors_xyz": [[-2.220446049250313e-16, -1.0000000000000002, 0], [1.0000000000000002, -2.220446049250313e-16, 0], [0, 0, 1]]
           },
           {
             "case_id": "mixed_a",

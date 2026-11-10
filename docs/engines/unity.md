@@ -20,8 +20,8 @@ For canonical Hamilton `q_C=(w,x,y,z)`, the adapter emits
 `q_Unity=(-x,-z,-y,w)` in native XYZW order. Its inverse is
 `q_C=(W,-X,-Z,-Y)` from native `(X,Y,Z,W)`.
 
-Native witness values include identity, three positive quarter-turns, two
-unequal mixed rotations, an antipode, a nonprincipal half-turn, both orders of
+Native witness values include identity, two unequal mixed rotations, an
+antipode, a nonprincipal half-turn, both orders of
 their noncommuting product, and the native action on each basis vector. The
 selected witnesses and provenance are in
 [`tests/oracles/unity/6000.5.2f1`](../../tests/oracles/unity/6000.5.2f1/contract.json).

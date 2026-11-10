@@ -19,8 +19,8 @@ For canonical Hamilton `q_C=(w,x,y,z)`, the adapter emits
 `q_G=(x,z,-y,w)` in native XYZW order. Its inverse is
 `q_C=(W,X,-Z,Y)` from native `(X,Y,Z,W)`.
 
-Each captured version retains the selected native outputs for identity, three
-positive quarter-turns, two unequal mixed rotations, an antipode, a nonprincipal
+Each captured version retains the selected native outputs for identity, two
+unequal mixed rotations, an antipode, a nonprincipal
 half-turn, both orders of their noncommuting product, and the three native basis
 actions. The versioned contracts and witnesses are
 [Godot 4.7](../../tests/oracles/godot/4.7-stable/contract.json) and

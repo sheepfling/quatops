@@ -2,19 +2,13 @@
 
 from __future__ import annotations
 
-from typing import cast
+from collections.abc import Sequence
 
 from scripts.evidence_schema.crystallized import (
     CanonicalInputs,
     CoordinateFrame,
-    CrystallizationHeader,
-    CrystallizedCapture,
-    CrystallizedEvidence,
-    CrystallizedWitnessSet,
     EngineQuaternionSerialization,
     EvidenceContract,
-    EvidenceTarget,
-    EvidenceWitness,
     FrameChainContract,
     FrameChainSerialization,
     FrameSemantics,
@@ -254,7 +248,7 @@ def _validate_contract_basis(
 
 
 def _validate_witnesses(
-    serialization: SemanticSerialization, target: EvidenceTarget
+    serialization: SemanticSerialization, native_precision: Sequence[str]
 ) -> None:
     if isinstance(
         serialization,
@@ -270,7 +264,7 @@ def _validate_witnesses(
                     f"{witness.case_id!r} coefficient order disagrees with "
                     "the normalized quaternion contract"
                 )
-            if witness.precision not in target.native_precision:
+            if witness.precision not in native_precision:
                 raise ValueError(
                     f"{witness.case_id!r} precision is absent from target metadata"
                 )
@@ -280,9 +274,7 @@ def _validate_witnesses(
         witnesses = serialization.witnesses
         if not witnesses:
             raise ValueError("target semantic serialization contains no witnesses")
-        if any(
-            witness.precision not in target.native_precision for witness in witnesses
-        ):
+        if any(witness.precision not in native_precision for witness in witnesses):
             raise ValueError(
                 "rotation-vector witness precision is absent from target metadata"
             )
@@ -365,39 +357,14 @@ def _validate_witnesses(
 
 
 def normalize_capture(
-    header: CrystallizationHeader,
     serialization: SemanticSerialization,
     canonical_inputs: CanonicalInputs,
-) -> CrystallizedCapture:
-    """Validate one target serializer output and construct the common records."""
-    if not header.evidence_id.strip() or not header.contract_id.strip():
-        raise ValueError("evidence and contract IDs must be nonempty")
-    if not header.witness_set_id.strip():
-        raise ValueError("witness-set ID must be nonempty")
-    if not all(
-        value.strip()
-        for value in (header.target.product, header.target.version, header.target.api)
-    ):
-        raise ValueError("target product, version, and API must be nonempty")
+    *,
+    native_precision: Sequence[str],
+) -> None:
+    """Validate a target's typed witnesses against its explicit frame contract."""
     contract = serialization.contract
     _validate_contract_semantics(contract)
     _validate_source_frame(contract, canonical_inputs)
     _validate_contract_basis(contract, canonical_inputs)
-    _validate_witnesses(serialization, header.target)
-    return CrystallizedCapture(
-        record=CrystallizedEvidence(
-            schema_version=2,
-            evidence_id=header.evidence_id,
-            layer=serialization.layer,
-            target=header.target,
-            contract_id=header.contract_id,
-            contract=serialization.contract,
-            witness_set_id=header.witness_set_id,
-            provenance=header.provenance,
-        ),
-        witness_set=CrystallizedWitnessSet(
-            schema_version=2,
-            witness_set_id=header.witness_set_id,
-            witnesses=cast(list[EvidenceWitness], serialization.witnesses),
-        ),
-    )
+    _validate_witnesses(serialization, native_precision)

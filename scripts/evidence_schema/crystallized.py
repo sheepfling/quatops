@@ -7,7 +7,6 @@ from typing import Annotated, Literal, Optional, Union
 from pydantic import Field
 
 from scripts.evidence_schema.primitives import (
-    SHA256,
     BasisImages,
     Matrix4,
     Quaternion4,
@@ -191,49 +190,6 @@ EvidenceContract = Annotated[
     Field(discriminator="kind"),
 ]
 
-EvidenceLayer = Literal[
-    "engine-quaternion",
-    "native-quaternion-api",
-    "frame-transport",
-    "geographic-transport",
-    "scene-transport",
-]
-
-
-class EvidenceTarget(StrictEvidenceModel):
-    """Runtime identity associated with a captured witness set."""
-
-    product: str
-    version: str
-    api: str
-    native_precision: list[str]
-    build_id: Optional[str] = None  # noqa: UP045
-
-
-class DependencyPin(StrictEvidenceModel):
-    """One pinned runtime dependency used by a native capture."""
-
-    name: str
-    version: str
-
-
-class CaptureProvenance(StrictEvidenceModel):
-    """Minimal provenance retained with a crystallized target record."""
-
-    capture_adapter: str
-    capture_adapter_sha256: SHA256
-    input_sha256: SHA256
-    contract_sha256: SHA256
-    semantic_contract_file: str
-    witnesses_sha256: SHA256
-    manifest_sha256: Optional[SHA256] = None  # noqa: UP045
-    native_runtime: str
-    native_binary_sha256: Optional[SHA256] = None  # noqa: UP045
-    checked_in_adapter_sha256: Optional[SHA256] = None  # noqa: UP045
-    transport_asset_sha256: Optional[SHA256] = None  # noqa: UP045
-    dependency_lock_sha256: Optional[SHA256] = None  # noqa: UP045
-    dependencies: list[DependencyPin]
-
 
 class OrientationWitness(StrictEvidenceModel):
     """Native quaternion coefficients and the native action on a basis."""
@@ -386,18 +342,6 @@ RotationVectorBoundaryWitness = Annotated[
     Union[RotationVectorWitness, RotationVectorCompositionWitness],
     Field(discriminator="kind"),
 ]
-EvidenceWitness = Annotated[
-    Union[
-        OrientationWitness,
-        CompositionWitness,
-        RotationVectorWitness,
-        RotationVectorCompositionWitness,
-        FrameChainWitness,
-        GeographicOrientationWitness,
-        SceneNodeWitness,
-    ],
-    Field(discriminator="kind"),
-]
 
 
 class EngineQuaternionSerialization(StrictEvidenceModel):
@@ -490,50 +434,3 @@ class CanonicalInputs(StrictEvidenceModel):
     composition_left_case_id: str
     composition_right_case_id: str
     product_order: str
-
-
-class CrystallizedEvidence(StrictEvidenceModel):
-    """Small, target-neutral evidence record consumed by offline tests."""
-
-    schema_version: Literal[2]
-    evidence_id: str
-    layer: EvidenceLayer
-    target: EvidenceTarget
-    contract_id: str
-    contract: EvidenceContract
-    witness_set_id: str
-    provenance: CaptureProvenance
-
-
-class CrystallizedWitnessSet(StrictEvidenceModel):
-    """Immutable selected values referenced by one or more version records."""
-
-    schema_version: Literal[2]
-    witness_set_id: str
-    witnesses: list[EvidenceWitness]
-
-
-class CrystallizedCapture(StrictEvidenceModel):
-    """Normalizer result before product-level witness-set deduplication."""
-
-    record: CrystallizedEvidence
-    witness_set: CrystallizedWitnessSet
-
-
-class CrystallizationHeader(StrictEvidenceModel):
-    """Product metadata and provenance supplied to the common normalizer."""
-
-    evidence_id: str
-    target: EvidenceTarget
-    contract_id: str
-    witness_set_id: str
-    provenance: CaptureProvenance
-
-
-class EvidenceProduct(StrictEvidenceModel):
-    """Versioned collection of crystallized records with shared inputs."""
-
-    schema_version: Literal[2]
-    canonical_inputs: CanonicalInputs
-    witness_sets: list[CrystallizedWitnessSet]
-    records: list[CrystallizedEvidence]

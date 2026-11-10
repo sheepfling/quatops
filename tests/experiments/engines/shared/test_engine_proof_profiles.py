@@ -5,6 +5,7 @@ import json
 
 import pytest
 
+from scripts.evidence_schema.engine_captures import ENGINE_RETAINED_CASE_IDS
 from tests.support.native_engine_support import load_versioned_engine_witness
 from tests.support.paths import REPOSITORY_ROOT
 from tests.support.provenance_archives import read_provenance_source
@@ -85,14 +86,15 @@ def test_witnesses_keep_only_discriminating_inputs_and_native_actions():
         row["case_id"]: row["canonical_wxyz"]
         for row in canonical_inputs["orientations"]
     }
+    assert set(ENGINE_RETAINED_CASE_IDS) <= set(expected_inputs)
     for engine, version in TARGETS:
         _, witnesses, _ = _load(engine, version)
         capture = witnesses["canonical_interop"]
         captures = capture.get("precision_captures", {"float32": capture})
         for profile in captures.values():
             cases = {row["case_id"]: row for row in profile["orientation_cases"]}
-            assert set(cases) == set(expected_inputs)
-            for case_id in expected_inputs:
+            assert set(cases) == set(ENGINE_RETAINED_CASE_IDS)
+            for case_id in ENGINE_RETAINED_CASE_IDS:
                 row = cases[case_id]
                 assert len(row["native_quaternion"]) == 4
                 assert len(row["native_rotated_positive_basis_vectors_xyz"]) == 3

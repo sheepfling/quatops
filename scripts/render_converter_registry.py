@@ -13,7 +13,7 @@ from quatops.experimental.semantics.assurance import (
     semantic_assurance_rows,
     validate_semantic_assurance,
 )
-from quatops.experimental.semantics.roles import SEMANTIC_CONTRACTS, SemanticContract
+from quatops.experimental.semantics.roles import SemanticContract
 
 
 def _wrapped(label: str, value: str) -> str:
@@ -39,46 +39,41 @@ def render_registry() -> str:
     ]
     for declaration in TARGET_DECLARATIONS.values():
         profile = CONVERTERS.get(declaration.converter_id or "")
+        representation = (
+            f"{profile.representation} / {profile.component_order or '—'}"
+            if profile is not None
+            else "—"
+        )
+        evidence = profile.representation_evidence if profile is not None else "—"
+        authority = profile.semantic_authority if profile is not None else "—"
         lines.extend(
             [
-                f"### `{declaration.target_id}`",
-                "",
-                _wrapped("- Target/API: ", f"{declaration.target}: {declaration.api}"),
-                _wrapped("- Version: ", declaration.version),
-                _wrapped("- Role: ", declaration.role),
                 _wrapped(
-                    "- Representation/order: ",
-                    (
-                        f"{profile.representation} / {profile.component_order or '—'}"
-                        if profile is not None
-                        else "—"
-                    ),
+                    f"- `{declaration.target_id}`: ",
+                    f"{declaration.target}: {declaration.api}; {declaration.version}; "
+                    f"{declaration.role}; {representation}; evidence={evidence}; "
+                    f"semantic authority={authority}; state={declaration.state}.",
                 ),
-                _wrapped(
-                    "- Representation evidence: ",
-                    profile.representation_evidence if profile is not None else "—",
-                ),
-                _wrapped(
-                    "- Semantic authority: ",
-                    profile.semantic_authority if profile is not None else "—",
-                ),
-                _wrapped("- Evidence state: ", declaration.state),
-                _wrapped("- Scope: ", declaration.scope),
+                _wrapped("  Scope: ", declaration.scope),
                 "",
             ]
         )
 
     lines.extend(
         [
-            "## Role-specific semantic contracts",
+            "## Semantic assurance matrix",
             "",
-            "These declarations preserve source authority, role scope, axes, and binding context.",
-            "The cited primary documents are collected in the",
+            "R identifies representation evidence. S records the declared role source. B is a",
+            "caller- or runtime-supplied physical alignment. N states the native proof scope.",
+            "Adapter conformance is reported separately; these claims do not establish physical",
+            "asset or sensor alignment. Primary sources are indexed in the",
             "[semantic source audit](semantic-source-audit.md).",
             "",
         ]
     )
-    for contract in SEMANTIC_CONTRACTS.values():
+    for row in semantic_assurance_rows():
+        contract = cast(SemanticContract, row["contract"])
+        evidence = cast(tuple[SemanticEvidenceArtifact, ...], row["evidence"])
         source = (
             " / ".join(
                 value
@@ -99,37 +94,6 @@ def render_registry() -> str:
         binding = contract.binding_kind
         if contract.alignment_purpose:
             binding += f"; alignment={contract.alignment_purpose}"
-        lines.extend(
-            [
-                f"### `{contract.contract_id}`",
-                "",
-                _wrapped("- Authority: ", contract.authority),
-                _wrapped("- Frame role: ", contract.frame_role or "—"),
-                _wrapped("- Description: ", contract.role),
-                _wrapped("- Target family: ", contract.target_family or "—"),
-                _wrapped("- Source: ", f"{contract.source_kind}; {source}"),
-                _wrapped("- Axes/handedness: ", axes),
-                _wrapped("- Binding context: ", binding),
-                _wrapped("- Claim: ", contract.source_claim or "application-defined"),
-                _wrapped("- Scope: ", contract.assurance_scope or "—"),
-                _wrapped("- Exclusions: ", "; ".join(contract.exclusions) or "—"),
-                "",
-            ]
-        )
-    lines.extend(
-        [
-            "## Semantic assurance matrix",
-            "",
-            "R identifies representation evidence. S records the declared role source. B is a",
-            "caller- or runtime-supplied physical alignment. N states the native proof scope.",
-            "Adapter conformance is reported separately; none of these proves physical",
-            "asset or sensor alignment.",
-            "",
-        ]
-    )
-    for row in semantic_assurance_rows():
-        contract = cast(SemanticContract, row["contract"])
-        evidence = cast(tuple[SemanticEvidenceArtifact, ...], row["evidence"])
         conformance = (
             "demonstrated"
             if evidence and all(item.adapter_conformance_checked for item in evidence)
@@ -147,15 +111,22 @@ def render_registry() -> str:
             [
                 f"### `{contract.contract_id}`",
                 "",
-                _wrapped("- R — representation: ", str(row["representation"])),
                 _wrapped(
-                    "- S — role source: ",
-                    f"{row['source']}; see the semantic source audit",
+                    "- Declaration: ",
+                    f"{contract.role}; authority={contract.authority}; "
+                    f"frame role={contract.frame_role or '—'}; "
+                    f"target={contract.target_family or '—'}",
                 ),
-                _wrapped("- B — physical alignment: ", str(row["binding"])),
-                _wrapped("- N — native action: ", str(row["native"])),
+                _wrapped("- Source: ", f"{contract.source_kind}; {source}"),
+                _wrapped("- Axes and binding: ", f"{axes}; {binding}"),
+                _wrapped("- Claim: ", contract.source_claim or "application-defined"),
                 _wrapped("- Scope: ", contract.assurance_scope or "—"),
                 _wrapped("- Exclusions: ", "; ".join(contract.exclusions) or "—"),
+                _wrapped(
+                    "- Assurance: ",
+                    f"R: {row['representation']}; S: {row['source']}; "
+                    f"B: {row['binding']}; N: {row['native']}",
+                ),
                 _wrapped("- Adapter conformance: ", conformance),
                 _wrapped("- Evidence: ", evidence_links),
                 "",

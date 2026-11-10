@@ -1,4 +1,4 @@
-# Canonical and crystallized converter evidence
+# Canonical converter evidence
 
 [`v1/canonical_inputs.json`](v1/canonical_inputs.json) defines the shared
 right-handed source frame, active Hamilton WXYZ contract, eight unit
@@ -6,47 +6,37 @@ orientations, mixed-vector probe, and both noncommuting product orders. The
 native capture programs use the same hand-authored inputs and call each pinned
 target's own vector action; they do not import QuatOps or SciPy.
 
-## Typed target packages and common product
+## Typed target packages and normalization
 
 Each target's contract, inputs, and native observations have strict Pydantic
-models in `scripts/evidence_schema/targets.py`. Unknown fields fail validation.
+models in `scripts/evidence_schema/converter_captures.py` and
+`scripts/evidence_schema/engine_captures.py`. Unknown fields fail validation.
 The target-specific records are reduced into the shared typed models in
 `scripts/evidence_schema/crystallized.py`; frame declarations and conversion
 rules come from the corresponding target contract and are never inferred from
 the product name.
 
-Regenerate the compact proof product after changing a capture, contract, or
-retention rule:
-
-```powershell
-.venv\Scripts\python.exe -m scripts.crystallize_converter_evidence --repository-root .
-.venv\Scripts\python.exe -m scripts.crystallize_converter_evidence --repository-root . --output $env:TEMP\quatops-converters.json
-.venv\Scripts\python.exe -m scripts.crystallize_converter_evidence --repository-root . --check --output $env:TEMP\quatops-converters.json
-```
-
-Validate the typed source packages independently:
+Validate and normalize the typed source packages after changing a capture,
+contract, or retention rule:
 
 ```powershell
 .venv\Scripts\python.exe -m scripts.validate_converter_evidence --repository-root .
 ```
 
-The first command validates and reduces the typed source packages in memory; it
-does not write a second checked-in copy of the captured values. Pass `--output`
-when a portable JSON export is needed, and use `--check --output` to compare an
-existing export with the current sources. The common `EvidenceProduct` stores
-the shared canonical inputs once, selected native witnesses, normalized target
-contracts, and source hashes/runtime provenance. It covers Unreal Engine,
+The validator checks the target-specific contracts and native witnesses and
+normalizes them in memory. The retained source values are the evidence; no
+generated evidence JSON is needed. The checks cover Unreal Engine,
 Unity, Godot, Blender, Eigen, MuJoCo, OpenCV, ROS 2/tf2, SpiceyPy/CSPICE,
 CesiumJS, glTF through Three.js, and OpenUSD. Godot 4.7 and 4.8 reference one
 shared immutable witness set where their retained values match; their version
-contracts and provenance remain separate. The raw versioned packages remain
+contracts and provenance remain separate. The versioned witness packages are
 the source for capture review and regeneration.
 
 To add a target or native version, give its contract, inputs, and observations
 target-specific Pydantic models, then add a reducer that selects only the
-reviewed witnesses needed by the common contract. Reuse a witness-set ID only
+reviewed witnesses needed by the common contract. Share a witness file only
 when the selected native values are identical; keep version identity and
-provenance on each record.
+provenance on each run record.
 
 Full discovery sweeps remain outside the retained evidence. The versioned
 selected native values, contracts, and provenance live under
