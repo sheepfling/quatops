@@ -255,9 +255,9 @@ def main() -> None:
                 f"native Eigen {profile.dtype} constructor or products are missing"
             )
         for row in profile.orientations:
-            if row.quaternion.coeffs_xyzw is None:
+            if (row.quaternion.coeffs_xyzw is not None) != (row.case_id == "mixed_a"):
                 raise ValueError(
-                    f"native Eigen {row.case_id} lacks coefficient storage"
+                    f"native Eigen {row.case_id} has unexpected coefficient storage"
                 )
             if (row.rotation_matrix is not None) != (row.case_id == "mixed_a"):
                 raise ValueError(

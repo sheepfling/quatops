@@ -130,12 +130,15 @@ def test_eigen_wxyz_constructor_xyzw_storage_and_native_actions():
                 dtype,
                 f"Eigen WXYZ accessors {case_id}/{dtype}",
             )
-            check(
-                row["quaternion"]["coeffs_xyzw"],
-                coeffs_xyzw(canonical),
-                dtype,
-                f"Eigen coeffs() order {case_id}/{dtype}",
-            )
+            if case_id == "mixed_a":
+                check(
+                    row["quaternion"]["coeffs_xyzw"],
+                    coeffs_xyzw(canonical),
+                    dtype,
+                    f"Eigen coeffs() order {case_id}/{dtype}",
+                )
+            else:
+                assert "coeffs_xyzw" not in row["quaternion"]
             check(
                 row["native_quaternion_basis_actions_xyz"],
                 [hamilton.rotate(canonical, p) for p in BASIS],

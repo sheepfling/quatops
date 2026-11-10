@@ -29,7 +29,9 @@ The capture verifies the archive digest before compiling with `g++` in C++17
 mode. It keeps the small selected witnesses and build provenance under
 [`tests/golden/oracles/eigen/5.0.1/converter`](../../../../tests/golden/oracles/eigen/5.0.1/converter/manifest.json).
 The compiler path/version and native executable digest are recorded in the
-manifest. The native harness emits the selected typed rows directly; the
+manifest. The harness retains one native `coeffs()` storage-order observation
+per precision, alongside WXYZ coefficients and native actions for each selected
+orientation. It emits the selected typed rows directly; the
 historical producer source remains available by digest in the provenance
 archive. Prepared JSON inputs
 are generated in memory; the native input stream and shared canonical source

@@ -85,7 +85,7 @@ void write_orientation(std::ostream& out, const InputCase& item, const Vector3<d
   const Quaternion<T> q(static_cast<T>(item.w), static_cast<T>(item.x),
                         static_cast<T>(item.y), static_cast<T>(item.z));
   out << "{\"case_id\":\"" << item.id << "\",\"quaternion\":";
-  write_quaternion(out, q);
+  write_quaternion(out, q, item.id == "mixed_a");
   if (item.id == "mixed_a") {
     out << ",\"rotation_matrix\":";
     write_matrix(out, q.toRotationMatrix());
