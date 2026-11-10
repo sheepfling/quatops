@@ -9,14 +9,15 @@ From the repository root, install the pinned environment and capture the
 selected witnesses:
 
 ```shell
-uv sync --locked --project experiments/converters/mujoco/3.17.0 --python 3.10.11
-uv run --locked --project experiments/converters/mujoco/3.17.0 --python 3.10.11 \
+uv sync --locked --project experiments/converters/python310 --extra mujoco --python 3.10.11
+uv run --locked --project experiments/converters/python310 --extra mujoco --python 3.10.11 \
   python experiments/converters/mujoco/3.17.0/capture_native.py --repository-root .
 ```
 
 The [`mujoco` optional dependency set](../../../pyproject.toml) pins
 `mujoco==3.17.0` and `numpy==2.2.6`; the root QuatOps development install does
-not need either native capture dependency.
+not need either native capture dependency. The Python 3.10 lock is shared
+with SpiceyPy while the two capture dependencies remain separate extras.
 
 The script writes only retained converter witnesses and provenance to
 [`tests/golden/oracles/mujoco/3.17.0/converter`](../../../../tests/golden/oracles/mujoco/3.17.0/converter/manifest.json).

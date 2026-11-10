@@ -12,12 +12,6 @@ from tests.support.paths import REPOSITORY_ROOT
     "target,version,manifest,field",
     [
         (
-            "mujoco",
-            "3.17.0",
-            "tests/golden/oracles/mujoco/3.17.0/converter/manifest.json",
-            "pinned_lockfile_sha256",
-        ),
-        (
             "opencv",
             "4.13.0",
             "tests/golden/oracles/opencv/4.13.0/converter/manifest.json",

@@ -73,7 +73,7 @@ def test_spiceypy_boundary_contract_and_capture_provenance_are_explicit():
         "selected_inputs_sha256": SHARED_PATH,
         "witnesses_sha256": FIXTURE / "witnesses.json",
         "reproduction_lockfile_sha256": ROOT
-        / "experiments/converters/spiceypy/8.3.0/uv.lock",
+        / "experiments/converters/python310/uv.lock",
     }
     for field, path in paths.items():
         assert (
@@ -83,13 +83,23 @@ def test_spiceypy_boundary_contract_and_capture_provenance_are_explicit():
     replay = MANIFEST["compact_lock_replay"]
     assert (
         replay["lockfile_sha256"]
-        == MANIFEST["provenance"]["reproduction_lockfile_sha256"]
+        == MANIFEST["provenance"]["pre_shared_lockfile_sha256"]
     )
     assert (
         replay["native_binary_sha256"]
         == MANIFEST["provenance"]["loaded_cspice_binary_sha256"]
     )
     assert replay["witnesses_sha256"] == MANIFEST["provenance"]["witnesses_sha256"]
+    shared = MANIFEST["shared_lock_replay"]
+    assert (
+        shared["lockfile_sha256"]
+        == MANIFEST["provenance"]["reproduction_lockfile_sha256"]
+    )
+    assert (
+        shared["native_binary_sha256"]
+        == MANIFEST["provenance"]["loaded_cspice_binary_sha256"]
+    )
+    assert shared["witnesses_sha256"] == MANIFEST["provenance"]["witnesses_sha256"]
     assert (
         hashlib.sha256(
             read_provenance_source(

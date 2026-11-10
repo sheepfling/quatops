@@ -1,0 +1,15 @@
+[project]
+name = "quatops-python310-captures"
+version = "0.1.0"
+requires-python = ">=3.10,<3.11"
+dependencies = ["quatops-experiments", "pydantic==2.14.2", "typing-inspection==0.4.4"]
+
+[project.optional-dependencies]
+mujoco = ["quatops-experiments[mujoco]"]
+spiceypy = ["quatops-experiments[spiceypy]"]
+
+[tool.uv]
+package = false
+
+[tool.uv.sources]
+quatops-experiments = { path = "../..", editable = true }

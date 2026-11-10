@@ -68,6 +68,7 @@ def main() -> None:
     options = parser.parse_args()
     repository_root = options.repository_root.resolve(strict=True)
     target_dir = repository_root / "experiments/converters/spiceypy/8.3.0"
+    shared_lock = repository_root / "experiments/converters/python310/uv.lock"
     input_path = (options.inputs or target_dir / "converter_inputs.json").resolve()
     output_dir = options.output_dir or (
         repository_root / "tests/golden/oracles/spiceypy/8.3.0/converter"
@@ -200,12 +201,12 @@ def main() -> None:
             "converter_input_spec_sha256": sha256_file(input_path),
             "selected_inputs_sha256": sha256_file(shared_path),
             "witnesses_sha256": sha256_file(witnesses_path),
-            "pinned_lockfile_sha256": sha256_file(target_dir / "uv.lock"),
-            "reproduction_lockfile_sha256": sha256_file(target_dir / "uv.lock"),
+            "pinned_lockfile_sha256": sha256_file(shared_lock),
+            "reproduction_lockfile_sha256": sha256_file(shared_lock),
             "loaded_cspice_binary_path": str(library_path),
             "loaded_cspice_binary_sha256": sha256_file(library_path),
             "exact_invocation": (
-                "uv run --locked --project experiments/converters/spiceypy/8.3.0 "
+                "uv run --locked --project experiments/converters/python310 --extra spiceypy "
                 "--python 3.10.11 "
                 "python experiments/converters/spiceypy/8.3.0/capture_native.py"
                 " --repository-root <repository>"

@@ -78,13 +78,22 @@ def test_mujoco_boundary_contract_and_capture_provenance_are_explicit():
         "selected_inputs_sha256": SHARED_PATH,
         "witnesses_sha256": FIXTURE / "witnesses.json",
         "reproduction_lockfile_sha256": ROOT
-        / "experiments/converters/mujoco/3.17.0/uv.lock",
+        / "experiments/converters/python310/uv.lock",
     }
     for field, path in paths.items():
         assert (
             hashlib.sha256(path.read_bytes()).hexdigest()
             == MANIFEST["provenance"][field]
         ), field
+    replay = MANIFEST["shared_lock_replay"]
+    assert (
+        replay["lockfile_sha256"]
+        == MANIFEST["provenance"]["reproduction_lockfile_sha256"]
+    )
+    assert (
+        replay["native_binary_sha256"] == MANIFEST["native_binary_files"][0]["sha256"]
+    )
+    assert replay["witnesses_sha256"] == MANIFEST["provenance"]["witnesses_sha256"]
     capture_source = paths["reproduction_capture_script_sha256"].read_text(
         encoding="utf-8"
     )

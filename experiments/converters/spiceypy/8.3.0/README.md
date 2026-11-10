@@ -9,13 +9,13 @@ From the repository root, install the pinned environment and capture the
 selected witnesses:
 
 ```powershell
-uv sync --locked --project experiments/converters/spiceypy/8.3.0 --python 3.10.11
-uv run --locked --project experiments/converters/spiceypy/8.3.0 --python 3.10.11 `
+uv sync --locked --project experiments/converters/python310 --extra spiceypy --python 3.10.11
+uv run --locked --project experiments/converters/python310 --extra spiceypy --python 3.10.11 `
   python experiments/converters/spiceypy/8.3.0/capture_native.py --repository-root .
 ```
 
-This version directory is SpiceyPy's optional native-capture dependency set.
-Its locked project installs `spiceypy==8.3.0`; the root QuatOps environment
+The shared Python 3.10 capture project provides a separate SpiceyPy extra.
+It installs `spiceypy==8.3.0`; the root QuatOps environment
 does not need this native capture dependency. The lock covers Python 3.10,
 the interpreter used for this capture; other Python versions require a
 separately resolved environment.
