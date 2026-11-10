@@ -19,18 +19,16 @@ From the repository root in PowerShell, create an isolated environment and
 write a fresh capture outside the repository:
 
 ```powershell
-$envDir = Join-Path $env:TEMP 'quatops-captures\proj-9.5.1'
 $env:PYTHONPATH = (Get-Location).Path
-uv venv --python 3.13.14 $envDir
-uv pip install --python (Join-Path $envDir 'Scripts\python.exe') -r experiments\oracles\proj\9.5.1\requirements.txt
 $captureDir = Join-Path $env:TEMP 'quatops-captures\proj-9.5.1\latest'
-& (Join-Path $envDir 'Scripts\python.exe') experiments\oracles\proj\9.5.1\capture_proj.py `
-  --geographic experiments\oracles\shared\geographic_inputs_v1.json --output $captureDir
+uv run --locked --project experiments/converters/python --extra proj --python 3.13.14 `
+  python experiments\oracles\proj\9.5.1\capture_proj.py `
+  --repository-root . --geographic experiments\oracles\shared\geographic_inputs_v1.json --output $captureDir
 ```
 
 The required `--geographic` input in the example is the shared
 [`geographic_inputs_v1.json`](../../shared/geographic_inputs_v1.json). The
-requirements include Pydantic for typed capture records and pyproj for the
+shared lock includes Pydantic for typed capture records and pyproj for the
 native transforms. The exporter writes observations and provenance directly,
 and validates the geographic input corpus with
 the shared strict Pydantic schema, disables network access, and uses WGS84

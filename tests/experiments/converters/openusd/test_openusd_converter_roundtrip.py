@@ -86,7 +86,7 @@ def test_openusd_converter_stage_provenance_and_frame_declarations():
     assert (
         MANIFEST["reproduction"]["lockfile_sha256"]
         == hashlib.sha256(
-            (ROOT / "experiments/converters/openusd/26.11/uv.lock").read_bytes()
+            (ROOT / "experiments/converters/python/uv.lock").read_bytes()
         ).hexdigest()
     )
     reproduction = MANIFEST["reproduction"]
@@ -109,11 +109,19 @@ def test_openusd_converter_stage_provenance_and_frame_declarations():
     }.items():
         assert hashlib.sha256(path.read_bytes()).hexdigest() == reproduction[field]
     assert (
-        MANIFEST["direct_reproduction"]["capture_script_sha256"]
+        MANIFEST["direct_reproduction"]["reproduction_capture_script_sha256"]
         == reproduction["capture_script_sha256"]
     )
     assert (
         MANIFEST["direct_reproduction"]["witnesses_sha256"]
+        == provenance["native_observations_sha256"]
+    )
+    assert (
+        MANIFEST["unified_lock_replay"]["lockfile_sha256"]
+        == reproduction["lockfile_sha256"]
+    )
+    assert (
+        MANIFEST["unified_lock_replay"]["witnesses_sha256"]
         == provenance["native_observations_sha256"]
     )
 

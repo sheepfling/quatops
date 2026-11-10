@@ -9,10 +9,10 @@ native witnesses into a temporary directory:
 
 ```powershell
 $env:PYTHONPATH = (Get-Location).Path
-uv run --project experiments/converters/openusd/26.11 --locked --python 3.14.6 `
+uv run --project experiments/converters/python --locked --extra openusd --python 3.13.14 `
   python experiments/converters/openusd/26.11/create_stage.py --repository-root .
 $captureDir = Join-Path $env:TEMP "quatops-openusd-26.11-capture"
-uv run --project experiments/converters/openusd/26.11 --locked --python 3.14.6 `
+uv run --project experiments/converters/python --locked --extra openusd --python 3.13.14 `
   python experiments/converters/openusd/26.11/capture_native.py --repository-root . `
   --output $captureDir
 ```

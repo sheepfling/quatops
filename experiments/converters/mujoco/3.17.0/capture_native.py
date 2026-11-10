@@ -73,7 +73,7 @@ def main() -> None:
     options = parser.parse_args()
     repository_root = options.repository_root.resolve(strict=True)
     target_dir = repository_root / "experiments/converters/mujoco/3.17.0"
-    shared_lock = repository_root / "experiments/converters/python310/uv.lock"
+    shared_lock = repository_root / "experiments/converters/python/uv.lock"
     input_path = (options.inputs or target_dir / "converter_inputs.json").resolve()
     output_dir = options.output_dir or (
         repository_root / "tests/golden/oracles/mujoco/3.17.0/converter"
@@ -198,8 +198,8 @@ def main() -> None:
             "pinned_lockfile_sha256": sha256_file(shared_lock),
             "reproduction_lockfile_sha256": sha256_file(shared_lock),
             "exact_invocation": (
-                "uv run --locked --project experiments/converters/python310 --extra mujoco "
-                "--python 3.10.11 "
+                "uv run --locked --project experiments/converters/python --extra mujoco "
+                "--python 3.13.14 "
                 "python experiments/converters/mujoco/3.17.0/capture_native.py "
                 "--repository-root <repository>"
             ),

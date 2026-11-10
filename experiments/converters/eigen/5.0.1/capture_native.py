@@ -107,7 +107,7 @@ def main() -> None:
     options = parser.parse_args()
     repository_root = options.repository_root.resolve(strict=True)
     target_dir = repository_root / "experiments/converters/eigen/5.0.1"
-    shared_lock = repository_root / "experiments/converters/python313/uv.lock"
+    shared_lock = repository_root / "experiments/converters/python/uv.lock"
     source_metadata = repository_root / "experiments/oracles/eigen/5.0.1/source.json"
     eigen_root = options.eigen_root.resolve()
     archive_path = options.eigen_archive.resolve()

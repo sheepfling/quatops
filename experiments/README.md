@@ -9,6 +9,7 @@ runtime package. For the user-facing documentation, start with the
 
 - [Engine captures](blender/README.md): Blender authoring and native rotation capture.
 - [Converter-boundary captures](converters/README.md): auxiliary canonical-to-target proofs.
+- [Shared Python capture environment](converters/python/README.md): locked target extras.
 - [Godot captures](godot/README.md): versioned native runtime evidence.
 - [Shared orientation inputs](interoperability/README.md): stable discovery and witness inputs.
 - [Math-library captures](oracles/README.md): independently implemented rotation APIs.

@@ -86,8 +86,7 @@ def test_eigen_contract_source_pin_and_native_build_provenance():
         "witnesses_sha256": FIXTURE / "witnesses.json",
         "eigen_source_metadata_sha256": ROOT
         / "experiments/oracles/eigen/5.0.1/source.json",
-        "reproduction_lockfile_sha256": ROOT
-        / "experiments/converters/python313/uv.lock",
+        "reproduction_lockfile_sha256": ROOT / "experiments/converters/python/uv.lock",
     }
     for field, path in paths.items():
         assert hashlib.sha256(path.read_bytes()).hexdigest() == provenance[field], field
@@ -96,10 +95,18 @@ def test_eigen_contract_source_pin_and_native_build_provenance():
     assert replay["witnesses_sha256"] == provenance["witnesses_sha256"]
     assert (
         MANIFEST["shared_lock_replay"]["lockfile_sha256"]
-        == provenance["reproduction_lockfile_sha256"]
+        == provenance["pre_unified_lockfile_sha256"]
     )
     assert (
         MANIFEST["shared_lock_replay"]["witnesses_sha256"]
+        == provenance["witnesses_sha256"]
+    )
+    assert (
+        MANIFEST["unified_lock_replay"]["lockfile_sha256"]
+        == provenance["reproduction_lockfile_sha256"]
+    )
+    assert (
+        MANIFEST["unified_lock_replay"]["witnesses_sha256"]
         == provenance["witnesses_sha256"]
     )
     archived_source = read_provenance_source(

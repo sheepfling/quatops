@@ -16,8 +16,8 @@ $archive = Join-Path $env:TEMP 'eigen-5.0.1.tar.gz'
 $extract = Join-Path $env:TEMP 'quatops-eigen-5.0.1'
 Invoke-WebRequest -Uri 'https://gitlab.com/libeigen/eigen/-/archive/5.0.1/eigen-5.0.1.tar.gz' -OutFile $archive
 tar -xzf $archive -C $extract
-uv sync --locked --project experiments/converters/python313 --extra eigen --python 3.13.14
-uv run --locked --project experiments/converters/python313 --extra eigen --python 3.13.14 `
+uv sync --locked --project experiments/converters/python --extra eigen --python 3.13.14
+uv run --locked --project experiments/converters/python --extra eigen --python 3.13.14 `
   python `
   experiments\converters\eigen\5.0.1\capture_native.py `
   --repository-root . `
@@ -26,7 +26,7 @@ uv run --locked --project experiments/converters/python313 --extra eigen --pytho
 ```
 
 The capture verifies the archive digest before compiling with `g++` in C++17
-mode. Its Python 3.13 lock is shared with OpenCV through separate extras;
+mode. Its Python 3.13 lock is shared across captures through separate extras;
 other Python versions require a separately resolved environment. It keeps the
 small selected witnesses and build provenance under
 [`tests/golden/oracles/eigen/5.0.1/converter`](../../../../tests/golden/oracles/eigen/5.0.1/converter/manifest.json).

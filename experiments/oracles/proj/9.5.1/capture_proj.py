@@ -28,6 +28,7 @@ from scripts.evidence_schema.shared_inputs import GeographicInputCorpus
 
 def main() -> None:
     cli = argparse.ArgumentParser(description=__doc__)
+    cli.add_argument("--repository-root", type=Path, required=True)
     cli.add_argument(
         "--geographic",
         type=Path,
@@ -134,6 +135,9 @@ def main() -> None:
         "native_binary_sha256": digest(native_binary),
         "input_sha256": digest(args.geographic),
         "exporter_sha256": digest(Path(__file__)),
+        "lockfile_sha256": digest(
+            args.repository_root / "experiments/converters/python/uv.lock"
+        ),
         "observations_sha256": digest(rows),
         "observation_count": len(observations),
         "scope": "WGS84 ENU/ECEF point transforms; network disabled; not Cesium or quaternion execution",

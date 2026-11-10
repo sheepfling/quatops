@@ -16,21 +16,20 @@ dependencies = [
 cesium = []
 eigen = []
 gltf = []
-mujoco = ["mujoco==3.17.0", "numpy==2.2.6"]
+mujoco = [
+  "mujoco==3.17.0",
+  "numpy==2.2.6; python_version < '3.11'",
+  "numpy==2.3.5; python_version >= '3.11'",
+]
 opencv = [
   "opencv-python-headless==4.13.0.92; python_version >= '3.11'",
   "numpy==2.3.5; python_version >= '3.11'",
 ]
-openusd = ["usd-core==26.11; python_version >= '3.14'"]
+openusd = ["usd-core==26.11; python_version >= '3.13'"]
 spiceypy = ["spiceypy==8.3.0; python_version < '3.14'"]
 proj = ["pyproj==3.7.2; python_version >= '3.11'"]
 reference = ["numpy>=1.20", "scipy>=1.18; python_version >= '3.12'"]
 dev = ["pyright[nodejs]==1.1.414", "pytest>=7", "ruff>=0.8"]
-
-[tool.uv]
-# PEP 621 extras above remain portable metadata; this UV-only declaration
-# resolves the intentionally incompatible native NumPy pins together.
-conflicts = [[{ extra = "mujoco" }, { extra = "opencv" }]]
 
 # The native capture package consumes this checkout's scripts without publishing
 # them as a second distribution.

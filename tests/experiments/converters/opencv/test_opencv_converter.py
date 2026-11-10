@@ -73,7 +73,7 @@ def test_opencv_contract_and_pinned_capture_provenance():
         / "experiments/converters/opencv/4.13.0/capture_native.py",
         "preparation_script_sha256": ROOT
         / "experiments/converters/opencv/4.13.0/prepare_inputs.py",
-        "lockfile_sha256": ROOT / "experiments/converters/python313/uv.lock",
+        "lockfile_sha256": ROOT / "experiments/converters/python/uv.lock",
     }
     for field, path in reproduction_paths.items():
         assert hashlib.sha256(path.read_bytes()).hexdigest() == reproduction[field], (
@@ -81,7 +81,7 @@ def test_opencv_contract_and_pinned_capture_provenance():
         )
     assert (
         MANIFEST["shared_lock_replay"]["lockfile_sha256"]
-        == reproduction["lockfile_sha256"]
+        == reproduction["pre_unified_lockfile_sha256"]
     )
     assert (
         MANIFEST["shared_lock_replay"]["native_binary_sha256"]
@@ -89,6 +89,14 @@ def test_opencv_contract_and_pinned_capture_provenance():
     )
     assert (
         MANIFEST["shared_lock_replay"]["witnesses_sha256"]
+        == provenance["witnesses_sha256"]
+    )
+    assert (
+        MANIFEST["unified_lock_replay"]["lockfile_sha256"]
+        == reproduction["lockfile_sha256"]
+    )
+    assert (
+        MANIFEST["unified_lock_replay"]["witnesses_sha256"]
         == provenance["witnesses_sha256"]
     )
     archived_capture = read_provenance_source(

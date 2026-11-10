@@ -30,7 +30,7 @@
   ],
   "provenance": {
     "capture_script_sha256": "ab00e29d284624426f46e88e65a7f2faa964d8e21fdbac08cb7f80a0be3af60e",
-    "reproduction_capture_script_sha256": "3668a11a9a53ef4e638625c168dc653e0d6db84ce437e8c4d881099ade47c1c1",
+    "reproduction_capture_script_sha256": "59c9352dbdf1d1ccdcd974af3c95e655bd1e0b135a5ee4516e8d8aab7610cc80",
     "contract_sha256": "6a2de9e8a58581109663850419dc39c01b7ae2674e60b969bdebe1fbeacefe8a",
     "converter_input_spec_sha256": "cfc5dbbc1729c6d22b9f0c2e8f7d3f335ff0b32a65a968f2f48f65a4aaa0eb82",
     "selected_inputs_sha256": "a6f0630806b69d3b3b29a036aa10f63bfe214668329c661598951f84f8f41eec",
@@ -38,10 +38,13 @@
     "witness_selection_note": "Quarter-turn rows were removed from the retained subset; original native capture identity and selected values are unchanged.",
     "pinned_lockfile_sha256": "9043b65cd8be3132dc0302638cc5d80886951cbee64fbc0612c3437acd0070a8",
     "exact_invocation": "uv run --locked --project experiments/converters/mujoco/3.17.0 --python 3.10.11 python experiments/converters/mujoco/3.17.0/capture_native.py --repository-root <repository>",
-    "reproduction_lockfile_sha256": "175d58e93537385b27d97d51bbfecd5d3eca43ef73faa588c4629482a8378e95",
+    "reproduction_lockfile_sha256": "4377022efa364fac013b8adf6a232bfbd6dc860847418061ef7f6c66e0f2d142",
     "pre_shared_lockfile_sha256": "d033290b2f70f1de10463dfb1672d28f533f180bceab0989224801ba7eec39a6",
     "pre_shared_lockfile_revision": "2618dc4757feb94669d35a57661ff1acdf731ea0",
-    "previous_reproduction_capture_script_sha256": "45c3e9dca41e03d4fe07d42c48a6a57475bda9a5478b5338cee1b40f84e4bff3"
+    "previous_reproduction_capture_script_sha256": "45c3e9dca41e03d4fe07d42c48a6a57475bda9a5478b5338cee1b40f84e4bff3",
+    "pre_unified_lockfile_sha256": "175d58e93537385b27d97d51bbfecd5d3eca43ef73faa588c4629482a8378e95",
+    "pre_unified_lockfile_revision": "abf2a2f27ceb601398da126423901484eb6ae46b",
+    "pre_unified_capture_source_sha256": "3668a11a9a53ef4e638625c168dc653e0d6db84ce437e8c4d881099ade47c1c1"
   },
   "semantic_contract": {
     "file": "experiments/converters/mujoco/3.17.0/semantic_contract.json",
@@ -51,6 +54,13 @@
     "utc": "2026-11-10T18:37:34.952221+00:00",
     "python": "3.10.11 (tags/v3.10.11:7d4cc5a, Apr  5 2023, 00:38:17) [MSC v.1929 64 bit (AMD64)]",
     "lockfile_sha256": "175d58e93537385b27d97d51bbfecd5d3eca43ef73faa588c4629482a8378e95",
+    "native_binary_sha256": "c395db1b3f5110a730c4b0c31b7a4f29881af459c8a74a03e14b7683f022d57f",
+    "witnesses_sha256": "0c5eb585275c19930d6b0ee2a1ebe92cfd65dff0b66776f52b9f85bfda0e3485"
+  },
+  "unified_lock_replay": {
+    "utc": "2026-11-10T19:07:46.381749+00:00",
+    "python": "3.13.14 (main, Jun 23 2026, 15:19:27) [MSC v.1944 64 bit (AMD64)]",
+    "lockfile_sha256": "4377022efa364fac013b8adf6a232bfbd6dc860847418061ef7f6c66e0f2d142",
     "native_binary_sha256": "c395db1b3f5110a730c4b0c31b7a4f29881af459c8a74a03e14b7683f022d57f",
     "witnesses_sha256": "0c5eb585275c19930d6b0ee2a1ebe92cfd65dff0b66776f52b9f85bfda0e3485"
   }

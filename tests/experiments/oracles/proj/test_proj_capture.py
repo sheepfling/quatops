@@ -56,7 +56,7 @@ def test_proj_reproduction_hashes_preserve_prior_and_current_source_identity() -
         root, "experiments/provenance/reproduction-v1.zip#proj-9.5.1/capture_proj.py"
     )
     current_exporter = root / reproduction["exporter_path"]
-    requirements = root / "experiments/oracles/proj/9.5.1/requirements.txt"
+    lock = root / "experiments/converters/python/uv.lock"
 
     assert (
         hashlib.sha256(archived).hexdigest()
@@ -67,8 +67,7 @@ def test_proj_reproduction_hashes_preserve_prior_and_current_source_identity() -
         == reproduction["exporter_sha256"]
     )
     assert (
-        hashlib.sha256(requirements.read_bytes()).hexdigest()
-        == reproduction["requirements_sha256"]
+        hashlib.sha256(lock.read_bytes()).hexdigest() == reproduction["lockfile_sha256"]
     )
     archived_helper = read_provenance_source(
         root, reproduction["capture_helper_archive"]
@@ -78,10 +77,18 @@ def test_proj_reproduction_hashes_preserve_prior_and_current_source_identity() -
         == reproduction["previous_checkout_capture_helper_sha256"]
     )
     assert (
-        manifest["direct_reproduction"]["exporter_sha256"]
+        manifest["direct_reproduction"]["reproduction_exporter_sha256"]
         == reproduction["exporter_sha256"]
     )
     assert manifest["direct_reproduction"]["observation_count"] == 11
+    assert (
+        manifest["unified_lock_replay"]["observations_sha256"]
+        == manifest["direct_reproduction"]["observations_sha256"]
+    )
+    assert (
+        manifest["unified_lock_replay"]["lockfile_sha256"]
+        == reproduction["lockfile_sha256"]
+    )
     assert baseline["audit_time_reproduction_exporter_sha256"] == (
         "9295111b0a0d2ddf36c207ee50c7078a28202b60911a5589301299622a665a9a"
     )

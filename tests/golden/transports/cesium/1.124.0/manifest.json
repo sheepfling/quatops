@@ -69,6 +69,7 @@
     "native_witnesses_sha256": "7aeceed46f87013b05255d90e06f2821b0ac9b1ee45a589a9b27de8b90d4e3be",
     "comparison": "Every selected native value matches the historical witness bit-for-bit, including signed zero; JSON formatting differs.",
     "runner_sha256": "0ec2d652fc870fcc0da1dcf82c61f7336a3facfb409ff253c922b93b433b3fb5",
-    "reproduction_runner_sha256": "9e5c8220cef64cabd5bf6617395170f8a941a33e25040b35633de762b262de78"
+    "reproduction_runner_sha256": "662e62f891451b7f0ddc817f22ce896a897faf590dbb7d3e646d15c04025b70f",
+    "pre_unified_runner_sha256": "9e5c8220cef64cabd5bf6617395170f8a941a33e25040b35633de762b262de78"
   }
 }

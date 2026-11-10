@@ -72,8 +72,7 @@ def test_spiceypy_boundary_contract_and_capture_provenance_are_explicit():
         / "experiments/converters/spiceypy/8.3.0/converter_inputs.json",
         "selected_inputs_sha256": SHARED_PATH,
         "witnesses_sha256": FIXTURE / "witnesses.json",
-        "reproduction_lockfile_sha256": ROOT
-        / "experiments/converters/python310/uv.lock",
+        "reproduction_lockfile_sha256": ROOT / "experiments/converters/python/uv.lock",
     }
     for field, path in paths.items():
         assert (
@@ -93,7 +92,7 @@ def test_spiceypy_boundary_contract_and_capture_provenance_are_explicit():
     shared = MANIFEST["shared_lock_replay"]
     assert (
         shared["lockfile_sha256"]
-        == MANIFEST["provenance"]["reproduction_lockfile_sha256"]
+        == MANIFEST["provenance"]["pre_unified_lockfile_sha256"]
     )
     assert (
         shared["native_binary_sha256"]
@@ -107,6 +106,14 @@ def test_spiceypy_boundary_contract_and_capture_provenance_are_explicit():
             )
         ).hexdigest()
         == MANIFEST["provenance"]["capture_script_sha256"]
+    )
+    assert (
+        MANIFEST["unified_lock_replay"]["lockfile_sha256"]
+        == MANIFEST["provenance"]["reproduction_lockfile_sha256"]
+    )
+    assert (
+        MANIFEST["unified_lock_replay"]["witnesses_sha256"]
+        == MANIFEST["provenance"]["witnesses_sha256"]
     )
     capture_source = paths["reproduction_capture_script_sha256"].read_text(
         encoding="utf-8"

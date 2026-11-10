@@ -75,7 +75,7 @@ def main() -> None:
     options = parser.parse_args()
     repository_root = options.repository_root.resolve(strict=True)
     target_dir = repository_root / "experiments/converters/opencv/4.13.0"
-    shared_lock = repository_root / "experiments/converters/python313/uv.lock"
+    shared_lock = repository_root / "experiments/converters/python/uv.lock"
     output_dir = options.output_dir or (
         repository_root / "tests/golden/oracles/opencv/4.13.0/converter"
     )

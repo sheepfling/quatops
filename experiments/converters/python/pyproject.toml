@@ -1,12 +1,16 @@
 [project]
-name = "quatops-python313-captures"
+name = "quatops-python-captures"
 version = "0.1.0"
 requires-python = ">=3.13,<3.14"
 dependencies = ["quatops-experiments", "pydantic==2.14.2", "typing-inspection==0.4.4"]
 
 [project.optional-dependencies]
 eigen = ["quatops-experiments[eigen]"]
+mujoco = ["quatops-experiments[mujoco]"]
 opencv = ["quatops-experiments[opencv]"]
+openusd = ["quatops-experiments[openusd]"]
+proj = ["quatops-experiments[proj]"]
+spiceypy = ["quatops-experiments[spiceypy]"]
 
 [tool.uv]
 package = false
