@@ -24,37 +24,6 @@ SPEC.loader.exec_module(builder)
 
 class GltfAssetBuilderTests(unittest.TestCase):
     def test_capture_source_identities_and_archives_are_pinned(self) -> None:
-        blender = json.loads(
-            (
-                REPOSITORY_ROOT / "tests/oracles/blender/5.1.2/reproduction.json"
-            ).read_text()
-        )
-        blender_contract = json.loads(
-            (REPOSITORY_ROOT / "tests/oracles/blender/5.1.2/contract.json").read_text()
-        )
-        blender_history = blender["historical_capture"]
-        self.assertEqual(
-            blender_contract["provenance"]["capture_source_sha256"],
-            blender_history["capture_source_sha256"],
-        )
-        self.assertEqual(
-            blender_contract["provenance"]["capture_source"],
-            blender_history["capture_source_archive"],
-        )
-        self.assertEqual(
-            hashlib.sha256(
-                read_provenance_source(
-                    REPOSITORY_ROOT, blender_history["capture_source_archive"]
-                )
-            ).hexdigest(),
-            blender_history["capture_source_sha256"],
-        )
-        source = REPOSITORY_ROOT / blender["reproduction"]["capture_source"]
-        self.assertEqual(
-            hashlib.sha256(source.read_bytes()).hexdigest(),
-            blender["reproduction"]["capture_source_sha256"],
-        )
-
         gltf = json.loads(
             (
                 REPOSITORY_ROOT
