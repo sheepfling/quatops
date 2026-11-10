@@ -28,7 +28,7 @@ $captureDir = Join-Path $env:TEMP 'quatops-captures\proj-9.5.1\latest'
   --geographic experiments\oracles\shared\geographic_inputs_v1.json --output $captureDir
 ```
 
-The input file defaults to the shared
+The required `--geographic` input in the example is the shared
 [`geographic_inputs_v1.json`](../../shared/geographic_inputs_v1.json). The
 requirements include Pydantic for the shared capture envelope and pyproj for
 the native transforms. The exporter validates the geographic input corpus with
