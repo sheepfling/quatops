@@ -22,6 +22,10 @@ from scripts.evidence_schema.crystallized import (
     SceneTransportSerialization,
     SemanticSerialization,
 )
+from scripts.evidence_schema.primitives import (
+    mapped_handedness,
+    validate_signed_axis_map,
+)
 
 
 def _validate_documented_frame(
@@ -54,28 +58,6 @@ def _validate_coordinate_frame(frame: CoordinateFrame, *, context: str) -> None:
         raise ValueError(f"{context} must declare all three positive axes")
 
 
-def _validate_signed_axis_map(values: list[str], *, context: str) -> None:
-    if len(values) != 3 or any(
-        value not in {"x", "-x", "y", "-y", "z", "-z"} for value in values
-    ):
-        raise ValueError(f"{context} is not a signed-axis triple")
-    if len({value.lstrip("-") for value in values}) != 3:
-        raise ValueError(f"{context} is not a signed-axis permutation")
-
-
-def _mapped_handedness(source: str, values: list[str], *, context: str) -> str:
-    """Return the destination handedness implied by a signed basis map."""
-    _validate_signed_axis_map(values, context=context)
-    axes = [value.lstrip("-") for value in values]
-    inversions = sum(
-        axes[left] > axes[right] for left in range(3) for right in range(left + 1, 3)
-    )
-    negative_axes = sum(value.startswith("-") for value in values)
-    determinant = -1 if (inversions + negative_axes) % 2 else 1
-    source_sign = 1 if source == "right-handed" else -1
-    return "right-handed" if determinant * source_sign > 0 else "left-handed"
-
-
 def _validate_mapped_frame_handedness(
     source: CoordinateFrame,
     destination: CoordinateFrame,
@@ -83,7 +65,7 @@ def _validate_mapped_frame_handedness(
     *,
     context: str,
 ) -> None:
-    expected = _mapped_handedness(
+    expected = mapped_handedness(
         source.handedness, axis_map, context=f"{context} axis map"
     )
     if destination.handedness != expected:
@@ -128,7 +110,7 @@ def _validate_contract_semantics(contract: EvidenceContract) -> None:
             _validate_frame_semantics(
                 mapping.semantics, context=f"frame {mapping.frame!r}"
             )
-            _validate_signed_axis_map(
+            validate_signed_axis_map(
                 mapping.axes_from_canonical,
                 context=f"frame {mapping.frame!r} axis map",
             )

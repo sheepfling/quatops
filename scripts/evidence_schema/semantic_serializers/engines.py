@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import re
 from pathlib import Path
-from typing import Literal, Protocol
+from typing import Protocol
 
 from scripts.evidence_schema.crystallized import (
     CanonicalInputs,
@@ -27,6 +27,7 @@ from scripts.evidence_schema.engine_captures import (
     NativeVector3,
     Vector3Object,
 )
+from scripts.evidence_schema.primitives import mapped_handedness
 from scripts.evidence_schema.semantic_serializers._witness_helpers import (
     select_retained_rows,
 )
@@ -45,19 +46,6 @@ def _vector(value: NativeVector3) -> list[float]:
     if isinstance(value, Vector3Object):
         return [value.x, value.y, value.z]
     return value
-
-
-def _handedness_from_map(
-    axis_map: list[str],
-) -> Literal["right-handed", "left-handed"]:
-    axes = [value.lstrip("-") for value in axis_map]
-    inversions = sum(
-        axes[left] > axes[right] for left in range(3) for right in range(left + 1, 3)
-    )
-    sign = -1 if inversions % 2 else 1
-    if sum(value.startswith("-") for value in axis_map) % 2:
-        sign *= -1
-    return "right-handed" if sign > 0 else "left-handed"
 
 
 def _opposite_axis_meaning(value: str) -> str:
@@ -99,13 +87,9 @@ def _native_axis_labels(package: EngineSemanticPackage) -> tuple[str, str, str]:
 def _validate_frame_map(package: EngineSemanticPackage) -> tuple[str, str, str]:
     conversion = package.contract.conversion
     axis_map = conversion.destination_axes_from_source
-    normalized_axes = [axis.lstrip("-") for axis in axis_map]
-    if (
-        len(axis_map) != 3
-        or any(axis not in {"x", "y", "z", "-x", "-y", "-z"} for axis in axis_map)
-        or sorted(normalized_axes) != ["x", "y", "z"]
-    ):
-        raise ValueError("native frame map must be a signed-axis permutation")
+    derived_handedness = mapped_handedness(
+        "right-handed", axis_map, context="native frame map"
+    )
     canonical = conversion.canonical_frame
     declared_labels = _native_axis_labels(package)
     canonical_labels = (
@@ -122,7 +106,6 @@ def _validate_frame_map(package: EngineSemanticPackage) -> tuple[str, str, str]:
             raise ValueError(
                 f"declared native axis {destination_index} disagrees with signed map"
             )
-    derived_handedness = _handedness_from_map(axis_map)
     declared_handedness = package.contract.conversion.native_frame.handedness
     if declared_handedness is not None:
         expected_hand = (
@@ -261,7 +244,11 @@ def serialize_engine_semantics(
     engine = contract.engine
     conversion = contract.conversion
     declared_labels = _validate_frame_map(package)
-    handedness = _handedness_from_map(conversion.destination_axes_from_source)
+    handedness = mapped_handedness(
+        "right-handed",
+        conversion.destination_axes_from_source,
+        context="native frame map",
+    )
     source = conversion.canonical_frame
     if source.handedness.lower() not in {"right", "right-handed"}:
         raise ValueError("engine interoperability source frame must be right-handed")

@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import math
 from collections.abc import Iterable
-from typing import Annotated, Union
+from typing import Annotated, Literal, Union
 
 from pydantic import (
     AfterValidator,
@@ -55,6 +55,31 @@ Matrix4 = Annotated[
     Field(min_length=4, max_length=4),
 ]
 BasisImages = Annotated[list[Vector3], Field(min_length=3, max_length=3)]
+
+
+def validate_signed_axis_map(values: list[str], *, context: str) -> None:
+    """Validate a declared signed permutation of three coordinate axes."""
+    if len(values) != 3 or any(
+        value not in {"x", "-x", "y", "-y", "z", "-z"} for value in values
+    ):
+        raise ValueError(f"{context} is not a signed-axis triple")
+    if len({value.lstrip("-") for value in values}) != 3:
+        raise ValueError(f"{context} is not a signed-axis permutation")
+
+
+def mapped_handedness(
+    source: str, values: list[str], *, context: str
+) -> Literal["right-handed", "left-handed"]:
+    """Compute the handedness induced by a declared signed-axis map."""
+    validate_signed_axis_map(values, context=context)
+    axes = [value.lstrip("-") for value in values]
+    inversions = sum(
+        axes[left] > axes[right] for left in range(3) for right in range(left + 1, 3)
+    )
+    negative_axes = sum(value.startswith("-") for value in values)
+    determinant = -1 if (inversions + negative_axes) % 2 else 1
+    source_sign = 1 if source == "right-handed" else -1
+    return "right-handed" if determinant * source_sign > 0 else "left-handed"
 
 
 def finite_max_abs(values: Iterable[float], label: str) -> float:

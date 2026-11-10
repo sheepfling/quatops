@@ -20,6 +20,7 @@ from scripts.evidence_schema.crystallized import (
     FrameSemantics,
     canonical_source_frame_semantics,
 )
+from scripts.evidence_schema.primitives import validate_signed_axis_map
 
 _QuaternionBoundaryTarget = Union[
     EigenContract, MuJoCoContract, OpenCVContract, SpiceyPyContract
@@ -60,12 +61,7 @@ def coordinate_frame(name: str, handedness_value: str, axes: object) -> Coordina
 
 
 def signed_axis_map(values: list[str]) -> list[str]:
-    if len(values) != 3 or any(
-        value not in {"x", "-x", "y", "-y", "z", "-z"} for value in values
-    ):
-        raise ValueError(f"invalid declared signed-axis map: {values!r}")
-    if len({value.lstrip("-") for value in values}) != 3:
-        raise ValueError(f"axis map must be a signed permutation: {values!r}")
+    validate_signed_axis_map(values, context="declared axis map")
     return values
 
 
