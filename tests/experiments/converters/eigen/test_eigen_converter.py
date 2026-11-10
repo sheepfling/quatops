@@ -91,6 +91,9 @@ def test_eigen_contract_source_pin_and_native_build_provenance():
     }
     for field, path in paths.items():
         assert hashlib.sha256(path.read_bytes()).hexdigest() == provenance[field], field
+    replay = MANIFEST["compact_lock_replay"]
+    assert replay["lockfile_sha256"] == provenance["reproduction_lockfile_sha256"]
+    assert replay["witnesses_sha256"] == provenance["witnesses_sha256"]
     archived_source = read_provenance_source(
         ROOT, provenance["native_cpp_source_archive"]
     )

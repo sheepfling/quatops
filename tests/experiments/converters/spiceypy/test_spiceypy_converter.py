@@ -80,6 +80,16 @@ def test_spiceypy_boundary_contract_and_capture_provenance_are_explicit():
             hashlib.sha256(path.read_bytes()).hexdigest()
             == MANIFEST["provenance"][field]
         ), field
+    replay = MANIFEST["compact_lock_replay"]
+    assert (
+        replay["lockfile_sha256"]
+        == MANIFEST["provenance"]["reproduction_lockfile_sha256"]
+    )
+    assert (
+        replay["native_binary_sha256"]
+        == MANIFEST["provenance"]["loaded_cspice_binary_sha256"]
+    )
+    assert replay["witnesses_sha256"] == MANIFEST["provenance"]["witnesses_sha256"]
     assert (
         hashlib.sha256(
             read_provenance_source(

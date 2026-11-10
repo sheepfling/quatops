@@ -16,7 +16,9 @@ uv run --locked --project experiments/converters/spiceypy/8.3.0 --python 3.10.11
 
 This version directory is SpiceyPy's optional native-capture dependency set.
 Its locked project installs `spiceypy==8.3.0`; the root QuatOps environment
-does not need this native capture dependency.
+does not need this native capture dependency. The lock covers Python 3.10,
+the interpreter used for this capture; other Python versions require a
+separately resolved environment.
 
 The script writes only the retained converter witnesses and run provenance to
 [`tests/golden/oracles/spiceypy/8.3.0/converter`](../../../../tests/golden/oracles/spiceypy/8.3.0/converter/manifest.json).

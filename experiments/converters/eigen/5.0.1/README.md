@@ -26,7 +26,9 @@ uv run --locked --project experiments/converters/eigen/5.0.1 --python 3.11.15 `
 ```
 
 The capture verifies the archive digest before compiling with `g++` in C++17
-mode. It keeps the small selected witnesses and build provenance under
+mode. Its lock covers Python 3.11, the documented reproduction interpreter;
+other Python versions require a separately resolved environment. It keeps the
+small selected witnesses and build provenance under
 [`tests/golden/oracles/eigen/5.0.1/converter`](../../../../tests/golden/oracles/eigen/5.0.1/converter/manifest.json).
 The compiler path/version and native executable digest are recorded in the
 manifest. The harness retains one native `coeffs()` storage-order observation

@@ -29,12 +29,6 @@ from tests.support.paths import REPOSITORY_ROOT
             "tests/golden/transports/openusd/26.11/converter/manifest.json",
             "lockfile_sha256",
         ),
-        (
-            "spiceypy",
-            "8.3.0",
-            "tests/golden/oracles/spiceypy/8.3.0/converter/manifest.json",
-            "pinned_lockfile_sha256",
-        ),
     ],
 )
 def test_historical_lock_bytes_are_recoverable(target, version, manifest, field):

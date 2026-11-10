@@ -72,10 +72,19 @@
     "reproduction_prepared_inputs_sha256": "83a747d9fb4613c8af96b06881e9f071c8d926e58d89b5f70d00abfad2e454d1",
     "reproduction_native_input_stream_sha256": "a4d707a7014e18f1a3c8c92ceb603e36650719e69dfb329b660f3f4cd8f2e7a3",
     "reproduction_witness_sha256": "291e42a582c358f3fa4e87afc1dfbed144f5c422ef42ef87fa97d7a2a3f89840",
-    "reproduction_lockfile_sha256": "bf81c34e574e4353861b0fe746ee0826e1b9d4a521d287223b819ba046b5bb51"
+    "reproduction_lockfile_sha256": "20bb58212abf4a90e56a3d099b76505994a6b22f5c3b507cdd9acb208a1d876b",
+    "previous_reproduction_lockfile_sha256": "bf81c34e574e4353861b0fe746ee0826e1b9d4a521d287223b819ba046b5bb51",
+    "previous_reproduction_lockfile_revision": "d24969cefca8c5393f37165b34208ebc20bcc7a6"
   },
   "semantic_contract": {
     "file": "experiments/converters/eigen/5.0.1/semantic_contract.json",
     "sha256": "80d24bf67748f0f315a99261d1b32f25f45548cb1e1bb3ce67ee3c812dfc845a"
+  },
+  "compact_lock_replay": {
+    "utc": "2026-11-10T17:55:29.810015+00:00",
+    "python": "3.11.15 (main, Jun 23 2026, 15:20:37) [MSC v.1944 64 bit (AMD64)]",
+    "lockfile_sha256": "20bb58212abf4a90e56a3d099b76505994a6b22f5c3b507cdd9acb208a1d876b",
+    "native_executable_sha256": "5b51f074c0e1cfe399b35ad2d87403c21ce493566802249eaec110f9fe036300",
+    "witnesses_sha256": "291e42a582c358f3fa4e87afc1dfbed144f5c422ef42ef87fa97d7a2a3f89840"
   }
 }
