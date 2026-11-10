@@ -6,11 +6,12 @@ import hashlib
 import json
 
 import numpy as np
-from scipy.spatial.transform import Rotation
 
-from quatops.python import hamilton
-from scripts.evidence_schema.primitives import NATIVE_RETAINED_CASE_IDS
-from tests.support.evidence_oracles import matrix_from_wxyz as matrix
+from tests.support.direct_quaternion_oracle import (
+    check_composition,
+    check_native_constructor,
+    check_orientations,
+)
 from tests.support.paths import REPOSITORY_ROOT
 from tests.support.provenance_archives import read_provenance_source
 
@@ -33,12 +34,6 @@ CANONICAL = {
     for item in SHARED["orientations"]
 }
 PROBE = np.asarray(SHARED["probe_vector_xyz"], dtype=float)
-BASIS = np.eye(3)
-ATOL = 3e-12
-
-
-def check(actual, expected, message):
-    np.testing.assert_allclose(actual, expected, rtol=0.0, atol=ATOL, err_msg=message)
 
 
 def test_spiceypy_boundary_contract_and_capture_provenance_are_explicit():
@@ -112,79 +107,24 @@ def test_spiceypy_boundary_contract_and_capture_provenance_are_explicit():
     )
 
 
-def test_spiceypy_native_quaternion_action_preserves_canonical_physical_action():
-    selected_ids = NATIVE_RETAINED_CASE_IDS
-    rows = {item["case_id"]: item for item in OBS["canonical_to_native"]}
-    assert set(rows) == set(selected_ids)
-    for case_id in selected_ids:
-        canonical = CANONICAL[case_id]
-        native = rows[case_id]
-        q_native = np.asarray(native["native_input_wxyz"], dtype=float)
-        np.testing.assert_array_equal(q_native, canonical)
-        expected_actions = np.asarray([hamilton.rotate(canonical, p) for p in BASIS])
-        check(
-            native["native_mxv_basis_xyz"],
-            expected_actions,
-            f"SPICE mxv {case_id}",
-        )
-        if case_id == "mixed_a":
-            check(
-                native["native_mxv_probe_xyz"],
-                hamilton.rotate(canonical, PROBE),
-                "SPICE mixed-vector action",
-            )
-
-    # The antipode is a distinct coefficient input but must have identical physical action.
-    check(
-        rows["antipode_mixed_a"]["native_mxv_basis_xyz"],
-        rows["mixed_a"]["native_mxv_basis_xyz"],
-        "SPICE q versus -q",
+def test_spiceypy_native_quaternion_action_preserves_canonical_orientation():
+    check_orientations(
+        OBS,
+        CANONICAL,
+        PROBE,
+        basis_field="native_mxv_basis_xyz",
+        probe_field="native_mxv_probe_xyz",
     )
 
 
-def test_spiceypy_native_created_axisar_m2q_route_converts_back_to_canonical():
-    case = INPUTS["native_constructed_orientation"]
-    native = OBS["native_created"][0]
-    expected_matrix = Rotation.from_rotvec(
-        np.asarray(case["axis_xyz"]) * case["angle_radians"]
-    ).as_matrix()
-    q_native = np.asarray(native["native_m2q_wxyz"], dtype=float)
-    check(matrix(q_native), expected_matrix, "SPICE axisar/m2q orientation")
-    check(
-        native["native_mxv_basis_xyz"],
-        (expected_matrix @ BASIS.T).T,
-        "SPICE native-created mxv",
-    )
-    check(
-        [hamilton.rotate(q_native, p) for p in BASIS],
-        native["native_mxv_basis_xyz"],
-        "SPICE native-to-canonical identity map",
+def test_spiceypy_native_constructor_converts_back_to_canonical():
+    check_native_constructor(
+        OBS,
+        INPUTS,
+        basis_field="native_mxv_basis_xyz",
+        quaternion_field="native_m2q_wxyz",
     )
 
 
-def test_spiceypy_qxq_matches_quatops_noncommuting_composition_both_orders():
-    rows = {item["case_id"]: item for item in OBS["composition"]}
-    for case_id, lhs_id, rhs_id in (
-        ("mixed_a_times_mixed_b", "mixed_a", "mixed_b"),
-        ("mixed_b_times_mixed_a", "mixed_b", "mixed_a"),
-    ):
-        row = rows[case_id]
-        expected = np.asarray(
-            hamilton.multiply(CANONICAL[lhs_id], CANONICAL[rhs_id]), dtype=float
-        )
-        np.testing.assert_allclose(
-            row["native_lhs_wxyz"], CANONICAL[lhs_id], rtol=0.0, atol=0.0
-        )
-        np.testing.assert_allclose(
-            row["native_rhs_wxyz"], CANONICAL[rhs_id], rtol=0.0, atol=0.0
-        )
-        check(row["native_input_wxyz"], expected, f"SPICE qxq coefficients {case_id}")
-        check(
-            row["native_mxv_basis_xyz"],
-            [hamilton.rotate(expected, p) for p in BASIS],
-            f"SPICE qxq action {case_id}",
-        )
-
-    forward = np.asarray(rows["mixed_a_times_mixed_b"]["native_mxv_basis_xyz"])
-    reverse = np.asarray(rows["mixed_b_times_mixed_a"]["native_mxv_basis_xyz"])
-    assert np.max(np.abs(forward - reverse)) > 0.1
+def test_spiceypy_noncommuting_composition_both_orders():
+    check_composition(OBS, CANONICAL, basis_field="native_mxv_basis_xyz")
