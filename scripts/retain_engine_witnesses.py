@@ -333,92 +333,63 @@ def retain(
     if axes_from_source != semantic_config.conversion.destination_axes_from_source:
         raise ValueError("native capture axis map differs from semantic config")
     capture_source = repository_root / capture_source_name
-    witness = {
-        "schema_version": 1,
-        "target": {
-            "engine": semantic_config.engine.engine,
-            "api": semantic_config.engine.api,
-            "version": version,
-            "build": engine_info.get("build_hash")
-            or engine_info.get("changelist")
-            or engine_info.get("build"),
-            "platform": engine_info.get("platform"),
-            "native_scalar_profiles": semantic_config.engine.native_scalar_profiles,
-            "native_quaternion_order": semantic_config.engine.native_quaternion_order,
-            "native_algebra": semantic_config.engine.native_algebra,
-            "native_vector_action": semantic_config.engine.native_vector_action,
-        },
-        "provenance": {
-            "original_capture_sha256": hashlib.sha256(original_bytes).hexdigest(),
-            "capture_source": capture_source_name,
-            "capture_source_sha256": sha256(capture_source),
-            "canonical_input_file": "experiments/interoperability/v1/canonical_inputs.json",
-            "canonical_input_sha256": sha256(canonical_inputs),
-            "native_build_record": engine_info,
-            "capture_method": captured.get("capture_method"),
-            "retention_method": (
-                "selected native outputs retained losslessly; shared inputs "
-                "referenced by case ID; redundant input copies and probe samples removed"
-            ),
-        },
-        "canonical_interop": canonical_interop,
+    target = {
+        "engine": semantic_config.engine.engine,
+        "api": semantic_config.engine.api,
+        "version": version,
+        "build": engine_info.get("build_hash")
+        or engine_info.get("changelist")
+        or engine_info.get("build"),
+        "platform": engine_info.get("platform"),
+        "native_scalar_profiles": semantic_config.engine.native_scalar_profiles,
+        "native_quaternion_order": semantic_config.engine.native_quaternion_order,
+        "native_algebra": semantic_config.engine.native_algebra,
+        "native_vector_action": semantic_config.engine.native_vector_action,
     }
     output_dir.mkdir(parents=True, exist_ok=True)
-    if engine == "godot":
-        shared_dir = output_dir.parent / "shared"
-        shared_dir.mkdir(parents=True, exist_ok=True)
-        output_path = shared_dir / "witnesses.json"
-        shared_witness = {
-            "schema_version": 1,
-            "canonical_interop": canonical_interop,
-        }
-        if output_path.exists():
-            existing = read_evidence_document(output_path)
-            if existing != shared_witness:
-                raise ValueError(
-                    "Godot version produced different selected values; retain a "
-                    "separate versioned witness instead of sharing this file"
-                )
-        else:
-            output_path.write_text(
-                dump_evidence_json(shared_witness),
-                encoding="utf-8",
-                newline="\n",
+    output_path = (
+        output_dir.parent / "shared" / "witnesses.json"
+        if engine == "godot"
+        else output_dir / "witnesses.json"
+    )
+    retained_witness = {"schema_version": 1, "canonical_interop": canonical_interop}
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    if engine == "godot" and output_path.exists():
+        if read_evidence_document(output_path) != retained_witness:
+            raise ValueError(
+                "Godot version produced different selected values; retain a "
+                "separate versioned witness instead of sharing this file"
             )
-        (output_dir / "witnesses.json").unlink(missing_ok=True)
-        contract_provenance = {
-            "witness_file": "../shared/witnesses.json",
-            "witness_sha256": sha256(output_path),
-            "capture_source": witness["provenance"]["capture_source"],
-            "capture_source_sha256": witness["provenance"]["capture_source_sha256"],
-            "original_capture_sha256": witness["provenance"]["original_capture_sha256"],
-            "canonical_input_file": witness["provenance"]["canonical_input_file"],
-            "canonical_input_sha256": witness["provenance"]["canonical_input_sha256"],
-            "native_build_record": engine_info,
-            "capture_method": witness["provenance"]["capture_method"],
-            "retention_method": witness["provenance"]["retention_method"],
-        }
     else:
-        output_path = output_dir / "witnesses.json"
-        retained_witness = {
-            "schema_version": 1,
-            "canonical_interop": canonical_interop,
-        }
         output_path.write_text(
             dump_evidence_json(retained_witness), encoding="utf-8", newline="\n"
         )
-        contract_provenance = {
-            "witness_file": "witnesses.json",
-            "witness_sha256": sha256(output_path),
-            "capture_source": witness["provenance"]["capture_source"],
-            "capture_source_sha256": witness["provenance"]["capture_source_sha256"],
-            "original_capture_sha256": witness["provenance"]["original_capture_sha256"],
-            "canonical_input_file": witness["provenance"]["canonical_input_file"],
-            "canonical_input_sha256": witness["provenance"]["canonical_input_sha256"],
-        }
-
+    if engine == "godot":
+        (output_dir / "witnesses.json").unlink(missing_ok=True)
+    contract_provenance: JsonRecord = {
+        "witness_file": "../shared/witnesses.json"
+        if engine == "godot"
+        else "witnesses.json",
+        "witness_sha256": sha256(output_path),
+        "capture_source": capture_source_name,
+        "capture_source_sha256": sha256(capture_source),
+        "original_capture_sha256": hashlib.sha256(original_bytes).hexdigest(),
+        "canonical_input_file": "experiments/interoperability/v1/canonical_inputs.json",
+        "canonical_input_sha256": sha256(canonical_inputs),
+    }
+    if engine == "godot":
+        contract_provenance.update(
+            {
+                "native_build_record": engine_info,
+                "capture_method": captured.get("capture_method"),
+                "retention_method": (
+                    "selected native outputs retained losslessly; shared inputs "
+                    "referenced by case ID; redundant input copies and probe samples removed"
+                ),
+            }
+        )
     contract = {
-        "engine": witness["target"],
+        "engine": target,
         "provenance": {
             **contract_provenance,
             "semantic_contract_file": semantic_config_path.relative_to(
