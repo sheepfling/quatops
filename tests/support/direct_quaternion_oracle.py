@@ -11,6 +11,15 @@ _BASIS = np.eye(3)
 _ATOL = 3e-12
 
 
+def canonical_cases_and_probe(shared):
+    """Read the shared canonical inputs for direct-library replay."""
+    cases = {
+        item["case_id"]: np.asarray(item["canonical_wxyz"], dtype=float)
+        for item in shared["orientations"]
+    }
+    return cases, np.asarray(shared["probe_vector_xyz"], dtype=float)
+
+
 def _check(actual, expected, message):
     np.testing.assert_allclose(actual, expected, rtol=0.0, atol=_ATOL, err_msg=message)
 

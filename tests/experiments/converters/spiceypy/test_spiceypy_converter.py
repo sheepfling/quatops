@@ -5,9 +5,8 @@ from __future__ import annotations
 import hashlib
 import json
 
-import numpy as np
-
 from tests.support.direct_quaternion_oracle import (
+    canonical_cases_and_probe,
     check_composition,
     check_native_constructor,
     check_orientations,
@@ -29,11 +28,7 @@ WITNESSES = json.loads((FIXTURE / "witnesses.json").read_text(encoding="utf-8"))
 SHARED_PATH = ROOT / "experiments/interoperability/v1/canonical_inputs.json"
 SHARED = json.loads(SHARED_PATH.read_text(encoding="utf-8"))
 OBS = WITNESSES["observations"]
-CANONICAL = {
-    item["case_id"]: np.asarray(item["canonical_wxyz"], dtype=float)
-    for item in SHARED["orientations"]
-}
-PROBE = np.asarray(SHARED["probe_vector_xyz"], dtype=float)
+CANONICAL, PROBE = canonical_cases_and_probe(SHARED)
 
 
 def test_spiceypy_boundary_contract_and_capture_provenance_are_explicit():
