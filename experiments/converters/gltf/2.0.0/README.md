@@ -8,7 +8,8 @@ The loader's package and lockfile are kept in the separate versioned
 
 From the repository root, run the cross-platform helper. It installs the
 versioned loader dependencies, generates the asset, captures in a temporary
-directory, and retains the selected native node witnesses:
+directory, and retains the selected native node witnesses. Replay regenerates
+the input and asset and checks both against their captured digests:
 
 ```shell
 uv run --extra dev python -m experiments.run_converter_capture gltf --repository-root .

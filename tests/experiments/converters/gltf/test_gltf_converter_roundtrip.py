@@ -7,6 +7,7 @@ import json
 
 import numpy as np
 
+from experiments.converters.gltf.inputs import build_artifacts, serialize_artifact
 from quatops.experimental.engines import QuaternionFrameMap, SignedAxisMap
 from tests.support.evidence_oracles import matrix_from_wxyz as rotation
 from tests.support.evidence_oracles import native_values as values
@@ -14,13 +15,13 @@ from tests.support.paths import REPOSITORY_ROOT
 
 ROOT = REPOSITORY_ROOT
 FIXTURE = ROOT / "tests/golden/transports/gltf/2.0.0/threejs/0.187.0/converter"
-INPUTS_PATH = ROOT / "experiments/converters/gltf/2.0.0/converter_inputs.json"
-ASSET_PATH = ROOT / "experiments/converters/gltf/2.0.0/quatops_hierarchy.gltf"
 CONTRACT_PATH = ROOT / "experiments/converters/gltf/2.0.0/semantic_contract.json"
 CONTRACT = json.loads(CONTRACT_PATH.read_text(encoding="utf-8"))
 MANIFEST = json.loads((FIXTURE / "manifest.json").read_text(encoding="utf-8"))
-INPUTS = json.loads(INPUTS_PATH.read_text(encoding="utf-8"))
-ASSET = json.loads(ASSET_PATH.read_text(encoding="utf-8"))
+INPUT_MODEL, ASSET = build_artifacts(ROOT)
+INPUTS = INPUT_MODEL.model_dump(mode="json")
+INPUT_BYTES = serialize_artifact(INPUTS)
+ASSET_BYTES = serialize_artifact(ASSET)
 CAPTURE = json.loads((FIXTURE / "witnesses.json").read_text(encoding="utf-8"))
 OBS = {row["node"]: row for row in CAPTURE["observations"]}
 FRAME = SignedAxisMap(("x", "z", "-y"))
@@ -63,8 +64,6 @@ def test_gltf_converter_artifact_loader_and_provenance_are_pinned():
     ]
 
     provenance_paths = {
-        "input_sha256": INPUTS_PATH,
-        "asset_sha256": ASSET_PATH,
         "native_observations_sha256": FIXTURE / "witnesses.json",
         "contract_sha256": CONTRACT_PATH,
     }
@@ -73,13 +72,25 @@ def test_gltf_converter_artifact_loader_and_provenance_are_pinned():
             hashlib.sha256(path.read_bytes()).hexdigest()
             == MANIFEST["provenance"][field]
         )
+    assert (
+        hashlib.sha256(INPUT_BYTES).hexdigest()
+        == MANIFEST["provenance"]["input_sha256"]
+    )
+    assert (
+        hashlib.sha256(ASSET_BYTES).hexdigest()
+        == MANIFEST["provenance"]["asset_sha256"]
+    )
     assert MANIFEST["provenance"]["input_serialization_note"].startswith(
         "JSON formatting changed only"
     )
-    assert len(MANIFEST["provenance"]["captured_input_sha256"]) == 64
+    assert (
+        MANIFEST["provenance"]["captured_input_sha256"]
+        == MANIFEST["provenance"]["input_sha256"]
+    )
 
     reproduction_paths = {
         "generator_sha256": ROOT / "experiments/converters/gltf/2.0.0/create_asset.py",
+        "input_builder_sha256": ROOT / "experiments/converters/gltf/inputs.py",
         "loader_script_sha256": ROOT
         / "experiments/converters/gltf/2.0.0/capture_threejs.mjs",
         "package_lock_sha256": ROOT

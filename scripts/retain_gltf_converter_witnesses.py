@@ -136,6 +136,9 @@ def main() -> None:
                 },
                 "reproduction": {
                     "generator_sha256": sha256(source_dir / "create_asset.py"),
+                    "input_builder_sha256": sha256(
+                        repository_root / "experiments/converters/gltf/inputs.py"
+                    ),
                     "loader_script_sha256": sha256(source_dir / "capture_threejs.mjs"),
                     "package_lock_sha256": sha256(package_lock),
                     "numeric_helper_sha256": sha256(

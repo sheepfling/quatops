@@ -44,6 +44,8 @@ EXCLUDED_PARTS = {
 }
 GENERATED_INPUTS = {
     "experiments/converters/cesium/1.124.0/converter_inputs.json",
+    "experiments/converters/gltf/2.0.0/converter_inputs.json",
+    "experiments/converters/gltf/2.0.0/quatops_hierarchy.gltf",
     "experiments/transports/gltf/2.0.0/assets/rotation_transport.gltf",
     "experiments/transports/gltf/2.0.0/assets/rotation_transport.bin",
 }

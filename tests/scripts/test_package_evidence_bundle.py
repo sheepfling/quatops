@@ -15,6 +15,10 @@ def test_generated_gltf_inputs_are_excluded_but_witnesses_are_included(
     cesium_dir = tmp_path / "experiments/converters/cesium/1.124.0"
     cesium_dir.mkdir(parents=True)
     (cesium_dir / "converter_inputs.json").write_text("{}", encoding="utf-8")
+    gltf_dir = tmp_path / "experiments/converters/gltf/2.0.0"
+    gltf_dir.mkdir(parents=True)
+    for name in ("converter_inputs.json", "quatops_hierarchy.gltf"):
+        (gltf_dir / name).write_text("{}", encoding="utf-8")
     witness = tmp_path / "tests/golden/native/witnesses.json"
     witness.parent.mkdir(parents=True)
     witness.write_text("{}", encoding="utf-8")

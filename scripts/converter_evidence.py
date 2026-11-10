@@ -224,6 +224,24 @@ def load_converter_evidence(
         input_bytes = serialize_inputs(build_inputs(normalized_root))
         inputs_source_path = None
         inputs_document = parse_evidence_document(input_bytes)
+    elif target.name == "Three.js GLTFLoader" and not inputs_path.is_file():
+        from experiments.converters.gltf.inputs import (
+            build_artifacts,
+            serialize_artifact,
+        )
+
+        generated_inputs, generated_asset = build_artifacts(normalized_root)
+        input_bytes = serialize_artifact(generated_inputs.model_dump(mode="json"))
+        asset_bytes = serialize_artifact(generated_asset)
+        provenance = manifest.get("provenance")
+        if not isinstance(provenance, dict) or hashlib.sha256(
+            asset_bytes
+        ).hexdigest() != provenance.get("asset_sha256"):
+            raise ValueError(
+                f"{directory}: generated glTF asset digest differs from capture"
+            )
+        inputs_source_path = None
+        inputs_document = parse_evidence_document(input_bytes)
     else:
         if not inputs_path.is_file():
             inputs_path = semantic_contract_path.parent / "converter_inputs.json"
@@ -234,13 +252,16 @@ def load_converter_evidence(
             inputs_path.resolve() if inputs_document is not None else None
         )
         input_bytes = inputs_path.read_bytes() if inputs_document is not None else b""
-    if target.name == "CesiumJS":
+    if target.name in {"CesiumJS", "Three.js GLTFLoader"}:
         provenance = manifest.get("provenance")
+        input_digest_key = (
+            "converter_input_sha256" if target.name == "CesiumJS" else "input_sha256"
+        )
         if not isinstance(provenance, dict) or hashlib.sha256(
             input_bytes
-        ).hexdigest() != provenance.get("converter_input_sha256"):
+        ).hexdigest() != provenance.get(input_digest_key):
             raise ValueError(
-                f"{directory}: Cesium converter input digest differs from capture"
+                f"{directory}: {target.name} converter input digest differs from capture"
             )
     semantic_contract_document = read_evidence_document(semantic_contract_path)
     contract = _target_contract(

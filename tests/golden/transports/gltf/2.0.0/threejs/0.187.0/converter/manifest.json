@@ -28,11 +28,12 @@
     "input_serialization_note": "JSON formatting changed only; parsed native input values are unchanged."
   },
   "reproduction": {
-    "generator_sha256": "8e6695d016f0ed356e925c3d827077a9ab3a32228a6cefdaea40db05f29d429e",
+    "generator_sha256": "e7bdbf5cde21f00c9ddbe236102464fe9533c07bb6619a45d77d82b09a5788b2",
+    "input_builder_sha256": "7a702cafa5ebd73dd1b89644573773b3f200a030be7c95d8046e71e1a06f00b2",
     "loader_script_sha256": "920a56c0a8ccbddcbfdded04a9da3d066c7c345e3a999db114e6442ace289110",
     "package_lock_sha256": "cede45573d60150ede075f768f955da9890935dfb78764b3cd0b0029cd48365d",
     "numeric_helper_sha256": "c0eaaa45990c0de90b8fc183fc820faccdce4c39c064111acaa7501a1e82a944",
-    "retention_script_sha256": "265d696e8cd4ad21c435af620c801ffa1d322e283438e50afd7d4f07f83a79db",
+    "retention_script_sha256": "fd4daf46c680476f0613eb84e787f2aa66101c08cd101a1a35b33e6de54b0ad1",
     "previous_retention_script_sha256": "14a47c34ea282a9f0cdfe2fbaea4ff32285ebc5c84fc14b17a178c9ae4f7a0da",
     "retention_script_identity_note": "Current capture and selector use finite binary64 JSON with signed zero preserved. A pinned native rerun reproduced the retained witness bytes; original capture identities remain in provenance.",
     "finite_json_replay": {
