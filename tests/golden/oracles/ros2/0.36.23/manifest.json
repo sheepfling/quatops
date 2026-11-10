@@ -94,9 +94,7 @@
       "runner_sha256": "6177ca151ac91efce01b00b3db1df1a59266cba3539ed5e8c5f81b75e850c906",
       "previous_checkout_runner_sha256": "be4047a273917756c9f0f9154a0990b8318797048744be360457a391e80c8d7b",
       "retention_script_sha256": "8fb2fc09dd05ddfc165be468d241169cfe8819e9e270852fde840467a4e9b2d4",
-      "retention_digest_helper_sha256": "293ac5c75393f99f783ba412be80983ec21dce39d89bc570623fb428194ea785",
       "retention_script_identity_note": "The current selector reads the frame-chain recipe; the stored witness values remain from the historical capture.",
-      "retention_helper_sha256": "3eea651a4485c4dd3e5a85bf0085edeff14d775badeaf7c07288de74d6519ed3",
       "direct_json_replay": {
         "utc": "2026-11-10T08:34:16.808333+00:00",
         "tf2_version": "0.36.23",
@@ -118,7 +116,9 @@
       "capture_schema_sha256": "f3b9cb097cdeee39b0f632adebe4169c7add5769de6976e544b90e0ccee6edc6",
       "pre_direct_source_archive": "experiments/provenance/reproduction-v1.zip#ros2-0.36.23/pre-direct/",
       "identity_note": "Pre-direct capture tools are archived at pre_direct_source_archive. The prior helper digest is retained, while the current direct capture no longer uses that helper.",
-      "previous_reproduction_helper_sha256": "c0eb259e3aaccd6e76c1023db0104b887350777fa777d1b54995b7100566cf38"
+      "previous_reproduction_helper_sha256": "c0eb259e3aaccd6e76c1023db0104b887350777fa777d1b54995b7100566cf38",
+      "previous_retention_digest_helper_sha256": "293ac5c75393f99f783ba412be80983ec21dce39d89bc570623fb428194ea785",
+      "previous_retention_helper_sha256": "3eea651a4485c4dd3e5a85bf0085edeff14d775badeaf7c07288de74d6519ed3"
     }
   },
   "selection": {

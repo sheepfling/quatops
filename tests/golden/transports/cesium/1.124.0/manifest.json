@@ -34,22 +34,23 @@
   "reproduction": {
     "input_generator_sha256": "cee4047253dab1237b2c5a52d2275984ea2f5d1de8f82a183d67fec06296f961",
     "input_builder_sha256": "0ff76107de79307db85deda097f63891e9c2464102482f14613769cf0c0c03a9",
-    "capture_script_sha256": "e856856b36948c08215e21a8eb9b1e38b56ec5d856dcc45dd46c1ca375ee2da7",
+    "capture_script_sha256": "d68537527643354369eadc9b28423ba6e38fdd25fe8c05ccc849a604a687fe2b",
     "numeric_helper_sha256": "c0eaaa45990c0de90b8fc183fc820faccdce4c39c064111acaa7501a1e82a944",
-    "retention_script_sha256": "4cc2ca111fa99ffd4f80431b5a77b810e62b08c94005c18c388499080fa2a1d6",
-    "retention_digest_helper_sha256": "293ac5c75393f99f783ba412be80983ec21dce39d89bc570623fb428194ea785",
-    "retention_script_identity_note": "Current capture and selector use finite binary64 JSON with signed zero preserved. A pinned native rerun reproduced the retained witness bytes; original capture identities remain in provenance.",
+    "retention_script_identity_note": "The current native exporter emits selected witnesses directly. Previous selection and capture hashes remain recorded.",
     "finite_json_replay": {
       "utc": "2026-11-10T08:20:52.098Z",
       "node": "v24.21.0",
       "native_observations_sha256": "05f077747d5d64d787ef21d7222ac1629fd2985670f0bbb3b9ca7e2076b60ff2",
       "selected_witnesses_sha256": "cf56f2ed41685d79fb08f3d04ef7e36818e5fb920286758aa813d85746613ed2"
     },
-    "retention_helper_sha256": "3eea651a4485c4dd3e5a85bf0085edeff14d775badeaf7c07288de74d6519ed3",
     "retention_formatter_sha256": "56961d6be101a2bdfb1b21372c823ec86dfd636547d851901b7284f2ae20e0b3",
     "package_lock_sha256": "5e331bee862cbdff2a96dec2d325e86aa996b780821833899f4053e9476002e0",
     "geographic_inputs_sha256": "619099b732593c6c45f4f7eb64714e4c7d79b2c96dcd070777522e3736e4f085",
-    "input_generator_archive": "experiments/provenance/reproduction-v1.zip#cesium-1.124.0-create_inputs-v2.py"
+    "input_generator_archive": "experiments/provenance/reproduction-v1.zip#cesium-1.124.0-create_inputs-v2.py",
+    "previous_capture_script_sha256": "e856856b36948c08215e21a8eb9b1e38b56ec5d856dcc45dd46c1ca375ee2da7",
+    "previous_retention_script_sha256": "4cc2ca111fa99ffd4f80431b5a77b810e62b08c94005c18c388499080fa2a1d6",
+    "previous_retention_digest_helper_sha256": "293ac5c75393f99f783ba412be80983ec21dce39d89bc570623fb428194ea785",
+    "previous_retention_helper_sha256": "3eea651a4485c4dd3e5a85bf0085edeff14d775badeaf7c07288de74d6519ed3"
   },
   "selection": {
     "retained_observations": 5,
@@ -60,5 +61,13 @@
   "semantic_contract": {
     "file": "experiments/converters/cesium/1.124.0/semantic_contract.json",
     "sha256": "18b97f79b455cf197421566bec02fae6380c4060cecbc0439bdfc8aa15f5c5d9"
+  },
+  "direct_reproduction": {
+    "utc": "2026-11-10T15:06:54.214Z",
+    "node": "v24.21.0",
+    "native_script_sha256": "d68537527643354369eadc9b28423ba6e38fdd25fe8c05ccc849a604a687fe2b",
+    "native_witnesses_sha256": "7aeceed46f87013b05255d90e06f2821b0ac9b1ee45a589a9b27de8b90d4e3be",
+    "comparison": "Every selected native value matches the historical witness bit-for-bit, including signed zero; JSON formatting differs.",
+    "runner_sha256": "0ec2d652fc870fcc0da1dcf82c61f7336a3facfb409ff253c922b93b433b3fb5"
   }
 }

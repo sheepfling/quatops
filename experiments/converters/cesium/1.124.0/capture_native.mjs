@@ -18,13 +18,12 @@ if (fs.existsSync(outputPath) && fs.readdirSync(outputPath).length) throw new Er
 fs.mkdirSync(outputPath, { recursive: true });
 const input = JSON.parse(fs.readFileSync(inputPath, 'utf8'));
 const sha = file => crypto.createHash('sha256').update(fs.readFileSync(file)).digest('hex');
-const rows3 = matrix => Array.from({ length: 3 }, (_, r) => Array.from({ length: 3 }, (_, c) => matrix[c * 3 + r]));
-const rows4 = matrix => Array.from({ length: 4 }, (_, r) => Array.from({ length: 4 }, (_, c) => matrix[c * 4 + r]));
 const qv = q => [q.x, q.y, q.z, q.w];
 const xyz = v => [v.x, v.y, v.z];
 const quat = xyzw => new C.Quaternion(xyzw[0], xyzw[1], xyzw[2], xyzw[3]);
 const points = input.probe_vectors_xyz.map(p => C.Cartesian3.fromArray(p));
 const observations = [];
+if (new Set(input.cases.map(item => item.case_id)).size !== input.cases.length) throw new Error('Duplicate Cesium case IDs');
 
 for (const item of input.cases) {
   const origin = C.Cartesian3.fromDegrees(item.longitude_degrees, item.latitude_degrees, item.height_m, C.Ellipsoid.WGS84);
@@ -34,10 +33,10 @@ for (const item of input.cases) {
   const localM = C.Matrix4.fromRotationTranslation(localR, C.Cartesian3.fromArray(item.local_translation_xyz_m), new C.Matrix4());
   const worldM = C.Matrix4.multiply(enuToEcef, localM, new C.Matrix4());
   const worldInverse = C.Matrix4.inverseTransformation(worldM, new C.Matrix4());
-  const localImages = points.map(p => xyz(C.Matrix3.multiplyByVector(localR, p, new C.Cartesian3())));
-  const worldPoints = points.map(p => xyz(C.Matrix4.multiplyByPoint(worldM, p, new C.Cartesian3())));
-  const worldDirections = points.map(p => xyz(C.Matrix4.multiplyByPointAsVector(worldM, p, new C.Cartesian3())));
-  const localFromWorldPoints = worldPoints.map(p => xyz(C.Matrix4.multiplyByPoint(worldInverse, C.Cartesian3.fromArray(p), new C.Cartesian3())));
+  const worldProbe = xyz(C.Matrix4.multiplyByPoint(worldM, points.at(-1), new C.Cartesian3()));
+  const worldDirections = points.slice(0, item.case_id === 'mixed_a@geo-03' ? 4 : 3)
+    .map(p => xyz(C.Matrix4.multiplyByPointAsVector(worldM, p, new C.Cartesian3())));
+  const localProbe = xyz(C.Matrix4.multiplyByPoint(worldInverse, C.Cartesian3.fromArray(worldProbe), new C.Cartesian3()));
 
   const ecefRotation = C.Matrix4.getMatrix3(worldM, new C.Matrix3());
   const enuRotation = C.Matrix4.getMatrix3(enuToEcef, new C.Matrix3());
@@ -45,30 +44,26 @@ for (const item of input.cases) {
   const enuQ = C.Quaternion.fromRotationMatrix(enuRotation, new C.Quaternion());
   const recoveredLocalQ = C.Quaternion.multiply(C.Quaternion.conjugate(enuQ, new C.Quaternion()), ecefQ, new C.Quaternion());
 
-  observations.push({
-    case_id: item.case_id,
-    native_entry_points: ['Cartesian3.fromDegrees', 'Transforms.eastNorthUpToFixedFrame', 'Matrix3.fromQuaternion', 'Matrix4.fromRotationTranslation', 'Matrix4.multiply', 'Matrix4.inverseTransformation'],
-    inputs: item,
-    outputs: {
-      enu_to_ecef_matrix_rows: numeric(rows4(enuToEcef)),
-      local_rotation_matrix_rows: numeric(rows3(localR)),
-      local_basis_and_probe_images: numeric(localImages),
-      model_to_ecef_matrix_rows: numeric(rows4(worldM)),
+  const outputs = {
       model_to_ecef_quaternion_xyzw: numeric(qv(ecefQ)),
       local_quaternion_recovered_from_ecef_xyzw: numeric(qv(recoveredLocalQ)),
-      world_points_xyz_m: numeric(worldPoints),
+      world_points_xyz_m: numeric([worldProbe]),
       world_directions_xyz: numeric(worldDirections),
-      point_roundtrip_local_xyz_m: numeric(localFromWorldPoints),
+      point_roundtrip_local_xyz_m: numeric([localProbe]),
       ecef_origin_xyz_m: numeric(xyz(origin)),
-    },
-  });
+  };
+  if (item.case_id === 'mixed_a@geo-03') {
+    outputs.local_basis_and_probe_images = numeric(points.map(p => xyz(C.Matrix3.multiplyByVector(localR, p, new C.Cartesian3()))));
+  }
+  observations.push({case_id: item.case_id, outputs});
 }
 
-const rowsPath = path.join(outputPath, 'observations.json');
-fs.writeFileSync(rowsPath, stringifyEvidence(observations));
+const rowsPath = path.join(outputPath, 'witnesses.json');
+fs.writeFileSync(rowsPath, stringifyEvidence({schema_version: '1.0', evidence_kind: 'native_cesium_quatops_converter_capture', observations}));
 const lockPath = path.join(packageRoot, 'package-lock.json');
 const packageJsonPath = path.join(packageRoot, 'node_modules/cesium/package.json');
 const packageVersion = JSON.parse(fs.readFileSync(packageJsonPath, 'utf8')).version;
+if (packageVersion !== '1.124.0') throw new Error('Expected CesiumJS 1.124.0');
 const exporterPath = fileURLToPath(import.meta.url);
 const manifest = {
   schema_version: '1.0', evidence_kind: 'native_cesium_quatops_converter_capture',
@@ -79,7 +74,7 @@ const manifest = {
   exporter: { path: path.relative(here, exporterPath), sha256: sha(exporterPath) },
   package_lock_sha256: sha(lockPath),
   numeric_helper_sha256: sha(path.resolve(here, '../../shared/numeric_evidence.mjs')),
-  observations: { path: 'observations.json', sha256: sha(rowsPath), count: observations.length },
+  observations: { path: 'witnesses.json', sha256: sha(rowsPath), count: observations.length },
   output: path.resolve(outputPath),
 };
 fs.writeFileSync(path.join(outputPath, 'manifest.json'), JSON.stringify(manifest, null, 2) + '\n');

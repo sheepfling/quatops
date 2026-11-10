@@ -22,10 +22,6 @@ class EvidencePayload(RootModel[JsonValue]):
     """Any standards-compliant JSON value with recursively valid contents."""
 
 
-class EvidenceRows(RootModel[list[dict[str, JsonValue]]]):
-    """A JSON array whose rows contain only JSON values."""
-
-
 def _reject_constant(value: str) -> NoReturn:
     raise ValueError(f"non-standard JSON number is not allowed: {value}")
 
@@ -81,43 +77,3 @@ def read_evidence_document(path: Path) -> dict[str, JsonValue]:
 def validate_evidence_payload(path: Path) -> None:
     """Validate any evidence JSON root without rewriting captured bytes."""
     parse_evidence_payload(path.read_bytes())
-
-
-def read_evidence_rows(path: Path) -> list[dict[str, JsonValue]]:
-    """Read and validate a JSON array of native observation objects."""
-    parsed = EvidenceRows.model_validate(_decode_json(path.read_bytes()), strict=True)
-    return parsed.root
-
-
-def _finite_numeric_shape(value: object) -> tuple[int, ...]:
-    if isinstance(value, list):
-        if not value:
-            return (0,)
-        shape = _finite_numeric_shape(value[0])
-        if any(_finite_numeric_shape(child) != shape for child in value[1:]):
-            raise ValueError("numeric values must have a rectangular shape")
-        return (len(value), *shape)
-    if isinstance(value, (int, float)) and not isinstance(value, bool):
-        try:
-            finite = math.isfinite(value)
-        except OverflowError:
-            finite = False
-        if not finite:
-            raise ValueError("numeric values must be finite")
-        return ()
-    raise TypeError("expected a finite numeric scalar or list")
-
-
-def select_numeric_evidence(item: object, selection: int | slice) -> dict[str, object]:
-    """Select finite binary64 native values from a current JavaScript capture."""
-    if not isinstance(item, dict) or set(item) != {"values", "dtype"}:
-        raise TypeError("expected a compact typed native numeric value")
-    if item["dtype"] != "binary64":
-        raise ValueError("JavaScript capture values must use binary64")
-    values = item["values"]
-    if not isinstance(values, list):
-        raise TypeError("numeric selection requires an outer list")
-    _finite_numeric_shape(values)
-    if isinstance(selection, bool) or not isinstance(selection, (int, slice)):
-        raise TypeError("numeric selection must be an integer or slice")
-    return {"values": values[selection], "dtype": item["dtype"]}

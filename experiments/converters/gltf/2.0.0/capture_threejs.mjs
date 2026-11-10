@@ -25,7 +25,6 @@ const gltf = await new Promise((resolve, reject) => loader.parse(JSON.stringify(
 const scene = gltf.scene;
 scene.updateMatrixWorld(true);
 const vectors = converterInputs.gltf_probe_vectors_xyz;
-const rows = matrix => Array.from({length:4},(_,r)=>Array.from({length:4},(_,c)=>matrix.elements[c*4+r]));
 const transformProbe = (object, source) => new THREE.Vector3(...source).applyMatrix4(object.matrixWorld).toArray();
 const directionProbe = (object, source) => {
   const value = new THREE.Vector3(...source).transformDirection(object.matrixWorld);
@@ -35,28 +34,31 @@ const directionProbe = (object, source) => {
 const observations = [];
 for (const name of ['QuatOpsParent', 'QuatOpsChild']) {
   const object = scene.getObjectByName(name);
-  const localImages = vectors.map(source => new THREE.Vector3(...source).applyQuaternion(object.quaternion).toArray());
-  const worldPoints = vectors.map(source => transformProbe(object, source));
-  const worldDirections = vectors.map(source => directionProbe(object, source));
-  const inverse = object.matrixWorld.clone().invert();
-  const roundtrip = worldPoints.map(source => new THREE.Vector3(...source).applyMatrix4(inverse).toArray());
+  if (!object) throw new Error(`Missing imported glTF node: ${name}`);
+  const localImages = vectors.slice(0, 3).map(source => new THREE.Vector3(...source).applyQuaternion(object.quaternion).toArray());
+  const outputs = {
+    local_quaternion_xyzw: numeric(object.quaternion.toArray()),
+    local_basis_images_xyz: numeric(localImages),
+  };
+  if (name === 'QuatOpsChild') {
+    const worldProbe = transformProbe(object, vectors.at(-1));
+    outputs.world_basis_images_xyz = numeric(vectors.slice(0, 3).map(source => directionProbe(object, source)));
+    outputs.world_probe_point_xyz = numeric(worldProbe);
+    outputs.roundtrip_probe_point_xyz = numeric(new THREE.Vector3(...worldProbe).applyMatrix4(object.matrixWorld.clone().invert()).toArray());
+  }
   observations.push({
     node: name,
-    native_entry_points: ['GLTFLoader.parse', 'Object3D.updateMatrixWorld', 'Object3D.localToWorld', 'Matrix4.invert'],
-    outputs: {
-      local_quaternion_xyzw: numeric(object.quaternion.toArray()),
-      local_matrix_rows: numeric(rows(object.matrix)),
-      world_matrix_rows: numeric(rows(object.matrixWorld)),
-      local_basis_and_probe_images: numeric(localImages),
-      world_points_xyz: numeric(worldPoints),
-      world_unit_directions_xyz: numeric(worldDirections),
-      world_to_local_point_roundtrip_xyz: numeric(roundtrip),
-    },
+    outputs,
   });
 }
-const outputFile = path.join(outputPath, 'observations.json');
-fs.writeFileSync(outputFile, stringifyEvidence(observations));
+const outputFile = path.join(outputPath, 'witnesses.json');
+fs.writeFileSync(outputFile, stringifyEvidence({
+  schema_version: '1.0', evidence_kind: 'native_threejs_gltf_converter_capture',
+  native_entry_points: ['GLTFLoader.parse', 'Object3D.updateMatrixWorld', 'Vector3.applyMatrix4', 'Matrix4.invert'],
+  observations,
+}));
 const packageJson = JSON.parse(fs.readFileSync(path.join(packageRoot, 'node_modules/three/package.json'), 'utf8'));
+if (packageJson.version !== '0.187.0') throw new Error('Expected Three.js 0.187.0');
 const manifest = {
   schema_version: '1.0', evidence_kind: 'native_threejs_gltf_converter_capture',
   semantic_contract: { file: path.relative(repositoryRoot, semanticContractPath).split(path.sep).join('/'), sha256: sha(semanticContractPath) },
@@ -66,7 +68,7 @@ const manifest = {
   exporter: { path: path.basename(fileURLToPath(import.meta.url)), sha256: sha(fileURLToPath(import.meta.url)) },
   package_lock_sha256: sha(path.join(packageRoot, 'package-lock.json')),
   numeric_helper_sha256: sha(path.resolve(here, '../../shared/numeric_evidence.mjs')),
-  observations: { path: 'observations.json', sha256: sha(outputFile), count: observations.length },
+  observations: { path: 'witnesses.json', sha256: sha(outputFile), count: observations.length },
 };
 fs.writeFileSync(path.join(outputPath, 'manifest.json'), JSON.stringify(manifest, null, 2) + '\n');
 console.log(JSON.stringify({output:outputPath, observations:observations.length, three:packageJson.version, node:process.version}));

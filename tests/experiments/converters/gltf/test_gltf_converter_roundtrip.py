@@ -97,9 +97,6 @@ def test_gltf_converter_artifact_loader_and_provenance_are_pinned():
         / "experiments/transports/gltf/2.0.0/threejs/0.187.0/package-lock.json",
         "numeric_helper_sha256": ROOT
         / "experiments/converters/shared/numeric_evidence.mjs",
-        "retention_script_sha256": ROOT / "scripts/retain_gltf_converter_witnesses.py",
-        "retention_digest_helper_sha256": ROOT / "scripts/evidence_schema/utilities.py",
-        "retention_helper_sha256": ROOT / "scripts/evidence_json.py",
         "retention_formatter_sha256": ROOT / "scripts/evidence_format.py",
     }
     for field, path in reproduction_paths.items():
@@ -107,6 +104,16 @@ def test_gltf_converter_artifact_loader_and_provenance_are_pinned():
             hashlib.sha256(path.read_bytes()).hexdigest()
             == MANIFEST["reproduction"][field]
         )
+    assert (
+        MANIFEST["direct_reproduction"]["native_script_sha256"]
+        == MANIFEST["reproduction"]["loader_script_sha256"]
+    )
+    assert (
+        MANIFEST["direct_reproduction"]["runner_sha256"]
+        == hashlib.sha256(
+            (ROOT / "experiments/run_converter_capture.py").read_bytes()
+        ).hexdigest()
+    )
 
     for source, asset_node in zip(INPUTS["nodes"], ASSET["nodes"]):
         assert asset_node["rotation"] == source["gltf_xyzw"]
