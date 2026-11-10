@@ -7,50 +7,35 @@ import hashlib
 import math
 import struct
 from pathlib import Path
-from typing import Annotated, Literal, Optional
+from typing import Annotated, Literal
 
 from pydantic import (
     BaseModel,
     ConfigDict,
     Field,
     FiniteFloat,
-    model_serializer,
     model_validator,
 )
 
 from scripts.evidence_format import dump_evidence_json
 from scripts.evidence_json import read_evidence_document
 from scripts.evidence_schema.primitives import SemanticContractReference
-from scripts.evidence_schema.sophus import SophusScalarProfile, SophusSemanticConfig
+from scripts.evidence_schema.sophus import (
+    CONSTRUCTION_CASES,
+    CONSTRUCTOR_COLUMNS,
+    EXP_LOG_CASES,
+    EXP_LOG_COLUMNS,
+    ROTATION_COLUMNS,
+    RotationRow,
+    SophusDiscoveryWitnessSet,
+    SophusScalarProfile,
+    SophusSemanticConfig,
+)
 from scripts.evidence_schema.utilities import sha256_file
 
-_CONSTRUCTION_CASES = (
-    "identity",
-    "x_quarter",
-    "y_quarter",
-    "z_quarter",
-    "mixed_unequal",
-    "mixed_unequal_antipode",
-    "nonunit",
-    "half_turn_axis",
-)
-_RAW_EXP_LOG_CASES = (
-    "zero",
-    "near_zero",
-    "mixed_a",
-    "mixed_b",
-    "near_pi_axis",
-    "above_pi_axis",
-    "perturbation",
-)
-_EXP_LOG_CASES = (
-    "zero",
-    "near_zero",
-    "mixed_a",
-    "mixed_b",
-    "near_pi_axis",
-    "above_pi_axis",
-)
+_CONSTRUCTION_CASES = CONSTRUCTION_CASES
+_EXP_LOG_CASES = EXP_LOG_CASES
+_RAW_EXP_LOG_CASES = (*EXP_LOG_CASES, "perturbation")
 _PINNED_INPUT_SHA256 = (
     "713fece6dbad561b864c3f625c740190f92210318af4fa09f4467930a04a3048"
 )
@@ -222,16 +207,7 @@ class NativeCapture(StrictModel):
 
         if probe is None or tuple(quaternions) != _CONSTRUCTION_CASES:
             raise ValueError("pinned TSV probe/constructor cases differ from contract")
-        raw_tangent_cases = (
-            "zero",
-            "near_zero",
-            "mixed_a",
-            "mixed_b",
-            "near_pi_axis",
-            "above_pi_axis",
-            "perturbation",
-        )
-        if tuple(tangents) != raw_tangent_cases:
+        if tuple(tangents) != _RAW_EXP_LOG_CASES:
             raise ValueError("pinned TSV tangent cases differ from contract")
 
         def target_precision(values: tuple[float, ...]) -> tuple[float, ...]:
@@ -257,82 +233,6 @@ class NativeCapture(StrictModel):
                 raise ValueError(
                     f"exp/log tangent differs from pinned TSV: {item.case_id}"
                 )
-
-
-class RotationWitness(StrictModel):
-    case_id: str
-    params_xyzw: Quaternion4
-    native_basis_images_xyz: Matrix3
-    native_probe_image_xyz: Optional[Vector3] = None  # noqa: UP045 -- Pydantic evaluates this on Python 3.9.
-
-    @model_serializer(mode="plain")
-    def serialize_row(self) -> list[object]:
-        return [
-            self.case_id,
-            self.params_xyzw,
-            self.native_basis_images_xyz,
-            self.native_probe_image_xyz,
-        ]
-
-
-class ConstructorWitness(StrictModel):
-    case_id: str
-    input_wxyz: Quaternion4
-    input_norm: float
-    result: RotationWitness
-    log_xyz: Vector3
-
-    @model_serializer(mode="plain")
-    def serialize_row(self) -> list[object]:
-        return [
-            self.case_id,
-            self.input_wxyz,
-            self.input_norm,
-            self.result.params_xyzw,
-            self.result.native_basis_images_xyz,
-            self.log_xyz,
-            self.result.native_probe_image_xyz,
-        ]
-
-
-class ExpLogWitness(StrictModel):
-    case_id: str
-    tangent_xyz: Vector3
-    exp_result: RotationWitness
-    log_of_exp_xyz: Vector3
-
-    @model_serializer(mode="plain")
-    def serialize_row(self) -> list[object]:
-        return [
-            self.case_id,
-            self.tangent_xyz,
-            self.exp_result.params_xyzw,
-            self.exp_result.native_basis_images_xyz,
-            self.log_of_exp_xyz,
-            self.exp_result.native_probe_image_xyz,
-        ]
-
-
-class DiscoveryWitnesses(StrictModel):
-    schema_version: Literal["1.0"]
-    evidence_kind: Literal["selected_native_discovery_witnesses"]
-    target: Literal[
-        "Sophus 1.24.6 SO3d / Eigen 5.0.1",
-        "Sophus 1.24.6 SO3f / Eigen 5.0.1",
-    ]
-    probe_frame: Literal["+X right, +Y forward, +Z up; right-handed"]
-    probe_xyz: Vector3
-    raw_capture_sha256: str
-    quaternion_construction_columns: tuple[str, ...]
-    quaternion_construction: tuple[ConstructorWitness, ...]
-    exp_log_columns: tuple[str, ...]
-    exp_log: tuple[ExpLogWitness, ...]
-    composition_columns: tuple[str, ...]
-    composition: tuple[RotationWitness, RotationWitness]
-    inverse_columns: tuple[str, ...]
-    inverse: RotationWitness
-    perturbation_columns: tuple[str, ...]
-    perturbation_side: tuple[RotationWitness, RotationWitness]
 
 
 def load_semantic_config() -> SophusSemanticConfig:
@@ -372,23 +272,19 @@ def profile_for_capture(
     return profile
 
 
-def _rotation_witness(
-    rotation: NativeRotation,
-    *,
-    probe_image: bool,
-) -> RotationWitness:
+def _rotation_witness(rotation: NativeRotation, *, probe_image: bool) -> RotationRow:
     actions = rotation.native_vector_actions_xyz
-    return RotationWitness(
-        case_id=rotation.case_id,
-        params_xyzw=rotation.params_xyzw,
-        native_basis_images_xyz=actions[:3],
-        native_probe_image_xyz=actions[3] if probe_image else None,
+    return (
+        rotation.case_id,
+        rotation.params_xyzw,
+        actions[:3],
+        actions[3] if probe_image else None,
     )
 
 
 def reduce_capture(
     capture_bytes: bytes, config: SophusSemanticConfig
-) -> DiscoveryWitnesses:
+) -> SophusDiscoveryWitnessSet:
     capture = NativeCapture.model_validate_json(capture_bytes, strict=True)
     profile = profile_for_capture(config, capture)
     constructors = {item.case_id: item for item in capture.quaternion_construction}
@@ -398,78 +294,50 @@ def reduce_capture(
 
     capture.validate_pinned_inputs(Path(__file__).with_name("capture_inputs.tsv"))
 
-    return DiscoveryWitnesses(
+    return SophusDiscoveryWitnessSet(
         schema_version="1.0",
         evidence_kind="selected_native_discovery_witnesses",
         target=profile.witness_target,
         probe_frame=config.probe_frame.description,
         probe_xyz=capture.probe_xyz,
         raw_capture_sha256=hashlib.sha256(capture_bytes).hexdigest(),
-        quaternion_construction_columns=(
-            "case_id",
-            "input_wxyz",
-            "input_norm",
-            "native_params_xyzw",
-            "native_basis_images_xyz",
-            "native_log_xyz",
-            "native_probe_image_xyz_or_null",
-        ),
+        quaternion_construction_columns=CONSTRUCTOR_COLUMNS,
         quaternion_construction=tuple(
-            ConstructorWitness(
-                case_id=item.case_id,
-                input_wxyz=item.input_wxyz,
-                input_norm=item.input_norm,
-                result=_rotation_witness(
-                    item.result,
-                    probe_image=item.case_id == "mixed_unequal",
-                ),
-                log_xyz=item.log_xyz,
+            (
+                item.case_id,
+                item.input_wxyz,
+                item.input_norm,
+                item.result.params_xyzw,
+                item.result.native_vector_actions_xyz[:3],
+                item.log_xyz,
+                item.result.native_vector_actions_xyz[3]
+                if item.case_id == "mixed_unequal"
+                else None,
             )
             for item in (constructors[case_id] for case_id in _CONSTRUCTION_CASES)
         ),
-        exp_log_columns=(
-            "case_id",
-            "tangent_xyz_radians",
-            "native_params_xyzw",
-            "native_basis_images_xyz",
-            "native_log_of_exp_xyz",
-            "native_probe_image_xyz_or_null",
-        ),
+        exp_log_columns=EXP_LOG_COLUMNS,
         exp_log=tuple(
-            ExpLogWitness(
-                case_id=item.case_id,
-                tangent_xyz=item.tangent_xyz,
-                exp_result=_rotation_witness(
-                    item.exp_result,
-                    probe_image=item.case_id == "mixed_a",
-                ),
-                log_of_exp_xyz=item.log_of_exp_xyz,
+            (
+                item.case_id,
+                item.tangent_xyz,
+                item.exp_result.params_xyzw,
+                item.exp_result.native_vector_actions_xyz[:3],
+                item.log_of_exp_xyz,
+                item.exp_result.native_vector_actions_xyz[3]
+                if item.case_id == "mixed_a"
+                else None,
             )
             for item in (exp_log[case_id] for case_id in _EXP_LOG_CASES)
         ),
-        composition_columns=(
-            "case_id",
-            "native_params_xyzw",
-            "native_basis_images_xyz",
-            "native_probe_image_xyz_or_null",
-        ),
+        composition_columns=ROTATION_COLUMNS,
         composition=(
             _rotation_witness(compositions["mixed_a_times_mixed_b"], probe_image=True),
             _rotation_witness(compositions["mixed_b_times_mixed_a"], probe_image=True),
         ),
-        inverse_columns=(
-            "case_id",
-            "native_params_xyzw",
-            "native_basis_images_xyz",
-            "native_probe_image_xyz_or_null",
-        ),
+        inverse_columns=ROTATION_COLUMNS,
         inverse=_rotation_witness(capture.inverse, probe_image=False),
-        perturbation_columns=(
-            "case_id",
-            "native_params_xyzw",
-            "native_basis_images_xyz",
-            "native_probe_image_xyz_or_null",
-        ),
+        perturbation_columns=ROTATION_COLUMNS,
         perturbation_side=(
             _rotation_witness(perturbations["delta_times_mixed_a"], probe_image=False),
             _rotation_witness(perturbations["mixed_a_times_delta"], probe_image=False),
@@ -477,7 +345,7 @@ def reduce_capture(
     )
 
 
-def _format_witnesses(value: DiscoveryWitnesses) -> str:
+def _format_witnesses(value: SophusDiscoveryWitnessSet) -> str:
     return dump_evidence_json(value.model_dump(mode="json"))
 
 

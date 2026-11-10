@@ -52,7 +52,7 @@
       "verify_scipy.py": "548bb54929ef570477c2b6a8d17756610af610ceb41979bba369d27485d35124"
     },
     "repair_replay_sources_sha256": {
-      "retain_witnesses.py": "a9b708e0ac515c37b395ea47b4c0cb821b38ba35b68de8cf9842acd1c65b4c2b",
+      "retain_witnesses.py": "15009d7abfc8e5774f1d6c0eeeb2e2ca33b8983516c957f21e0a54e351a9ac8d",
       "verify_scipy.py": "f979939ccaaad092de2c0f97c8bca93ed9fb0169dd6c3e0e0b7e400139d14b86"
     },
     "input_file": "capture_inputs.tsv",
@@ -76,7 +76,9 @@
         "selected_witness_file": "witnesses/float64.json",
         "selected_witness_sha256": "000002c68ffad82d1bfcdb9787219bf4a9635036a21a1f56890d5280a2d0b8b4"
       }
-    }
+    },
+    "previous_repair_replay_reducer_sha256": "a9b708e0ac515c37b395ea47b4c0cb821b38ba35b68de8cf9842acd1c65b4c2b",
+    "retained_schema_sha256": "c880fbafc54109da132a4133028d1a2b60d03e268d51d0791fe97932e2d27574"
   },
   "review": {
     "state": "selected_native_discovery_witnesses_reviewed",

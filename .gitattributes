@@ -13,5 +13,6 @@ experiments/converters/** -text
 experiments/provenance/** -text
 tests/oracles/** -text
 scripts/evidence_json.py -text
+scripts/evidence_schema/sophus.py -text
 scripts/compact_oracle_witnesses.py -text
 scripts/retain_*_witnesses.py -text

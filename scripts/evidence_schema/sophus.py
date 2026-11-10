@@ -102,6 +102,48 @@ ExpLogRow = tuple[
 ]
 RotationRow = tuple[str, Quaternion4, Matrix3, OptionalVector3]
 
+CONSTRUCTION_CASES = (
+    "identity",
+    "x_quarter",
+    "y_quarter",
+    "z_quarter",
+    "mixed_unequal",
+    "mixed_unequal_antipode",
+    "nonunit",
+    "half_turn_axis",
+)
+EXP_LOG_CASES = (
+    "zero",
+    "near_zero",
+    "mixed_a",
+    "mixed_b",
+    "near_pi_axis",
+    "above_pi_axis",
+)
+CONSTRUCTOR_COLUMNS = (
+    "case_id",
+    "input_wxyz",
+    "input_norm",
+    "native_params_xyzw",
+    "native_basis_images_xyz",
+    "native_log_xyz",
+    "native_probe_image_xyz_or_null",
+)
+EXP_LOG_COLUMNS = (
+    "case_id",
+    "tangent_xyz_radians",
+    "native_params_xyzw",
+    "native_basis_images_xyz",
+    "native_log_of_exp_xyz",
+    "native_probe_image_xyz_or_null",
+)
+ROTATION_COLUMNS = (
+    "case_id",
+    "native_params_xyzw",
+    "native_basis_images_xyz",
+    "native_probe_image_xyz_or_null",
+)
+
 
 class SophusDiscoveryWitnessSet(NativeCaptureModel):
     """Strict schema for the compact table-shaped retained Sophus JSON."""
@@ -133,65 +175,19 @@ class SophusDiscoveryWitnessSet(NativeCaptureModel):
     @model_validator(mode="after")
     def columns_match_rows(self) -> SophusDiscoveryWitnessSet:
         expected_columns = {
-            "quaternion_construction_columns": (
-                "case_id",
-                "input_wxyz",
-                "input_norm",
-                "native_params_xyzw",
-                "native_basis_images_xyz",
-                "native_log_xyz",
-                "native_probe_image_xyz_or_null",
-            ),
-            "exp_log_columns": (
-                "case_id",
-                "tangent_xyz_radians",
-                "native_params_xyzw",
-                "native_basis_images_xyz",
-                "native_log_of_exp_xyz",
-                "native_probe_image_xyz_or_null",
-            ),
-            "composition_columns": (
-                "case_id",
-                "native_params_xyzw",
-                "native_basis_images_xyz",
-                "native_probe_image_xyz_or_null",
-            ),
-            "inverse_columns": (
-                "case_id",
-                "native_params_xyzw",
-                "native_basis_images_xyz",
-                "native_probe_image_xyz_or_null",
-            ),
-            "perturbation_columns": (
-                "case_id",
-                "native_params_xyzw",
-                "native_basis_images_xyz",
-                "native_probe_image_xyz_or_null",
-            ),
+            "quaternion_construction_columns": CONSTRUCTOR_COLUMNS,
+            "exp_log_columns": EXP_LOG_COLUMNS,
+            "composition_columns": ROTATION_COLUMNS,
+            "inverse_columns": ROTATION_COLUMNS,
+            "perturbation_columns": ROTATION_COLUMNS,
         }
         if any(
             getattr(self, name) != expected
             for name, expected in expected_columns.items()
         ):
             raise ValueError("Sophus witness columns differ from the typed schema")
-        if tuple(row[0] for row in self.quaternion_construction) != (
-            "identity",
-            "x_quarter",
-            "y_quarter",
-            "z_quarter",
-            "mixed_unequal",
-            "mixed_unequal_antipode",
-            "nonunit",
-            "half_turn_axis",
-        ):
+        if tuple(row[0] for row in self.quaternion_construction) != CONSTRUCTION_CASES:
             raise ValueError("Sophus constructor witness IDs or order changed")
-        if tuple(row[0] for row in self.exp_log) != (
-            "zero",
-            "near_zero",
-            "mixed_a",
-            "mixed_b",
-            "near_pi_axis",
-            "above_pi_axis",
-        ):
+        if tuple(row[0] for row in self.exp_log) != EXP_LOG_CASES:
             raise ValueError("Sophus exp/log witness IDs or order changed")
         return self

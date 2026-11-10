@@ -14,6 +14,7 @@ import pytest
 from pydantic import ValidationError
 
 from scripts.evidence_schema.primitives import finite_max_abs
+from scripts.evidence_schema.sophus import SophusDiscoveryWitnessSet
 from tests.support.paths import REPOSITORY_ROOT
 from tests.support.provenance_archives import read_provenance_source
 
@@ -215,7 +216,7 @@ def test_compact_witnesses_keep_the_documented_six_exp_log_rows() -> None:
     selected = retain.reduce_capture(
         json.dumps(_capture()).encode("utf-8"), retain.load_semantic_config()
     )
-    assert tuple(item.case_id for item in selected.exp_log) == (
+    assert tuple(item[0] for item in selected.exp_log) == (
         "zero",
         "near_zero",
         "mixed_a",
@@ -224,6 +225,32 @@ def test_compact_witnesses_keep_the_documented_six_exp_log_rows() -> None:
         "above_pi_axis",
     )
     assert len(selected.exp_log) == 6
+
+
+@pytest.mark.parametrize("precision,tolerance", [("float32", 2e-6), ("float64", 2e-14)])
+def test_retained_sophus_witnesses_validate_and_match_native_basis_actions(
+    precision: str, tolerance: float
+) -> None:
+    np = pytest.importorskip("numpy")
+    rotation = pytest.importorskip("scipy.spatial.transform").Rotation
+    manifest = json.loads((SOPHUS / "manifest.json").read_text())
+    profile = manifest["artifacts"]["scalar_profiles"][precision]
+    payload = (SOPHUS / profile["selected_witness_file"]).read_bytes()
+    assert hashlib.sha256(payload).hexdigest() == profile["selected_witness_sha256"]
+    witnesses = SophusDiscoveryWitnessSet.model_validate_json(payload, strict=True)
+    assert witnesses.raw_capture_sha256 == profile["raw_capture_sha256"]
+    rows = [(row[3], row[4]) for row in witnesses.quaternion_construction]
+    rows += [(row[2], row[3]) for row in witnesses.exp_log]
+    rows += [(row[1], row[2]) for row in witnesses.composition]
+    rows += [(witnesses.inverse[1], witnesses.inverse[2])]
+    rows += [(row[1], row[2]) for row in witnesses.perturbation_side]
+    for native_xyzw, native_basis_images in rows:
+        np.testing.assert_allclose(
+            rotation.from_quat(native_xyzw).apply(np.eye(3)),
+            native_basis_images,
+            rtol=0.0,
+            atol=tolerance,
+        )
 
 
 def test_float32_capture_inputs_are_compared_at_exporter_precision() -> None:
@@ -331,10 +358,14 @@ def test_historical_capture_sources_are_archived_and_current_sources_are_separat
         archived = read_provenance_source(
             ROOT, f"experiments/provenance/reproduction-v1.zip#{archive_name}"
         )
-        assert (
-            hashlib.sha256(archived).hexdigest() == historical[source_name]
-        )
+        assert hashlib.sha256(archived).hexdigest() == historical[source_name]
     current = manifest["artifacts"]["repair_replay_sources_sha256"]
+    assert (
+        hashlib.sha256(
+            (ROOT / "scripts/evidence_schema/sophus.py").read_bytes()
+        ).hexdigest()
+        == manifest["artifacts"]["retained_schema_sha256"]
+    )
     assert (
         hashlib.sha256((SOPHUS / "retain_witnesses.py").read_bytes()).hexdigest()
         == current["retain_witnesses.py"]
