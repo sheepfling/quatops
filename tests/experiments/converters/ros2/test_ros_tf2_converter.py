@@ -93,7 +93,6 @@ def test_ros_capture_is_native_pinned_and_selected_values_are_lossless():
     assert len(provenance["full_observation_sha256"]) == 64
     assert "historical capture" in reproduction["input_serialization_note"]
     file_hashes = {
-        "capture_helper_sha256": ROOT / "experiments/oracles/shared/capture_io.py",
         "retention_digest_helper_sha256": ROOT / "scripts/evidence_schema/utilities.py",
         "retention_helper_sha256": ROOT / "scripts/evidence_json.py",
         "retention_formatter_sha256": ROOT / "scripts/evidence_format.py",

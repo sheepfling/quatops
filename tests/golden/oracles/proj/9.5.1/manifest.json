@@ -85,16 +85,16 @@
   },
   "reproduction": {
     "exporter_path": "experiments/oracles/proj/9.5.1/capture_proj.py",
-    "exporter_sha256": "e53f1b08cd8003e7b211552ac56703a03af2c1c649eb029672bb65edbc665836",
+    "exporter_sha256": "7567785060d92eea201c2861d87a75a576666ca0bd31a683c7452c2bf8913b77",
     "previous_checkout_exporter_sha256": "b1924e77c6a449b3c86af70f8fb870cb06fa2eecd160f8a1d6937b3bbe4254a6",
-    "capture_helper_path": "experiments/oracles/shared/capture_io.py",
-    "capture_helper_sha256": "c0eb259e3aaccd6e76c1023db0104b887350777fa777d1b54995b7100566cf38",
     "input_path": "experiments/oracles/shared/geographic_inputs_v1.json",
     "input_sha256": "619099b732593c6c45f4f7eb64714e4c7d79b2c96dcd070777522e3736e4f085",
     "requirements_path": "experiments/oracles/proj/9.5.1/requirements.txt",
     "requirements_sha256": "2ebfab05fa84c1997fce51031415ed2da1209595112badc09faecbeadfa3aa6a",
     "previous_checkout_capture_helper_sha256": "ecdf0245b9d0318d67189c471f26b3ec58e2ef871611b6a2c5c79cbbc16963da",
-    "capture_helper_archive": "experiments/provenance/reproduction-v1.zip#capture_io.py"
+    "capture_helper_archive": "experiments/provenance/reproduction-v1.zip#capture_io.py",
+    "previous_reproduction_exporter_sha256": "e53f1b08cd8003e7b211552ac56703a03af2c1c649eb029672bb65edbc665836",
+    "previous_reproduction_helper_sha256": "c0eb259e3aaccd6e76c1023db0104b887350777fa777d1b54995b7100566cf38"
   },
   "retention": {
     "source_observations_sha256": "67adb8fcedc1cd9b6aca1b203a6109b8b57f2d8fe3f381951cbcb0dcd56e5f5a",
@@ -102,5 +102,18 @@
     "selection": "For each of 11 locations, retain native ECEF origin, three ENU unit-axis endpoints, one mixed-point ECEF endpoint, and its local inverse readback. Inputs resolve by case ID in the shared geographic corpus.",
     "verified_inverse_readbacks": "All five prior local readbacks at each location were checked against their source points within 1e-8 m before retaining the mixed-point readback.",
     "verified_hex_values_removed": 583
+  },
+  "direct_reproduction": {
+    "utc": "2026-11-10T14:50:54.626997+00:00",
+    "pyproj_version": "3.7.2",
+    "proj_version": "9.5.1",
+    "python": "3.13.14 (main, Jun 23 2026, 15:19:27) [MSC v.1944 64 bit (AMD64)]",
+    "platform": "Windows-11-10.0.26300-SP0",
+    "native_binary_sha256": "bc220c1e28b5a5aa694eabe713c8c7b35f39aa38d6d6412046f9d1dfc96f138c",
+    "input_sha256": "619099b732593c6c45f4f7eb64714e4c7d79b2c96dcd070777522e3736e4f085",
+    "exporter_sha256": "7567785060d92eea201c2861d87a75a576666ca0bd31a683c7452c2bf8913b77",
+    "observations_sha256": "d30b93e91e68d562f3a4d6187a648191e748e400cf45876135ed6a8958aa35ba",
+    "observation_count": 11,
+    "comparison": "All 11 native records reproduced on Windows; maximum absolute difference from historical Linux values was 9.313225746154785e-10 m, with no signed-zero differences."
   }
 }

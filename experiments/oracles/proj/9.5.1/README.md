@@ -6,8 +6,8 @@ a quaternion converter or a Cesium runtime. The frozen 11-case native record
 is in [`tests/golden/oracles/proj/9.5.1`](../../../../tests/golden/oracles/proj/9.5.1/manifest.json).
 
 The original native run used Python `3.13.5`, pyproj `3.7.2`, and PROJ `9.5.1`
-on Linux x64. This package retains the input corpus, capture helper, current
-exporter, and pinned pyproj requirement for repeat runs. Its exporter was
+on Linux x64. This package retains the input corpus, current exporter, and
+pinned pyproj requirement for repeat runs. Its exporter was
 reorganized for this versioned package after the selected observations were
 captured; source hashes for the historical native run and current reproducer
 are recorded separately in the fixture. The retained fixture keeps every
@@ -30,8 +30,9 @@ $captureDir = Join-Path $env:TEMP 'quatops-captures\proj-9.5.1\latest'
 
 The required `--geographic` input in the example is the shared
 [`geographic_inputs_v1.json`](../../shared/geographic_inputs_v1.json). The
-requirements include Pydantic for the shared capture envelope and pyproj for
-the native transforms. The exporter validates the geographic input corpus with
+requirements include Pydantic for typed capture records and pyproj for the
+native transforms. The exporter writes observations and provenance directly,
+and validates the geographic input corpus with
 the shared strict Pydantic schema, disables network access, and uses WGS84
 without external datum grids. See
 [`docs/oracles/proj.md`](../../../../docs/oracles/proj.md) for the measured

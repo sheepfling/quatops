@@ -6,12 +6,14 @@ import hashlib
 import json
 import math
 import sys
-from dataclasses import asdict, dataclass
+from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
 import bpy
+
+from scripts.evidence_schema import blender_gltf as schema
 
 
 @dataclass(frozen=True, slots=True)
@@ -30,125 +32,9 @@ class CurveRow:
 
 
 @dataclass(frozen=True, slots=True)
-class FcurveSummary:
-    data_path: str
-    array_indices: list[int]
-    interpolations_by_component: list[list[str]]
-
-
-@dataclass(frozen=True, slots=True)
-class CubicFcurveSummary(FcurveSummary):
-    left_handle_types_by_component: list[list[str]]
-    right_handle_types_by_component: list[list[str]]
-
-
-@dataclass(frozen=True, slots=True)
 class CapturedActionCurves:
-    summary: FcurveSummary
+    summary: schema.BlenderGltfFcurveSummary
     key_frames: list[float]
-
-
-@dataclass(frozen=True, slots=True)
-class StaticTransform:
-    matrix_basis_rows: list[list[float]]
-    matrix_world_rows: list[list[float]]
-
-
-@dataclass(frozen=True, slots=True)
-class GltfTransport:
-    name: str
-    version: str
-    source_coordinates: str
-
-
-@dataclass(frozen=True, slots=True)
-class BlenderLoader:
-    name: str
-    version: str
-    version_tuple: list[int]
-    build_hash: str
-    build_date: str
-    build_platform: str
-    python_version: str
-    executable: str
-    executable_sha256: str
-    importer_source_root: str
-    importer_source_sha256: dict[str, str]
-    rotation_component_order: str
-
-
-@dataclass(frozen=True, slots=True)
-class OperatorArguments:
-    filepath: str
-
-
-@dataclass(frozen=True, slots=True)
-class CaptureProvenance:
-    gltf_sha256: str
-    binary_sha256: str
-    exporter_sha256: str
-    exact_invocation: str
-    operator_arguments: OperatorArguments
-    other_operator_properties: str
-    captured_at_utc: str
-
-
-@dataclass(frozen=True, slots=True)
-class SceneUnitSettings:
-    system: str
-    scale_length: float
-    system_rotation: str
-
-
-@dataclass(frozen=True, slots=True)
-class SceneSettings:
-    fps: int
-    fps_base: float
-    frame_start: int
-    frame_end: int
-    unit_settings: SceneUnitSettings
-
-
-@dataclass(frozen=True, slots=True)
-class AxisImages:
-    x: list[float]
-    y: list[float]
-    z: list[float]
-
-
-@dataclass(frozen=True, slots=True)
-class AnimationSample:
-    sample: str
-    time_seconds: float
-    quaternion_wxyz: list[float]
-
-
-@dataclass(frozen=True, slots=True)
-class AnimationObservation:
-    interpolation: str
-    action_name: str
-    target_object: str
-    key_times_seconds_from_imported_fcurves: list[float]
-    fcurves: FcurveSummary
-    samples: list[AnimationSample]
-
-
-@dataclass(frozen=True, slots=True)
-class GltfObservations:
-    static_transforms: dict[str, StaticTransform]
-    source_translation_axis_images_in_blender_xyz: AxisImages
-    animations: list[AnimationObservation]
-
-
-@dataclass(frozen=True, slots=True)
-class BlenderGltfCapture:
-    schema_version: str
-    evidence_kind: str
-    transport: GltfTransport
-    loader: BlenderLoader
-    provenance: CaptureProvenance
-    scene: SceneSettings
-    observations: GltfObservations
 
 
 def sha256_file(path: Path) -> str:
@@ -180,10 +66,10 @@ def quaternion_wxyz(quaternion: Any) -> list[float]:
     ]
 
 
-def object_transform(object_: Any) -> StaticTransform:
+def object_transform(object_: Any) -> schema.BlenderGltfStaticTransform:
     bpy.context.view_layer.update()
     evaluated = object_.evaluated_get(bpy.context.evaluated_depsgraph_get())
-    return StaticTransform(
+    return schema.BlenderGltfStaticTransform(
         matrix_basis_rows=matrix_rows(evaluated.matrix_basis),
         matrix_world_rows=matrix_rows(evaluated.matrix_world),
     )
@@ -221,16 +107,16 @@ def action_curves(action: Any, *, include_handles: bool) -> CapturedActionCurves
     key_frames = rows[0].key_frames
     if any(row.key_frames != key_frames for row in rows[1:]):
         raise RuntimeError(f"Quaternion F-curve key times differ in {action.name!r}")
-    common = FcurveSummary(
+    common = schema.BlenderGltfFcurveSummary(
         data_path=rows[0].data_path,
         array_indices=[row.array_index for row in rows],
         interpolations_by_component=[
             [key.interpolation for key in row.keys] for row in rows
         ],
     )
-    summary: FcurveSummary = common
+    summary: schema.BlenderGltfFcurveSummary = common
     if include_handles:
-        summary = CubicFcurveSummary(
+        summary = schema.BlenderGltfCubicFcurveSummary(
             data_path=common.data_path,
             array_indices=common.array_indices,
             interpolations_by_component=common.interpolations_by_component,
@@ -302,7 +188,7 @@ def main() -> None:
     ]
     objects = {name: require_object(name) for name in names}
     static_names = {"parent_frame", "static_trs", "static_matrix"}
-    static: dict[str, StaticTransform] = {
+    static: dict[str, schema.BlenderGltfStaticTransform] = {
         name: object_transform(objects[name]) for name in names if name in static_names
     }
 
@@ -316,13 +202,13 @@ def main() -> None:
             )
         ]
 
-    axis_images = AxisImages(
+    axis_images = schema.BlenderGltfAxisImages(
         x=axis_image("x"),
         y=axis_image("y"),
         z=axis_image("z"),
     )
 
-    animations: list[AnimationObservation] = []
+    animations: list[schema.BlenderGltfAnimationFields] = []
     for interpolation, node_name, action_name in (
         ("STEP", "animated_step", "rotation_step"),
         ("LINEAR", "animated_linear", "rotation_linear"),
@@ -364,19 +250,23 @@ def main() -> None:
                 ("key-1", t1),
                 ("key-2", t2),
             ]
-        sample_rows: list[AnimationSample] = []
+        sample_rows: list[schema.BlenderGltfAnimationSample] = []
         for sample_name, sample_time in samples:
             set_scene_time(scene, sample_time)
             evaluated = object_.evaluated_get(bpy.context.evaluated_depsgraph_get())
             sample_rows.append(
-                AnimationSample(
+                schema.BlenderGltfAnimationSample(
                     sample=sample_name,
                     time_seconds=sample_time,
                     quaternion_wxyz=quaternion_wxyz(evaluated.rotation_quaternion),
                 )
             )
         animations.append(
-            AnimationObservation(
+            {
+                "STEP": schema.BlenderGltfStepAnimation,
+                "LINEAR": schema.BlenderGltfLinearAnimation,
+                "CUBICSPLINE": schema.BlenderGltfCubicSplineAnimation,
+            }[interpolation](
                 interpolation=interpolation,
                 action_name=action.name,
                 target_object=object_.name,
@@ -401,10 +291,10 @@ def main() -> None:
         for relative in importer_paths
         if (importer_root / relative).exists()
     }
-    result = BlenderGltfCapture(
+    result = schema.BlenderGltfCapture(
         schema_version="1.0",
         evidence_kind="native_blender_gltf_importer_capture",
-        transport=GltfTransport(
+        transport=schema.GltfTransportIdentity(
             name="glTF",
             version="2.0",
             source_coordinates=(
@@ -412,7 +302,7 @@ def main() -> None:
                 "measured by explicit translation probes"
             ),
         ),
-        loader=BlenderLoader(
+        loader=schema.BlenderGltfLoader(
             name="Blender glTF importer",
             version=bpy.app.version_string,
             version_tuple=list(bpy.app.version),
@@ -428,38 +318,40 @@ def main() -> None:
                 "WXYZ in mathutils Quaternion; outputs labelled explicitly"
             ),
         ),
-        provenance=CaptureProvenance(
+        provenance=schema.BlenderGltfProvenance(
             gltf_sha256=sha256_file(asset_path),
             binary_sha256=sha256_file(asset_binary),
             exporter_sha256=sha256_file(Path(__file__)),
             exact_invocation=(
-                "blender --background --factory-startup --python-exit-code 1 "
+                "blender --background --factory-startup --python-use-system-env --python-exit-code 1 "
                 "--python capture_gltf.py -- --asset <rotation_transport.gltf> "
                 "--output <native_blender_gltf.json>"
             ),
-            operator_arguments=OperatorArguments(filepath=asset_path.name),
+            operator_arguments=schema.BlenderGltfOperatorArguments(
+                filepath=asset_path.name
+            ),
             other_operator_properties="Blender 5.1.2 importer defaults",
             captured_at_utc=datetime.now(timezone.utc).isoformat(),
         ),
-        scene=SceneSettings(
+        scene=schema.BlenderGltfScene(
             fps=scene.render.fps,
             fps_base=scene.render.fps_base,
             frame_start=scene.frame_start,
             frame_end=scene.frame_end,
-            unit_settings=SceneUnitSettings(
+            unit_settings=schema.BlenderGltfSceneUnits(
                 system=scene.unit_settings.system,
                 scale_length=scene.unit_settings.scale_length,
                 system_rotation=scene.unit_settings.system_rotation,
             ),
         ),
-        observations=GltfObservations(
-            static_transforms=static,
+        observations=schema.BlenderGltfObservations(
+            static_transforms=schema.BlenderGltfStaticTransforms(**static),
             source_translation_axis_images_in_blender_xyz=axis_images,
-            animations=animations,
+            animations=tuple(animations),
         ),
     )
     output_path.write_text(
-        json.dumps(asdict(result), indent=2, allow_nan=False) + "\n",
+        json.dumps(result.model_dump(mode="json"), indent=2, allow_nan=False) + "\n",
         encoding="utf-8",
         newline="\n",
     )
@@ -469,7 +361,7 @@ def main() -> None:
                 "output": str(output_path),
                 "blender": bpy.app.version_string,
                 "animations": len(animations),
-                "axis_images": asdict(axis_images),
+                "axis_images": axis_images.model_dump(mode="json"),
             }
         )
     )

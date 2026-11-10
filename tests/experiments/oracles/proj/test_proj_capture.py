@@ -73,15 +73,15 @@ def test_proj_reproduction_hashes_preserve_prior_and_current_source_identity() -
     archived_helper = read_provenance_source(
         root, reproduction["capture_helper_archive"]
     )
-    current_helper = root / reproduction["capture_helper_path"]
     assert (
         hashlib.sha256(archived_helper).hexdigest()
         == reproduction["previous_checkout_capture_helper_sha256"]
     )
     assert (
-        hashlib.sha256(current_helper.read_bytes()).hexdigest()
-        == reproduction["capture_helper_sha256"]
+        manifest["direct_reproduction"]["exporter_sha256"]
+        == reproduction["exporter_sha256"]
     )
+    assert manifest["direct_reproduction"]["observation_count"] == 11
     assert baseline["audit_time_reproduction_exporter_sha256"] == (
         "9295111b0a0d2ddf36c207ee50c7078a28202b60911a5589301299622a665a9a"
     )

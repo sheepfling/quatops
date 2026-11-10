@@ -3,17 +3,18 @@
 from __future__ import annotations
 
 import argparse
-from importlib import resources
+import hashlib
+import json
+import platform
+import sys
+from datetime import datetime, timezone
 from pathlib import Path
 
 import pyproj
+import pyproj._transformer as transformer
 from pyproj import Transformer, network
 from pyproj.enums import TransformDirection
 
-from experiments.oracles.shared.capture_io import (
-    Capture,
-    Observation,
-)
 from scripts.evidence_schema.proj_capture import (
     ProjCaptureContract,
     ProjNativeInputs,
@@ -41,40 +42,17 @@ def main() -> None:
     data = GeographicInputCorpus.model_validate_json(
         args.geographic.read_bytes(), strict=True
     )
-    module_files = resources.files("pyproj")
-    native_binary = next(
-        (
-            Path(str(resource))
-            for resource in module_files.iterdir()
-            if resource.name.startswith("_transformer")
-        ),
-        None,
-    )
-    capture = Capture(
-        "proj_geographic",
-        "PROJ via pyproj",
-        pyproj.proj_version_str,
-        args.geographic,
-        args.output,
-        Path(__file__),
-        {
-            "input": "binary64 geographic degrees/metres",
-            "arithmetic": "native PROJ double",
-            "output": "binary64",
-            "serialized": "round-trip binary64 JSON values without per-value hex sidecars",
-        },
-        oracle_family="proj",
-        native_binary=native_binary,
-        dependencies=[{"name": "pyproj", "version": pyproj.__version__}],
-        limitations=[
-            "This is PROJ execution, not Cesium execution.",
-            "Local Cartesian point transforms only; no quaternion/HPR function is inferred.",
-            "At geographic poles longitude fixes a convention; Cesium may choose another fallback.",
-            "Network disabled; WGS84 ellipsoid only, with no external datum grids.",
-            "Retains the origin, three local-axis endpoints, one probe, and its inverse readback per location.",
-        ],
-    )
-    capture.artifacts.append((args.geographic.resolve(), "geographic_input_corpus"))
+    native_binary = Path(transformer.__file__)
+    if (pyproj.__version__, pyproj.proj_version_str) != ("3.7.2", "9.5.1"):
+        raise ValueError("This capture requires pyproj 3.7.2 and PROJ 9.5.1")
+    if native_binary.suffix not in {".pyd", ".so"} or not native_binary.is_file():
+        raise FileNotFoundError(
+            f"Cannot identify pyproj's native extension: {native_binary}"
+        )
+    if args.output.exists() and any(args.output.iterdir()):
+        raise FileExistsError(f"Refusing to overwrite capture: {args.output}")
+    args.output.mkdir(parents=True, exist_ok=True)
+    observations: list[ProjObservation] = []
 
     geocentric = Transformer.from_crs(4979, 4978, always_xy=True)
     for item in data.locations:
@@ -130,9 +108,43 @@ def main() -> None:
             diagnostic=None,
             schema_version="1.0",
         )
-        capture.add(Observation(**observation.model_dump(mode="json")))
+        observations.append(observation)
 
-    print(capture.finish(["FRAME"], observation_role="selected_native_observations"))
+    rows = args.output / "observations.jsonl"
+    rows.write_text(
+        "".join(
+            json.dumps(row.model_dump(mode="json"), allow_nan=False) + "\n"
+            for row in observations
+        ),
+        encoding="utf-8",
+        newline="\n",
+    )
+
+    def digest(path: Path) -> str:
+        return hashlib.sha256(path.read_bytes()).hexdigest()
+
+    manifest = {
+        "evidence_kind": "native_proj_geographic_capture",
+        "utc": datetime.now(timezone.utc).isoformat(),
+        "pyproj_version": pyproj.__version__,
+        "proj_version": pyproj.proj_version_str,
+        "python": sys.version,
+        "platform": platform.platform(),
+        "native_binary": str(native_binary),
+        "native_binary_sha256": digest(native_binary),
+        "input_sha256": digest(args.geographic),
+        "exporter_sha256": digest(Path(__file__)),
+        "observations_sha256": digest(rows),
+        "observation_count": len(observations),
+        "scope": "WGS84 ENU/ECEF point transforms; network disabled; not Cesium or quaternion execution",
+    }
+    path = args.output / "manifest.json"
+    path.write_text(
+        json.dumps(manifest, indent=2, allow_nan=False) + "\n",
+        encoding="utf-8",
+        newline="\n",
+    )
+    print(path)
 
 
 if __name__ == "__main__":

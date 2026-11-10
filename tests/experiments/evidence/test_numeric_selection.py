@@ -6,25 +6,10 @@ import subprocess
 
 import pytest
 
-from experiments.oracles.shared.capture_io import numeric
 from scripts.evidence_json import dump_evidence_json, parse_evidence_document
 from scripts.retain_cesium_converter_witnesses import _vectors
 from scripts.retain_gltf_converter_witnesses import select_numeric
 from tests.support.paths import REPOSITORY_ROOT
-
-
-@pytest.mark.parametrize(
-    "dtype,expected", [("binary32", 0.3333333432674408), ("binary64", 1.0 / 3.0)]
-)
-def test_python_capture_preserves_precision_and_signed_zero(dtype, expected) -> None:
-    captured = numeric([-0.0, 1.0 / 3.0], dtype)
-    decoded = parse_evidence_document(dump_evidence_json(captured))
-    assert math.copysign(1.0, decoded["values"][0]) == -1.0
-    assert decoded["values"][1] == expected
-    with pytest.raises(ValueError, match="finite"):
-        numeric([float("nan")])
-    with pytest.raises(ValueError, match="Ragged"):
-        numeric([[1.0], [2.0, 3.0]])
 
 
 def test_selectors_preserve_values_and_signed_zero() -> None:

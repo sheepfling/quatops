@@ -48,13 +48,29 @@ class GltfAssetBuilderTests(unittest.TestCase):
             ).hexdigest(),
             gltf_history["exporter_sha256"],
         )
-        for field in ("capture_source", "asset_builder_source"):
+        for field in (
+            "capture_source",
+            "asset_builder_source",
+            "schema",
+            "schema_primitives",
+            "requirements",
+        ):
             self.assertEqual(
                 hashlib.sha256(
                     read_provenance_source(REPOSITORY_ROOT, gltf["reproduction"][field])
                 ).hexdigest(),
                 gltf["reproduction"][f"{field}_sha256"],
             )
+        canonical_observations = json.dumps(
+            native["observations"],
+            sort_keys=True,
+            separators=(",", ":"),
+            allow_nan=False,
+        ).encode()
+        self.assertEqual(
+            hashlib.sha256(canonical_observations).hexdigest(),
+            gltf["pydantic_native_rerun"]["observations_sha256"],
+        )
 
     def test_supported_shapes(self) -> None:
         self.assertEqual(

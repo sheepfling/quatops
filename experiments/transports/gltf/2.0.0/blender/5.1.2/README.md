@@ -8,16 +8,25 @@ the explicit axis-translation probes.
 
 ## Reproduce
 
-First [generate the input assets](../../README.md#reproducible-asset). Then run
-from the repository root in PowerShell:
+First [generate the input assets](../../README.md#reproducible-asset). Install
+the pinned capture dependencies into a temporary directory using Blender's
+Python 3.13 interpreter, then run from the repository root in PowerShell:
 
 ```powershell
-& 'C:\Program Files\Blender Foundation\Blender 5.1\blender.exe' `
-  --background --factory-startup --python-exit-code 1 `
+$blender = 'C:\Program Files\Blender Foundation\Blender 5.1'
+$site = Join-Path $env:TEMP 'quatops-blender-capture-deps'
+uv pip install --python "$blender\5.1\python\bin\python.exe" --target $site `
+  -r experiments\transports\gltf\2.0.0\blender\5.1.2\requirements-capture.txt
+$env:PYTHONPATH = "$PWD;$site"
+& "$blender\blender.exe" `
+  --background --factory-startup --python-use-system-env --python-exit-code 1 `
   --python 'experiments\transports\gltf\2.0.0\blender\5.1.2\capture_gltf.py' -- `
   --asset 'experiments\transports\gltf\2.0.0\assets\rotation_transport.gltf' `
-  --output 'tests\golden\transports\gltf\2.0.0\blender\5.1.2\native_rotation.json'
+  --output "$env:TEMP\quatops-blender-gltf-capture.json"
 ```
+
+The capture uses the replay tests' Pydantic models. The historical exporter and
+the matching native rerun are identified in the adjacent provenance file.
 
 The exporter sets the scene to 30 FPS with a unit frame-rate base before import.
 Blender 5.1.2 imports keyframe coordinates as `time * FPS`; its scene frame
