@@ -19,6 +19,10 @@ def test_generated_gltf_inputs_are_excluded_but_witnesses_are_included(
     gltf_dir.mkdir(parents=True)
     for name in ("converter_inputs.json", "quatops_hierarchy.gltf"):
         (gltf_dir / name).write_text("{}", encoding="utf-8")
+    usd_dir = tmp_path / "experiments/converters/openusd/26.11"
+    usd_dir.mkdir(parents=True)
+    for name in ("converter_inputs.json", "quatops_hierarchy.usda"):
+        (usd_dir / name).write_text("input", encoding="utf-8")
     witness = tmp_path / "tests/golden/native/witnesses.json"
     witness.parent.mkdir(parents=True)
     witness.write_text("{}", encoding="utf-8")

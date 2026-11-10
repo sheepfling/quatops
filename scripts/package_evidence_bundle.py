@@ -46,6 +46,8 @@ GENERATED_INPUTS = {
     "experiments/converters/cesium/1.124.0/converter_inputs.json",
     "experiments/converters/gltf/2.0.0/converter_inputs.json",
     "experiments/converters/gltf/2.0.0/quatops_hierarchy.gltf",
+    "experiments/converters/openusd/26.11/converter_inputs.json",
+    "experiments/converters/openusd/26.11/quatops_hierarchy.usda",
     "experiments/transports/gltf/2.0.0/assets/rotation_transport.gltf",
     "experiments/transports/gltf/2.0.0/assets/rotation_transport.bin",
 }

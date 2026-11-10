@@ -10,6 +10,7 @@ from pydantic import ValidationError
 
 import experiments.converters.cesium.inputs as cesium_inputs
 import experiments.converters.gltf.inputs as gltf_inputs
+import experiments.converters.openusd.inputs as openusd_inputs
 from scripts.converter_evidence import (
     converter_fixture_directories,
     load_converter_evidence,
@@ -67,7 +68,7 @@ def test_converter_inputs_are_loaded_from_the_contract_package():
     for directory in converter_fixture_directories(ROOT):
         package = load_converter_evidence(directory, repository_root=ROOT)
         if (
-            package.target.name in {"CesiumJS", "Three.js GLTFLoader"}
+            package.target.name in {"CesiumJS", "Three.js GLTFLoader", "OpenUSD"}
             and package.inputs_source_path is None
         ):
             assert package.inputs is not None
@@ -91,6 +92,21 @@ def test_generated_gltf_asset_must_match_the_captured_digest(monkeypatch):
     with pytest.raises(ValueError, match="generated glTF asset digest differs"):
         load_converter_evidence(
             ROOT / "tests/golden/transports/gltf/2.0.0/threejs/0.187.0/converter",
+            repository_root=ROOT,
+        )
+
+
+def test_generated_openusd_stage_must_match_the_captured_digest(monkeypatch):
+    original = openusd_inputs.build_artifacts
+
+    def changed_stage(root):
+        inputs, stage = original(root)
+        return inputs, stage + "# altered\n"
+
+    monkeypatch.setattr(openusd_inputs, "build_artifacts", changed_stage)
+    with pytest.raises(ValueError, match="generated OpenUSD stage digest differs"):
+        load_converter_evidence(
+            ROOT / "tests/golden/transports/openusd/26.11/converter",
             repository_root=ROOT,
         )
 

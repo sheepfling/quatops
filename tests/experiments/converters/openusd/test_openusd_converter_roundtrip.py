@@ -7,6 +7,7 @@ import json
 
 import numpy as np
 
+from experiments.converters.openusd.inputs import build_artifacts, serialize_inputs
 from quatops.experimental.engines import QuaternionFrameMap, SignedAxisMap
 from tests.support.evidence_oracles import matrix_from_wxyz as rotation
 from tests.support.paths import REPOSITORY_ROOT
@@ -14,13 +15,11 @@ from tests.support.provenance_archives import read_provenance_source
 
 ROOT = REPOSITORY_ROOT
 FIXTURE = ROOT / "tests/golden/transports/openusd/26.11/converter"
-INPUTS_PATH = ROOT / "experiments/converters/openusd/26.11/converter_inputs.json"
-STAGE_PATH = ROOT / "experiments/converters/openusd/26.11/quatops_hierarchy.usda"
 CONTRACT_PATH = ROOT / "experiments/converters/openusd/26.11/semantic_contract.json"
 CONTRACT = json.loads(CONTRACT_PATH.read_text(encoding="utf-8"))
 MANIFEST = json.loads((FIXTURE / "manifest.json").read_text(encoding="utf-8"))
-INPUTS = json.loads(INPUTS_PATH.read_text(encoding="utf-8"))
-STAGE = STAGE_PATH.read_text(encoding="utf-8")
+INPUT_MODEL, STAGE = build_artifacts(ROOT)
+INPUTS = INPUT_MODEL.model_dump(mode="json")
 CAPTURE = json.loads((FIXTURE / "witnesses.json").read_text(encoding="utf-8"))
 OBS = {row["node"]: row for row in CAPTURE["observations"]}
 FRAME = SignedAxisMap(("x", "z", "-y"))
@@ -62,13 +61,18 @@ def test_openusd_converter_stage_provenance_and_frame_declarations():
 
     provenance = MANIFEST["provenance"]
     paths = {
-        "stage_sha256": STAGE_PATH,
-        "converter_input_sha256": INPUTS_PATH,
         "native_observations_sha256": FIXTURE / "witnesses.json",
         "contract_sha256": CONTRACT_PATH,
     }
     for field, path in paths.items():
         assert hashlib.sha256(path.read_bytes()).hexdigest() == provenance[field]
+    assert (
+        hashlib.sha256(STAGE.encode("utf-8")).hexdigest() == provenance["stage_sha256"]
+    )
+    assert (
+        hashlib.sha256(serialize_inputs(INPUT_MODEL)).hexdigest()
+        == provenance["converter_input_sha256"]
+    )
     assert (
         hashlib.sha256(
             read_provenance_source(ROOT, MANIFEST["reproduction"]["generator_archive"])
@@ -86,6 +90,12 @@ def test_openusd_converter_stage_provenance_and_frame_declarations():
         ).hexdigest()
     )
     reproduction = MANIFEST["reproduction"]
+    assert (
+        hashlib.sha256(
+            (ROOT / "experiments/converters/openusd/inputs.py").read_bytes()
+        ).hexdigest()
+        == reproduction["input_builder_sha256"]
+    )
     assert (
         hashlib.sha256(
             (ROOT / "experiments/converters/openusd/26.11/create_stage.py").read_bytes()

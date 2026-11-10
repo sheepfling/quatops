@@ -122,6 +122,11 @@ def main() -> None:
                     "contract_sha256": sha256(contract_path),
                 },
                 "reproduction": {
+                    "generator_sha256": sha256(source_dir / "create_stage.py"),
+                    "capture_script_sha256": sha256(source_dir / "capture_native.py"),
+                    "input_builder_sha256": sha256(
+                        repository_root / "experiments/converters/openusd/inputs.py"
+                    ),
                     "lockfile_sha256": sha256(source_dir / "uv.lock"),
                     "retention_script_sha256": sha256(Path(__file__)),
                     "retention_helper_sha256": sha256(

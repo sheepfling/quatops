@@ -242,6 +242,23 @@ def load_converter_evidence(
             )
         inputs_source_path = None
         inputs_document = parse_evidence_document(input_bytes)
+    elif target.name == "OpenUSD" and not inputs_path.is_file():
+        from experiments.converters.openusd.inputs import (
+            build_artifacts,
+            serialize_inputs,
+        )
+
+        generated_inputs, generated_stage = build_artifacts(normalized_root)
+        input_bytes = serialize_inputs(generated_inputs)
+        provenance = manifest.get("provenance")
+        if not isinstance(provenance, dict) or hashlib.sha256(
+            generated_stage.encode("utf-8")
+        ).hexdigest() != provenance.get("stage_sha256"):
+            raise ValueError(
+                f"{directory}: generated OpenUSD stage digest differs from capture"
+            )
+        inputs_source_path = None
+        inputs_document = parse_evidence_document(input_bytes)
     else:
         if not inputs_path.is_file():
             inputs_path = semantic_contract_path.parent / "converter_inputs.json"
@@ -252,10 +269,12 @@ def load_converter_evidence(
             inputs_path.resolve() if inputs_document is not None else None
         )
         input_bytes = inputs_path.read_bytes() if inputs_document is not None else b""
-    if target.name in {"CesiumJS", "Three.js GLTFLoader"}:
+    if target.name in {"CesiumJS", "Three.js GLTFLoader", "OpenUSD"}:
         provenance = manifest.get("provenance")
         input_digest_key = (
-            "converter_input_sha256" if target.name == "CesiumJS" else "input_sha256"
+            "input_sha256"
+            if target.name == "Three.js GLTFLoader"
+            else "converter_input_sha256"
         )
         if not isinstance(provenance, dict) or hashlib.sha256(
             input_bytes

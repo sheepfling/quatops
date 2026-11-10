@@ -25,5 +25,6 @@ translate/orient op order, parent/child composition, `resetXformStack`, point
 and direction actions, and inverse point recovery.
 
 The fixture manifest records the runtime, binary, script, input, stage, and
-lock hashes. The scope excludes time samples, scale/shear decomposition,
+lock hashes. Replay regenerates the input and stage and checks their captured
+digests. The scope excludes time samples, scale/shear decomposition,
 renderers, and application-specific import pipelines.
