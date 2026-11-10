@@ -90,10 +90,8 @@ class BlenderGltfAxisImages(NativeCaptureModel):
 
 
 class BlenderGltfFcurveSummary(NativeCaptureModel):
-    slot_identifiers: list[str]
     data_path: Literal["rotation_quaternion"]
     array_indices: Annotated[list[StrictInt], Field(min_length=4, max_length=4)]
-    key_count: Literal[3]
     interpolations_by_component: ComponentKeyValues
     left_handle_types_by_component: ComponentKeyValues
     right_handle_types_by_component: ComponentKeyValues

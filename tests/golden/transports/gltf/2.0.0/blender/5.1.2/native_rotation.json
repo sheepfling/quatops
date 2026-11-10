@@ -98,10 +98,8 @@
         "target_object": "animated_step",
         "key_times_seconds_from_imported_fcurves": [0.0, 0.7, 1.9],
         "fcurves": {
-          "slot_identifiers": ["OBanimated_step"],
           "data_path": "rotation_quaternion",
           "array_indices": [0, 1, 2, 3],
-          "key_count": 3,
           "interpolations_by_component": [
             ["CONSTANT", "CONSTANT", "CONSTANT"],
             ["CONSTANT", "CONSTANT", "CONSTANT"],
@@ -160,10 +158,8 @@
         "target_object": "animated_linear",
         "key_times_seconds_from_imported_fcurves": [0.0, 0.7, 1.9],
         "fcurves": {
-          "slot_identifiers": ["OBanimated_linear"],
           "data_path": "rotation_quaternion",
           "array_indices": [0, 1, 2, 3],
-          "key_count": 3,
           "interpolations_by_component": [
             ["LINEAR", "LINEAR", "LINEAR"],
             ["LINEAR", "LINEAR", "LINEAR"],
@@ -212,10 +208,8 @@
         "target_object": "animated_cubic",
         "key_times_seconds_from_imported_fcurves": [0.0, 0.7, 1.9],
         "fcurves": {
-          "slot_identifiers": ["OBanimated_cubic"],
           "data_path": "rotation_quaternion",
           "array_indices": [0, 1, 2, 3],
-          "key_count": 3,
           "interpolations_by_component": [
             ["BEZIER", "BEZIER", "BEZIER"],
             ["BEZIER", "BEZIER", "BEZIER"],

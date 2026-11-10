@@ -23,7 +23,6 @@ class CurveKey:
 
 @dataclass(frozen=True, slots=True)
 class CurveRow:
-    slot_identifier: str
     data_path: str
     array_index: int
     keys: list[CurveKey]
@@ -32,10 +31,8 @@ class CurveRow:
 
 @dataclass(frozen=True, slots=True)
 class FcurveSummary:
-    slot_identifiers: list[str]
     data_path: str
     array_indices: list[int]
-    key_count: int
     interpolations_by_component: list[list[str]]
     left_handle_types_by_component: list[list[str]]
     right_handle_types_by_component: list[list[str]]
@@ -207,7 +204,6 @@ def action_curves(action: Any) -> CapturedActionCurves:
                     ]
                     rows.append(
                         CurveRow(
-                            slot_identifier=slot.identifier,
                             data_path=curve.data_path,
                             array_index=curve.array_index,
                             keys=keys,
@@ -223,10 +219,8 @@ def action_curves(action: Any) -> CapturedActionCurves:
         raise RuntimeError(f"Quaternion F-curve key times differ in {action.name!r}")
     return CapturedActionCurves(
         summary=FcurveSummary(
-            slot_identifiers=sorted({row.slot_identifier for row in rows}),
             data_path=rows[0].data_path,
             array_indices=[row.array_index for row in rows],
-            key_count=len(key_frames),
             interpolations_by_component=[
                 [key.interpolation for key in row.keys] for row in rows
             ],

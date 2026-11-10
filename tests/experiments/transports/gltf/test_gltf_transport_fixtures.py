@@ -361,7 +361,7 @@ def test_blender_importer_axis_mapping_and_quaternion_animation_profiles_are_fro
     linear = rows["LINEAR"]
     assert linear.fcurves.data_path == "rotation_quaternion"
     assert linear.fcurves.array_indices == [0, 1, 2, 3]
-    assert linear.fcurves.key_count == 3
+    assert len(linear.key_times_seconds_from_imported_fcurves) == 3
     assert {
         kind
         for component in linear.fcurves.interpolations_by_component
