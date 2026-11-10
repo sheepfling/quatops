@@ -95,12 +95,9 @@
       "previous_checkout_runner_sha256": "be4047a273917756c9f0f9154a0990b8318797048744be360457a391e80c8d7b",
       "capture_helper_sha256": "deda0df66c47cf7aebd1b992a2fb7ea634e4dd8aa5bb95d4c12386b27d2a0af8",
       "retention_script_sha256": "c75b6e6172668495e4672d78a7319113ee510f27806b9e4b31507572d61d92d6",
-      "before_direct_json_capture_helper_sha256": "c237dbdcc7e82df3a36b430fc9f5b935b0cbbf00adae620c5b3f6355900b26d2",
-      "before_direct_json_retention_script_sha256": "8d130b60c1ff7a2493863e21d47c703f28263ea0b8cf237bd337961eb86dbb2e",
       "previous_retention_script_sha256": "910dfdf3da7c1e19535e4440e1b502b8f18bb3be79d5d01e53b999b0f48c5665",
       "retention_script_identity_note": "The current selector reads the frame-chain recipe; the stored witness values remain from the historical capture.",
       "retention_helper_sha256": "3eea651a4485c4dd3e5a85bf0085edeff14d775badeaf7c07288de74d6519ed3",
-      "before_direct_json_retention_helper_sha256": "e429a76babab3900b1f269c82980de4b42978548577e37e338e172b303a75ae7",
       "direct_json_replay": {
         "utc": "2026-11-10T08:34:16.808333+00:00",
         "tf2_version": "0.36.23",

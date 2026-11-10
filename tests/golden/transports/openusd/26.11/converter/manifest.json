@@ -42,15 +42,13 @@
     "previous_retention_script_sha256": "8d8267371f79a37a675a0cbda0b6fc74caf4822654debb09587752b86873b4bc",
     "retention_script_identity_note": "Current selector uses the shared contract; previous digest identifies the earlier selector. Native witnesses were not recaptured.",
     "retention_helper_sha256": "3eea651a4485c4dd3e5a85bf0085edeff14d775badeaf7c07288de74d6519ed3",
-    "before_direct_json_retention_helper_sha256": "e429a76babab3900b1f269c82980de4b42978548577e37e338e172b303a75ae7",
     "previous_retention_helper_sha256": "373dd7fefdffddbb8cb1a9399859f4168fc2ea97710bd55b9481b68dec693bab",
     "retention_formatter_sha256": "56961d6be101a2bdfb1b21372c823ec86dfd636547d851901b7284f2ae20e0b3",
     "generator_sha256": "e07e7643da391c55ad1fa30243f1d087b0e9ad53eedbdc7e170df5449fe1fb74",
     "generator_archive": "experiments/provenance/reproduction-v1.zip#openusd-26.11-create_stage.py",
     "capture_script_sha256": "bd3cda3a7eff771dcc98f891c854b223dd004c363de9608272799f8c8370de7a",
     "capture_script_identity_note": "The current capture entry point adds the semantic contract to the output; provenance.native_capture_script_sha256 remains the producer identity for the retained native observations.",
-    "lockfile_sha256": "3ab41b046da6374e42286dc7710b708ba3968aba1fefebae1ec8db42bc120665",
-    "before_lock_metadata_repair_retention_script_sha256": "e92cfbad47cfb4c5ff10802a38b92a65d29c2de3ec9f5d11c33c090f9dfcd247"
+    "lockfile_sha256": "3ab41b046da6374e42286dc7710b708ba3968aba1fefebae1ec8db42bc120665"
   },
   "selection": {
     "retained_observations": 3,

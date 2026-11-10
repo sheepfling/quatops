@@ -36,10 +36,6 @@
     "capture_script_sha256": "e856856b36948c08215e21a8eb9b1e38b56ec5d856dcc45dd46c1ca375ee2da7",
     "numeric_helper_sha256": "c0eaaa45990c0de90b8fc183fc820faccdce4c39c064111acaa7501a1e82a944",
     "retention_script_sha256": "16795587b1badb8d08de45f80ae49a6833b39e47f3c2e87353e4e43bfbc5d946",
-    "before_direct_json_retention_script_sha256": "9cf0995019013d70e276d362b064654423e1765177d670156fdafe5d7a09b023",
-    "before_finite_json_capture_script_sha256": "99758b4a362bfe888e75b6f4ebecd1de0a56bf014f0ca98f0ed8080d65f442a4",
-    "before_finite_json_numeric_helper_sha256": "aed1da7b180e76ff0e101a477dd6a941ed0ad076509d9716bf2bf9b6896f5fa4",
-    "before_finite_json_retention_script_sha256": "d353c098ae3f7235b76b31a45da02b9a8d3538d806f4e850fb8a80144eaf9fa0",
     "previous_retention_script_sha256": "b431abc0ae416ceb7d748ee50752507ba005a2009eb7a4aff69cc291642fa7f6",
     "retention_script_identity_note": "Current capture and selector use finite binary64 JSON with signed zero preserved. A pinned native rerun reproduced the retained witness bytes; original capture identities remain in provenance.",
     "finite_json_replay": {
@@ -49,8 +45,6 @@
       "selected_witnesses_sha256": "cf56f2ed41685d79fb08f3d04ef7e36818e5fb920286758aa813d85746613ed2"
     },
     "retention_helper_sha256": "3eea651a4485c4dd3e5a85bf0085edeff14d775badeaf7c07288de74d6519ed3",
-    "before_direct_json_retention_helper_sha256": "e429a76babab3900b1f269c82980de4b42978548577e37e338e172b303a75ae7",
-    "before_finite_json_retention_helper_sha256": "373dd7fefdffddbb8cb1a9399859f4168fc2ea97710bd55b9481b68dec693bab",
     "retention_formatter_sha256": "56961d6be101a2bdfb1b21372c823ec86dfd636547d851901b7284f2ae20e0b3",
     "package_lock_sha256": "5e331bee862cbdff2a96dec2d325e86aa996b780821833899f4053e9476002e0",
     "geographic_inputs_sha256": "619099b732593c6c45f4f7eb64714e4c7d79b2c96dcd070777522e3736e4f085",
