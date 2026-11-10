@@ -145,6 +145,9 @@ def main() -> None:
         },
         "reproduction": {
             "input_generator_sha256": sha256(source_dir / "create_inputs.py"),
+            "input_builder_sha256": sha256(
+                repository_root / "experiments/converters/cesium/inputs.py"
+            ),
             "capture_script_sha256": sha256(source_dir / "capture_native.mjs"),
             "numeric_helper_sha256": sha256(
                 repository_root / "experiments/converters/shared/numeric_evidence.mjs"

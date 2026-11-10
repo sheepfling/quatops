@@ -8,6 +8,7 @@ from types import MappingProxyType
 import pytest
 from pydantic import ValidationError
 
+import experiments.converters.cesium.inputs as cesium_inputs
 from scripts.converter_evidence import (
     converter_fixture_directories,
     load_converter_evidence,
@@ -64,10 +65,21 @@ EXPECTED_WITNESS_COUNTS = MappingProxyType(
 def test_converter_inputs_are_loaded_from_the_contract_package():
     for directory in converter_fixture_directories(ROOT):
         package = load_converter_evidence(directory, repository_root=ROOT)
+        if package.target.name == "CesiumJS" and package.inputs_source_path is None:
+            assert package.inputs is not None
+            continue
         if package.inputs is not None:
             assert package.inputs_source_path == (
                 package.contract_source_path.parent / "converter_inputs.json"
             )
+
+
+def test_generated_cesium_inputs_must_match_the_captured_digest(monkeypatch):
+    monkeypatch.setattr(cesium_inputs, "serialize_inputs", lambda _: b"{}")
+    with pytest.raises(ValueError, match="Cesium converter input digest differs"):
+        load_converter_evidence(
+            ROOT / "tests/golden/transports/cesium/1.124.0", repository_root=ROOT
+        )
 
 
 def test_converter_rejects_changed_shared_contract(tmp_path):

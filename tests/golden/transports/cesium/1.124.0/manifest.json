@@ -32,10 +32,11 @@
     "captured_input_generator_archive": "experiments/provenance/reproduction-v1.zip#cesium-1.124.0-create_inputs-v2.py"
   },
   "reproduction": {
-    "input_generator_sha256": "39db4feb151d0584b028a861f25e7e63d733aba8a1d381623e0a3c48f9c26137",
+    "input_generator_sha256": "cee4047253dab1237b2c5a52d2275984ea2f5d1de8f82a183d67fec06296f961",
+    "input_builder_sha256": "0ff76107de79307db85deda097f63891e9c2464102482f14613769cf0c0c03a9",
     "capture_script_sha256": "e856856b36948c08215e21a8eb9b1e38b56ec5d856dcc45dd46c1ca375ee2da7",
     "numeric_helper_sha256": "c0eaaa45990c0de90b8fc183fc820faccdce4c39c064111acaa7501a1e82a944",
-    "retention_script_sha256": "16795587b1badb8d08de45f80ae49a6833b39e47f3c2e87353e4e43bfbc5d946",
+    "retention_script_sha256": "bba3dba3a5f9abfc90c6b2455d0b548475f6ddfb318ea3a8ac4a95939c69fe76",
     "previous_retention_script_sha256": "b431abc0ae416ceb7d748ee50752507ba005a2009eb7a4aff69cc291642fa7f6",
     "retention_script_identity_note": "Current capture and selector use finite binary64 JSON with signed zero preserved. A pinned native rerun reproduced the retained witness bytes; original capture identities remain in provenance.",
     "finite_json_replay": {

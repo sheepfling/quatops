@@ -2,12 +2,13 @@
 
 from __future__ import annotations
 
+import hashlib
 from pathlib import Path, PurePosixPath
 from typing import NamedTuple, Optional, Union
 
 from pydantic import BaseModel, ConfigDict, Field, JsonValue
 
-from scripts.evidence_json import read_evidence_document
+from scripts.evidence_json import parse_evidence_document, read_evidence_document
 from scripts.evidence_schema.converter_captures import (
     CesiumCapture,
     CesiumContract,
@@ -217,12 +218,30 @@ def load_converter_evidence(
     # Converter input recipes live beside the authenticated semantic contract.
     # A fixture-local copy takes precedence when a capture retains its own input.
     inputs_path = directory / "inputs.json"
-    if not inputs_path.is_file():
-        inputs_path = semantic_contract_path.parent / "converter_inputs.json"
-    inputs_document = (
-        read_evidence_document(inputs_path) if inputs_path.is_file() else None
-    )
-    inputs_source_path = inputs_path.resolve() if inputs_document is not None else None
+    if target.name == "CesiumJS" and not inputs_path.is_file():
+        from experiments.converters.cesium.inputs import build_inputs, serialize_inputs
+
+        input_bytes = serialize_inputs(build_inputs(normalized_root))
+        inputs_source_path = None
+        inputs_document = parse_evidence_document(input_bytes)
+    else:
+        if not inputs_path.is_file():
+            inputs_path = semantic_contract_path.parent / "converter_inputs.json"
+        inputs_document = (
+            read_evidence_document(inputs_path) if inputs_path.is_file() else None
+        )
+        inputs_source_path = (
+            inputs_path.resolve() if inputs_document is not None else None
+        )
+        input_bytes = inputs_path.read_bytes() if inputs_document is not None else b""
+    if target.name == "CesiumJS":
+        provenance = manifest.get("provenance")
+        if not isinstance(provenance, dict) or hashlib.sha256(
+            input_bytes
+        ).hexdigest() != provenance.get("converter_input_sha256"):
+            raise ValueError(
+                f"{directory}: Cesium converter input digest differs from capture"
+            )
     semantic_contract_document = read_evidence_document(semantic_contract_path)
     contract = _target_contract(
         target.name, semantic_contract_document, directory=semantic_contract_path

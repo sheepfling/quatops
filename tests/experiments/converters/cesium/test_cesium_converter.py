@@ -8,6 +8,7 @@ import json
 import numpy as np
 from scipy.spatial.transform import Rotation
 
+from experiments.converters.cesium.inputs import build_inputs, serialize_inputs
 from quatops.experimental.semantics import (
     Ellipsoid,
     GeodeticOrigin,
@@ -21,11 +22,11 @@ from tests.support.provenance_archives import read_provenance_source
 
 ROOT = REPOSITORY_ROOT
 FIXTURE = ROOT / "tests/golden/transports/cesium/1.124.0"
-INPUTS_PATH = ROOT / "experiments/converters/cesium/1.124.0/converter_inputs.json"
 CONTRACT_PATH = ROOT / "experiments/converters/cesium/1.124.0/semantic_contract.json"
 CONTRACT = json.loads(CONTRACT_PATH.read_text(encoding="utf-8"))
 MANIFEST = json.loads((FIXTURE / "manifest.json").read_text(encoding="utf-8"))
-INPUTS = json.loads(INPUTS_PATH.read_text(encoding="utf-8"))
+INPUTS_BYTES = serialize_inputs(build_inputs(ROOT))
+INPUTS = json.loads(INPUTS_BYTES)
 CAPTURE = json.loads((FIXTURE / "witnesses.json").read_text(encoding="utf-8"))
 OBSERVATIONS = {row["case_id"]: row for row in CAPTURE["observations"]}
 ATOL = 2e-11
@@ -86,15 +87,20 @@ def test_cesium_capture_provenance_and_explicit_frame_contract():
     assert provenance["input_serialization_note"].startswith(
         "JSON formatting changed only"
     )
-    assert len(provenance["captured_converter_input_sha256"]) == 64
+    assert (
+        provenance["captured_converter_input_sha256"]
+        == provenance["converter_input_sha256"]
+    )
     hash_paths = {
-        "converter_input_sha256": INPUTS_PATH,
         "canonical_inputs_sha256": ROOT
         / "experiments/interoperability/v1/canonical_inputs.json",
         "witnesses_sha256": FIXTURE / "witnesses.json",
     }
     for field, path in hash_paths.items():
         assert hashlib.sha256(path.read_bytes()).hexdigest() == provenance[field]
+    assert (
+        hashlib.sha256(INPUTS_BYTES).hexdigest() == provenance["converter_input_sha256"]
+    )
 
     reproduction = MANIFEST["reproduction"]
     reproduction_paths = {
@@ -102,6 +108,7 @@ def test_cesium_capture_provenance_and_explicit_frame_contract():
         / "experiments/oracles/shared/geographic_inputs_v1.json",
         "input_generator_sha256": ROOT
         / "experiments/converters/cesium/1.124.0/create_inputs.py",
+        "input_builder_sha256": ROOT / "experiments/converters/cesium/inputs.py",
         "capture_script_sha256": ROOT
         / "experiments/converters/cesium/1.124.0/capture_native.mjs",
         "package_lock_sha256": ROOT

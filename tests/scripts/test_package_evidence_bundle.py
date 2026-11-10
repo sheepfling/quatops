@@ -1,4 +1,4 @@
-"""Evidence bundles omit reproducible glTF inputs after local recapture."""
+"""Evidence bundles omit generated inputs after local recapture."""
 
 from pathlib import Path
 
@@ -12,6 +12,9 @@ def test_generated_gltf_inputs_are_excluded_but_witnesses_are_included(
     asset_dir.mkdir(parents=True)
     for name in ("rotation_transport.gltf", "rotation_transport.bin", "build_asset.py"):
         (asset_dir / name).write_text("input", encoding="utf-8")
+    cesium_dir = tmp_path / "experiments/converters/cesium/1.124.0"
+    cesium_dir.mkdir(parents=True)
+    (cesium_dir / "converter_inputs.json").write_text("{}", encoding="utf-8")
     witness = tmp_path / "tests/golden/native/witnesses.json"
     witness.parent.mkdir(parents=True)
     witness.write_text("{}", encoding="utf-8")
