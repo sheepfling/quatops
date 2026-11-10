@@ -26,6 +26,33 @@ class CoordinateFrame(StrictEvidenceModel):
     positive_z: str
 
 
+class FrameSemantics(StrictEvidenceModel):
+    """Role and authority of a frame assignment, separate from its numbers."""
+
+    role: str
+    authority: Literal[
+        "target_documented",
+        "application_declared",
+        "fixture_only",
+        "unspecified",
+    ]
+    statement: str
+    evidence_reference: Optional[str] = None  # noqa: UP045
+
+
+def canonical_source_frame_semantics() -> FrameSemantics:
+    """Describe the shared corpus frame without assigning target-world meaning."""
+    return FrameSemantics(
+        role="canonical_probe",
+        authority="application_declared",
+        statement=(
+            "The shared corpus explicitly assigns this right-handed frame "
+            "for interoperability comparisons; it is not an implicit world "
+            "or asset frame."
+        ),
+    )
+
+
 class PrecisionTolerance(StrictEvidenceModel):
     """Comparison rule for one native scalar profile."""
 
@@ -42,7 +69,9 @@ class QuaternionBoundaryContract(StrictEvidenceModel):
     canonical_order: Literal["wxyz", "xyzw"]
     rotation_action: Literal["active", "passive"]
     source_frame: CoordinateFrame
+    source_frame_semantics: FrameSemantics
     destination_frame: CoordinateFrame
+    destination_frame_semantics: FrameSemantics
     destination_axes_from_source: Annotated[
         list[str], Field(min_length=3, max_length=3)
     ]
@@ -66,7 +95,9 @@ class RotationVectorBoundaryContract(StrictEvidenceModel):
     canonical_order: Literal["wxyz", "xyzw"]
     rotation_action: Literal["active", "passive"]
     source_frame: CoordinateFrame
+    source_frame_semantics: FrameSemantics
     destination_frame: CoordinateFrame
+    destination_frame_semantics: FrameSemantics
     destination_axes_from_source: Annotated[
         list[str], Field(min_length=3, max_length=3)
     ]
@@ -85,12 +116,15 @@ class FrameAxisMapping(StrictEvidenceModel):
 
     frame: str
     axes_from_canonical: Annotated[list[str], Field(min_length=3, max_length=3)]
+    semantics: FrameSemantics
 
 
 class FrameChainContract(StrictEvidenceModel):
     """Named-frame direction contract for robotics and transform graphs."""
 
     kind: Literal["frame_chain"]
+    canonical_frame: CoordinateFrame
+    canonical_frame_semantics: FrameSemantics
     quaternion_order: Literal["wxyz", "xyzw"]
     vector_action: str
     lookup_direction: str
@@ -104,8 +138,16 @@ class GeographicContract(StrictEvidenceModel):
 
     kind: Literal["geographic"]
     canonical_frame: CoordinateFrame
+    canonical_frame_semantics: FrameSemantics
     local_frame: CoordinateFrame
+    local_frame_semantics: FrameSemantics
     local_axes_from_canonical: Annotated[list[str], Field(min_length=3, max_length=3)]
+    local_alignment_authority: Literal[
+        "target_documented",
+        "application_declared",
+        "fixture_only",
+        "unspecified",
+    ]
     global_frame_name: str
     geodetic_datum: str
     forward_expression: str
@@ -124,7 +166,10 @@ class SceneTransportContract(StrictEvidenceModel):
     loader_name: str
     loader_version: str
     canonical_frame: CoordinateFrame
-    asset_frame: CoordinateFrame
+    canonical_frame_semantics: FrameSemantics
+    target_frame: CoordinateFrame
+    target_frame_semantics: FrameSemantics
+    target_frame_role: Literal["caller_assigned_probe", "declared_stage"]
     destination_axes_from_source: Annotated[
         list[str], Field(min_length=3, max_length=3)
     ]
@@ -179,6 +224,7 @@ class CaptureProvenance(StrictEvidenceModel):
     capture_adapter_sha256: SHA256
     input_sha256: SHA256
     contract_sha256: SHA256
+    semantic_contract_file: str
     witnesses_sha256: SHA256
     manifest_sha256: Optional[SHA256] = None  # noqa: UP045
     native_runtime: str
@@ -248,7 +294,8 @@ class FrameTransform(StrictEvidenceModel):
 
     parent_frame: str
     child_frame: str
-    quaternion_xyzw: Quaternion4
+    quaternion: Quaternion4
+    coefficient_order: Literal["wxyz", "xyzw"]
     translation_xyz: Vector3
 
 
@@ -259,7 +306,8 @@ class FrameMessageWitness(StrictEvidenceModel):
     child_frame: str
     stamp_sec: int
     stamp_nanosec: int
-    quaternion_xyzw: Quaternion4
+    quaternion: Quaternion4
+    coefficient_order: Literal["wxyz", "xyzw"]
     translation_xyz: Vector3
 
 
@@ -293,10 +341,11 @@ class GeographicOrientationWitness(StrictEvidenceModel):
     longitude_degrees: float
     latitude_degrees: float
     height_m: float
-    local_coefficients_xyzw: Quaternion4
+    coefficient_order: Literal["wxyz", "xyzw"]
+    local_coefficients: Quaternion4
     local_translation_xyz_m: Vector3
-    ecef_coefficients_xyzw: Quaternion4
-    recovered_local_coefficients_xyzw: Quaternion4
+    ecef_coefficients: Quaternion4
+    recovered_local_coefficients: Quaternion4
     local_basis_images_xyz: Optional[BasisImages] = None  # noqa: UP045
     local_probe_image_xyz: Optional[Vector3] = None  # noqa: UP045
     world_directions_xyz: BasisImages
@@ -330,6 +379,13 @@ class SceneNodeWitness(StrictEvidenceModel):
     resets_parent_stack: Optional[bool] = None  # noqa: UP045
 
 
+QuaternionBoundaryWitness = Annotated[
+    Union[OrientationWitness, CompositionWitness], Field(discriminator="kind")
+]
+RotationVectorBoundaryWitness = Annotated[
+    Union[RotationVectorWitness, RotationVectorCompositionWitness],
+    Field(discriminator="kind"),
+]
 EvidenceWitness = Annotated[
     Union[
         OrientationWitness,
@@ -341,6 +397,64 @@ EvidenceWitness = Annotated[
         SceneNodeWitness,
     ],
     Field(discriminator="kind"),
+]
+
+
+class EngineQuaternionSerialization(StrictEvidenceModel):
+    """Engine quaternion evidence with its exact shared contract and witnesses."""
+
+    layer: Literal["engine-quaternion"]
+    contract: QuaternionBoundaryContract
+    witnesses: list[QuaternionBoundaryWitness]
+
+
+class NativeQuaternionApiSerialization(StrictEvidenceModel):
+    """Native quaternion API evidence with its exact witness family."""
+
+    layer: Literal["native-quaternion-api"]
+    contract: QuaternionBoundaryContract
+    witnesses: list[QuaternionBoundaryWitness]
+
+
+class RotationVectorSerialization(StrictEvidenceModel):
+    """Native rotation-vector evidence with its exact contract and witnesses."""
+
+    layer: Literal["native-quaternion-api"]
+    contract: RotationVectorBoundaryContract
+    witnesses: list[RotationVectorBoundaryWitness]
+
+
+class FrameChainSerialization(StrictEvidenceModel):
+    """Frame-transport evidence with only frame-chain witnesses."""
+
+    layer: Literal["frame-transport"]
+    contract: FrameChainContract
+    witnesses: list[FrameChainWitness]
+
+
+class GeographicSerialization(StrictEvidenceModel):
+    """Geographic-transport evidence with only geographic witnesses."""
+
+    layer: Literal["geographic-transport"]
+    contract: GeographicContract
+    witnesses: list[GeographicOrientationWitness]
+
+
+class SceneTransportSerialization(StrictEvidenceModel):
+    """Scene-transport evidence with only scene-node witnesses."""
+
+    layer: Literal["scene-transport"]
+    contract: SceneTransportContract
+    witnesses: list[SceneNodeWitness]
+
+
+SemanticSerialization = Union[
+    EngineQuaternionSerialization,
+    NativeQuaternionApiSerialization,
+    RotationVectorSerialization,
+    FrameChainSerialization,
+    GeographicSerialization,
+    SceneTransportSerialization,
 ]
 
 
@@ -370,6 +484,7 @@ class CanonicalInputs(StrictEvidenceModel):
     contract_id: str
     contract: CanonicalInputContract
     source_frame: CoordinateFrame
+    source_frame_semantics: FrameSemantics
     orientations: list[CanonicalOrientationInput]
     probe_vector_xyz: Vector3
     composition_left_case_id: str
@@ -380,7 +495,7 @@ class CanonicalInputs(StrictEvidenceModel):
 class CrystallizedEvidence(StrictEvidenceModel):
     """Small, target-neutral evidence record consumed by offline tests."""
 
-    schema_version: Literal[1]
+    schema_version: Literal[2]
     evidence_id: str
     layer: EvidenceLayer
     target: EvidenceTarget
@@ -393,26 +508,24 @@ class CrystallizedEvidence(StrictEvidenceModel):
 class CrystallizedWitnessSet(StrictEvidenceModel):
     """Immutable selected values referenced by one or more version records."""
 
-    schema_version: Literal[1]
+    schema_version: Literal[2]
     witness_set_id: str
     witnesses: list[EvidenceWitness]
 
 
 class CrystallizedCapture(StrictEvidenceModel):
-    """Transient reducer result before product-level witness-set deduplication."""
+    """Normalizer result before product-level witness-set deduplication."""
 
     record: CrystallizedEvidence
     witness_set: CrystallizedWitnessSet
 
 
 class CrystallizationHeader(StrictEvidenceModel):
-    """Validated target contract and provenance supplied to a reducer."""
+    """Product metadata and provenance supplied to the common normalizer."""
 
     evidence_id: str
-    layer: EvidenceLayer
     target: EvidenceTarget
     contract_id: str
-    contract: EvidenceContract
     witness_set_id: str
     provenance: CaptureProvenance
 
@@ -420,7 +533,7 @@ class CrystallizationHeader(StrictEvidenceModel):
 class EvidenceProduct(StrictEvidenceModel):
     """Versioned collection of crystallized records with shared inputs."""
 
-    schema_version: Literal[1]
+    schema_version: Literal[2]
     canonical_inputs: CanonicalInputs
     witness_sets: list[CrystallizedWitnessSet]
     records: list[CrystallizedEvidence]

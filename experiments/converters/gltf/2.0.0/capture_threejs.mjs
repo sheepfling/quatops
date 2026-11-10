@@ -7,6 +7,8 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 import { numeric } from '../../shared/numeric_evidence.mjs';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
+const repositoryRoot = path.resolve(here, '../../../..');
+const semanticContractPath = path.join(here, 'semantic_contract.json');
 const packageRoot = path.resolve(here, '../../../transports/gltf/2.0.0/threejs/0.187.0');
 const THREE = await import(pathToFileURL(path.join(packageRoot, 'node_modules/three/build/three.module.js')));
 const { GLTFLoader } = await import(pathToFileURL(path.join(packageRoot, 'node_modules/three/examples/jsm/loaders/GLTFLoader.js')));
@@ -57,6 +59,7 @@ fs.writeFileSync(outputFile, JSON.stringify(observations, null, 2) + '\n');
 const packageJson = JSON.parse(fs.readFileSync(path.join(packageRoot, 'node_modules/three/package.json'), 'utf8'));
 const manifest = {
   schema_version: '1.0', evidence_kind: 'native_threejs_gltf_converter_capture',
+  semantic_contract: { file: path.relative(repositoryRoot, semanticContractPath).split(path.sep).join('/'), sha256: sha(semanticContractPath) },
   target: { name: 'Three.js GLTFLoader', package_version: packageJson.version, revision: THREE.REVISION },
   execution: { was_run: true, utc: new Date().toISOString(), node: process.version, v8: process.versions.v8, platform: os.platform(), architecture: os.arch() },
   asset: { path: path.basename(assetPath), sha256: sha(assetPath), input_sha256: sha(path.join(here, 'converter_inputs.json')) },

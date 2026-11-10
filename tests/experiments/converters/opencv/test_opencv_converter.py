@@ -10,6 +10,7 @@ from scipy.spatial.transform import Rotation
 
 from quatops.python import hamilton
 from tests.support.paths import REPOSITORY_ROOT
+from tests.support.provenance_archives import read_provenance_source
 
 ROOT = REPOSITORY_ROOT
 FIXTURE = ROOT / "tests/golden/oracles/opencv/4.13.0/converter"
@@ -81,11 +82,10 @@ def test_opencv_contract_and_pinned_capture_provenance():
         assert hashlib.sha256(path.read_bytes()).hexdigest() == reproduction[field], (
             field
         )
-    archived_capture = (
-        ROOT
-        / "experiments/provenance/reproduction-v1/opencv-4.13.0/capture_native.py.txt"
+    archived_capture = read_provenance_source(
+        ROOT, provenance["capture_script_archive"]
     )
-    archived_hash = hashlib.sha256(archived_capture.read_bytes()).hexdigest()
+    archived_hash = hashlib.sha256(archived_capture).hexdigest()
     assert archived_hash == provenance["capture_script_sha256"]
     assert archived_hash == reproduction["previous_checkout_capture_script_sha256"]
     assert (

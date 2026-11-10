@@ -1,5 +1,21 @@
 """Physical frame semantics, independent of target-engine encodings."""
 
+from .assurance import (
+    SEMANTIC_EVIDENCE,
+    semantic_assurance_rows,
+    validate_semantic_assurance,
+)
+from .bindings import (
+    AlignmentSource,
+    Ellipsoid,
+    FrameAlignment,
+    GeodeticOrigin,
+    OpenXRReferenceSpaceType,
+    OpenXRSpaceContext,
+    SemanticFrameBinding,
+    bind_cesium_enu_frame,
+    bind_semantic_role,
+)
 from .conventions import (
     AEROSPACE_BODY_FRD,
     CANONICAL_BODY_FRAME,
@@ -8,6 +24,7 @@ from .conventions import (
     CANONICAL_WORLD_RFU,
     ECEF_FRAME,
     ECEF_WORLD,
+    OPENXR_REFERENCE_SPACE_RUB,
     OPENXR_SPACE_RUB,
     ROS_BODY_FLU,
     ROS_CAMERA_OPTICAL,
@@ -26,6 +43,7 @@ from .frames import (
     PhysicalOrientationBatch,
     SemanticQuaternionMap,
 )
+from .roles import SEMANTIC_CONTRACTS, SemanticAuthority, SemanticContract
 
 __all__ = [
     "AEROSPACE_BODY_FRD",
@@ -35,19 +53,35 @@ __all__ = [
     "CANONICAL_WORLD_RFU",
     "ECEF_FRAME",
     "ECEF_WORLD",
+    "OPENXR_REFERENCE_SPACE_RUB",
     "OPENXR_SPACE_RUB",
     "ROS_BODY_FLU",
     "ROS_CAMERA_OPTICAL",
+    "SEMANTIC_CONTRACTS",
+    "SEMANTIC_EVIDENCE",
     "WORLD_ENU",
     "WORLD_NED",
+    "AlignmentSource",
     "CoordinateFrame",
     "ECEFBodyOrientation",
+    "Ellipsoid",
+    "FrameAlignment",
     "FrameConvention",
     "FrameCorrespondence",
     "FrameRole",
     "FramedOrientation",
     "FramedOrientationBatch",
+    "GeodeticOrigin",
+    "OpenXRReferenceSpaceType",
+    "OpenXRSpaceContext",
     "PhysicalOrientation",
     "PhysicalOrientationBatch",
+    "SemanticAuthority",
+    "SemanticContract",
+    "SemanticFrameBinding",
     "SemanticQuaternionMap",
+    "bind_cesium_enu_frame",
+    "bind_semantic_role",
+    "semantic_assurance_rows",
+    "validate_semantic_assurance",
 ]

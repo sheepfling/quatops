@@ -17,14 +17,14 @@ import mujoco  # pyright: ignore[reportMissingModuleSource]
 import numpy as np
 
 from scripts.evidence_format import dump_evidence_json
-from scripts.evidence_schema.shared_inputs import SharedCanonicalInputCapture
-from scripts.evidence_schema.targets import (
+from scripts.evidence_schema.converter_captures import (
     MuJoCoCapture,
     MuJoCoInputs,
     MuJoCoObservations,
     MuJoCoOrientation,
     TargetIdentity,
 )
+from scripts.evidence_schema.shared_inputs import SharedCanonicalInputCapture
 
 
 def sha256_file(path: Path) -> str:
@@ -138,6 +138,8 @@ def main() -> None:
     native_files = [{"path": "mujoco.dll", "sha256": sha256_file(native_library)}]
     out = output_dir.resolve()
     out.mkdir(parents=True, exist_ok=True)
+    semantic_contract_path = target_dir / "semantic_contract.json"
+    (out / "contract.json").write_bytes(semantic_contract_path.read_bytes())
     witnesses_path = out / "witnesses.json"
     witnesses = MuJoCoCapture(
         schema_version="1.0",
@@ -156,6 +158,12 @@ def main() -> None:
     )
     manifest = {
         "schema_version": "1.0",
+        "semantic_contract": {
+            "file": (target_dir / "semantic_contract.json")
+            .relative_to(repository_root)
+            .as_posix(),
+            "sha256": sha256_file(target_dir / "semantic_contract.json"),
+        },
         "review_state": "Pinned native capture only; replay acceptance is recorded by repository tests",
         "execution": {
             "was_run": True,
@@ -182,7 +190,7 @@ def main() -> None:
         "provenance": {
             "capture_script_sha256": sha256_file(Path(__file__)),
             "reproduction_capture_script_sha256": sha256_file(Path(__file__)),
-            "contract_sha256": sha256_file(out / "contract.json"),
+            "contract_sha256": sha256_file(target_dir / "semantic_contract.json"),
             "converter_input_spec_sha256": sha256_file(input_path),
             "selected_inputs_sha256": sha256_file(shared_path),
             "witnesses_sha256": sha256_file(witnesses_path),

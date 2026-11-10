@@ -24,16 +24,16 @@
     "native_loader_script_sha256": "6ee56db73b1765ebe477c921b7108b2ee76605f446b900aed9e09db6d99d89a1",
     "native_package_lock_sha256": "cede45573d60150ede075f768f955da9890935dfb78764b3cd0b0029cd48365d",
     "native_numeric_helper_sha256": "aed1da7b180e76ff0e101a477dd6a941ed0ad076509d9716bf2bf9b6896f5fa4",
-    "contract_sha256": "357cf09c4ff560f7b40ed482a710c39603cf0f779248fc22fbea6c7f3dcbf07c",
+    "contract_sha256": "91cc30cafafdc798f6d88ac56a3c3f02da1398009b0d7de24e9267239a590c11",
     "input_serialization_note": "JSON formatting changed only; parsed native input values are unchanged."
   },
   "reproduction": {
-    "generator_sha256": "ea123e52b51a3e9cfcec606ef9789084e677a3708e60627cf51fcb1b66bdd2ed",
-    "loader_script_sha256": "6ee56db73b1765ebe477c921b7108b2ee76605f446b900aed9e09db6d99d89a1",
+    "generator_sha256": "8e6695d016f0ed356e925c3d827077a9ab3a32228a6cefdaea40db05f29d429e",
+    "loader_script_sha256": "c6e612024383a5e45a74b8081776ea63975874fdbebcc0753d19b7c655595b32",
     "package_lock_sha256": "cede45573d60150ede075f768f955da9890935dfb78764b3cd0b0029cd48365d",
     "numeric_helper_sha256": "aed1da7b180e76ff0e101a477dd6a941ed0ad076509d9716bf2bf9b6896f5fa4",
-    "retention_script_sha256": "458890a1b44283f3cd9cb004188f834102216468d0fa77083cb7eb0d34e529f1",
-    "retention_helper_sha256": "8a0dd9379b0e50726685f2254a881d5836f444845b05e22ec892db9e828ee9a1",
+    "retention_script_sha256": "14a47c34ea282a9f0cdfe2fbaea4ff32285ebc5c84fc14b17a178c9ae4f7a0da",
+    "retention_helper_sha256": "373dd7fefdffddbb8cb1a9399859f4168fc2ea97710bd55b9481b68dec693bab",
     "retention_formatter_sha256": "56961d6be101a2bdfb1b21372c823ec86dfd636547d851901b7284f2ae20e0b3"
   },
   "selection": {
@@ -41,5 +41,9 @@
     "native_observations": 2,
     "policy": "local quaternion and basis actions per node; one child world basis, mixed-point, and inverse-point witness",
     "numeric_values": "round-trippable decimals and dtype; exact bits only for signed-zero or nonfinite values"
+  },
+  "semantic_contract": {
+    "file": "experiments/converters/gltf/2.0.0/semantic_contract.json",
+    "sha256": "91cc30cafafdc798f6d88ac56a3c3f02da1398009b0d7de24e9267239a590c11"
   }
 }

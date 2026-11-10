@@ -50,7 +50,16 @@ Replay is covered by
 
 ## Limits
 
-The converter proof covers static transforms for this declared basis map. It
-does not claim an animation exporter, universal model-forward axis, behavior
-for every loader/import setting, or full conformance beyond the retained
-validator and loader evidence.
+The converter proof covers static transforms for this caller-assigned,
+camera-like probe basis. In the capture, +X is right, +Y is up, and -Z is the
+probe's forward direction. This is not the glTF oriented-asset front
+convention: glTF distinguishes asset front (+Z, with -X to the asset's right)
+from camera viewing direction (-Z, with +X to the camera's right). The fixture
+contains transform-only nodes, so it establishes neither an asset-front nor a
+camera-role conversion.
+
+The proof does not claim an animation exporter, universal model-forward axis,
+behavior for every loader/import setting, or full conformance beyond the
+retained validator and loader evidence. A role-specific asset or camera
+conversion needs its own independently specified body-frame alignment; do not
+apply either role's basis to every `node.rotation` by default.

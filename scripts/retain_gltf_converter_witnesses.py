@@ -13,6 +13,7 @@ from scripts.evidence_json import (
     read_evidence_rows,
     select_numeric_evidence,
 )
+from scripts.evidence_schema.converter_captures import ThreeGltfContract
 
 
 def sha256(path: Path) -> str:
@@ -94,49 +95,31 @@ def main() -> None:
         encoding="utf-8",
         newline="\n",
     )
-    contract = {
-        "contract_id": "quatops-gltf-static-hierarchy-v1",
-        "target": "glTF 2.0 loaded by Three.js GLTFLoader 0.187.0",
-        "algebra": "Hamilton active quaternion",
-        "source_storage": "QuatOps WXYZ",
-        "serialized_storage": "glTF XYZW",
-        "canonical_frame": {
-            "handedness": "right",
-            "positive_x": "right",
-            "positive_y": "forward",
-            "positive_z": "up",
-        },
-        "asset_frame": {
-            "handedness": "right",
-            "positive_x": "right",
-            "positive_y": "up",
-            "positive_z": "backward",
-            "forward": "-Z",
-        },
-        "destination_axes_from_source": ["x", "z", "-y"],
-        "transform_semantics": "node local to parent; world = parent world * child local; column-vector action",
-        "scope": [
-            "static node TRS serialization",
-            "hierarchy composition",
-            "native local quaternion and basis actions",
-            "native child world basis action and mixed-point action",
-            "inverse point round trip",
-        ],
-        "excludes": [
-            "animation",
-            "mesh model-forward convention",
-            "compression extensions",
-            "other GLTFLoader versions",
-        ],
-    }
+    target = native_manifest["target"]
+    if (
+        target.get("name") != "Three.js GLTFLoader"
+        or target.get("package_version") != "0.187.0"
+    ):
+        raise ValueError("glTF semantic contract does not match captured loader")
+    contract = ThreeGltfContract.model_validate(
+        read_evidence_document(source_dir / "semantic_contract.json"), strict=True
+    )
     contract_path = destination / "contract.json"
     contract_path.write_text(
-        dump_evidence_json(contract), encoding="utf-8", newline="\n"
+        dump_evidence_json(contract.model_dump(mode="json")),
+        encoding="utf-8",
+        newline="\n",
     )
     (destination / "manifest.json").write_text(
         dump_evidence_json(
             {
                 "schema_version": "1.0",
+                "semantic_contract": {
+                    "file": (source_dir / "semantic_contract.json")
+                    .relative_to(repository_root)
+                    .as_posix(),
+                    "sha256": sha256(source_dir / "semantic_contract.json"),
+                },
                 "review_state": "QuatOps-generated asset loaded by pinned native GLTFLoader; replay tests passed",
                 "target": native_manifest["target"],
                 "execution": native_manifest["execution"],

@@ -142,12 +142,7 @@ class FrameCorrespondence:
             raise TypeError("destination must be a CoordinateFrame")
         if self.source.reference != self.destination.reference:
             raise ValueError("mapped frames must share the same declared reference")
-        if (
-            self.source.reference_convention is not None
-            and self.destination.reference_convention is not None
-            and self.source.reference_convention
-            != self.destination.reference_convention
-        ):
+        if self.source.reference_convention != self.destination.reference_convention:
             raise ValueError("mapped frames must use the same reference convention")
         source = self.source.basis_to_reference.matrix
         destination = self.destination.basis_to_reference.matrix
@@ -189,11 +184,7 @@ def _same_frame_definition(left: CoordinateFrame, right: CoordinateFrame) -> boo
         or left.axes != right.axes
         or left.handedness != right.handedness
         or left.role != right.role
-        or (
-            left.reference_convention is not None
-            and right.reference_convention is not None
-            and left.reference_convention != right.reference_convention
-        )
+        or left.reference_convention != right.reference_convention
     ):
         return False
     left_basis = left.basis_to_reference.matrix

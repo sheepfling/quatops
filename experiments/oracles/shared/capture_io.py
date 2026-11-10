@@ -9,12 +9,12 @@ import platform
 import struct
 import sys
 from collections import Counter
-from dataclasses import asdict, dataclass, field
+from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Literal, Optional, TypedDict
+from typing import Literal, Optional, TypedDict
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, JsonValue
 
 NumericType = Literal["binary32", "binary64"]
 ContractUnits = Literal["radians", "geographic degrees; Cartesian metres"]
@@ -54,8 +54,8 @@ def sha256(path: Path) -> str:
 
 
 def numeric(
-    values: Any, dtype: NumericType = "binary64", *, include_bits: bool = True
-) -> dict[str, Any]:
+    values: object, dtype: NumericType = "binary64", *, include_bits: bool = True
+) -> dict[str, JsonValue]:
     """Serialize a numeric array, retaining post-binding bits and negative zero.
 
     NumPy is deliberately not required. Foreign vector/matrix objects must first
@@ -64,7 +64,7 @@ def numeric(
     code = ">f" if dtype == "binary32" else ">d"
     bits: list[str] = []
 
-    def visit(value: Any) -> Any:
+    def visit(value: object) -> JsonValue:
         if isinstance(value, (list, tuple)):
             return [visit(item) for item in value]
         native = struct.unpack(code, struct.pack(code, float(value)))[0]
@@ -78,7 +78,7 @@ def numeric(
             }
         return native
 
-    def shape(value: Any) -> list[int]:
+    def shape(value: object) -> list[int]:
         if not isinstance(value, (list, tuple)):
             return []
         if not value:
@@ -89,9 +89,8 @@ def numeric(
         return [len(value), *child]
 
     dimensions = shape(values)
-    result = visit(values)
-    result = {
-        "values": result,
+    result: dict[str, JsonValue] = {
+        "values": visit(values),
         "dtype": dtype,
         "shape": dimensions,
     }
@@ -100,7 +99,7 @@ def numeric(
     return result
 
 
-def write_json(path: Path, value: Any) -> None:
+def write_json(path: Path, value: JsonValue) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(
         json.dumps(value, indent=2, allow_nan=False) + "\n", encoding="utf-8"
@@ -113,8 +112,8 @@ class Observation:
     operation_id: str
     native_entry_point: str
     contract: ContractRecord
-    native_inputs: dict[str, Any]
-    native_outputs: dict[str, Any]
+    native_inputs: dict[str, JsonValue]
+    native_outputs: dict[str, JsonValue]
     status: str = "ok"
     diagnostic: Optional[str] = None  # noqa: UP045 -- Python 3.9.
     schema_version: str = "1.0"
@@ -128,9 +127,9 @@ class Capture:
     corpus_path: Path
     output_dir: Path
     exporter_path: Path
-    precision: dict[str, Any]
+    precision: dict[str, JsonValue]
     oracle_family: Optional[str] = None  # noqa: UP045 -- Python 3.9.
-    dependencies: list[dict[str, Any]] = field(default_factory=list)
+    dependencies: list[dict[str, JsonValue]] = field(default_factory=list)
     native_binary: Optional[Path] = None  # noqa: UP045 -- Python 3.9.
     limitations: list[str] = field(default_factory=list)
     observations: list[Observation] = field(default_factory=list)
@@ -159,14 +158,28 @@ class Capture:
         rows = self.output_dir / "observations.jsonl"
         rows.write_text(
             "".join(
-                json.dumps(asdict(item), allow_nan=False) + "\n"
+                json.dumps(
+                    {
+                        "case_id": item.case_id,
+                        "operation_id": item.operation_id,
+                        "native_entry_point": item.native_entry_point,
+                        "contract": item.contract,
+                        "native_inputs": item.native_inputs,
+                        "native_outputs": item.native_outputs,
+                        "status": item.status,
+                        "diagnostic": item.diagnostic,
+                        "schema_version": item.schema_version,
+                    },
+                    allow_nan=False,
+                )
+                + "\n"
                 for item in self.observations
             ),
             encoding="utf-8",
         )
         counts = Counter(item.status for item in self.observations)
         artifacts = [(rows, observation_role), *self.artifacts]
-        manifest = {
+        manifest: dict[str, JsonValue] = {
             "schema_version": "1.0",
             "capture_id": self.output_dir.name,
             "oracle_id": self.oracle_id,

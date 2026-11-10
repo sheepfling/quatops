@@ -7,10 +7,10 @@ import hashlib
 import json
 from pathlib import Path
 
-from quatops.engines import QuaternionFrameMap, SignedAxisMap
+from quatops.experimental.engines import QuaternionFrameMap, SignedAxisMap
 from scripts.evidence_json import read_evidence_document
+from scripts.evidence_schema.converter_captures import ThreeGltfInputs
 from scripts.evidence_schema.shared_inputs import SharedCanonicalInputCapture
-from scripts.evidence_schema.targets import ThreeGltfInputs
 
 
 def main() -> None:

@@ -31,3 +31,10 @@ projects and rerun instructions are under
 These contracts validate quaternion coefficient and physical-action transfer.
 They do not claim an Euler adapter, animation behavior, imported-scene parity,
 or a universal asset axis.
+
+The registered `godot.camera-axes` role uses Godot 4.7's
+[3D asset direction guidance](https://docs.godotengine.org/en/4.7/tutorials/assets_pipeline/importing_3d_scenes/model_export_considerations.html):
+right-handed, +Y up, and camera forward along -Z. The same page distinguishes
+camera forward from the oriented-asset convention, whose front points along
++Z. QuatOps keeps those as different roles; neither is inferred for an
+arbitrary imported object.

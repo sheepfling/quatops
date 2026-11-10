@@ -64,7 +64,7 @@ select world axes, model-forward axes, or an active/passive interpretation.
 determinants, because such a result is useful to inspect but is not a proper
 quaternion orientation. The scalar/frame primitive checks cover all 48 signed
 maps and all 48-by-48 world/body map pairs in
-[`test_engine_basis_oracle.py`](../../tests/quatops/engines/test_engine_basis_oracle.py).
+[`test_engine_basis_oracle.py`](../../tests/quatops/experimental/engines/test_engine_basis_oracle.py).
 
 For semantic frame IDs, axis descriptions, and common physical conventions,
 use `quatops.experimental.semantics`. The common [`quatops.experimental.converters` gateway](../converters.md)

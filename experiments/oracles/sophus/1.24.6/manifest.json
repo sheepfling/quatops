@@ -1,6 +1,10 @@
 {
   "schema_version": "1.0",
   "evidence_kind": "native_discovery_capture",
+  "semantic_contract": {
+    "file": "experiments/oracles/sophus/1.24.6/semantic_contract.json",
+    "sha256": "03565b08512484d0bb5c2fc8199cec0a06dc6ba5d7908667effd57a073a66c52"
+  },
   "target": "Sophus 1.24.6 SO3f and SO3d / Eigen 5.0.1",
   "pin": {
     "schema_version": "1.0",
@@ -37,10 +41,7 @@
       "-o",
       "<temporary capture executable>"
     ],
-    "capture_commands": [
-      ["capture_sophus.exe", "capture_inputs.tsv", "float32"],
-      ["capture_sophus.exe", "capture_inputs.tsv", "float64"]
-    ]
+    "capture_commands": [["capture_sophus.exe", "capture_inputs.tsv", "float32"], ["capture_sophus.exe", "capture_inputs.tsv", "float64"]]
   },
   "artifacts": {
     "capture_sources_sha256": {
@@ -51,8 +52,8 @@
       "verify_scipy.py": "548bb54929ef570477c2b6a8d17756610af610ceb41979bba369d27485d35124"
     },
     "repair_replay_sources_sha256": {
-      "retain_witnesses.py": "3ef71e068b6d5d3fed606a2b75bdecc658e9ca5e7d720b7e2bb885ac3326fb4b",
-      "verify_scipy.py": "40a35dc0d2b93a42c5ec0072c02796c04b1b10d54ae701ffba8b909e7c891d0d"
+      "retain_witnesses.py": "a9b708e0ac515c37b395ea47b4c0cb821b38ba35b68de8cf9842acd1c65b4c2b",
+      "verify_scipy.py": "f979939ccaaad092de2c0f97c8bca93ed9fb0169dd6c3e0e0b7e400139d14b86"
     },
     "input_file": "capture_inputs.tsv",
     "input_sha256": "713fece6dbad561b864c3f625c740190f92210318af4fa09f4467930a04a3048",
@@ -95,8 +96,8 @@
         "pydantic_version": "2.14.2",
         "requirements_sha256": "9008876dcb5c9692eb33a765e022b59de2cdff5aec907a013f1814dee7976d23",
         "quatops_executed": false,
-        "absolute_tolerance": 2e-6,
-        "maximum_absolute_error": 9.500000008877407e-7,
+        "absolute_tolerance": 2e-06,
+        "maximum_absolute_error": 9.500000008877407e-07,
         "result": "pass"
       },
       "float64": {

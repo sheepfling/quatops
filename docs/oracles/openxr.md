@@ -14,6 +14,15 @@ it is a frame-direction interpretation, not a measurement from this machine's
 runtime. Locations are time-specific, and a runtime may revise them as it
 updates reference-space origins.
 
+The typed OpenXR semantic binding retains the `XrSpaceLocation.locationFlags`
+bitmask and rejects a location unless
+`XR_SPACE_LOCATION_ORIENTATION_VALID_BIT` is set. It reports the
+`XR_SPACE_LOCATION_ORIENTATION_TRACKED_BIT` separately: a valid orientation
+is not necessarily currently tracked. The OpenXR 1.1.65
+[`XrSpaceLocationFlagBits` reference](https://registry.khronos.org/OpenXR/specs/1.1/man/html/XrSpaceLocationFlagBits.html)
+defines those flags. This check does not turn the pinned test runtime into a
+vendor tracking or hardware guarantee.
+
 `VIEW`, `LOCAL`, and `LOCAL_FLOOR` use +X right, +Y up, -Z forward. `VIEW`
 follows the viewer and is not gravity-aligned. `LOCAL` is world-locked and
 gravity-aligned, with an origin the runtime may choose at launch or another

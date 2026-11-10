@@ -67,13 +67,13 @@ def parse_evidence_payload(payload: str | bytes) -> JsonValue:
     return EvidencePayload.model_validate(decoded, strict=True).root
 
 
-def parse_evidence_document(payload: str | bytes) -> dict[str, Any]:
+def parse_evidence_document(payload: str | bytes) -> dict[str, JsonValue]:
     """Parse an object document, rejecting non-object roots and invalid values."""
     parsed = EvidenceDocument.model_validate(_decode_json(payload), strict=True)
-    return cast(dict[str, Any], parsed.root)
+    return parsed.root
 
 
-def read_evidence_document(path: Path) -> dict[str, Any]:
+def read_evidence_document(path: Path) -> dict[str, JsonValue]:
     """Read and validate a repository evidence JSON object from disk."""
     return parse_evidence_document(path.read_bytes())
 
@@ -83,10 +83,10 @@ def validate_evidence_payload(path: Path) -> None:
     parse_evidence_payload(path.read_bytes())
 
 
-def read_evidence_rows(path: Path) -> list[dict[str, Any]]:
+def read_evidence_rows(path: Path) -> list[dict[str, JsonValue]]:
     """Read and validate a JSON array of native observation objects."""
     parsed = EvidenceRows.model_validate(_decode_json(path.read_bytes()), strict=True)
-    return cast(list[dict[str, Any]], parsed.root)
+    return parsed.root
 
 
 def _contains_nonfinite_marker(value: Any) -> bool:

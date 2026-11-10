@@ -60,6 +60,9 @@ def trs(rotation_matrix, translation):
 def test_gltf_converter_artifact_loader_and_provenance_are_pinned():
     assert ASSET["asset"]["version"] == "2.0"
     assert CONTRACT["destination_axes_from_source"] == ["x", "z", "-y"]
+    assert CONTRACT["probe_frame"]["forward"] == "-Z"
+    assert "asset_frame" not in CONTRACT
+    assert "camera-like" in CONTRACT["frame_role_note"]
     assert CONTRACT["target"] == "glTF 2.0 loaded by Three.js GLTFLoader 0.187.0"
     assert MANIFEST["target"]["package_version"] == "0.187.0"
     assert MANIFEST["execution"]["was_run"] is True

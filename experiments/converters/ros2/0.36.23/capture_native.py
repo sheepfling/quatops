@@ -7,7 +7,8 @@ import os
 import subprocess
 import xml.etree.ElementTree as ET
 from pathlib import Path
-from typing import Any
+
+from pydantic import JsonValue
 
 from experiments.oracles.shared.capture_io import (
     Capture,
@@ -17,7 +18,7 @@ from experiments.oracles.shared.capture_io import (
     numeric,
     sha256,
 )
-from scripts.evidence_json import read_evidence_document
+from scripts.evidence_json import dump_evidence_json, read_evidence_document
 from scripts.evidence_schema.ros_capture import (
     RosFullCapture,
     RosSelectedCorpus,
@@ -46,16 +47,20 @@ def deb_version(package: str) -> str:
     return result.stdout.strip()
 
 
-def pack(value: Any, label: NumericType) -> Any:
+def pack(value: object, label: NumericType) -> JsonValue:
     if isinstance(value, dict):
+        if any(not isinstance(key, str) for key in value):
+            raise TypeError("captured object keys must be strings")
         return {key: pack(item, label) for key, item in value.items()}
-    if isinstance(value, list) and (
-        not value or isinstance(value[0], (int, float, list))
-    ):
-        return numeric(value, label)
+    if isinstance(value, list):
+        if not value or isinstance(value[0], (int, float, list)):
+            return numeric(value, label)
+        return [pack(item, label) for item in value]
     if isinstance(value, float):
         return numeric(value, label)
-    return value
+    if value is None or isinstance(value, (bool, int, str)):
+        return value
+    raise TypeError(f"cannot serialize capture value of type {type(value).__name__}")
 
 
 def main() -> None:
@@ -113,6 +118,10 @@ def main() -> None:
             "No QuatOps replay is performed by this native capture.",
         ],
     )
+    semantic_contract = package_dir / "semantic_contract.json"
+    retained_contract = args.output / "contract.json"
+    retained_contract.write_bytes(semantic_contract.read_bytes())
+    capture.artifacts.append((retained_contract, "experiment_semantic_contract"))
 
     run = subprocess.run(
         [str(args.executable.resolve()), str(corpus.resolve())],
@@ -181,7 +190,18 @@ def main() -> None:
             ),
         ]
     )
-    print(capture.finish(["EULER", "ALGEBRA", "MATRIX", "ACTION", "FRAME", "FORMAT"]))
+    manifest_path = capture.finish(
+        ["EULER", "ALGEBRA", "MATRIX", "ACTION", "FRAME", "FORMAT"]
+    )
+    manifest = read_evidence_document(manifest_path)
+    manifest["semantic_contract"] = {
+        "file": semantic_contract.relative_to(repository_root).as_posix(),
+        "sha256": sha256(semantic_contract),
+    }
+    manifest_path.write_text(
+        dump_evidence_json(manifest), encoding="utf-8", newline="\n"
+    )
+    print(manifest_path)
 
 
 if __name__ == "__main__":

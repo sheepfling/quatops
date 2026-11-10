@@ -11,6 +11,7 @@ from scripts.evidence_json import (
     read_evidence_document,
     read_evidence_rows,
 )
+from scripts.evidence_schema.converter_captures import OpenUsdContract
 
 
 def sha256(path: Path) -> str:
@@ -82,54 +83,28 @@ def main() -> None:
         encoding="utf-8",
         newline="\n",
     )
-    contract = {
-        "contract_id": "quatops-openusd-y-up-hierarchy-v1",
-        "target": "OpenUSD usd-core 26.11; USDA reopened by pxr.Usd.Stage.Open",
-        "source": {
-            "algebra": "Hamilton active",
-            "storage": "WXYZ",
-            "frame": "right-handed; +X right, +Y forward, +Z up",
-        },
-        "stage": {
-            "handedness": "right",
-            "upAxis": "Y",
-            "positive_x": "right",
-            "positive_y": "up",
-            "positive_z": "backward",
-            "forward": "-Z",
-            "metersPerUnit": 1.0,
-        },
-        "destination_axes_from_source": ["x", "z", "-y"],
-        "serialized_orientation": "USDA quatd orient op, real-first WXYZ, converted by QuatOps QuaternionFrameMap",
-        "matrix_action": (
-            "OpenUSD Gf row vectors; child world row matrix = child local row "
-            "matrix * parent world row matrix"
-        ),
-        "native_numeric_type": "binary64 Gf.Quatd and Gf.Matrix4d",
-        "scope": [
-            "file serialization and reopen",
-            "quatd orient op readback",
-            "translate+orient stacks",
-            "parent/child composition",
-            "resetXformStack",
-            "native world basis directions and mixed-point actions",
-            "one inverse point round trip",
-        ],
-        "excludes": [
-            "other stage up-axis choices",
-            "time samples",
-            "shear/nonuniform scale decomposition",
-            "renderer or file import pipeline",
-        ],
-    }
+    target = native["target"]
+    if target.get("name") != "OpenUSD" or target.get("distribution_version") != "26.11":
+        raise ValueError("OpenUSD semantic contract does not match captured runtime")
+    contract = OpenUsdContract.model_validate(
+        read_evidence_document(source_dir / "semantic_contract.json"), strict=True
+    )
     contract_path = destination / "contract.json"
     contract_path.write_text(
-        dump_evidence_json(contract), encoding="utf-8", newline="\n"
+        dump_evidence_json(contract.model_dump(mode="json")),
+        encoding="utf-8",
+        newline="\n",
     )
     (destination / "manifest.json").write_text(
         dump_evidence_json(
             {
                 "schema_version": "1.0",
+                "semantic_contract": {
+                    "file": (source_dir / "semantic_contract.json")
+                    .relative_to(repository_root)
+                    .as_posix(),
+                    "sha256": sha256(source_dir / "semantic_contract.json"),
+                },
                 "review_state": "QuatOps-generated USDA reopened by pinned OpenUSD; native capture retained",
                 "target": native["target"],
                 "stage_metadata": native["stage_metadata"],

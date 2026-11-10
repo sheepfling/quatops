@@ -10,6 +10,7 @@ from scipy.spatial.transform import Rotation
 
 from quatops.experimental.engines import QuaternionFrameMap, SignedAxisMap
 from tests.support.paths import REPOSITORY_ROOT
+from tests.support.provenance_archives import read_provenance_source
 
 ROOT = REPOSITORY_ROOT
 FIXTURE = ROOT / "tests/golden/transports/openusd/26.11/converter"
@@ -78,14 +79,13 @@ def test_openusd_converter_stage_provenance_and_frame_declarations():
         "stage_sha256": STAGE_PATH,
         "converter_input_sha256": INPUTS_PATH,
         "native_observations_sha256": FIXTURE / "witnesses.json",
-        "generator_sha256": ROOT
-        / "experiments/provenance/reproduction-v1/openusd-26.11-create_stage.py.txt",
-        "native_capture_script_sha256": ROOT
-        / "experiments/converters/openusd/26.11/capture_native.py",
         "contract_sha256": FIXTURE / "contract.json",
     }
     for field, path in paths.items():
         assert hashlib.sha256(path.read_bytes()).hexdigest() == provenance[field]
+    assert hashlib.sha256(
+        read_provenance_source(ROOT, MANIFEST["reproduction"]["generator_archive"])
+    ).hexdigest() == provenance["generator_sha256"]
     assert (
         provenance["captured_converter_input_sha256"]
         == provenance["converter_input_sha256"]
@@ -97,16 +97,25 @@ def test_openusd_converter_stage_provenance_and_frame_declarations():
         ).hexdigest()
     )
     reproduction = MANIFEST["reproduction"]
-    assert hashlib.sha256(
-        (ROOT / "experiments/converters/openusd/26.11/create_stage.py").read_bytes()
-    ).hexdigest() == reproduction["generator_sha256"]
+    assert (
+        hashlib.sha256(
+            (ROOT / "experiments/converters/openusd/26.11/create_stage.py").read_bytes()
+        ).hexdigest()
+        == reproduction["generator_sha256"]
+    )
     for field, path in {
+        "capture_script_sha256": ROOT
+        / "experiments/converters/openusd/26.11/capture_native.py",
         "retention_script_sha256": ROOT
         / "scripts/retain_openusd_converter_witnesses.py",
         "retention_helper_sha256": ROOT / "scripts/evidence_json.py",
         "retention_formatter_sha256": ROOT / "scripts/evidence_format.py",
     }.items():
         assert hashlib.sha256(path.read_bytes()).hexdigest() == reproduction[field]
+    assert reproduction["capture_script_identity_note"].startswith(
+        "The current capture entry point adds the semantic contract to the output; "
+        "provenance.native_capture_script_sha256 remains the producer identity"
+    )
 
 
 def test_openusd_native_orient_ops_local_world_stacks_and_actions_match_quatops():

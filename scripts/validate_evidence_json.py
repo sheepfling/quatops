@@ -7,7 +7,9 @@ from pathlib import Path
 
 from scripts.evidence_json import validate_evidence_payload
 
-_EXCLUDED_PARTS = {".venv", "__pycache__", "node_modules", "build", "install"}
+_EXCLUDED_PARTS = frozenset(
+    {".venv", "__pycache__", "node_modules", "build", "install"}
+)
 
 
 def evidence_json_files(repository_root: Path) -> list[Path]:

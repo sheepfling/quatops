@@ -1,1 +1,1 @@
-"""Tests for the typed evidence serialization and reduction layer."""
+"""Tests for typed evidence serialization and normalization."""

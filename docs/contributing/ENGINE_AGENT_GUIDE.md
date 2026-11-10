@@ -27,6 +27,9 @@ separate [Unreal](../engines/unreal.md), [Unity](../engines/unity.md), and
 
 ## Required evidence and reporting
 
+- Preserve native captures and provenance, then use the target semantic
+  serializers and common normalizer described in
+  [semantic evidence serialization](EVIDENCE_SEMANTIC_SERIALIZATION.md).
 - Add or update deterministic SciPy matrix-oracle cases for conversion math.
   Construct the expected basis independently from the code under test.
 - Check interpolation separately: compare mapped native/library samples with
@@ -47,8 +50,8 @@ separate [Unreal](../engines/unreal.md), [Unity](../engines/unity.md), and
 
 Pinned native fixtures now cover Unreal 5.7.4, Unity 6000.5.2f1, Godot 4.7
 stable and 4.8-dev1, and Blender 5.1.2. The selected native outputs are
-replayed by `tests/quatops/engines/test_canonical_interoperability.py`; that Python test reads
-frozen outputs and does not launch the engines. `tests/quatops/engines/test_engine_basis_oracle.py`
+replayed by `tests/quatops/experimental/engines/test_canonical_interoperability.py`; that Python test reads
+frozen outputs and does not launch the engines. `tests/quatops/experimental/engines/test_engine_basis_oracle.py`
 separately checks the shared formula over all 48 signed-axis maps.
 
 The auxiliary converter proofs for CesiumJS, glTF/Three.js, OpenUSD, and

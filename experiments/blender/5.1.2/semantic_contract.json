@@ -1,0 +1,65 @@
+{
+  "schema_version": 1,
+  "engine": {
+    "engine": "Blender",
+    "api": "mathutils.Quaternion((w,x,y,z)); Quaternion @ Vector",
+    "version": "5.1.2",
+    "native_scalar_profiles": [
+      "float32"
+    ],
+    "native_quaternion_order": "wxyz",
+    "native_algebra": "Hamilton",
+    "native_vector_action": "active quaternion sandwich / engine vector rotation API"
+  },
+  "conversion": {
+    "contract_id": "quatops-canonical-hamilton-wxyz-active-rh-v1",
+    "canonical_algebra": "Hamilton",
+    "canonical_order": "wxyz",
+    "canonical_action": "active",
+    "canonical_frame": {
+      "declaration": "explicit probe frame; not inferred from Blender or an imported object's local axes",
+      "handedness": "right-handed",
+      "positive_x": "right",
+      "positive_y": "forward",
+      "positive_z": "up"
+    },
+    "native_frame": {
+      "declared_probe_semantics": "+X right, +Y forward, +Z up for this fixture",
+      "positive_x_image": [
+        1.0,
+        0.0,
+        0.0
+      ],
+      "positive_y_image": [
+        0.0,
+        1.0,
+        0.0
+      ],
+      "positive_z_image": [
+        0.0,
+        0.0,
+        1.0
+      ],
+      "semantic_imported_object_forward_axis": "not assumed"
+    },
+    "destination_axes_from_source": [
+      "x",
+      "y",
+      "z"
+    ],
+    "conversion_rule": "native_wxyz=(w,x,y,z)",
+    "inverse_rule": "canonical_wxyz=native_wxyz",
+    "world_and_body_map": "same declared signed-axis map",
+    "input_domain": "unit Hamilton quaternion; adapters preserve magnitude and do not normalize",
+    "native_precision_tolerance": {
+      "float32": 2e-06
+    },
+    "scope": "unit quaternion coefficient and physical-action conversion",
+    "excludes": [
+      "asset model-forward defaults",
+      "scene import",
+      "animation transport",
+      "Euler adapters"
+    ]
+  }
+}

@@ -14,12 +14,14 @@ from types import MappingProxyType
 from typing import Literal, cast
 
 from ...python import hamilton as _hamilton
+from ..semantics.bindings import SemanticFrameBinding
 from ..semantics.frames import (
     CoordinateFrame,
     FramedOrientation,
     FramedOrientationBatch,
     SemanticQuaternionMap,
 )
+from ..semantics.roles import SemanticAuthority
 
 Representation = Literal["quaternion", "rotation_vector"]
 ComponentOrder = Literal["wxyz", "xyzw"]
@@ -33,6 +35,9 @@ TargetRole = Literal[
     "frame_provider",
     "format_validator",
     "loader_observation",
+]
+RepresentationEvidence = Literal[
+    "native_verified", "spec_and_test_runtime", "native_supporting"
 ]
 
 
@@ -50,6 +55,8 @@ class TargetOrientation:
     component_order: ComponentOrder | None
     from_frame: CoordinateFrame
     to_frame: CoordinateFrame
+    parent_semantic_binding: SemanticFrameBinding | None = None
+    child_semantic_binding: SemanticFrameBinding | None = None
 
     def __post_init__(self) -> None:
         if self.representation not in ("quaternion", "rotation_vector"):
@@ -76,6 +83,12 @@ class TargetOrientation:
             raise TypeError("from_frame must be a CoordinateFrame definition")
         if not isinstance(self.to_frame, CoordinateFrame):
             raise TypeError("to_frame must be a CoordinateFrame definition")
+        _validate_semantic_binding(
+            self.parent_semantic_binding, self.to_frame, "parent"
+        )
+        _validate_semantic_binding(
+            self.child_semantic_binding, self.from_frame, "child"
+        )
         object.__setattr__(self, "values", values)
 
 
@@ -90,6 +103,8 @@ class TargetOrientationBatch:
     from_frame: CoordinateFrame
     to_frame: CoordinateFrame
     component_axis: int
+    parent_semantic_binding: SemanticFrameBinding | None = None
+    child_semantic_binding: SemanticFrameBinding | None = None
 
     def __post_init__(self) -> None:
         if not self.converter_id:
@@ -98,6 +113,12 @@ class TargetOrientationBatch:
             raise TypeError("from_frame must be a CoordinateFrame definition")
         if not isinstance(self.to_frame, CoordinateFrame):
             raise TypeError("to_frame must be a CoordinateFrame definition")
+        _validate_semantic_binding(
+            self.parent_semantic_binding, self.to_frame, "parent"
+        )
+        _validate_semantic_binding(
+            self.child_semantic_binding, self.from_frame, "child"
+        )
         if isinstance(self.component_axis, bool):
             raise TypeError("component_axis must be an integer")
         try:
@@ -105,6 +126,19 @@ class TargetOrientationBatch:
         except TypeError as exc:
             raise TypeError("component_axis must be an integer") from exc
         object.__setattr__(self, "component_axis", component_axis)
+
+
+def _validate_semantic_binding(
+    binding: SemanticFrameBinding | None,
+    frame: CoordinateFrame,
+    role: str,
+) -> None:
+    if binding is not None and not isinstance(binding, SemanticFrameBinding):
+        raise TypeError(f"{role}_semantic_binding must be a SemanticFrameBinding")
+    if binding is not None and not binding.coordinate_frame.has_identical_definition(
+        frame
+    ):
+        raise ValueError(f"{role} semantic binding does not match its target frame")
 
 
 @dataclass(frozen=True)
@@ -118,6 +152,8 @@ class ConverterProfile:
     representation: Representation
     component_order: ComponentOrder | None
     evidence_status: EvidenceStatus
+    representation_evidence: RepresentationEvidence
+    semantic_authority: SemanticAuthority
     scope: str
 
     def __post_init__(self) -> None:
@@ -138,6 +174,25 @@ class ConverterProfile:
             "supporting_oracle_only",
         ):
             raise ValueError("unsupported evidence status")
+        if self.representation_evidence not in (
+            "native_verified",
+            "spec_and_test_runtime",
+            "native_supporting",
+        ):
+            raise ValueError("unsupported representation evidence state")
+        if self.semantic_authority not in (
+            "target_defined",
+            "standard_defined",
+            "application_declared",
+            "representation_only",
+            "fixture_only",
+            "unknown_or_conflicting",
+        ):
+            raise ValueError("unsupported semantic authority")
+        if self.semantic_authority != "representation_only":
+            raise ValueError(
+                "physical frame roles must be declared in SEMANTIC_CONTRACTS"
+            )
 
     def to_target(
         self,
@@ -266,6 +321,7 @@ def _profile(
     status: EvidenceStatus,
     scope: str,
     representation: Representation = "quaternion",
+    representation_evidence: RepresentationEvidence = "native_verified",
 ) -> ConverterProfile:
     return ConverterProfile(
         converter_id=converter_id,
@@ -275,6 +331,8 @@ def _profile(
         representation=representation,
         component_order=order,
         evidence_status=status,
+        representation_evidence=representation_evidence,
+        semantic_authority="representation_only",
         scope=scope,
     )
 
@@ -417,6 +475,7 @@ _PROFILES = {
             "xyzw",
             "declared_contract",
             "Spec and Khronos test-runtime contract only; no vendor-runtime or hardware acceptance.",
+            representation_evidence="spec_and_test_runtime",
         ),
         _profile(
             "sophus.so3-params",
@@ -426,6 +485,7 @@ _PROFILES = {
             "xyzw",
             "supporting_oracle_only",
             "Captured SO(3) representation; not an accepted application-frame converter.",
+            representation_evidence="native_supporting",
         ),
     )
 }

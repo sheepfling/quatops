@@ -17,6 +17,15 @@ import spiceypy as spice  # pyright: ignore[reportMissingModuleSource]
 
 from scripts.evidence_format import dump_evidence_json
 from scripts.evidence_json import read_evidence_document
+from scripts.evidence_schema.converter_captures import (
+    SPICEYPY_CONSTRUCTOR_CASE_ID,
+    SpiceyPyCapture,
+    SpiceyPyConstructedOrientation,
+    SpiceyPyInputs,
+    SpiceyPyObservations,
+    SpiceyPyOrientation,
+    TargetIdentity,
+)
 from scripts.evidence_schema.shared_inputs import (
     SharedCanonicalInputCapture,
     resolve_orientation_selection,
@@ -24,28 +33,30 @@ from scripts.evidence_schema.shared_inputs import (
 from scripts.evidence_schema.spiceypy_capture import (
     validate_spiceypy_capture_matches_inputs,
 )
-from scripts.evidence_schema.targets import SpiceyPyCapture, SpiceyPyInputs
 
 
 def sha256_file(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
-def capture_quaternion(case_id: str, q: np.ndarray, probe: np.ndarray) -> dict:
+def capture_quaternion(
+    case_id: str, q: np.ndarray, probe: np.ndarray
+) -> SpiceyPyOrientation:
     matrix = np.asarray(spice.q2m(q), dtype=np.float64)
-    result = {
-        "case_id": case_id,
-        "native_input_wxyz": q.tolist(),
-        "native_mxv_basis_xyz": [
+    probe_action = (
+        np.asarray(spice.mxv(matrix, probe), dtype=np.float64).tolist()
+        if case_id == "mixed_a"
+        else None
+    )
+    return SpiceyPyOrientation(
+        case_id=case_id,
+        native_input_wxyz=q.tolist(),
+        native_mxv_basis_xyz=[
             np.asarray(spice.mxv(matrix, vector), dtype=np.float64).tolist()
             for vector in np.eye(3)
         ],
-    }
-    if case_id == "mixed_a":
-        result["native_mxv_probe_xyz"] = np.asarray(
-            spice.mxv(matrix, probe), dtype=np.float64
-        ).tolist()
-    return result
+        native_mxv_probe_xyz=probe_action,
+    )
 
 
 def main() -> None:
@@ -74,52 +85,53 @@ def main() -> None:
     )
     probe = np.asarray(shared.probe_vector_xyz, dtype=np.float64)
 
-    observations = {
-        "canonical_to_native": [
-            capture_quaternion(
-                row.case_id,
-                np.asarray(row.canonical_wxyz, dtype=np.float64),
-                probe,
-            )
-            for row in selected
-        ],
-        "native_created": [],
-        "composition": [],
-    }
+    canonical_to_native = [
+        capture_quaternion(
+            row.case_id,
+            np.asarray(row.canonical_wxyz, dtype=np.float64),
+            probe,
+        )
+        for row in selected
+    ]
     ctor = spec.native_constructed_orientation
     axis = np.asarray(ctor.axis_xyz, dtype=np.float64)
     matrix = np.asarray(spice.axisar(axis, float(ctor.angle_radians)), dtype=np.float64)
     qnative = np.asarray(spice.m2q(matrix), dtype=np.float64)
     q2m = np.asarray(spice.q2m(qnative), dtype=np.float64)
-    observations["native_created"].append(
-        {
-            "case_id": ctor.case_id,
-            "native_constructor": "axisar(axis, angle) -> m2q(matrix)",
-            "native_m2q_wxyz": qnative.tolist(),
-            "native_mxv_basis_xyz": [
+    native_created = [
+        SpiceyPyConstructedOrientation(
+            case_id=SPICEYPY_CONSTRUCTOR_CASE_ID,
+            native_constructor="axisar(axis, angle) -> m2q(matrix)",
+            native_m2q_wxyz=qnative.tolist(),
+            native_mxv_basis_xyz=[
                 np.asarray(spice.mxv(q2m, vector), dtype=np.float64).tolist()
                 for vector in np.eye(3)
             ],
-        }
-    )
+        )
+    ]
 
     pair = {
         row.case_id: np.asarray(row.canonical_wxyz, dtype=np.float64)
         for row in selected
     }
     a, b = pair["mixed_a"], pair["mixed_b"]
+    composition: list[SpiceyPyOrientation] = []
     for case_id, lhs, rhs in (
         ("mixed_a_times_mixed_b", a, b),
         ("mixed_b_times_mixed_a", b, a),
     ):
         product = np.asarray(spice.qxq(lhs, rhs), dtype=np.float64)
-        observations["composition"].append(
-            capture_quaternion(case_id, product, probe)
-            | {
-                "native_lhs_wxyz": lhs.tolist(),
-                "native_rhs_wxyz": rhs.tolist(),
-                "product_order": "lhs * rhs; rhs acts first",
-            }
+        orientation = capture_quaternion(case_id, product, probe)
+        composition.append(
+            SpiceyPyOrientation(
+                case_id=orientation.case_id,
+                native_input_wxyz=orientation.native_input_wxyz,
+                native_mxv_basis_xyz=orientation.native_mxv_basis_xyz,
+                native_mxv_probe_xyz=orientation.native_mxv_probe_xyz,
+                native_lhs_wxyz=lhs.tolist(),
+                native_rhs_wxyz=rhs.tolist(),
+                product_order="lhs * rhs; rhs acts first",
+            )
         )
 
     library_path = Path(str(resources.files("spiceypy"))) / "utils" / "cspice.dll"
@@ -127,18 +139,23 @@ def main() -> None:
         raise FileNotFoundError(library_path)
     out = output_dir.resolve()
     out.mkdir(parents=True, exist_ok=True)
+    semantic_contract_path = target_dir / "semantic_contract.json"
+    (out / "contract.json").write_bytes(semantic_contract_path.read_bytes())
     witnesses_path = out / "witnesses.json"
-    witnesses = {
-        "schema_version": "1.0",
-        "evidence_kind": "native_runtime_selected_converter_witnesses",
-        "target": {
-            "name": "SpiceyPy / CSPICE",
-            "wrapper_version": spice.__version__,
-            "toolkit_version": spice.tkvrsn("TOOLKIT"),
-        },
-        "observations": observations,
-    }
-    checked_witnesses = SpiceyPyCapture.model_validate(witnesses, strict=True)
+    checked_witnesses = SpiceyPyCapture(
+        schema_version="1.0",
+        evidence_kind="native_runtime_selected_converter_witnesses",
+        target=TargetIdentity(
+            name="SpiceyPy / CSPICE",
+            wrapper_version=spice.__version__,
+            toolkit_version=spice.tkvrsn("TOOLKIT"),
+        ),
+        observations=SpiceyPyObservations(
+            canonical_to_native=canonical_to_native,
+            native_created=native_created,
+            composition=composition,
+        ),
+    )
     validate_spiceypy_capture_matches_inputs(checked_witnesses, spec, shared)
     witnesses_path.write_text(
         dump_evidence_json(
@@ -149,6 +166,12 @@ def main() -> None:
     )
     manifest = {
         "schema_version": "1.0",
+        "semantic_contract": {
+            "file": (target_dir / "semantic_contract.json")
+            .relative_to(repository_root)
+            .as_posix(),
+            "sha256": sha256_file(target_dir / "semantic_contract.json"),
+        },
         "review_state": "Pinned native capture only; replay acceptance is recorded by repository tests",
         "execution": {
             "was_run": True,
@@ -173,7 +196,7 @@ def main() -> None:
         "provenance": {
             "capture_script_sha256": sha256_file(Path(__file__)),
             "reproduction_capture_script_sha256": sha256_file(Path(__file__)),
-            "contract_sha256": sha256_file(out / "contract.json"),
+            "contract_sha256": sha256_file(target_dir / "semantic_contract.json"),
             "converter_input_spec_sha256": sha256_file(input_path),
             "selected_inputs_sha256": sha256_file(shared_path),
             "witnesses_sha256": sha256_file(witnesses_path),

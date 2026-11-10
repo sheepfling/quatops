@@ -13,7 +13,13 @@ import numpy as np
 import scipy
 from numpy.typing import NDArray
 from pydantic import BaseModel, ConfigDict, Field, FiniteFloat
-from retain_witnesses import ExpLog, NativeCapture, NativeRotation
+from retain_witnesses import (
+    ExpLog,
+    NativeCapture,
+    NativeRotation,
+    load_semantic_config,
+    profile_for_capture,
+)
 from scipy.spatial.transform import Rotation
 
 from scripts.evidence_schema.primitives import finite_max_abs
@@ -140,16 +146,17 @@ def main() -> None:
     options = parser.parse_args()
     input_path = options.capture.resolve()
     capture = NativeCapture.model_validate_json(input_path.read_bytes(), strict=True)
+    config = load_semantic_config()
+    profile = profile_for_capture(config, capture)
     capture.validate_pinned_inputs(Path(__file__).with_name("capture_inputs.tsv"))
-    is_float32 = capture.target == "Sophus SO3f"
-    tolerance = 2e-6 if is_float32 else 2e-14
+    tolerance = profile.scipy_tolerance
     maxima = MaxAbsErrors()
     probes = np.asarray(
         [
             [1.0, 0.0, 0.0],
             [0.0, 1.0, 0.0],
             [0.0, 0.0, 1.0],
-            capture.probe_xyz,
+            config.probe_xyz,
         ],
         dtype=np.float64,
     )

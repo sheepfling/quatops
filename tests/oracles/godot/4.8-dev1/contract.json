@@ -5,7 +5,9 @@
     "version": "4.8-dev1",
     "build": "official",
     "platform": "Windows",
-    "native_scalar_profiles": ["float32"],
+    "native_scalar_profiles": [
+      "float32"
+    ],
     "native_quaternion_order": "xyzw",
     "native_algebra": "Hamilton",
     "native_vector_action": "active quaternion sandwich / engine vector rotation API"
@@ -28,7 +30,11 @@
       "positive_y": "up",
       "positive_z": "backward"
     },
-    "destination_axes_from_source": ["x", "z", "-y"],
+    "destination_axes_from_source": [
+      "x",
+      "z",
+      "-y"
+    ],
     "conversion_rule": "native_xyzw=(x,z,-y,w)",
     "inverse_rule": "canonical_wxyz=(W,X,-Z,Y)",
     "world_and_body_map": "same declared signed-axis map",
@@ -37,7 +43,12 @@
       "float32": 2e-06
     },
     "scope": "unit quaternion coefficient and physical-action conversion",
-    "excludes": ["asset model-forward defaults", "scene import", "animation transport", "Euler adapters"]
+    "excludes": [
+      "asset model-forward defaults",
+      "scene import",
+      "animation transport",
+      "Euler adapters"
+    ]
   },
   "provenance": {
     "witness_file": "../shared/witnesses.json",
@@ -60,6 +71,8 @@
       "version": "4.8-dev1 (official)"
     },
     "capture_method": "Godot headless GDScript SceneTree script",
-    "retention_method": "selected native outputs retained losslessly; inputs linked by case ID; redundant inputs and probe actions omitted"
+    "retention_method": "selected native outputs retained losslessly; inputs linked by case ID; redundant inputs and probe actions omitted",
+    "semantic_contract_file": "experiments/godot/4.8-dev1/semantic_contract.json",
+    "semantic_contract_sha256": "ce7fa5492f0c0ae9ad2e1ce221b6377eb1c5c40b944efaeb6054b7f9c5004055"
   }
 }

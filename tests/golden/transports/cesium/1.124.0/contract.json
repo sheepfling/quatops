@@ -5,9 +5,9 @@
   "storage": "QuatOps WXYZ; Cesium XYZW",
   "local_frame": {
     "handedness": "right",
-    "positive_x": "east/right",
-    "positive_y": "north/forward",
-    "positive_z": "up/ellipsoid normal"
+    "positive_x": "east",
+    "positive_y": "north",
+    "positive_z": "ellipsoid normal"
   },
   "source_map": ["x", "y", "z"],
   "native_api": [

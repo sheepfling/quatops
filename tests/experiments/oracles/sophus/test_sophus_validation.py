@@ -15,6 +15,7 @@ from pydantic import ValidationError
 
 from scripts.evidence_schema.primitives import finite_max_abs
 from tests.support.paths import REPOSITORY_ROOT
+from tests.support.provenance_archives import read_provenance_source
 
 ROOT = REPOSITORY_ROOT
 SOPHUS = ROOT / "experiments/oracles/sophus/1.24.6"
@@ -211,7 +212,9 @@ def test_complete_capture_matches_pinned_tsv() -> None:
 
 
 def test_compact_witnesses_keep_the_documented_six_exp_log_rows() -> None:
-    selected = retain.reduce_capture(json.dumps(_capture()).encode("utf-8"))
+    selected = retain.reduce_capture(
+        json.dumps(_capture()).encode("utf-8"), retain.load_semantic_config()
+    )
     assert tuple(item.case_id for item in selected.exp_log) == (
         "zero",
         "near_zero",
@@ -322,12 +325,14 @@ def test_historical_capture_sources_are_archived_and_current_sources_are_separat
     manifest = json.loads((SOPHUS / "manifest.json").read_text())
     historical = manifest["artifacts"]["capture_sources_sha256"]
     for source_name, archive_name in (
-        ("retain_witnesses.py", "sophus-1.24.6-retain_witnesses.py.txt"),
-        ("verify_scipy.py", "sophus-1.24.6-verify_scipy.py.txt"),
+        ("retain_witnesses.py", "sophus-1.24.6-retain_witnesses.py"),
+        ("verify_scipy.py", "sophus-1.24.6-verify_scipy.py"),
     ):
-        archived = ROOT / "experiments/provenance/reproduction-v1" / archive_name
+        archived = read_provenance_source(
+            ROOT, f"experiments/provenance/reproduction-v1.zip#{archive_name}"
+        )
         assert (
-            hashlib.sha256(archived.read_bytes()).hexdigest() == historical[source_name]
+            hashlib.sha256(archived).hexdigest() == historical[source_name]
         )
     current = manifest["artifacts"]["repair_replay_sources_sha256"]
     assert (

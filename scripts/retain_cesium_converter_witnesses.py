@@ -13,6 +13,7 @@ from scripts.evidence_json import (
     read_evidence_rows,
     select_numeric_evidence,
 )
+from scripts.evidence_schema.converter_captures import CesiumContract
 
 
 def sha256(path: Path) -> str:
@@ -99,53 +100,19 @@ def main() -> None:
         encoding="utf-8",
         newline="\n",
     )
-    contract = {
-        "contract_id": "quatops-cesium-local-enu-ecef-v1",
-        "target": "CesiumJS 1.124.0",
-        "algebra": "Hamilton active quaternion",
-        "storage": "QuatOps WXYZ; Cesium XYZW",
-        "local_frame": {
-            "handedness": "right",
-            "positive_x": "east/right",
-            "positive_y": "north/forward",
-            "positive_z": "up/ellipsoid normal",
-        },
-        "source_map": ["x", "y", "z"],
-        "native_api": [
-            "Cartesian3.fromDegrees",
-            "Transforms.eastNorthUpToFixedFrame",
-            "Matrix3.fromQuaternion",
-            "Matrix4.fromRotationTranslation",
-            "Matrix4.multiply",
-            "Matrix4.inverseTransformation",
-        ],
-        "forward": (
-            "R_ECEF_from_model = R_ECEF_from_ENU * R_ENU_from_model; "
-            "t_ECEF = t_ECEF_from_ENU + R_ECEF_from_ENU * t_ENU_from_model"
-        ),
-        "inverse": (
-            "R_ENU_from_model = transpose(R_ECEF_from_ENU) * R_ECEF_from_model; "
-            "t_ENU = transpose(R_ECEF_from_ENU) * (t_ECEF - t_ECEF_from_ENU)"
-        ),
-        "geodesy": "WGS84; lon/lat input in degrees, height and translations in metres",
-        "normalization": "unit input quaternion; no hidden sign canonicalization in QuatOps input mapping",
-        "scope": [
-            "QuatOps-produced local quaternion to Cesium ECEF transform",
-            "native basis/probe action",
-            "multiple geodetic origins",
-            "inverse point and orientation recovery",
-            "noncommuting composition and antipode",
-        ],
-        "excludes": [
-            "Cesium Model/glTF importer",
-            "asset model-forward defaults",
-            "rendering",
-            "time-dependent EOP/ICRF",
-        ],
-    }
+    if (
+        run["target"].get("name") != "CesiumJS"
+        or run["target"].get("package_version") != "1.124.0"
+    ):
+        raise ValueError("Cesium semantic contract does not match captured package")
+    contract = CesiumContract.model_validate(
+        read_evidence_document(source_dir / "semantic_contract.json"), strict=True
+    )
     contract_path = destination / "contract.json"
     contract_path.write_text(
-        dump_evidence_json(contract), encoding="utf-8", newline="\n"
+        dump_evidence_json(contract.model_dump(mode="json")),
+        encoding="utf-8",
+        newline="\n",
     )
     source_inputs = (
         repository_root / "experiments/interoperability/v1/canonical_inputs.json"
@@ -156,6 +123,12 @@ def main() -> None:
     native_numeric_helper_sha256 = run.get("numeric_helper_sha256")
     manifest = {
         "schema_version": "1.0",
+        "semantic_contract": {
+            "file": (source_dir / "semantic_contract.json")
+            .relative_to(repository_root)
+            .as_posix(),
+            "sha256": sha256(source_dir / "semantic_contract.json"),
+        },
         "review_state": (
             "native capture retained; QuatOps replay covered by "
             "tests/experiments/converters/cesium/test_cesium_converter.py"

@@ -5,6 +5,12 @@ compiled against Eigen 5.0.1 with GCC 15.2.0 on Windows x86-64. The assigned
 right-handed probe frame is +X right, +Y forward, +Z up; Sophus does not assign
 that frame universally.
 
+The experiment-owned [`semantic_contract.json`](semantic_contract.json)
+declares the representation facts, that fixture-only probe frame, both scalar
+profiles, and their SciPy formula tolerances. The reducer and reference checker
+load it through strict Pydantic models and verify its manifest SHA-256. This
+remains supporting SO(3) evidence, not an accepted application-frame converter.
+
 [`witnesses/float32.json`](witnesses/float32.json) and
 [`witnesses/float64.json`](witnesses/float64.json) each retain eight
 quaternion-construction cases, six `exp`/`log` cases, both orders of one

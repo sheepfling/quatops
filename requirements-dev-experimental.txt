@@ -1,0 +1,2 @@
+# Bridge for the reusable workflow's requirements-file input.
+-e .[dev-experimental]

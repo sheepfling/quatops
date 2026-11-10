@@ -2,13 +2,17 @@
 
 ## Accepted scope
 
-The retained proof validates a QuatOps converter for explicit local right-handed
-frames assigned to Cesium's east-north-up frame: canonical `+X right/east`,
-`+Y forward/north`, and `+Z up` map to Cesium `+X east`, `+Y north`, and `+Z`
-ellipsoid normal. Quaternion coefficients are Hamilton WXYZ in QuatOps and
-active XYZW at the Cesium API boundary. The local quaternion is composed with
-Cesium's native WGS84 ENU-to-ECEF transform; frame placement is not folded into
-the local quaternion conversion.
+The shared canonical source frame is right-handed, with `+X right`, `+Y
+forward`, and `+Z up`. The fixture explicitly assigns its local axes to
+Cesium ENU: source right maps to east, forward maps to north, and up maps to the
+ellipsoid normal. That alignment is an application declaration; it is not a
+meaning attached to a generic Cesium quaternion. The captured API documents
+the local ENU axes and its ENU-to-ECEF transform.
+
+Quaternion coefficients are Hamilton WXYZ in QuatOps and active XYZW at the
+Cesium API boundary. The local quaternion is composed with Cesium's native
+WGS84 ENU-to-ECEF transform; frame placement is not folded into the local
+quaternion conversion.
 
 The native capture ran CesiumJS `1.124.0` with Node.js `v24.21.0` on Windows
 x64. It retains five selected cases covering identity, mixed rotations, an

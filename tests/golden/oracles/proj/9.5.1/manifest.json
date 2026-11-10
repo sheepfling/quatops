@@ -64,9 +64,7 @@
     }
   ],
   "coverage": {
-    "profiles": [
-      "FRAME"
-    ],
+    "profiles": ["FRAME"],
     "independent_input_count": 11,
     "native_observation_count": 11,
     "quatops_replay_count": 0,
@@ -87,17 +85,17 @@
   },
   "reproduction": {
     "exporter_path": "experiments/oracles/proj/9.5.1/capture_proj.py",
-    "exporter_sha256": "f86b895fc655e39d04032ff46dfd3693a0c498b8aa5cf360bf16070eaec29f29",
+    "exporter_sha256": "5018e271746484619dd54a86218853f2cee432deef7bca890fb850c50f528cbd",
     "previous_manifest_exporter_sha256": "9295111b0a0d2ddf36c207ee50c7078a28202b60911a5589301299622a665a9a",
     "previous_checkout_exporter_sha256": "b1924e77c6a449b3c86af70f8fb870cb06fa2eecd160f8a1d6937b3bbe4254a6",
     "capture_helper_path": "experiments/oracles/shared/capture_io.py",
-    "capture_helper_sha256": "a0fa76c3f4aab85c1d5ec8f78634cd2f02c064f020c6779501d7780f2c232277",
+    "capture_helper_sha256": "c237dbdcc7e82df3a36b430fc9f5b935b0cbbf00adae620c5b3f6355900b26d2",
     "input_path": "experiments/oracles/shared/geographic_inputs_v1.json",
     "input_sha256": "ca5c70314444c14cead0cc196f319e5d189657bb818eb59751c07e55ec23ff85",
     "requirements_path": "experiments/oracles/proj/9.5.1/requirements.txt",
     "requirements_sha256": "2ebfab05fa84c1997fce51031415ed2da1209595112badc09faecbeadfa3aa6a",
     "previous_checkout_capture_helper_sha256": "ecdf0245b9d0318d67189c471f26b3ec58e2ef871611b6a2c5c79cbbc16963da",
-    "capture_helper_archive": "experiments/provenance/reproduction-v1/capture_io.py.txt"
+    "capture_helper_archive": "experiments/provenance/reproduction-v1.zip#capture_io.py"
   },
   "retention": {
     "source_observations_sha256": "67adb8fcedc1cd9b6aca1b203a6109b8b57f2d8fe3f381951cbcb0dcd56e5f5a",

@@ -174,8 +174,10 @@ AEROSPACE_BODY_FRD = FrameConvention(
     ),
     handedness="right",
 )
-OPENXR_SPACE_RUB = FrameConvention(
-    convention_id="openxr.space.right-up-back",
+# This applies to the standardized VIEW, LOCAL, and LOCAL_FLOOR reference
+# spaces only; arbitrary XrSpace values require their own declared axes.
+OPENXR_REFERENCE_SPACE_RUB = FrameConvention(
+    convention_id="openxr.reference-space.right-up-back",
     role="world",
     axes=("right", "up", "back"),
     reference_convention=_WORLD_RFU_REFERENCE,
@@ -184,6 +186,8 @@ OPENXR_SPACE_RUB = FrameConvention(
     ),
     handedness="right",
 )
+# Compatibility alias; prefer the name that identifies this limited scope.
+OPENXR_SPACE_RUB = OPENXR_REFERENCE_SPACE_RUB
 
 ECEF_FRAME = ECEF_WORLD.bind("quatops.ecef", "quatops.ecef")
 CANONICAL_WORLD_FRAME = CANONICAL_WORLD_RFU.bind(

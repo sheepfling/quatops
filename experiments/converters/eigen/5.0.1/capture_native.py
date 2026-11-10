@@ -18,12 +18,7 @@ from pydantic import BaseModel, ConfigDict
 
 from scripts.evidence_format import dump_evidence_json
 from scripts.evidence_json import parse_evidence_document, read_evidence_document
-from scripts.evidence_schema.primitives import Vector3
-from scripts.evidence_schema.shared_inputs import (
-    SharedCanonicalInputCapture,
-    SharedFrameInput,
-)
-from scripts.evidence_schema.targets import (
+from scripts.evidence_schema.converter_captures import (
     BasisActions,
     CompositionInput,
     EigenCapture,
@@ -37,6 +32,11 @@ from scripts.evidence_schema.targets import (
     NativeConstructedInput,
     QuaternionValues,
     TargetIdentity,
+)
+from scripts.evidence_schema.primitives import Vector3
+from scripts.evidence_schema.shared_inputs import (
+    SharedCanonicalInputCapture,
+    SharedFrameInput,
 )
 from scripts.platform_probe import executable_suffix
 
@@ -259,6 +259,8 @@ def main() -> None:
         or repository_root / "tests/golden/oracles/eigen/5.0.1/converter"
     ).resolve()
     output_dir.mkdir(parents=True, exist_ok=True)
+    semantic_contract_path = target_dir / "semantic_contract.json"
+    (output_dir / "contract.json").write_bytes(semantic_contract_path.read_bytes())
 
     compiler = shutil.which(options.compiler)
     if compiler is None:
@@ -347,6 +349,12 @@ def main() -> None:
     capture_runner_sha256 = sha256_file(Path(__file__))
     manifest = {
         "schema_version": "1.0",
+        "semantic_contract": {
+            "file": (target_dir / "semantic_contract.json")
+            .relative_to(repository_root)
+            .as_posix(),
+            "sha256": sha256_file(target_dir / "semantic_contract.json"),
+        },
         "review_state": "Pinned native Eigen harness capture; repository replay acceptance is recorded by tests",
         "execution": {
             "was_run": True,
@@ -383,7 +391,7 @@ def main() -> None:
             "reproduction_capture_runner_sha256": capture_runner_sha256,
             "native_cpp_source_sha256": sha256_file(cpp_source),
             "reproduction_native_cpp_source_sha256": sha256_file(cpp_source),
-            "contract_sha256": sha256_file(output_dir / "contract.json"),
+            "contract_sha256": sha256_file(target_dir / "semantic_contract.json"),
             "converter_input_spec_sha256": sha256_file(spec_path),
             "selected_inputs_sha256": inputs.canonical_input_sha256,
             "prepared_inputs_sha256": prepared_inputs_sha256,

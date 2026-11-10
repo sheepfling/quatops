@@ -6,20 +6,23 @@ import hashlib
 import json
 import math
 import sys
+from dataclasses import asdict, dataclass
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, TypedDict
+from typing import Any
 
 import bpy
 
 
-class CurveKey(TypedDict):
+@dataclass(frozen=True, slots=True)
+class CurveKey:
     interpolation: str
     handle_left_type: str
     handle_right_type: str
 
 
-class CurveRow(TypedDict):
+@dataclass(frozen=True, slots=True)
+class CurveRow:
     slot_identifier: str
     data_path: str
     array_index: int
@@ -27,7 +30,8 @@ class CurveRow(TypedDict):
     key_frames: list[float]
 
 
-class ActionCurves(TypedDict):
+@dataclass(frozen=True, slots=True)
+class FcurveSummary:
     slot_identifiers: list[str]
     data_path: str
     array_indices: list[int]
@@ -35,7 +39,115 @@ class ActionCurves(TypedDict):
     interpolations_by_component: list[list[str]]
     left_handle_types_by_component: list[list[str]]
     right_handle_types_by_component: list[list[str]]
+
+
+@dataclass(frozen=True, slots=True)
+class CapturedActionCurves:
+    summary: FcurveSummary
     key_frames: list[float]
+
+
+@dataclass(frozen=True, slots=True)
+class StaticTransform:
+    matrix_basis_rows: list[list[float]]
+    matrix_world_rows: list[list[float]]
+
+
+@dataclass(frozen=True, slots=True)
+class GltfTransport:
+    name: str
+    version: str
+    source_coordinates: str
+
+
+@dataclass(frozen=True, slots=True)
+class BlenderLoader:
+    name: str
+    version: str
+    version_tuple: list[int]
+    build_hash: str
+    build_date: str
+    build_platform: str
+    python_version: str
+    executable: str
+    executable_sha256: str
+    importer_source_root: str
+    importer_source_sha256: dict[str, str]
+    rotation_component_order: str
+
+
+@dataclass(frozen=True, slots=True)
+class OperatorArguments:
+    filepath: str
+
+
+@dataclass(frozen=True, slots=True)
+class CaptureProvenance:
+    gltf_sha256: str
+    binary_sha256: str
+    exporter_sha256: str
+    exact_invocation: str
+    operator_arguments: OperatorArguments
+    other_operator_properties: str
+    captured_at_utc: str
+
+
+@dataclass(frozen=True, slots=True)
+class SceneUnitSettings:
+    system: str
+    scale_length: float
+    system_rotation: str
+
+
+@dataclass(frozen=True, slots=True)
+class SceneSettings:
+    fps: int
+    fps_base: float
+    frame_start: int
+    frame_end: int
+    unit_settings: SceneUnitSettings
+
+
+@dataclass(frozen=True, slots=True)
+class AxisImages:
+    x: list[float]
+    y: list[float]
+    z: list[float]
+
+
+@dataclass(frozen=True, slots=True)
+class AnimationSample:
+    sample: str
+    time_seconds: float
+    quaternion_wxyz: list[float]
+
+
+@dataclass(frozen=True, slots=True)
+class AnimationObservation:
+    interpolation: str
+    action_name: str
+    target_object: str
+    key_times_seconds_from_imported_fcurves: list[float]
+    fcurves: FcurveSummary
+    samples: list[AnimationSample]
+
+
+@dataclass(frozen=True, slots=True)
+class GltfObservations:
+    static_transforms: dict[str, StaticTransform]
+    source_translation_axis_images_in_blender_xyz: AxisImages
+    animations: list[AnimationObservation]
+
+
+@dataclass(frozen=True, slots=True)
+class BlenderGltfCapture:
+    schema_version: str
+    evidence_kind: str
+    transport: GltfTransport
+    loader: BlenderLoader
+    provenance: CaptureProvenance
+    scene: SceneSettings
+    observations: GltfObservations
 
 
 def sha256_file(path: Path) -> str:
@@ -67,16 +179,16 @@ def quaternion_wxyz(quaternion: Any) -> list[float]:
     ]
 
 
-def object_transform(object_: Any) -> dict[str, list[list[float]]]:
+def object_transform(object_: Any) -> StaticTransform:
     bpy.context.view_layer.update()
     evaluated = object_.evaluated_get(bpy.context.evaluated_depsgraph_get())
-    return {
-        "matrix_basis_rows": matrix_rows(evaluated.matrix_basis),
-        "matrix_world_rows": matrix_rows(evaluated.matrix_world),
-    }
+    return StaticTransform(
+        matrix_basis_rows=matrix_rows(evaluated.matrix_basis),
+        matrix_world_rows=matrix_rows(evaluated.matrix_world),
+    )
 
 
-def action_curves(action: Any) -> ActionCurves:
+def action_curves(action: Any) -> CapturedActionCurves:
     rows: list[CurveRow] = []
     for layer in action.layers:
         for strip in layer.strips:
@@ -85,46 +197,48 @@ def action_curves(action: Any) -> ActionCurves:
                 if bag is None:
                     continue
                 for curve in bag.fcurves:
-                    keys: list[CurveKey] = [
-                        {
-                            "interpolation": point.interpolation,
-                            "handle_left_type": point.handle_left_type,
-                            "handle_right_type": point.handle_right_type,
-                        }
+                    keys = [
+                        CurveKey(
+                            interpolation=point.interpolation,
+                            handle_left_type=point.handle_left_type,
+                            handle_right_type=point.handle_right_type,
+                        )
                         for point in curve.keyframe_points
                     ]
                     rows.append(
-                        {
-                            "slot_identifier": slot.identifier,
-                            "data_path": curve.data_path,
-                            "array_index": curve.array_index,
-                            "keys": keys,
-                            "key_frames": [
+                        CurveRow(
+                            slot_identifier=slot.identifier,
+                            data_path=curve.data_path,
+                            array_index=curve.array_index,
+                            keys=keys,
+                            key_frames=[
                                 float(point.co.x) for point in curve.keyframe_points
                             ],
-                        }
+                        )
                     )
     if not rows:
         raise RuntimeError(f"No F-curves in action {action.name!r}")
-    key_frames = rows[0]["key_frames"]
-    if any(row["key_frames"] != key_frames for row in rows[1:]):
+    key_frames = rows[0].key_frames
+    if any(row.key_frames != key_frames for row in rows[1:]):
         raise RuntimeError(f"Quaternion F-curve key times differ in {action.name!r}")
-    return {
-        "slot_identifiers": sorted({row["slot_identifier"] for row in rows}),
-        "data_path": rows[0]["data_path"],
-        "array_indices": [row["array_index"] for row in rows],
-        "key_count": len(key_frames),
-        "interpolations_by_component": [
-            [key["interpolation"] for key in row["keys"]] for row in rows
-        ],
-        "left_handle_types_by_component": [
-            [key["handle_left_type"] for key in row["keys"]] for row in rows
-        ],
-        "right_handle_types_by_component": [
-            [key["handle_right_type"] for key in row["keys"]] for row in rows
-        ],
-        "key_frames": key_frames,
-    }
+    return CapturedActionCurves(
+        summary=FcurveSummary(
+            slot_identifiers=sorted({row.slot_identifier for row in rows}),
+            data_path=rows[0].data_path,
+            array_indices=[row.array_index for row in rows],
+            key_count=len(key_frames),
+            interpolations_by_component=[
+                [key.interpolation for key in row.keys] for row in rows
+            ],
+            left_handle_types_by_component=[
+                [key.handle_left_type for key in row.keys] for row in rows
+            ],
+            right_handle_types_by_component=[
+                [key.handle_right_type for key in row.keys] for row in rows
+            ],
+        ),
+        key_frames=key_frames,
+    )
 
 
 def install_action(object_: Any, action: Any) -> None:
@@ -185,22 +299,27 @@ def main() -> None:
     ]
     objects = {name: require_object(name) for name in names}
     static_names = {"parent_frame", "static_trs", "static_matrix"}
-    static = {
+    static: dict[str, StaticTransform] = {
         name: object_transform(objects[name]) for name in names if name in static_names
     }
 
     origin = objects["source_axis_origin"].matrix_world.translation.copy()
-    axis_images = {
-        axis: [
+
+    def axis_image(axis: str) -> list[float]:
+        return [
             float(component)
             for component in (
                 objects[f"source_axis_{axis}"].matrix_world.translation.copy() - origin
             )
         ]
-        for axis in "xyz"
-    }
 
-    animations = []
+    axis_images = AxisImages(
+        x=axis_image("x"),
+        y=axis_image("y"),
+        z=axis_image("z"),
+    )
+
+    animations: list[AnimationObservation] = []
     for interpolation, node_name, action_name in (
         ("STEP", "animated_step", "rotation_step"),
         ("LINEAR", "animated_linear", "rotation_linear"),
@@ -214,10 +333,7 @@ def main() -> None:
             )
         install_action(object_, action)
         curves = action_curves(action)
-        curve_frames = curves["key_frames"]
-        fcurves = {
-            name: values for name, values in curves.items() if name != "key_frames"
-        }
+        curve_frames = curves.key_frames
         time_values = sorted(
             {frame * scene.render.fps_base / scene.render.fps for frame in curve_frames}
         )
@@ -245,26 +361,26 @@ def main() -> None:
                 ("key-1", t1),
                 ("key-2", t2),
             ]
-        sample_rows = []
+        sample_rows: list[AnimationSample] = []
         for sample_name, sample_time in samples:
             set_scene_time(scene, sample_time)
             evaluated = object_.evaluated_get(bpy.context.evaluated_depsgraph_get())
             sample_rows.append(
-                {
-                    "sample": sample_name,
-                    "time_seconds": sample_time,
-                    "quaternion_wxyz": quaternion_wxyz(evaluated.rotation_quaternion),
-                }
+                AnimationSample(
+                    sample=sample_name,
+                    time_seconds=sample_time,
+                    quaternion_wxyz=quaternion_wxyz(evaluated.rotation_quaternion),
+                )
             )
         animations.append(
-            {
-                "interpolation": interpolation,
-                "action_name": action.name,
-                "target_object": object_.name,
-                "key_times_seconds_from_imported_fcurves": time_values,
-                "fcurves": fcurves,
-                "samples": sample_rows,
-            }
+            AnimationObservation(
+                interpolation=interpolation,
+                action_name=action.name,
+                target_object=object_.name,
+                key_times_seconds_from_imported_fcurves=time_values,
+                fcurves=curves.summary,
+                samples=sample_rows,
+            )
         )
         object_.animation_data.action = None
 
@@ -282,63 +398,67 @@ def main() -> None:
         for relative in importer_paths
         if (importer_root / relative).exists()
     }
-    result = {
-        "schema_version": "1.0",
-        "evidence_kind": "native_blender_gltf_importer_capture",
-        "transport": {
-            "name": "glTF",
-            "version": "2.0",
-            "source_coordinates": (
+    result = BlenderGltfCapture(
+        schema_version="1.0",
+        evidence_kind="native_blender_gltf_importer_capture",
+        transport=GltfTransport(
+            name="glTF",
+            version="2.0",
+            source_coordinates=(
                 "glTF specification right-handed Y-up; target axis conversion "
                 "measured by explicit translation probes"
             ),
-        },
-        "loader": {
-            "name": "Blender glTF importer",
-            "version": bpy.app.version_string,
-            "version_tuple": list(bpy.app.version),
-            "build_hash": text_value(bpy.app.build_hash),
-            "build_date": text_value(bpy.app.build_date),
-            "build_platform": text_value(bpy.app.build_platform),
-            "python_version": sys.version,
-            "executable": str(executable),
-            "executable_sha256": sha256_file(executable),
-            "importer_source_root": str(importer_root),
-            "importer_source_sha256": importer_sources,
-            "rotation_component_order": "WXYZ in mathutils Quaternion; outputs labelled explicitly",
-        },
-        "provenance": {
-            "gltf_sha256": sha256_file(asset_path),
-            "binary_sha256": sha256_file(asset_binary),
-            "exporter_sha256": sha256_file(Path(__file__)),
-            "exact_invocation": (
+        ),
+        loader=BlenderLoader(
+            name="Blender glTF importer",
+            version=bpy.app.version_string,
+            version_tuple=list(bpy.app.version),
+            build_hash=text_value(bpy.app.build_hash),
+            build_date=text_value(bpy.app.build_date),
+            build_platform=text_value(bpy.app.build_platform),
+            python_version=sys.version,
+            executable=str(executable),
+            executable_sha256=sha256_file(executable),
+            importer_source_root=str(importer_root),
+            importer_source_sha256=importer_sources,
+            rotation_component_order=(
+                "WXYZ in mathutils Quaternion; outputs labelled explicitly"
+            ),
+        ),
+        provenance=CaptureProvenance(
+            gltf_sha256=sha256_file(asset_path),
+            binary_sha256=sha256_file(asset_binary),
+            exporter_sha256=sha256_file(Path(__file__)),
+            exact_invocation=(
                 "blender --background --factory-startup --python-exit-code 1 "
                 "--python capture_gltf.py -- --asset <rotation_transport.gltf> "
                 "--output <native_blender_gltf.json>"
             ),
-            "operator_arguments": {"filepath": asset_path.name},
-            "other_operator_properties": "Blender 5.1.2 importer defaults",
-            "captured_at_utc": datetime.now(timezone.utc).isoformat(),
-        },
-        "scene": {
-            "fps": scene.render.fps,
-            "fps_base": scene.render.fps_base,
-            "frame_start": scene.frame_start,
-            "frame_end": scene.frame_end,
-            "unit_settings": {
-                "system": scene.unit_settings.system,
-                "scale_length": scene.unit_settings.scale_length,
-                "system_rotation": scene.unit_settings.system_rotation,
-            },
-        },
-        "observations": {
-            "static_transforms": static,
-            "source_translation_axis_images_in_blender_xyz": axis_images,
-            "animations": animations,
-        },
-    }
+            operator_arguments=OperatorArguments(filepath=asset_path.name),
+            other_operator_properties="Blender 5.1.2 importer defaults",
+            captured_at_utc=datetime.now(timezone.utc).isoformat(),
+        ),
+        scene=SceneSettings(
+            fps=scene.render.fps,
+            fps_base=scene.render.fps_base,
+            frame_start=scene.frame_start,
+            frame_end=scene.frame_end,
+            unit_settings=SceneUnitSettings(
+                system=scene.unit_settings.system,
+                scale_length=scene.unit_settings.scale_length,
+                system_rotation=scene.unit_settings.system_rotation,
+            ),
+        ),
+        observations=GltfObservations(
+            static_transforms=static,
+            source_translation_axis_images_in_blender_xyz=axis_images,
+            animations=animations,
+        ),
+    )
     output_path.write_text(
-        json.dumps(result, indent=2) + "\n", encoding="utf-8", newline="\n"
+        json.dumps(asdict(result), indent=2, allow_nan=False) + "\n",
+        encoding="utf-8",
+        newline="\n",
     )
     print(
         json.dumps(
@@ -346,7 +466,7 @@ def main() -> None:
                 "output": str(output_path),
                 "blender": bpy.app.version_string,
                 "animations": len(animations),
-                "axis_images": axis_images,
+                "axis_images": asdict(axis_images),
             }
         )
     )

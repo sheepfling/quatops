@@ -16,9 +16,9 @@ forward, or active/passive transform meaning.
 | Blender `mathutils.Quaternion` | Hamilton WXYZ | [Blender](blender.md) |
 
 The [coordinate-mapping page](coordinate-mapping.md) gives the shared basis
-math. The [CAP-300 contract](CAP-300.md) explains the release gate and the
-[proof matrix](proof-matrix.md) links each selected versioned native witness
-set. Capture exporters and rerun instructions are indexed in
+math. The [proof matrix](proof-matrix.md) links each selected versioned native
+witness set and summarizes the shared validation method. Capture exporters
+and rerun instructions are indexed in
 [`experiments/README.md`](../../experiments/README.md). The common
 frame-labelled scalar and NumPy converter front, including other target
 boundaries, is documented in the [converter guide](../converters.md).

@@ -12,6 +12,7 @@ import unittest
 from pathlib import Path
 
 from tests.support.paths import REPOSITORY_ROOT
+from tests.support.provenance_archives import read_provenance_source
 
 BUILDER = REPOSITORY_ROOT / "experiments/transports/gltf/2.0.0/assets/build_asset.py"
 SPEC = importlib.util.spec_from_file_location("gltf_asset_builder", BUILDER)
@@ -40,9 +41,12 @@ class GltfAssetBuilderTests(unittest.TestCase):
             blender_contract["provenance"]["capture_source"],
             blender_history["capture_source_archive"],
         )
-        archive = REPOSITORY_ROOT / blender_history["capture_source_archive"]
         self.assertEqual(
-            hashlib.sha256(archive.read_bytes()).hexdigest(),
+            hashlib.sha256(
+                read_provenance_source(
+                    REPOSITORY_ROOT, blender_history["capture_source_archive"]
+                )
+            ).hexdigest(),
             blender_history["capture_source_sha256"],
         )
         source = REPOSITORY_ROOT / blender["reproduction"]["capture_source"]
@@ -67,15 +71,19 @@ class GltfAssetBuilderTests(unittest.TestCase):
         self.assertEqual(
             native["provenance"]["exporter_sha256"], gltf_history["exporter_sha256"]
         )
-        archive = REPOSITORY_ROOT / gltf_history["exporter_archive"]
         self.assertEqual(
-            hashlib.sha256(archive.read_bytes()).hexdigest(),
+            hashlib.sha256(
+                read_provenance_source(REPOSITORY_ROOT, gltf_history["exporter_archive"])
+            ).hexdigest(),
             gltf_history["exporter_sha256"],
         )
         for field in ("capture_source", "asset_builder_source"):
-            source = REPOSITORY_ROOT / gltf["reproduction"][field]
             self.assertEqual(
-                hashlib.sha256(source.read_bytes()).hexdigest(),
+                hashlib.sha256(
+                    read_provenance_source(
+                        REPOSITORY_ROOT, gltf["reproduction"][field]
+                    )
+                ).hexdigest(),
                 gltf["reproduction"][f"{field}_sha256"],
             )
 

@@ -35,6 +35,7 @@
   ],
   "provenance": {
     "capture_script_sha256": "ce6df5cbbbb0983633e7ee64df2b39219b7c8e1a69731a480b152f780fda499b",
+    "capture_script_archive": "experiments/provenance/reproduction-v1.zip#opencv-4.13.0/capture_native.py",
     "prepared_inputs_sha256": "81dae4a755dba80a2a432925ff09a7d32690f6bd9ba22e6e16c5e4ed23212d2e",
     "preparation_script_sha256": "d48c5017e46355a72fdf4ce96b1a66c8c78779ecbd15edb4b3a430de46c6ac92",
     "preparation_spec_sha256": "9f17f3eafd3186d3460488eff91e0f50771f2ee7c5e6d42409b1e93df5fc084e",
@@ -45,10 +46,14 @@
     "invocation_template": "python experiments/converters/opencv/4.13.0/prepare_inputs.py --output <temporary inputs.json>; then run capture_native.py --inputs <temporary inputs.json>"
   },
   "reproduction": {
-    "capture_script_sha256": "34131beae7c2e98b6029f6db1a01e9e19571a6325194967e7ba624e6e1546c93",
+    "capture_script_sha256": "cf26f6deaa8ba40f54f6013124d7286f2bc67b44e647298cb6e4626695c0865f",
     "previous_checkout_capture_script_sha256": "ce6df5cbbbb0983633e7ee64df2b39219b7c8e1a69731a480b152f780fda499b",
-    "preparation_script_sha256": "d48c5017e46355a72fdf4ce96b1a66c8c78779ecbd15edb4b3a430de46c6ac92",
+    "preparation_script_sha256": "b46f9bbb0f7422d7b940cab33682443be84225335d270be5ac323a7396e3368d",
     "lockfile_sha256": "8288ebf7e36753cc45b10f2fa0594bd5b55aee6b6405055ee8f8a972ce6ac9bf",
     "capture_script_identity_note": "The reproduction script now uses equivalent list extension; provenance.capture_script_sha256 preserves the historical producer used for the retained capture."
+  },
+  "semantic_contract": {
+    "file": "experiments/converters/opencv/4.13.0/semantic_contract.json",
+    "sha256": "e79649ea9c6fdecc4111ea311c74b66419fb0fc2796727cafa31405788456af2"
   }
 }

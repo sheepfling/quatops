@@ -19,6 +19,10 @@ from pydantic import (
 )
 
 from scripts.evidence_format import dump_evidence_json
+from scripts.evidence_json import read_evidence_document
+from scripts.evidence_schema.primitives import SemanticContractReference
+from scripts.evidence_schema.sophus import SophusScalarProfile, SophusSemanticConfig
+from scripts.evidence_schema.utilities import sha256_file
 
 _CONSTRUCTION_CASES = (
     "identity",
@@ -331,6 +335,43 @@ class DiscoveryWitnesses(StrictModel):
     perturbation_side: tuple[RotationWitness, RotationWitness]
 
 
+def load_semantic_config() -> SophusSemanticConfig:
+    """Load the experiment-owned contract only when its manifest hash agrees."""
+    package_dir = Path(__file__).resolve().parent
+    repository_root = package_dir.parents[3]
+    config_path = package_dir / "semantic_contract.json"
+    manifest = read_evidence_document(package_dir / "manifest.json")
+    reference = SemanticContractReference.model_validate(
+        manifest.get("semantic_contract"), strict=True
+    )
+    if reference.file != config_path.relative_to(repository_root).as_posix():
+        raise ValueError("manifest semantic contract points outside this experiment")
+    if sha256_file(config_path) != reference.sha256:
+        raise ValueError("experiment semantic contract hash differs from manifest")
+    return SophusSemanticConfig.model_validate(
+        read_evidence_document(config_path), strict=True
+    )
+
+
+def profile_for_capture(
+    config: SophusSemanticConfig, capture: NativeCapture
+) -> SophusScalarProfile:
+    """Resolve the scalar profile and verify the fixture-owned probe frame."""
+    if capture.probe_xyz != tuple(config.probe_xyz):
+        raise ValueError("native capture probe differs from the experiment contract")
+    profile = next(
+        (
+            item
+            for item in config.scalar_profiles
+            if item.capture_target == capture.target
+        ),
+        None,
+    )
+    if profile is None:
+        raise ValueError(f"semantic config has no profile for {capture.target!r}")
+    return profile
+
+
 def _rotation_witness(
     rotation: NativeRotation,
     *,
@@ -345,8 +386,11 @@ def _rotation_witness(
     )
 
 
-def reduce_capture(capture_bytes: bytes) -> DiscoveryWitnesses:
+def reduce_capture(
+    capture_bytes: bytes, config: SophusSemanticConfig
+) -> DiscoveryWitnesses:
     capture = NativeCapture.model_validate_json(capture_bytes, strict=True)
+    profile = profile_for_capture(config, capture)
     constructors = {item.case_id: item for item in capture.quaternion_construction}
     exp_log = {item.case_id: item for item in capture.exp_log}
     compositions = {item.case_id: item for item in capture.composition}
@@ -357,12 +401,8 @@ def reduce_capture(capture_bytes: bytes) -> DiscoveryWitnesses:
     return DiscoveryWitnesses(
         schema_version="1.0",
         evidence_kind="selected_native_discovery_witnesses",
-        target=(
-            "Sophus 1.24.6 SO3f / Eigen 5.0.1"
-            if capture.target == "Sophus SO3f"
-            else "Sophus 1.24.6 SO3d / Eigen 5.0.1"
-        ),
-        probe_frame="+X right, +Y forward, +Z up; right-handed",
+        target=profile.witness_target,
+        probe_frame=config.probe_frame.description,
         probe_xyz=capture.probe_xyz,
         raw_capture_sha256=hashlib.sha256(capture_bytes).hexdigest(),
         quaternion_construction_columns=(
@@ -446,9 +486,10 @@ def main() -> None:
     parser.add_argument("--capture", required=True, type=Path)
     parser.add_argument("--output", required=True, type=Path)
     args = parser.parse_args()
+    config = load_semantic_config()
     capture_path = args.capture.resolve()
     output_path = args.output.resolve()
-    selected = reduce_capture(capture_path.read_bytes())
+    selected = reduce_capture(capture_path.read_bytes(), config)
     output_path.parent.mkdir(parents=True, exist_ok=True)
     output_path.write_text(
         _format_witnesses(selected),

@@ -28,8 +28,12 @@ reference = ["numpy>=1.20", "scipy>=1.18; python_version >= '3.12'"]
 dev = ["pyright[nodejs]==1.1.414", "pytest>=7", "ruff>=0.8"]
 
 [tool.uv]
+# PEP 621 extras above remain portable metadata; this UV-only declaration
+# resolves the intentionally incompatible native NumPy pins together.
 conflicts = [[{ extra = "mujoco" }, { extra = "opencv" }]]
 
+# The native capture package consumes this checkout's scripts without publishing
+# them as a second distribution.
 [tool.uv.sources]
 quatops = { path = "..", editable = true }
 

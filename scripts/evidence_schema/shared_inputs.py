@@ -12,6 +12,7 @@ from scripts.evidence_schema.crystallized import (
     CanonicalInputs,
     CanonicalOrientationInput,
     CoordinateFrame,
+    canonical_source_frame_semantics,
 )
 from scripts.evidence_schema.primitives import (
     FiniteInputNumber,
@@ -184,6 +185,7 @@ def crystallize_shared_inputs(capture: SharedCanonicalInputCapture) -> Canonical
             positive_y=capture.source_frame.positive_y,
             positive_z=capture.source_frame.positive_z,
         ),
+        source_frame_semantics=canonical_source_frame_semantics(),
         orientations=[
             CanonicalOrientationInput(
                 case_id=row.case_id,

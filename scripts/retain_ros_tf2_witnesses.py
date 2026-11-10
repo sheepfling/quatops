@@ -12,6 +12,7 @@ from scripts.evidence_json import (
     parse_evidence_document,
     read_evidence_document,
 )
+from scripts.evidence_schema.converter_captures import Ros2Contract
 
 
 def sha256(path: Path) -> str:
@@ -105,90 +106,27 @@ def main() -> None:
         dump_evidence_json(witnesses), encoding="utf-8", newline="\n"
     )
 
-    maps = {
-        "canonical_axes": {
-            "handedness": "right",
-            "positive_x": "right/east",
-            "positive_y": "forward/north",
-            "positive_z": "up",
-        },
-        "ros_world_from_canonical_world": ["x", "y", "z"],
-        "ros_base_from_canonical_base": ["y", "-x", "z"],
-        "ros_sensor_optical_from_canonical_sensor": ["x", "-z", "y"],
-        "interpretation": (
-            "Each signed-axis map maps canonical frame-coordinate components "
-            "into the named ROS frame. The maps are fixture declarations, not "
-            "inferred from frame IDs."
-        ),
-    }
-    contract = {
-        "contract_id": "quatops-ros2-tf2-frame-chain-v1",
-        "target": {
-            "name": "ROS 2 tf2",
-            "distro": "jazzy",
-            "tf2_version": manifest["product"]["version"],
-            "native_scalar_bytes": native["native_scalar_bytes"],
-            "native_scalar_dtype": "float64",
-        },
-        "native_api": [
-            "tf2::BufferCore::setTransform",
-            "tf2::BufferCore::lookupTransform",
-            "tf2::Transform",
-            "geometry_msgs/msg/TransformStamped",
-            "tf2::fromMsg",
-        ],
-        "rotation": {
-            "algebra": "Hamilton",
-            "native_order": "xyzw",
-            "action": "active source-point to target-point transform",
-            "units": "radians",
-        },
-        "frames": maps,
-        "frame_direction": (
-            "lookupTransform(target, source) returns target_from_source; its "
-            "rotation and translation map source point coordinates into target "
-            "coordinates"
-        ),
-        "conversion": (
-            "For each edge, convert native target_from_source quaternion with "
-            "QuaternionFrameMap(world_map=target_map, "
-            "body_map=source_map).from_destination_wxyz(); map "
-            "translation with target_map.inverse().vector(). Compose labelled "
-            "edges world_from_base and base_from_sensor in that order."
-        ),
-        "inverse_conversion": (
-            "Apply the same operation to the reverse lookup using its declared "
-            "target/source maps; equivalently invert the canonical forward "
-            "rigid transform."
-        ),
-        "input_domain": (
-            "unit rotations, finite translations, static transforms at one "
-            "exact timestamp; native double tf2Scalar"
-        ),
-        "scope": [
-            "named-frame direction",
-            "two-edge noncommuting chain",
-            "both lookup directions",
-            "TransformStamped message fields and fromMsg round trip",
-            "point action",
-        ],
-        "exclusions": [
-            "DDS/CDR wire encoding",
-            "live network",
-            "time interpolation/extrapolation",
-            "dynamic broadcasters",
-            "CovarianceStamped",
-            "ROS model-forward assumptions",
-        ],
-        "native_witnesses": "witnesses.json",
-    }
+    contract_path = package_dir / "semantic_contract.json"
+    contract = Ros2Contract.model_validate(
+        read_evidence_document(contract_path), strict=True
+    )
+    if contract.target.tf2_version != manifest["product"]["version"]:
+        raise ValueError("ROS semantic contract and native capture versions differ")
+    if contract.target.native_scalar_bytes != native["native_scalar_bytes"]:
+        raise ValueError("ROS semantic contract and native scalar widths differ")
     (destination / "contract.json").write_text(
-        dump_evidence_json(contract), encoding="utf-8", newline="\n"
+        dump_evidence_json(contract.model_dump(mode="json")),
+        encoding="utf-8",
+        newline="\n",
     )
     (destination / "manifest.json").write_text(
         dump_evidence_json(
             {
                 "schema_version": "1.0",
+                "semantic_contract": {
+                    "file": contract_path.relative_to(repository_root).as_posix(),
+                    "sha256": sha256(contract_path),
+                },
                 "evidence_kind": "native_runtime_selected_witnesses",
                 "review_state": "native tf2 capture retained; QuatOps frame-chain replay passed",
                 "product": manifest["product"],

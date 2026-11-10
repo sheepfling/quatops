@@ -4,11 +4,13 @@ from __future__ import annotations
 
 from typing import Annotated, Literal, Optional
 
-from pydantic import Field, FiniteFloat
+from pydantic import Field, FiniteFloat, model_validator
 from typing_extensions import TypeAlias
 
 from scripts.evidence_schema import primitives
-from scripts.evidence_schema.primitives import NativeCaptureModel
+from scripts.evidence_schema.primitives import (
+    NativeCaptureModel,
+)
 
 # Keep the earlier OpenXR schema import surface while the shared helper lives
 # with the other scalar primitives.
@@ -66,3 +68,57 @@ class OpenXRVerifierSummary(NativeCaptureModel):
     chain_translation_max_abs_error_m: FiniteFloat
     chain_point_max_abs_error_m: FiniteFloat
     result: Literal["pass"]
+
+
+class OpenXRRelationCase(NativeCaptureModel):
+    """One declared target-in-base relation exercised by the fixture."""
+
+    observation: ObservationKey
+    target: InputKey
+    base: InputKey
+
+
+class OpenXRReferenceSpaceContract(NativeCaptureModel):
+    reference_space_type: Literal["LOCAL"]
+    handedness: Literal["right-handed"]
+    positive_x: Literal["right"]
+    positive_y: Literal["up"]
+    positive_z: Literal["back"]
+    origin: Literal["runtime-defined"]
+
+
+class OpenXRSemanticConfig(NativeCaptureModel):
+    """Experiment-owned OpenXR facts, separate from capture provenance."""
+
+    schema_version: Literal["1.0"]
+    evidence_status: Literal["declared_not_native_accepted"]
+    product: Literal["Khronos OpenXR SDK and SDK-Source test_runtime"]
+    version: Literal["1.1.65"]
+    api_version: Annotated[list[int], Field(min_length=3, max_length=3)]
+    quaternion_order: Literal["xyzw"]
+    quaternion_precision: Literal["binary32"]
+    position_units: Literal["metres"]
+    validation_tolerance: FiniteFloat
+    orientation_applied_before_translation: Literal[True]
+    locate_returns_target_pose_in_base: Literal[True]
+    reference_space: OpenXRReferenceSpaceContract
+    input_spaces: Annotated[list[InputKey], Field(min_length=3, max_length=3)]
+    relation_cases: Annotated[
+        list[OpenXRRelationCase], Field(min_length=3, max_length=3)
+    ]
+
+    @model_validator(mode="after")
+    def relation_cases_are_consistent(self) -> OpenXRSemanticConfig:
+        if len(set(self.input_spaces)) != len(self.input_spaces):
+            raise ValueError("OpenXR semantic config repeats an input space")
+        if len({case.observation for case in self.relation_cases}) != len(
+            self.relation_cases
+        ):
+            raise ValueError("OpenXR semantic config repeats a relation case")
+        input_spaces = set(self.input_spaces)
+        for case in self.relation_cases:
+            if case.base not in input_spaces or case.target not in input_spaces:
+                raise ValueError("OpenXR relation refers to an undeclared input space")
+            if case.observation != f"{case.base}_from_{case.target}":
+                raise ValueError("OpenXR relation key disagrees with target/base order")
+        return self

@@ -17,7 +17,7 @@ import numpy as np
 from prepare_inputs import PreparedOpenCVInputs
 
 from scripts.evidence_json import dump_evidence_json
-from scripts.evidence_schema.targets import (
+from scripts.evidence_schema.converter_captures import (
     OpenCVCapture,
     OpenCVComposition,
     OpenCVObservations,
@@ -153,6 +153,8 @@ def main() -> None:
 
     output = output_dir.resolve()
     output.mkdir(parents=True, exist_ok=True)
+    semantic_contract_path = target_dir / "semantic_contract.json"
+    (output / "contract.json").write_bytes(semantic_contract_path.read_bytes())
     witnesses_path = output / "witnesses.json"
     witnesses = OpenCVCapture(
         schema_version="1.0",
@@ -183,6 +185,12 @@ def main() -> None:
         raise RuntimeError(f"No OpenCV native extension or DLL found under {cv2_path}")
     manifest = {
         "schema_version": "1.0",
+        "semantic_contract": {
+            "file": (target_dir / "semantic_contract.json")
+            .relative_to(repository_root)
+            .as_posix(),
+            "sha256": sha256_file(target_dir / "semantic_contract.json"),
+        },
         "review_state": "Pinned native OpenCV converter capture; replay acceptance is recorded by repository tests",
         "execution": {
             "was_run": True,

@@ -8,7 +8,7 @@
   "historical_capture": {
     "capture_source": "experiments/blender/5.1.2/capture.py",
     "capture_source_sha256": "f61b09cbed8fe6ce3f0615745bd438d168a552d184558f8d6fc78b849e093cc4",
-    "capture_source_archive": "experiments/provenance/reproduction-v1/blender-5.1.2-capture.py.txt"
+    "capture_source_archive": "experiments/provenance/reproduction-v1.zip#blender-5.1.2-capture.py"
   },
   "reproduction": {
     "capture_source": "experiments/blender/5.1.2/capture.py",

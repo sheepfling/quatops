@@ -4,6 +4,13 @@ This product keeps the OpenXR pose contract, the pinned header ABI probe, and
 one small native test-runtime frame-chain witness. Source pins, run details,
 and artifact hashes are in [`manifest.json`](manifest.json).
 
+The experiment-owned [`semantic_contract.json`](semantic_contract.json)
+records the versioned pose facts, LOCAL-space declaration, and target/base
+relations exercised by the fixture. The verifier loads it through a strict
+Pydantic model and checks its manifest SHA-256 before interpreting capture
+fields. This package remains declared evidence, not a native-accepted QuatOps
+converter.
+
 ## Captured contract
 
 The SDK header probe records the size and field offsets of `XrQuaternionf` and

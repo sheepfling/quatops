@@ -1,0 +1,50 @@
+{
+  "schema_version": "1.0",
+  "contract_id": "quatops-opencv-4.13.0-rodrigues-boundary-v1",
+  "target": {
+    "name": "OpenCV",
+    "version": "4.13.0",
+    "interface": "cv2.Rodrigues and cv2.gemm",
+    "scalar_profiles": ["float32", "float64"]
+  },
+  "canonical": {
+    "algebra": "Hamilton",
+    "coefficient_order": "WXYZ",
+    "rotation_action": "active: q * (0, v) * conjugate(q)",
+    "matrix_action": "column vectors",
+    "handedness": "right-handed",
+    "normalization": "unit quaternion",
+    "frame": {
+      "positive_x": "right",
+      "positive_y": "forward",
+      "positive_z": "up"
+    }
+  },
+  "target_boundary": {
+    "representation": "3D rotation vector: direction is axis and norm is angle in radians",
+    "rotation_vector_from_canonical": "QuatOps Hamilton to_rotation_vector(q); supplied as 3x1 to cv2.Rodrigues",
+    "native_matrix_action": "cv2.gemm(R, vector_column, alpha=1, beta=0)",
+    "native_to_canonical": "cv2.Rodrigues(matrix) gives a rotation vector; QuatOps from_rotation_vector returns the canonical quaternion",
+    "coordinate_map": ["x", "y", "z"],
+    "probe_frame_assignment": {
+      "positive_x": "right",
+      "positive_y": "forward",
+      "positive_z": "up",
+      "meaning": "explicit numeric test frame for this matrix boundary; no camera or world frame is inferred"
+    },
+    "matrix_layout": "3x3 matrix rows returned by cv2.Rodrigues; matrix multiplies column vectors"
+  },
+  "scope": [
+    "canonical quaternion to rotation vector to native Rodrigues matrix",
+    "native cv2.gemm action on three basis vectors and one asymmetric probe",
+    "native matrix-to-rotation-vector inverse route and QuatOps reconstruction",
+    "native noncommuting matrix composition in both operand orders",
+    "binary32 and binary64 OpenCV arrays"
+  ],
+  "excludes": [
+    "OpenCV C++ cv::Quat algebra",
+    "camera/world extrinsics, solvePnP, and application-specific frame direction",
+    "Rodrigues Jacobian or differential adapter claims",
+    "principal-vector coefficient equality at half-turn branches"
+  ]
+}

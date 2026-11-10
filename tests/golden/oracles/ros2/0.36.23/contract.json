@@ -23,8 +23,8 @@
   "frames": {
     "canonical_axes": {
       "handedness": "right",
-      "positive_x": "right/east",
-      "positive_y": "forward/north",
+      "positive_x": "right",
+      "positive_y": "forward",
       "positive_z": "up"
     },
     "ros_world_from_canonical_world": ["x", "y", "z"],

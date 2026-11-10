@@ -10,13 +10,14 @@
     "positive_y": "forward",
     "positive_z": "up"
   },
-  "asset_frame": {
+  "probe_frame": {
     "handedness": "right",
     "positive_x": "right",
     "positive_y": "up",
     "positive_z": "backward",
     "forward": "-Z"
   },
+  "frame_role_note": "Caller-assigned camera-like probe basis; not a glTF asset-front or camera-role conversion.",
   "destination_axes_from_source": ["x", "z", "-y"],
   "transform_semantics": "node local to parent; world = parent world * child local; column-vector action",
   "scope": [

@@ -2,13 +2,13 @@
 
 from __future__ import annotations
 
-from pathlib import Path
-from typing import Any, Optional, Union
+from pathlib import Path, PurePosixPath
+from typing import Optional, Union
 
 from pydantic import BaseModel, ConfigDict, Field, JsonValue
 
 from scripts.evidence_json import read_evidence_document
-from scripts.evidence_schema.targets import (
+from scripts.evidence_schema.converter_captures import (
     CesiumCapture,
     CesiumContract,
     CesiumInputs,
@@ -36,6 +36,8 @@ from scripts.evidence_schema.targets import (
     ThreeGltfContract,
     ThreeGltfInputs,
 )
+from scripts.evidence_schema.primitives import SemanticContractReference
+from scripts.evidence_schema.utilities import sha256_file
 
 _VERSION_FIELDS = (
     "version",
@@ -74,6 +76,7 @@ class ConverterEvidencePackage(BaseModel):
     target_capture: TargetCapture
     manifest: dict[str, JsonValue]
     observation_group_count: int
+    contract_source_path: Path = Field(exclude=True)
     inputs_source_path: Optional[Path] = Field(default=None, exclude=True)  # noqa: UP045
 
 
@@ -133,7 +136,7 @@ _INPUT_DOCUMENT_PATHS = {
 
 
 def _target_capture(
-    name: str, document: dict[str, Any], *, directory: Path
+    name: str, document: dict[str, JsonValue], *, directory: Path
 ) -> TargetCapture:
     model = _CAPTURE_MODELS.get(name)
     if model is None:
@@ -141,7 +144,7 @@ def _target_capture(
     return model.model_validate(document, strict=True)
 
 
-def _target_contract(name: str, document: dict[str, Any], *, directory: Path):
+def _target_contract(name: str, document: dict[str, JsonValue], *, directory: Path):
     model = _CONTRACT_MODELS.get(name)
     if model is None:
         raise ValueError(f"{directory}: unsupported typed contract target {name!r}")
@@ -149,7 +152,7 @@ def _target_contract(name: str, document: dict[str, Any], *, directory: Path):
 
 
 def _target_inputs(
-    name: str, document: dict[str, Any], *, directory: Path
+    name: str, document: dict[str, JsonValue], *, directory: Path
 ) -> TargetInputs:
     model = _INPUT_MODELS.get(name)
     if model is None:
@@ -176,7 +179,7 @@ def converter_fixture_directories(root: Path) -> list[Path]:
     )
 
 
-def _target_identity(manifest: dict[str, Any]) -> ConverterEvidenceTarget:
+def _target_identity(manifest: dict[str, JsonValue]) -> ConverterEvidenceTarget:
     raw_target = manifest.get("target")
     if not isinstance(raw_target, dict):
         raw_target = manifest.get("product")
@@ -197,6 +200,9 @@ def _target_identity(manifest: dict[str, Any]) -> ConverterEvidenceTarget:
     )
     if version_field is None:
         raise ValueError(f"manifest target {name!r} must declare a version")
+    version = raw_target[version_field]
+    if not isinstance(version, str) or not version:
+        raise ValueError(f"manifest target {name!r} must declare a string version")
 
     details = {
         key: value
@@ -205,7 +211,7 @@ def _target_identity(manifest: dict[str, Any]) -> ConverterEvidenceTarget:
     }
     return ConverterEvidenceTarget(
         name=name,
-        version=raw_target[version_field],
+        version=version,
         details=details,
     )
 
@@ -228,7 +234,42 @@ def load_converter_evidence(
         read_evidence_document(inputs_path) if inputs_path.is_file() else None
     )
     inputs_source_path = inputs_path.resolve() if inputs_document is not None else None
-    contract = _target_contract(target.name, contract_document, directory=directory)
+    retained_contract = _target_contract(
+        target.name, contract_document, directory=directory
+    )
+    contract_reference = SemanticContractReference.model_validate(
+        manifest.get("semantic_contract"), strict=True
+    )
+    relative_contract_path = PurePosixPath(contract_reference.file)
+    if (
+        relative_contract_path.is_absolute()
+        or ".." in relative_contract_path.parts
+        or "\\" in contract_reference.file
+    ):
+        raise ValueError(
+            f"{directory}: semantic contract path must be repository-relative"
+        )
+    normalized_root = repository_root.resolve()
+    semantic_contract_path = (
+        normalized_root / Path(*relative_contract_path.parts)
+    ).resolve(strict=True)
+    try:
+        semantic_contract_path.relative_to(normalized_root)
+    except ValueError as error:
+        raise ValueError(
+            f"{directory}: semantic contract path escapes the repository"
+        ) from error
+    if sha256_file(semantic_contract_path) != contract_reference.sha256:
+        raise ValueError(f"{directory}: semantic contract digest differs from manifest")
+    semantic_contract_document = read_evidence_document(semantic_contract_path)
+    contract = _target_contract(
+        target.name, semantic_contract_document, directory=semantic_contract_path
+    )
+    if retained_contract != contract:
+        raise ValueError(
+            f"{directory}: retained contract differs from experiment-owned "
+            f"semantic contract {semantic_contract_path}"
+        )
     contract_id = getattr(contract, "contract_id", None)
     if not isinstance(contract_id, str) or not contract_id:
         raise ValueError(f"{directory}: contract must declare contract_id")
@@ -261,7 +302,6 @@ def load_converter_evidence(
     ):
         raise ValueError(f"{directory}: contract and manifest target names differ")
 
-    normalized_root = repository_root.resolve()
     return ConverterEvidencePackage(
         fixture_directory=directory.relative_to(normalized_root).as_posix(),
         schema_version=schema_version,
@@ -273,5 +313,6 @@ def load_converter_evidence(
         target_capture=capture,
         manifest=manifest,
         observation_group_count=_observation_group_count(capture),
+        contract_source_path=semantic_contract_path.resolve(),
         inputs_source_path=inputs_source_path,
     )

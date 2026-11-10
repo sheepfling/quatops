@@ -29,3 +29,9 @@ The capture project and exact rerun commands are documented in
 This contract covers quaternion coefficient and physical-action conversion. It
 does not claim an Euler adapter, transform/asset import behavior, or a default
 model axis.
+
+The registered `unreal.world-axes` role is sourced from Epic's
+[Unreal Engine 5.7 Coordinate System and Spaces documentation](https://dev.epicgames.com/documentation/en-us/unreal-engine/coordinate-system-and-spaces-in-unreal-engine?application_version=5.7),
+which defines the Editor axes as +X forward, +Y right, and +Z up and identifies
+that coordinate system as left-handed. Project-specific coordinate spaces and
+asset-local axes still require their own declarations.

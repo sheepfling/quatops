@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from types import MappingProxyType
+
 import pytest
 from pydantic import ValidationError
 
@@ -9,25 +11,27 @@ from scripts.converter_evidence import (
     converter_fixture_directories,
     load_converter_evidence,
 )
+from scripts.evidence_schema.converter_captures import EigenInputs, EigenOrientation
 from scripts.evidence_schema.crystallized import (
     CrystallizedEvidence,
     EvidenceProduct,
     FrameChainContract,
+    FrameChainWitness,
     GeographicContract,
+    NativeQuaternionApiSerialization,
     QuaternionBoundaryContract,
     RotationVectorBoundaryContract,
     SceneTransportContract,
 )
-from scripts.evidence_schema.engine_product import ENGINE_VERSIONS, load_engine_package
+from scripts.evidence_schema.engine_evidence import ENGINE_VERSIONS, load_engine_package
 from scripts.evidence_schema.product import (
     build_evidence_product,
     render_evidence_product,
 )
-from scripts.evidence_schema.targets import EigenInputs, EigenOrientation
 from tests.support.paths import REPOSITORY_ROOT
 
 ROOT = REPOSITORY_ROOT
-EXPECTED_WITNESS_COUNTS = {
+EXPECTED_WITNESS_COUNTS = MappingProxyType({
     ("Unreal Engine", "5.7.4"): 18,
     ("Unity Editor", "6000.5.2f1"): 9,
     ("Godot Engine", "4.7-stable"): 9,
@@ -41,7 +45,7 @@ EXPECTED_WITNESS_COUNTS = {
     ("CesiumJS", "1.124.0"): 5,
     ("Three.js GLTFLoader", "0.187.0"): 2,
     ("OpenUSD", "26.11"): 3,
-}
+})
 
 
 def test_target_specific_captures_reduce_to_reproducible_compact_product():
@@ -115,6 +119,34 @@ def test_target_specific_captures_reduce_to_reproducible_compact_product():
     ]
     assert isinstance(records[("CesiumJS", "1.124.0")].contract, GeographicContract)
     assert isinstance(records[("OpenUSD", "26.11")].contract, SceneTransportContract)
+
+
+def test_concrete_serialization_rejects_mismatched_layer_and_witness_family():
+    product = build_evidence_product(ROOT)
+    records = {(row.target.product, row.target.version): row for row in product.records}
+    witness_sets = {row.witness_set_id: row for row in product.witness_sets}
+    eigen_record = records[("Eigen", "5.0.1")]
+    eigen_witnesses = witness_sets[eigen_record.witness_set_id].witnesses
+    orientation = next(row for row in eigen_witnesses if row.kind == "orientation")
+    ros_record = records[("ROS 2 tf2", "0.36.23")]
+    frame_chain = witness_sets[ros_record.witness_set_id].witnesses[0]
+
+    assert isinstance(eigen_record.contract, QuaternionBoundaryContract)
+    assert isinstance(frame_chain, FrameChainWitness)
+    serialization = NativeQuaternionApiSerialization(
+        layer="native-quaternion-api",
+        contract=eigen_record.contract,
+        witnesses=[orientation],
+    )
+    payload = serialization.model_dump(mode="python")
+    payload["layer"] = "engine-quaternion"
+    with pytest.raises(ValidationError):
+        NativeQuaternionApiSerialization.model_validate(payload, strict=True)
+
+    payload = serialization.model_dump(mode="python")
+    payload["witnesses"] = [frame_chain.model_dump(mode="python")]
+    with pytest.raises(ValidationError):
+        NativeQuaternionApiSerialization.model_validate(payload, strict=True)
 
 
 def test_eigen_storage_view_is_typed_and_matches_native_accessors():

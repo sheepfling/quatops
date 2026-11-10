@@ -45,7 +45,7 @@ correction outside the quaternion-only map.
 
 ## Establish mathematical correctness
 
-The [SciPy oracle](../../tests/quatops/engines/test_engine_basis_oracle.py) independently
+The [SciPy oracle](../../tests/quatops/experimental/engines/test_engine_basis_oracle.py) independently
 constructs the basis matrix from the declared axes, obtains source rotation
 matrices from SciPy, and compares the result with `B R B^T`. It covers all 48
 signed axis permutations, Hamilton and JPL source values, both coefficient
@@ -62,7 +62,7 @@ choice explicit.
 Run the focused and complete suites when changing implementation code:
 
 ```sh
-.venv/bin/python -m pytest -q tests/quatops/engines/test_engine_basis_oracle.py
+.venv/bin/python -m pytest -q tests/quatops/experimental/engines/test_engine_basis_oracle.py
 .venv/bin/python -m pytest -q
 ```
 

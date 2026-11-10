@@ -14,7 +14,14 @@ from experiments.oracles.shared.capture_io import (
     Capture,
     Observation,
     contract,
-    numeric,
+)
+from scripts.evidence_schema.proj_capture import (
+    ProjCaptureContract,
+    ProjNativeInputs,
+    ProjNativeOutputs,
+    ProjNumericBasisImages,
+    ProjNumericVector3,
+    ProjObservation,
 )
 from scripts.evidence_schema.shared_inputs import GeographicInputCorpus
 
@@ -93,29 +100,56 @@ def main() -> None:
             for point in probes
         ]
         probe_readback = local.transform(*ecef_points[-1], errcheck=True)
+        typed_observation = ProjObservation(
+            case_id=item.case_id,
+            operation_id="geographic-enu-ecef",
+            native_entry_point=(
+                "pyproj.Transformer.from_crs(4979,4978); "
+                "from_pipeline(topocentric); transform"
+            ),
+            contract=ProjCaptureContract(
+                units="geographic degrees; Cartesian metres",
+                quaternion_order=None,
+                matrix_action="column vectors",
+                frame_direction="forward ECEF -> ENU; inverse ENU -> ECEF",
+            ),
+            native_inputs=ProjNativeInputs(),
+            native_outputs=ProjNativeOutputs(
+                origin_ecef_m=ProjNumericVector3(
+                    values=list(origin), dtype="binary64", shape=[3]
+                ),
+                enu_basis_endpoints_ecef_m=ProjNumericBasisImages(
+                    values=[list(point) for point in ecef_points[1:4]],
+                    dtype="binary64",
+                    shape=[3, 3],
+                ),
+                probe_endpoint_ecef_m=ProjNumericVector3(
+                    values=list(ecef_points[-1]), dtype="binary64", shape=[3]
+                ),
+                probe_roundtrip_local_xyz_m=ProjNumericVector3(
+                    values=list(probe_readback), dtype="binary64", shape=[3]
+                ),
+            ),
+            status="ok",
+            diagnostic=None,
+            schema_version="1.0",
+        )
         capture.add(
             Observation(
-                item.case_id,
-                "geographic-enu-ecef",
-                "pyproj.Transformer.from_crs(4979,4978); from_pipeline(topocentric); transform",
+                typed_observation.case_id,
+                typed_observation.operation_id,
+                typed_observation.native_entry_point,
                 contract(
-                    units="geographic degrees; Cartesian metres",
-                    frame="forward ECEF -> ENU; inverse ENU -> ECEF",
+                    units=typed_observation.contract.units,
+                    order=typed_observation.contract.quaternion_order,
+                    action=typed_observation.contract.matrix_action,
+                    frame=typed_observation.contract.frame_direction,
                 ),
-                {},
-                {
-                    "origin_ecef_m": numeric(list(origin), include_bits=False),
-                    "enu_basis_endpoints_ecef_m": numeric(
-                        [list(point) for point in ecef_points[1:4]],
-                        include_bits=False,
-                    ),
-                    "probe_endpoint_ecef_m": numeric(
-                        list(ecef_points[-1]), include_bits=False
-                    ),
-                    "probe_roundtrip_local_xyz_m": numeric(
-                        list(probe_readback), include_bits=False
-                    ),
-                },
+                typed_observation.native_inputs.model_dump(mode="json"),
+                typed_observation.native_outputs.model_dump(mode="json"),
+                status=typed_observation.status,
+                diagnostic=typed_observation.diagnostic,
+                schema_version=typed_observation.schema_version,
             )
         )
 

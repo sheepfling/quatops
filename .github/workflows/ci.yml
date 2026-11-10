@@ -10,6 +10,52 @@ permissions:
   contents: read
 
 jobs:
+  evidence-bundle-replay:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.13"
+          cache: pip
+      - name: Build evidence bundle
+        run: python -m scripts.package_evidence_bundle --output "$RUNNER_TEMP/quatops-evidence-bundle.zip"
+      - name: Extract and verify replay inputs
+        run: |
+          python - <<'PY'
+          import os
+          from pathlib import Path
+          from zipfile import ZipFile
+
+          runner_temp = Path(os.environ["RUNNER_TEMP"])
+          archive_path = runner_temp / "quatops-evidence-bundle.zip"
+          destination = runner_temp / "quatops-evidence-replay"
+          with ZipFile(archive_path) as archive:
+              assert archive.testzip() is None
+              names = set(archive.namelist())
+              for required in (
+                  "tests/support/paths.py",
+                  "tests/support/native_engine_support.py",
+                  "scripts/evidence_json.py",
+                  "scripts/validate_evidence_json.py",
+                  "scripts/validate_converter_evidence.py",
+              ):
+                  assert required in names, required
+              assert not any("/node_modules/" in name for name in names)
+              archive.extractall(destination)
+          PY
+      - name: Install isolated bundle environment
+        run: |
+          python -m venv "$RUNNER_TEMP/evidence-venv"
+          "$RUNNER_TEMP/evidence-venv/bin/python" -m pip install "$RUNNER_TEMP/quatops-evidence-replay[dev]"
+      - name: Replay validations from extracted bundle
+        working-directory: ${{ runner.temp }}/quatops-evidence-replay
+        run: |
+          "$RUNNER_TEMP/evidence-venv/bin/python" -m scripts.validate_evidence_json --repository-root .
+          "$RUNNER_TEMP/evidence-venv/bin/python" -m scripts.validate_converter_evidence --repository-root .
+          "$RUNNER_TEMP/evidence-venv/bin/python" -m scripts.render_converter_registry --repository-root . --check
+          "$RUNNER_TEMP/evidence-venv/bin/python" -m pytest -q tests/quatops/experimental/semantics tests/quatops/experimental/converters tests/quatops/experimental/engines/test_canonical_interoperability.py
+
   test:
     # Ubuntu 26.04 does not provide the CPython 3.9 build used by this matrix.
     runs-on: ubuntu-24.04

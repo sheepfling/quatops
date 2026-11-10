@@ -5,7 +5,9 @@
     "version": "6000.5.2f1",
     "build": null,
     "platform": "WindowsEditor",
-    "native_scalar_profiles": ["float32"],
+    "native_scalar_profiles": [
+      "float32"
+    ],
     "native_quaternion_order": "xyzw",
     "native_algebra": "Hamilton",
     "native_vector_action": "active quaternion sandwich / engine vector rotation API"
@@ -27,7 +29,11 @@
       "positive_y": "up",
       "positive_z": "forward"
     },
-    "destination_axes_from_source": ["x", "z", "y"],
+    "destination_axes_from_source": [
+      "x",
+      "z",
+      "y"
+    ],
     "conversion_rule": "native_xyzw=(-x,-z,-y,w)",
     "inverse_rule": "canonical_wxyz=(W,-X,-Z,-Y)",
     "world_and_body_map": "same declared signed-axis map",
@@ -36,7 +42,12 @@
       "float32": 2e-06
     },
     "scope": "unit quaternion coefficient and physical-action conversion",
-    "excludes": ["asset model-forward defaults", "scene import", "animation transport", "Euler adapters"]
+    "excludes": [
+      "asset model-forward defaults",
+      "scene import",
+      "animation transport",
+      "Euler adapters"
+    ]
   },
   "provenance": {
     "witness_file": "witnesses.json",
@@ -46,6 +57,8 @@
     "original_capture_sha256": "d94da828fc5d905bad9797475f14a44bcd771c0024f4154186cb3ef5fbb57267",
     "canonical_input_sha256": "a6f0630806b69d3b3b29a036aa10f63bfe214668329c661598951f84f8f41eec",
     "retention_method": "selected native outputs retained losslessly; inputs linked by case ID; redundant inputs and probe actions omitted",
-    "canonical_input_file": "experiments/interoperability/v1/canonical_inputs.json"
+    "canonical_input_file": "experiments/interoperability/v1/canonical_inputs.json",
+    "semantic_contract_file": "experiments/unity/6000.5.2f1/semantic_contract.json",
+    "semantic_contract_sha256": "c1a2d84eb3e91a63f19ce776ad59b0f3b810ca31ce82ec59df2be4ec2e096b9e"
   }
 }

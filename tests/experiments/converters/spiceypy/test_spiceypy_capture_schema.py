@@ -6,14 +6,14 @@ import pytest
 from pydantic import ValidationError
 
 from scripts.evidence_json import read_evidence_document
-from scripts.evidence_schema.shared_inputs import SharedCanonicalInputCapture
-from scripts.evidence_schema.spiceypy_capture import (
-    validate_spiceypy_capture_matches_inputs,
-)
-from scripts.evidence_schema.targets import (
+from scripts.evidence_schema.converter_captures import (
     SpiceyPyCapture,
     SpiceyPyInputs,
     SpiceyPyOrientation,
+)
+from scripts.evidence_schema.shared_inputs import SharedCanonicalInputCapture
+from scripts.evidence_schema.spiceypy_capture import (
+    validate_spiceypy_capture_matches_inputs,
 )
 from tests.support.paths import REPOSITORY_ROOT
 

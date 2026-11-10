@@ -17,11 +17,21 @@ if __package__:
         parse_evidence_document,
         read_evidence_document,
     )
+    from scripts.evidence_schema.engine_captures import (
+        EngineCanonicalFrame,
+        EngineFrame,
+        EngineSemanticConfig,
+    )
 else:
     from evidence_json import (
         dump_evidence_json,
         parse_evidence_document,
         read_evidence_document,
+    )
+    from evidence_schema.engine_captures import (
+        EngineCanonicalFrame,
+        EngineFrame,
+        EngineSemanticConfig,
     )
 
 JsonRecord = dict[str, JsonValue]
@@ -33,9 +43,6 @@ class EngineRetentionConfig:
     source: str
     map_key: str
     frame_key: str
-    api: str
-    rule: str
-    inverse: str
 
 
 ENGINE_CONFIG = {
@@ -44,36 +51,24 @@ ENGINE_CONFIG = {
         source="experiments/unreal/5.7.4/Source/QuatOpsUnrealCapture/Private/QuatOpsUnrealCaptureTests.cpp",
         map_key="source_to_unreal_axis_map",
         frame_key="unreal_world_frame",
-        api="UE::Math::TQuat<T>(X,Y,Z,W); TQuat::RotateVector",
-        rule="native_xyzw=(-y,-x,-z,w)",
-        inverse="canonical_wxyz=(W,-Y,-X,-Z)",
     ),
     "unity": EngineRetentionConfig(
         version="6000.5.2f1",
         source="experiments/unity/6000.5.2f1/Assets/Editor/QuatOpsEngineCapture.cs",
         map_key="source_to_unity_axis_map",
         frame_key="unity_world_frame",
-        api="UnityEngine.Quaternion(x,y,z,w); Quaternion * Vector3",
-        rule="native_xyzw=(-x,-z,-y,w)",
-        inverse="canonical_wxyz=(W,-X,-Z,-Y)",
     ),
     "godot": EngineRetentionConfig(
         version=None,
         source="experiments/godot/capture.gd",
         map_key="source_to_godot_axis_map",
         frame_key="godot_world_frame",
-        api="Quaternion(x,y,z,w); Quaternion * Vector3",
-        rule="native_xyzw=(x,z,-y,w)",
-        inverse="canonical_wxyz=(W,X,-Z,Y)",
     ),
     "blender": EngineRetentionConfig(
         version="5.1.2",
         source="experiments/blender/5.1.2/capture.py",
         map_key="source_to_blender_axis_map",
         frame_key="blender_world_frame_probe",
-        api="mathutils.Quaternion((w,x,y,z)); Quaternion @ Vector",
-        rule="native_wxyz=(w,x,y,z)",
-        inverse="canonical_wxyz=native_wxyz",
     ),
 }
 
@@ -221,6 +216,14 @@ def retain(
     config = ENGINE_CONFIG[engine]
     if config.version and version != config.version:
         raise ValueError(f"{engine} version must be {config.version}")
+    semantic_config_path = (
+        repository_root / "experiments" / engine / version / "semantic_contract.json"
+    )
+    semantic_config = EngineSemanticConfig.model_validate(
+        read_evidence_document(semantic_config_path), strict=True
+    )
+    if semantic_config.engine.version != version:
+        raise ValueError(f"{engine} semantic config version must be {version}")
     capture_source_name = config.source.format(version=version)
     original_bytes = source_path.read_bytes()
     captured = _record(
@@ -262,6 +265,8 @@ def retain(
     canonical_interop = retain_canonical_interop(canonical_interop, expected_inputs)
 
     engine_info = _record(captured.get("engine"), context="engine")
+    if engine_info.get("name") != semantic_config.engine.engine:
+        raise ValueError("native capture engine identity differs from semantic config")
     if engine == "unreal":
         native_semantics = _record(
             captured.get("native_semantics"), context="native_semantics"
@@ -284,47 +289,35 @@ def retain(
             context=config.frame_key,
         )
     axes_from_source = _axis_map(map_record.get("destination_axes_from_source"))
+    observed_source_frame = EngineCanonicalFrame.model_validate(
+        source_frame, strict=True
+    )
+    observed_native_frame = EngineFrame.model_validate(native_frame, strict=True)
+    if observed_source_frame != semantic_config.conversion.canonical_frame:
+        raise ValueError("native capture source frame differs from semantic config")
+    if observed_native_frame != semantic_config.conversion.native_frame:
+        raise ValueError("native capture target frame differs from semantic config")
+    if axes_from_source != semantic_config.conversion.destination_axes_from_source:
+        raise ValueError("native capture axis map differs from semantic config")
     capture_source = repository_root / capture_source_name
     witness = {
         "schema_version": 1,
         "target": {
-            "engine": engine_info["name"],
-            "api": config.api,
+            "engine": semantic_config.engine.engine,
+            "api": semantic_config.engine.api,
             "version": version,
             "build": engine_info.get("build_hash")
             or engine_info.get("changelist")
             or engine_info.get("build"),
             "platform": engine_info.get("platform"),
-            "native_scalar_profiles": ["float32", "float64"]
-            if engine == "unreal"
-            else ["float32"],
-            "native_quaternion_order": "wxyz" if engine == "blender" else "xyzw",
-            "native_algebra": "Hamilton",
-            "native_vector_action": "active quaternion sandwich / engine vector rotation API",
+            "native_scalar_profiles": semantic_config.engine.native_scalar_profiles,
+            "native_quaternion_order": semantic_config.engine.native_quaternion_order,
+            "native_algebra": semantic_config.engine.native_algebra,
+            "native_vector_action": semantic_config.engine.native_vector_action,
         },
-        "contract": {
-            "contract_id": "quatops-canonical-hamilton-wxyz-active-rh-v1",
-            "canonical_algebra": "Hamilton",
-            "canonical_order": "wxyz",
-            "canonical_action": "active",
-            "canonical_frame": source_frame,
-            "native_frame": native_frame,
-            "destination_axes_from_source": axes_from_source,
-            "conversion_rule": config.rule,
-            "inverse_rule": config.inverse,
-            "world_and_body_map": "same declared signed-axis map",
-            "input_domain": "unit Hamilton quaternion; adapters preserve magnitude and do not normalize",
-            "native_precision_tolerance": {"float32": 2e-6, "float64": 2e-14}
-            if engine == "unreal"
-            else {"float32": 2e-6},
-            "scope": "unit quaternion coefficient and physical-action conversion",
-            "excludes": [
-                "asset model-forward defaults",
-                "scene import",
-                "animation transport",
-                "Euler adapters",
-            ],
-        },
+        "contract": semantic_config.conversion.model_dump(
+            mode="json", exclude_none=True
+        ),
         "provenance": {
             "original_capture_sha256": hashlib.sha256(original_bytes).hexdigest(),
             "capture_source": capture_source_name,
@@ -397,7 +390,13 @@ def retain(
     contract = {
         "engine": witness["target"],
         "conversion": witness["contract"],
-        "provenance": contract_provenance,
+        "provenance": {
+            **contract_provenance,
+            "semantic_contract_file": semantic_config_path.relative_to(
+                repository_root
+            ).as_posix(),
+            "semantic_contract_sha256": sha256(semantic_config_path),
+        },
     }
     (output_dir / "contract.json").write_text(
         dump_evidence_json(contract), encoding="utf-8", newline="\n"

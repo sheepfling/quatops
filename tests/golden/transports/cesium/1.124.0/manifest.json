@@ -9,43 +9,47 @@
   },
   "execution": {
     "was_run": true,
-    "utc": "2026-11-04T08:58:45.847Z",
+    "utc": "2026-11-06T23:48:41.853Z",
     "node": "v24.21.0",
     "v8": "13.6.233.17-node.53",
     "platform": "win32",
     "architecture": "x64"
   },
   "provenance": {
-    "run_manifest_sha256": "f40bc6729825b3d95ff98c6b3fd4152a034c4a88cbf39e6bbe8659f89de44776",
+    "run_manifest_sha256": "a6fd084da848ace05719d396114219443b29267a931412d6e58a98daaf15cbc1",
     "full_observation_sha256": "25deabd662a8fca8e2ff710ab3f4017a043fe63a123ef5ab75fd4b75cc4f740a",
-    "converter_input_sha256": "0fea339670bff7808650325f8b2d9d94c7c7b8e583c1b9287ccc34227a867a31",
-    "captured_converter_input_sha256": "0fea339670bff7808650325f8b2d9d94c7c7b8e583c1b9287ccc34227a867a31",
+    "converter_input_sha256": "1750c433c0344684015dba2bdadcd3695cd40880a2e4bdd8781f2d56b4e3d489",
+    "captured_converter_input_sha256": "1750c433c0344684015dba2bdadcd3695cd40880a2e4bdd8781f2d56b4e3d489",
     "canonical_inputs_sha256": "a6f0630806b69d3b3b29a036aa10f63bfe214668329c661598951f84f8f41eec",
     "geographic_inputs_sha256": "619099b732593c6c45f4f7eb64714e4c7d79b2c96dcd070777522e3736e4f085",
     "native_capture_script_sha256": "cc596d22e143b7dac96bbca8eebca8629cf4eb8dec3fe52c75a9fdd691d23b41",
     "native_numeric_helper_sha256": "aed1da7b180e76ff0e101a477dd6a941ed0ad076509d9716bf2bf9b6896f5fa4",
     "native_package_lock_sha256": "5e331bee862cbdff2a96dec2d325e86aa996b780821833899f4053e9476002e0",
     "witnesses_sha256": "cf56f2ed41685d79fb08f3d04ef7e36818e5fb920286758aa813d85746613ed2",
-    "contract_sha256": "df361fce8d9d5311f035d51cd8e04f60718bfa3d8c869dbee4d8a69ea6488c76",
+    "contract_sha256": "18b97f79b455cf197421566bec02fae6380c4060cecbc0439bdfc8aa15f5c5d9",
     "input_serialization_note": "JSON formatting changed only; parsed native input values are unchanged.",
-    "captured_input_generator_sha256": "b520febfabf06cac54c438ccbb7160dcc8e3df8c9f1ab3388e8ba2d837dc67b7",
-    "captured_input_generator_archive": "experiments/provenance/reproduction-v1/cesium-1.124.0-create_inputs.py.txt"
+    "captured_input_generator_sha256": "53fc7b1ebaa120677a08ba1d578983de7b2694ea8b17a5321dcb2e6797d9b6a0",
+    "captured_input_generator_archive": "experiments/provenance/reproduction-v2/cesium-1.124.0-create_inputs.py.txt"
   },
   "reproduction": {
-    "input_generator_sha256": "95c2905c48eb1013ded0b498342af991ba2b1db005ac91500cd72473eedd8bf8",
-    "capture_script_sha256": "cc596d22e143b7dac96bbca8eebca8629cf4eb8dec3fe52c75a9fdd691d23b41",
+    "input_generator_sha256": "39db4feb151d0584b028a861f25e7e63d733aba8a1d381623e0a3c48f9c26137",
+    "capture_script_sha256": "99758b4a362bfe888e75b6f4ebecd1de0a56bf014f0ca98f0ed8080d65f442a4",
     "numeric_helper_sha256": "aed1da7b180e76ff0e101a477dd6a941ed0ad076509d9716bf2bf9b6896f5fa4",
-    "retention_script_sha256": "d4fb85da817803d5b38aa4d93937b9dfac6118ff87d8e3b2a23488aca464ee98",
-    "retention_helper_sha256": "8a0dd9379b0e50726685f2254a881d5836f444845b05e22ec892db9e828ee9a1",
+    "retention_script_sha256": "b431abc0ae416ceb7d748ee50752507ba005a2009eb7a4aff69cc291642fa7f6",
+    "retention_helper_sha256": "373dd7fefdffddbb8cb1a9399859f4168fc2ea97710bd55b9481b68dec693bab",
     "retention_formatter_sha256": "56961d6be101a2bdfb1b21372c823ec86dfd636547d851901b7284f2ae20e0b3",
     "package_lock_sha256": "5e331bee862cbdff2a96dec2d325e86aa996b780821833899f4053e9476002e0",
     "geographic_inputs_sha256": "619099b732593c6c45f4f7eb64714e4c7d79b2c96dcd070777522e3736e4f085",
-    "input_generator_archive": "experiments/provenance/reproduction-v1/cesium-1.124.0-create_inputs.py.txt"
+    "input_generator_archive": "experiments/provenance/reproduction-v2/cesium-1.124.0-create_inputs.py.txt"
   },
   "selection": {
     "retained_observations": 5,
     "native_observations": 5,
     "policy": "retain local basis action once; retain ECEF orientation, world basis action, one probe point round trip, and origin for identity, mixed, antipodal, and composed cases",
     "numeric_values": "round-trippable decimals and dtype; exact bits only for signed-zero or nonfinite values"
+  },
+  "semantic_contract": {
+    "file": "experiments/converters/cesium/1.124.0/semantic_contract.json",
+    "sha256": "18b97f79b455cf197421566bec02fae6380c4060cecbc0439bdfc8aa15f5c5d9"
   }
 }

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import math
 from collections.abc import Sequence
 from pathlib import Path
@@ -17,16 +18,30 @@ from scripts.evidence_json import read_evidence_document
 from scripts.evidence_schema.openxr import (
     InputKey,
     ObservationKey,
+    OpenXRSemanticConfig,
     OpenXRTestRuntimeCapture,
     OpenXRVerifierSummary,
     finite_max_abs,
 )
+from scripts.evidence_schema.primitives import SemanticContractReference
 
-OBSERVATION_CASES: tuple[tuple[ObservationKey, InputKey, InputKey], ...] = (
-    ("A_from_B", "A", "B"),
-    ("B_from_C", "B", "C"),
-    ("A_from_C", "A", "C"),
-)
+
+def _load_semantic_config() -> OpenXRSemanticConfig:
+    package_dir = Path(__file__).resolve().parent
+    repository_root = package_dir.parents[3]
+    config_path = package_dir / "semantic_contract.json"
+    manifest = read_evidence_document(package_dir / "manifest.json")
+    reference = SemanticContractReference.model_validate(
+        manifest.get("semantic_contract"), strict=True
+    )
+    expected_reference = config_path.relative_to(repository_root).as_posix()
+    if reference.file != expected_reference:
+        raise ValueError("manifest semantic contract points outside this experiment")
+    if hashlib.sha256(config_path.read_bytes()).hexdigest() != reference.sha256:
+        raise ValueError("experiment semantic contract hash differs from manifest")
+    return OpenXRSemanticConfig.model_validate(
+        read_evidence_document(config_path), strict=True
+    )
 
 
 def _native(
@@ -83,14 +98,19 @@ def main() -> None:
     parser.add_argument("capture", type=Path)
     parser.add_argument("--retain-to", type=Path)
     args = parser.parse_args()
+    config = _load_semantic_config()
     raw_capture = read_evidence_document(args.capture)
     capture = OpenXRTestRuntimeCapture.model_validate(raw_capture, strict=True)
-    if capture.api_version != [1, 1, 65]:
+    if capture.api_version != config.api_version:
         raise ValueError(f"unexpected test runtime API version: {capture.api_version}")
-    if set(capture.inputs_pose_in_reference_space) != {"A", "B", "C"}:
+    if set(capture.inputs_pose_in_reference_space) != set(config.input_spaces):
         raise ValueError("fixture must contain exactly the declared A, B, and C inputs")
-    if set(capture.observations) != {key for key, _, _ in OBSERVATION_CASES}:
+    if set(capture.observations) != {
+        case.observation for case in config.relation_cases
+    }:
         raise ValueError("fixture must contain exactly the three declared locate calls")
+    if capture.reference_space_type != config.reference_space.reference_space_type:
+        raise ValueError("capture reference space differs from experiment config")
     if capture.runtime.hardware_runtime:
         raise ValueError(
             "fixture must identify the Khronos test runtime as non-hardware"
@@ -100,9 +120,10 @@ def main() -> None:
     if capture.locate_time_xr_time <= 0:
         raise ValueError("test runtime capture requires a positive synthetic XrTime")
 
-    tolerance = 2e-6
+    tolerance = config.validation_tolerance
     native_errors: dict[ObservationKey, float] = {}
-    for key, base_name, target_name in OBSERVATION_CASES:
+    for case in config.relation_cases:
+        key, base_name, target_name = case.observation, case.base, case.target
         observation = capture.observations[key]
         if (observation.base, observation.target) != (base_name, target_name):
             raise ValueError(f"{key} does not preserve its target/base direction")

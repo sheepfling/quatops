@@ -11,12 +11,15 @@ from typing import Literal
 from pydantic import BaseModel, ConfigDict
 
 from quatops.python import hamilton
+from scripts.evidence_schema.converter_captures import (
+    NativeConstructedInput,
+    OpenCVInputs,
+)
 from scripts.evidence_schema.primitives import SHA256, Quaternion4, Vector3
 from scripts.evidence_schema.shared_inputs import (
     SharedCanonicalInputCapture,
     SharedFrameInput,
 )
-from scripts.evidence_schema.targets import NativeConstructedInput, OpenCVInputs
 
 
 class PreparedOrientation(BaseModel):

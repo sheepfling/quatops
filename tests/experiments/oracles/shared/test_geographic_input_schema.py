@@ -9,8 +9,10 @@ import pytest
 from pydantic import TypeAdapter, ValidationError
 
 from scripts.evidence_json import read_evidence_document
+from scripts.evidence_schema.proj_capture import ProjObservation
 from scripts.evidence_schema.shared_inputs import GeographicInputCorpus
 from tests.support.paths import REPOSITORY_ROOT
+from tests.support.provenance_archives import read_provenance_source
 
 CORPUS = REPOSITORY_ROOT / "experiments/oracles/shared/geographic_inputs_v1.json"
 
@@ -86,20 +88,39 @@ def test_geographic_schema_rejects_extra_fields_and_wrong_versions() -> None:
         GeographicInputCorpus.model_validate(corpus, strict=True)
 
 
+def test_proj_capture_observations_use_a_target_specific_strict_schema() -> None:
+    observations_path = (
+        REPOSITORY_ROOT / "tests/golden/oracles/proj/9.5.1/observations.jsonl"
+    )
+    lines = observations_path.read_text(encoding="utf-8").splitlines()
+    observations = [
+        ProjObservation.model_validate_json(line, strict=True) for line in lines
+    ]
+
+    assert len(observations) == 11
+    assert observations[0].native_outputs.origin_ecef_m.shape == [3]
+    assert observations[0].native_outputs.enu_basis_endpoints_ecef_m.shape == [3, 3]
+
+    malformed = observations[0].model_dump(mode="json")
+    malformed["native_outputs"]["origin_ecef_m"]["shape"] = [4]
+    with pytest.raises(ValidationError):
+        ProjObservation.model_validate(malformed, strict=True)
+
+
 def test_proj_reproduction_hashes_preserve_prior_and_current_source_identity() -> None:
     root = REPOSITORY_ROOT
     manifest = read_evidence_document(
         root / "tests/golden/oracles/proj/9.5.1/manifest.json"
     )
     reproduction = manifest["reproduction"]
-    archived = (
-        root / "experiments/provenance/reproduction-v1/proj-9.5.1/capture_proj.py.txt"
+    archived = read_provenance_source(
+        root, "experiments/provenance/reproduction-v1.zip#proj-9.5.1/capture_proj.py"
     )
     current_exporter = root / reproduction["exporter_path"]
     requirements = root / "experiments/oracles/proj/9.5.1/requirements.txt"
 
     assert (
-        hashlib.sha256(archived.read_bytes()).hexdigest()
+        hashlib.sha256(archived).hexdigest()
         == reproduction["previous_checkout_exporter_sha256"]
     )
     assert (
@@ -110,10 +131,12 @@ def test_proj_reproduction_hashes_preserve_prior_and_current_source_identity() -
         hashlib.sha256(requirements.read_bytes()).hexdigest()
         == reproduction["requirements_sha256"]
     )
-    archived_helper = root / reproduction["capture_helper_archive"]
+    archived_helper = read_provenance_source(
+        root, reproduction["capture_helper_archive"]
+    )
     current_helper = root / reproduction["capture_helper_path"]
     assert (
-        hashlib.sha256(archived_helper.read_bytes()).hexdigest()
+        hashlib.sha256(archived_helper).hexdigest()
         == reproduction["previous_checkout_capture_helper_sha256"]
     )
     assert (

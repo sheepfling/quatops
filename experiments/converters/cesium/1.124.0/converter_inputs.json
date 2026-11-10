@@ -6,8 +6,8 @@
   "frame_contract": {
     "canonical_local": {
       "handedness": "right",
-      "positive_x": "east/right",
-      "positive_y": "north/forward",
+      "positive_x": "right",
+      "positive_y": "forward",
       "positive_z": "up",
       "forward": null,
       "upAxis": null

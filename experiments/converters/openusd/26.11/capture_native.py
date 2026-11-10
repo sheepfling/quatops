@@ -16,8 +16,8 @@ from pxr import Gf, Usd, UsdGeom
 from pydantic import BaseModel, ConfigDict
 
 from scripts.evidence_format import dump_evidence_json
+from scripts.evidence_schema.converter_captures import OpenUsdInputs
 from scripts.evidence_schema.primitives import Matrix4, Quaternion4, Vector3
-from scripts.evidence_schema.targets import OpenUsdInputs
 
 
 class NativeOpenUsdOutputs(BaseModel):
@@ -144,6 +144,8 @@ def main() -> None:
         binaries[relative] = sha(binary)
     output_path = args.output.resolve()
     output_path.mkdir(parents=True, exist_ok=True)
+    semantic_contract_path = target_dir / "semantic_contract.json"
+    (output_path / "contract.json").write_bytes(semantic_contract_path.read_bytes())
     observations_path = output_path / "observations.json"
     observations_path.write_text(
         dump_evidence_json([row.model_dump(mode="json") for row in observations]),
@@ -153,6 +155,12 @@ def main() -> None:
     manifest = {
         "schema_version": "1.0",
         "evidence_kind": "native_openusd_quatops_converter_capture",
+        "semantic_contract": {
+            "file": (target_dir / "semantic_contract.json")
+            .relative_to(repository_root)
+            .as_posix(),
+            "sha256": sha(target_dir / "semantic_contract.json"),
+        },
         "target": {
             "name": "OpenUSD",
             "distribution": "usd-core",

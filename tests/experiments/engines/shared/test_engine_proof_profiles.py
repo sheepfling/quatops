@@ -7,6 +7,7 @@ import pytest
 
 from tests.support.native_engine_support import load_versioned_engine_witness
 from tests.support.paths import REPOSITORY_ROOT
+from tests.support.provenance_archives import read_provenance_source
 
 ROOT = REPOSITORY_ROOT
 TARGETS = (
@@ -46,7 +47,7 @@ def test_contract_and_witnesses_are_versioned_small_and_provenanced(engine, vers
     expected_hashes = {
         "witness_sha256": hashlib.sha256(witness_path.read_bytes()).hexdigest(),
         "capture_source_sha256": hashlib.sha256(
-            (ROOT / contract["provenance"]["capture_source"]).read_bytes()
+            read_provenance_source(ROOT, contract["provenance"]["capture_source"])
         ).hexdigest(),
         "canonical_input_sha256": hashlib.sha256(
             (ROOT / contract["provenance"]["canonical_input_file"]).read_bytes()

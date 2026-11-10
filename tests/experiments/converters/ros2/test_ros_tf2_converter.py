@@ -10,6 +10,7 @@ import numpy as np
 from quatops.experimental.engines import QuaternionFrameMap, SignedAxisMap
 from quatops.python import hamilton
 from tests.support.paths import REPOSITORY_ROOT
+from tests.support.provenance_archives import read_provenance_source
 
 ROOT = REPOSITORY_ROOT
 FIXTURE = ROOT / "tests/golden/oracles/ros2/0.36.23"
@@ -117,9 +118,11 @@ def test_ros_capture_is_native_pinned_and_selected_values_are_lossless():
     for field, path in file_hashes.items():
         assert hashlib.sha256(path.read_bytes()).hexdigest() == reproduction[field]
 
-    archived_exporter = ROOT / reproduction["exporter_source_archive"]
+    archived_exporter = read_provenance_source(
+        ROOT, reproduction["exporter_source_archive"]
+    )
     assert (
-        hashlib.sha256(archived_exporter.read_bytes()).hexdigest()
+        hashlib.sha256(archived_exporter).hexdigest()
         == reproduction["previous_checkout_exporter_source_sha256"]
         == provenance["exporter_source_sha256"]
     )
@@ -127,21 +130,21 @@ def test_ros_capture_is_native_pinned_and_selected_values_are_lossless():
         "has not been rebuilt or recaptured."
     )
 
-    archived_capture_helper = (
-        ROOT / reproduction["capture_helper_archive"]
-    ).read_bytes()
+    archived_capture_helper = read_provenance_source(
+        ROOT, reproduction["capture_helper_archive"]
+    )
     assert (
         hashlib.sha256(archived_capture_helper).hexdigest()
         == reproduction["previous_checkout_capture_helper_sha256"]
         == provenance["capture_helper_sha256"]
     )
 
-    archived_runner = (
-        ROOT
-        / "experiments/provenance/reproduction-v1/ros2-0.36.23/capture_native.py.txt"
+    archived_runner = read_provenance_source(
+        ROOT,
+        "experiments/provenance/reproduction-v1.zip#ros2-0.36.23/capture_native.py",
     )
     assert (
-        hashlib.sha256(archived_runner.read_bytes()).hexdigest()
+        hashlib.sha256(archived_runner).hexdigest()
         == (reproduction["previous_checkout_runner_sha256"])
     )
     assert (

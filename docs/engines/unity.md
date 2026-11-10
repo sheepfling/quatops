@@ -30,3 +30,9 @@ The pinned capture project and rerun instructions are in
 
 This is quaternion conversion evidence. It does not claim an Euler adapter,
 animation behavior, imported-scene parity, or a universal asset axis.
+
+The registered `unity.world-axes` role follows Unity 6000.5's
+[Quaternion API convention page](https://docs.unity.com/en-us/engine/6000.5/manual/scripting/programming-math/unity-engine-math/class-quaternion),
+which states that Unity uses a left-handed coordinate system with +X right,
++Y up, and +Z forward. This describes the engine convention; it does not
+establish an imported model's local axes or a project's physical alignment.

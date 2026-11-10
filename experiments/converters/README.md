@@ -8,14 +8,23 @@ inventory, accepted evidence, and remaining scope are maintained in the
 ## Where things live
 
 - `experiments/converters/<target>/<version>/` contains target inputs,
-  generators, and native capture entry points.
+  `semantic_contract.json`, generators, and native capture entry points.
 - `tests/golden/{oracles,transports}/<target>/<version>/` contains selected
   native witnesses, contracts, and provenance.
 - `tests/experiments/converters/<target>/` contains replay acceptance checks.
+- `scripts/evidence_schema/semantic_serializers/<target>.py` maps each
+  validated target capture, contract, and input document into semantic
+  witnesses; `normalizer.py` validates that serialization against the shared
+  evidence contract.
 - `experiments/pyproject.toml` packages shared evidence helpers and Pydantic
   schemas and declares optional target dependency sets. Each pinned Python
   capture project selects its target extra and keeps a version-specific
   `uv.lock` beside the runner.
+
+The optional groups use portable PEP 621 metadata. The `[tool.uv]` settings in
+that file only express resolver-specific constraints between incompatible
+native extras and point the local package at this checkout; they do not replace
+the portable dependency declarations.
 
 Run all frozen converter acceptance checks from the repository root with:
 
@@ -23,9 +32,15 @@ Run all frozen converter acceptance checks from the repository root with:
 uv run --extra dev python -m pytest -q tests/experiments/converters
 ```
 
-Capture exporters use shared input files and typed evidence models where the
-target runtime permits them. Version-specific locks keep native environments
-reproducible without putting their dependencies in QuatOps' regular install.
+Each experiment manifest identifies its `semantic_contract.json` by path and
+digest. The common pipeline loads that experiment-owned contract, verifies the
+retained contract copy against it, and passes typed inputs and native
+observations to the experiment's semantic serializer. Native capture programs
+do not import the common normalizer; the repository-side pipeline imports the
+target adapter after the native runtime has exited. Capture exporters use
+shared input files and typed evidence models where the target runtime permits
+them. Version-specific locks keep native environments reproducible without
+putting their dependencies in QuatOps' regular install.
 The reduced evidence product is generated on
 demand by [`crystallize_converter_evidence.py`](../../scripts/crystallize_converter_evidence.py);
 the repository does not keep a second copy of its derived output.

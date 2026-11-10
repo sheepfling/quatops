@@ -94,7 +94,7 @@ branch-policy exception next to the tests. Run the full suite with the local
   and rotation-vector aliases:
   [`test_rotation_conversion_oracle.py`](../../tests/experiments/oracles/shared/test_rotation_conversion_oracle.py).
 - Engine signed-axis maps and basis-converted SLERP trajectories:
-  [`test_engine_basis_oracle.py`](../../tests/quatops/engines/test_engine_basis_oracle.py).
+  [`test_engine_basis_oracle.py`](../../tests/quatops/experimental/engines/test_engine_basis_oracle.py).
 - Frozen upstream Unity.Mathematics/Godot Euler-to-quaternion and matrix values:
   [`test_engine_euler_golden.py`](../../tests/experiments/engines/shared/test_engine_euler_golden.py) with
   source-attributed values in [`engine_euler_fixtures.json`](../../tests/golden/engine_euler_fixtures.json).

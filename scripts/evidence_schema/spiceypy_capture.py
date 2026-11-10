@@ -2,11 +2,11 @@
 
 from __future__ import annotations
 
+from scripts.evidence_schema.converter_captures import SpiceyPyCapture, SpiceyPyInputs
 from scripts.evidence_schema.shared_inputs import (
     SharedCanonicalInputCapture,
     resolve_orientation_selection,
 )
-from scripts.evidence_schema.targets import SpiceyPyCapture, SpiceyPyInputs
 
 
 def validate_spiceypy_capture_matches_inputs(

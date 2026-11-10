@@ -1,8 +1,10 @@
 # Quaternion interoperability evidence atlas
 
 This atlas separates shared mathematics, target-specific contracts, native
-physical-action evidence, and transport behavior. A native convention capture
-does not by itself validate a QuatOps adapter.
+physical-action evidence, and transport behavior. Native action evidence
+verifies a numeric boundary under its declared frame assignment; it does not
+by itself establish that assignment as the target's universal physical frame
+or validate every application-specific frame interpretation.
 
 ## Canonical converter contract
 
@@ -25,9 +27,13 @@ canonical frame `+X right, +Y forward, +Z up`:
 | [Godot 4.7 stable and 4.8-dev1](engines/godot.md) | `Quaternion` / XYZW; float32 | `(+X,+Z,-Y)`, determinant +1 | `(x,z,-y,w)` |
 | [Blender 5.1.2](engines/blender.md) | `mathutils.Quaternion` / WXYZ | Identity in the assigned probe frame | `(w,x,y,z)` |
 
-These maps are specific to the source and target frames recorded in each
-versioned [contract and witness set](engines/proof-matrix.md). They are not
-universal engine world-frame or asset-import defaults.
+The canonical RFU frame above is a QuatOps design choice used for these
+comparisons. Each map is specific to the source and target frames recorded in
+its versioned [contract and witness set](engines/proof-matrix.md); the target
+side is a declared numeric probe where the native API does not define a
+physical role. These are not universal engine world-frame, camera, or
+asset-import defaults. Physical parent/world and child/body meanings remain
+caller inputs unless a target API explicitly defines the role and its frame.
 
 ## Retained evidence
 
@@ -80,8 +86,7 @@ Run the converter acceptance set with:
 
 ```shell
 uv run --extra dev python -m pytest -q \
-  tests/quatops/converters \
-  tests/quatops/engines \
+  tests/quatops/experimental \
   tests/experiments/engines \
   tests/experiments/converters
 ```
@@ -91,7 +96,7 @@ uv run --extra dev python -m pytest -q \
 | Target | Captured converter proof | Remaining scope not claimed |
 | --- | --- | --- |
 | [CesiumJS 1.124.0](oracles/cesium.md) | QuatOps local-ENU orientations placed at selected WGS84 origins with native ENU-to-ECEF transforms, point actions, and inverse recovery; 5 selected witnesses | Other local frames, asset axes, rendering, and time-dependent Earth orientation |
-| [glTF 2.0 / Three.js GLTFLoader 0.187.0](transports/gltf.md) | QuatOps-generated static `.gltf` hierarchy loaded by the pinned native loader; local/world actions, hierarchy composition, inverse, and file hashes | Animation export/import is outside this converter proof; other loaders retain separate behavior evidence |
+| [glTF 2.0 / Three.js GLTFLoader 0.187.0](transports/gltf.md) | QuatOps-generated static `.gltf` hierarchy loaded by the pinned native loader; local/world actions, hierarchy composition, inverse, and file hashes, under a caller-assigned camera-like probe basis | Does not establish glTF asset-front or camera-role conversion; animation export/import is outside this proof; other loaders retain separate behavior evidence |
 | glTF 2.0 loader observations through Blender 5.1.2, VTK, and Trimesh | Native loader captures for authored assets | No QuatOps-generated round-trip acceptance claim for these loader routes |
 | Khronos glTF Validator 2.0.0-dev.3.10 | Native file/spec validation | Validation only; not a rotation-action oracle |
 | [OpenUSD 26.11](transports/openusd.md) | QuatOps-generated USDA reopened by pinned OpenUSD; orient ops, parent/child composition, reset stack, and native point/direction actions | Time-sampled ops, scale/shear decomposition, renderer/importer behavior, and asset axes |
@@ -110,6 +115,12 @@ checks are recorded as separate evidence kinds. Python replay tests separately
 use QuatOps and SciPy formulas to check accepted captured actions. Retained
 fixtures contain selected native witnesses and distinct known discrepancies;
 passing broad sweeps are not included in the product evidence set.
+
+Interpret profile acceptance narrowly: a numerically accepted boundary means
+the captured representation and action agree for the stated API and frame
+assignment. It does not assign an application's object front, sensor mounting,
+named reference frame, or world axes. Those meanings require a target-documented
+role or an explicit application declaration.
 
 The compact converter suites are grouped by target under
 `tests/experiments/converters/`: ROS 2/tf2, Cesium, glTF, OpenUSD, SpiceyPy,

@@ -1,6 +1,10 @@
 {
   "schema_version": "1.0",
   "evidence_kind": "native_discovery_capture",
+  "semantic_contract": {
+    "file": "experiments/oracles/openxr/1.1.65/semantic_contract.json",
+    "sha256": "9f4ba0970dd69d825ac5038bf10660167b55f14172cad0fe0b892732f7bbc7eb"
+  },
   "target": "Khronos OpenXR SDK 1.1.65 and SDK-Source test_runtime",
   "pin": {
     "schema_version": "1.0",
@@ -141,7 +145,7 @@
     }
   },
   "replay": {
-    "verifier_script_sha256": "387601f1b8915f38aec8f074fbe52f95e8b8235749c93acb8c193247336b2a54",
+    "verifier_script_sha256": "391febcaeb27261fbcb8a5084ffbf9cc39f15df3f6df4cedaa5664376e4ae40d",
     "test_module": "tests/experiments/oracles/openxr/test_openxr_test_runtime.py"
   },
   "review": {

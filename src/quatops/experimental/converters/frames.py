@@ -1,4 +1,4 @@
-"""Backward-compatible imports for frame semantics now in ``quatops.semantics``."""
+"""Backward-compatible imports for semantics in ``quatops.experimental.semantics``."""
 
 from ..semantics import (
     CANONICAL_BODY_FRAME,

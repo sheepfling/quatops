@@ -7,14 +7,14 @@ import hashlib
 import json
 from pathlib import Path
 
-from quatops.engines import QuaternionFrameMap, SignedAxisMap
+from quatops.experimental.engines import QuaternionFrameMap, SignedAxisMap
 from quatops.python import hamilton
 from scripts.evidence_json import read_evidence_document
+from scripts.evidence_schema.converter_captures import CesiumInputs
 from scripts.evidence_schema.shared_inputs import (
     GeographicInputCorpus,
     SharedCanonicalInputCapture,
 )
-from scripts.evidence_schema.targets import CesiumInputs
 
 
 def main() -> None:
@@ -109,8 +109,8 @@ def main() -> None:
         "frame_contract": {
             "canonical_local": {
                 "handedness": "right",
-                "positive_x": "east/right",
-                "positive_y": "north/forward",
+                "positive_x": "right",
+                "positive_y": "forward",
                 "positive_z": "up",
             },
             "cesium_local": {

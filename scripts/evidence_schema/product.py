@@ -4,44 +4,36 @@ from __future__ import annotations
 
 import re
 from pathlib import Path
-from typing import Any
 
-from quatops.scalar import multiply as multiply_wxyz
+from pydantic import JsonValue
+
 from scripts.converter_evidence import (
     ConverterEvidencePackage,
     converter_fixture_directories,
     load_converter_evidence,
 )
 from scripts.evidence_json import dump_evidence_json, read_evidence_document
-from scripts.evidence_schema.contracts import crystallize_contract
 from scripts.evidence_schema.crystallized import (
-    CanonicalInputs,
     CaptureProvenance,
     CrystallizationHeader,
     CrystallizedCapture,
     DependencyPin,
-    EvidenceLayer,
     EvidenceProduct,
     EvidenceTarget,
 )
-from scripts.evidence_schema.engine_product import (
+from scripts.evidence_schema.engine_evidence import (
     ENGINE_VERSIONS,
     crystallize_engine_package,
     load_engine_package,
 )
-from scripts.evidence_schema.reduce import crystallize_capture
+from scripts.evidence_schema.normalizer import normalize_capture
+from scripts.evidence_schema.semantic_serializers import serialize_target_semantics
+from scripts.evidence_schema.semantic_serializers.context import (
+    SemanticSerializationContext,
+)
 from scripts.evidence_schema.shared_inputs import (
     SharedCanonicalInputCapture,
     crystallize_shared_inputs,
-)
-from scripts.evidence_schema.targets import (
-    CesiumInputs,
-    EigenInputs,
-    MuJoCoInputs,
-    OpenCVInputs,
-    OpenUsdInputs,
-    SpiceyPyInputs,
-    ThreeGltfInputs,
 )
 from scripts.evidence_schema.utilities import sha256_file, slug_identifier
 
@@ -73,7 +65,7 @@ _INPUT_HASH_KEYS = (
 )
 
 
-def _find_manifest_value(value: Any, keys: tuple[str, ...]) -> str | None:
+def _find_manifest_value(value: JsonValue, keys: tuple[str, ...]) -> str | None:
     if isinstance(value, dict):
         for key in keys:
             candidate = value.get(key)
@@ -91,7 +83,7 @@ def _find_manifest_value(value: Any, keys: tuple[str, ...]) -> str | None:
     return None
 
 
-def _run_details(manifest: dict[str, Any]) -> tuple[str, list[DependencyPin]]:
+def _run_details(manifest: dict[str, JsonValue]) -> tuple[str, list[DependencyPin]]:
     execution = manifest.get("execution")
     if not isinstance(execution, dict):
         return "runtime details not declared in manifest", []
@@ -122,22 +114,31 @@ def _run_details(manifest: dict[str, Any]) -> tuple[str, list[DependencyPin]]:
     return "; ".join(runtime_parts) or "runtime details not declared", dependencies
 
 
-def _reproduction_dependencies(manifest: dict[str, Any]) -> list[DependencyPin]:
+def _reproduction_dependencies(
+    manifest: dict[str, JsonValue],
+) -> list[DependencyPin]:
     product = manifest.get("product")
-    if not isinstance(product, dict) or not isinstance(
-        product.get("dependencies"), list
-    ):
+    if not isinstance(product, dict):
         return []
-    return [
-        DependencyPin(name=item["name"], version=item["version"])
-        for item in product["dependencies"]
-        if isinstance(item, dict)
-        and item.get("name") in {"container image", "ROS_DISTRO"}
-        and isinstance(item.get("version"), str)
-    ]
+    dependencies = product.get("dependencies")
+    if not isinstance(dependencies, list):
+        return []
+    pins: list[DependencyPin] = []
+    for item in dependencies:
+        if not isinstance(item, dict):
+            continue
+        name = item.get("name")
+        version = item.get("version")
+        if (
+            isinstance(name, str)
+            and name in {"container image", "ROS_DISTRO"}
+            and isinstance(version, str)
+        ):
+            pins.append(DependencyPin(name=name, version=version))
+    return pins
 
 
-def _primary_native_binary(manifest: dict[str, Any], product: str) -> str | None:
+def _primary_native_binary(manifest: dict[str, JsonValue], product: str) -> str | None:
     if product in {"Eigen", "ROS 2 tf2"}:
         keys = (
             ("native_executable_sha256", "binary_sha256")
@@ -159,12 +160,16 @@ def _primary_native_binary(manifest: dict[str, Any], product: str) -> str | None
             rows = manifest.get(key)
             if isinstance(rows, list):
                 for row in rows:
+                    if not isinstance(row, dict):
+                        continue
+                    path = row.get("path")
+                    digest = row.get("sha256")
                     if (
-                        isinstance(row, dict)
-                        and row.get("path", "").lower().endswith(preferred_name.lower())
-                        and isinstance(row.get("sha256"), str)
+                        isinstance(path, str)
+                        and path.lower().endswith(preferred_name.lower())
+                        and isinstance(digest, str)
                     ):
-                        return row["sha256"]
+                        return digest
         binaries = manifest.get("native_binaries_sha256")
         if isinstance(binaries, dict):
             for path, digest in binaries.items():
@@ -204,7 +209,7 @@ def _precision_profiles(package: ConverterEvidencePackage) -> list[str]:
                 profiles.add(value)
     capture_dump = package.target_capture.model_dump(mode="python")
 
-    def collect_dtype(value: Any) -> None:
+    def collect_dtype(value: object) -> None:
         if isinstance(value, dict):
             for key, child in value.items():
                 if key in {"dtype", "native_scalar_dtype"} and isinstance(child, str):
@@ -236,17 +241,6 @@ def _target_api(package: ConverterEvidencePackage) -> str:
     return package.target.name
 
 
-def _layer(package: ConverterEvidencePackage) -> EvidenceLayer:
-    kind = package.evidence_kind
-    if "ros2_tf2" in kind:
-        return "frame-transport"
-    if "cesium" in kind:
-        return "geographic-transport"
-    if "threejs" in kind or "openusd" in kind:
-        return "scene-transport"
-    return "native-quaternion-api"
-
-
 def _provenance(
     package: ConverterEvidencePackage,
     *,
@@ -271,7 +265,7 @@ def _provenance(
             raise ValueError(f"{directory}: no input digest in package or manifest")
     runtime, dependencies = _run_details(manifest)
     dependencies.extend(_reproduction_dependencies(manifest))
-    contract_path = directory / "contract.json"
+    contract_path = package.contract_source_path
     witnesses_path = directory / "witnesses.json"
     manifest_path = directory / "manifest.json"
     return CaptureProvenance(
@@ -279,6 +273,7 @@ def _provenance(
         capture_adapter_sha256=declared_adapter_hash,
         input_sha256=input_hash,
         contract_sha256=sha256_file(contract_path),
+        semantic_contract_file=contract_path.relative_to(repository_root).as_posix(),
         witnesses_sha256=sha256_file(witnesses_path),
         manifest_sha256=sha256_file(manifest_path),
         native_runtime=runtime,
@@ -305,15 +300,12 @@ def _header(
     repository_root: Path,
     directory: Path,
 ) -> CrystallizationHeader:
-    layer = _layer(package)
-    evidence_contract = crystallize_contract(package)
     build_id = _find_manifest_value(
         package.manifest,
         ("native_executable_sha256", "package_entry_sha256", "binary_sha256"),
     )
     return CrystallizationHeader(
         evidence_id=f"{package.target.name}:{package.target.version}",
-        layer=layer,
         target=EvidenceTarget(
             product=package.target.name,
             version=package.target.version,
@@ -322,7 +314,6 @@ def _header(
             build_id=build_id,
         ),
         contract_id=package.contract_id,
-        contract=evidence_contract,
         witness_set_id=f"{slug_identifier(package.target.name)}-converter-v1",
         provenance=_provenance(
             package,
@@ -332,100 +323,8 @@ def _header(
     )
 
 
-def _validate_canonical_quaternion(
-    target: str,
-    case_id: str,
-    coefficients: list[float],
-    canonical_by_case: dict[str, list[float]],
-) -> None:
-    expected = canonical_by_case.get(case_id)
-    if expected is None or coefficients != expected:
-        raise ValueError(
-            f"{target} input {case_id!r} differs from shared canonical inputs"
-        )
-
-
-def _validate_converter_input_links(
-    package: ConverterEvidencePackage,
-    *,
-    canonical_inputs: CanonicalInputs,
-    canonical_path: Path,
-    repository_root: Path,
-) -> None:
-    inputs = package.inputs
-    expected_hash = sha256_file(canonical_path)
-    canonical_by_case = {
-        row.case_id: row.coefficients_wxyz for row in canonical_inputs.orientations
-    }
-    canonical_case_ids = list(canonical_by_case)
-    target = package.target.name
-
-    # ROS 2 keeps its explicit frame-chain inputs in the native capture itself.
-    if inputs is None:
-        if target == "ROS 2 tf2":
-            return
-        raise ValueError(f"{target} package lacks its typed input document")
-
-    if isinstance(inputs, (EigenInputs, MuJoCoInputs, OpenCVInputs, SpiceyPyInputs)):
-        referenced_path = (repository_root / inputs.shared_canonical_inputs).resolve()
-        if referenced_path != canonical_path.resolve():
-            raise ValueError(f"{target} references a different canonical input file")
-        if inputs.retained_case_ids != canonical_case_ids:
-            raise ValueError(f"{target} retained case IDs differ from shared inputs")
-        return
-
-    if isinstance(inputs, CesiumInputs):
-        if inputs.canonical_input_sha256 != expected_hash:
-            raise ValueError("Cesium canonical input digest differs")
-        for row in inputs.cases:
-            case_id = row.canonical_orientation_case
-            if case_id in canonical_by_case:
-                _validate_canonical_quaternion(
-                    target, case_id, row.canonical_wxyz, canonical_by_case
-                )
-            elif case_id == (
-                f"{canonical_inputs.composition_left_case_id} * "
-                f"{canonical_inputs.composition_right_case_id}"
-            ):
-                expected = multiply_wxyz(
-                    canonical_by_case[canonical_inputs.composition_left_case_id],
-                    canonical_by_case[canonical_inputs.composition_right_case_id],
-                )
-                if any(
-                    abs(actual - wanted) > 1e-15
-                    for actual, wanted in zip(row.canonical_wxyz, expected)
-                ):
-                    raise ValueError(
-                        "Cesium composed input differs from shared product"
-                    )
-            else:
-                raise ValueError(f"Cesium input references unknown case {case_id!r}")
-        return
-
-    if isinstance(inputs, ThreeGltfInputs):
-        if inputs.canonical_input_sha256 != expected_hash:
-            raise ValueError("glTF canonical input digest differs")
-        known_values = {tuple(values) for values in canonical_by_case.values()}
-        if any(tuple(row.canonical_wxyz) not in known_values for row in inputs.nodes):
-            raise ValueError(
-                "glTF node input differs from shared canonical orientations"
-            )
-        return
-
-    if isinstance(inputs, OpenUsdInputs):
-        if inputs.canonical_input_sha256 != expected_hash:
-            raise ValueError("OpenUSD canonical input digest differs")
-        for row in inputs.nodes:
-            _validate_canonical_quaternion(
-                target, row.canonical_case_id, row.canonical_wxyz, canonical_by_case
-            )
-        return
-
-    raise TypeError(f"no canonical input link validation for {type(inputs).__name__}")
-
-
 def build_evidence_product(repository_root: Path) -> EvidenceProduct:
-    """Load, validate, and reduce every versioned converter proof package."""
+    """Load, serialize, normalize, and collect every converter proof package."""
     repository_root = repository_root.resolve()
     canonical_path = (
         repository_root / "experiments/interoperability/v1/canonical_inputs.json"
@@ -436,6 +335,12 @@ def build_evidence_product(repository_root: Path) -> EvidenceProduct:
         canonical_document, strict=True
     )
     canonical_inputs = crystallize_shared_inputs(canonical_capture)
+    serialization_context = SemanticSerializationContext(
+        canonical_inputs=canonical_inputs,
+        canonical_input_path=canonical_path.resolve(),
+        canonical_input_sha256=canonical_hash,
+        repository_root=repository_root,
+    )
     captures: list[CrystallizedCapture] = []
     for engine, version in ENGINE_VERSIONS:
         package = load_engine_package(repository_root, engine, version)
@@ -450,21 +355,16 @@ def build_evidence_product(repository_root: Path) -> EvidenceProduct:
         )
     for directory in converter_fixture_directories(repository_root):
         package = load_converter_evidence(directory, repository_root=repository_root)
-        _validate_converter_input_links(
-            package,
-            canonical_inputs=canonical_inputs,
-            canonical_path=canonical_path,
-            repository_root=repository_root,
-        )
+        serialization = serialize_target_semantics(package, serialization_context)
         captures.append(
-            crystallize_capture(
-                package.target_capture,
+            normalize_capture(
                 _header(
                     package,
                     repository_root=repository_root,
                     directory=directory,
                 ),
-                target_inputs=package.inputs,
+                serialization,
+                canonical_inputs,
             )
         )
     witness_sets = {}
@@ -480,7 +380,7 @@ def build_evidence_product(repository_root: Path) -> EvidenceProduct:
             )
         witness_sets.setdefault(witness_set.witness_set_id, witness_set)
     return EvidenceProduct(
-        schema_version=1,
+        schema_version=2,
         canonical_inputs=canonical_inputs,
         witness_sets=list(witness_sets.values()),
         records=[capture.record for capture in captures],

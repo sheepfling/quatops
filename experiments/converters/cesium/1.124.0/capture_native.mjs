@@ -8,6 +8,8 @@ import { numeric } from '../../shared/numeric_evidence.mjs';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const packageRoot = here;
+const repositoryRoot = path.resolve(here, '../../../..');
+const semanticContractPath = path.join(here, 'semantic_contract.json');
 const C = await import(pathToFileURL(path.join(packageRoot, 'node_modules/cesium/Source/Cesium.js')));
 const inputPath = path.join(here, 'converter_inputs.json');
 const outputPath = process.argv[2];
@@ -70,6 +72,7 @@ const packageVersion = JSON.parse(fs.readFileSync(packageJsonPath, 'utf8')).vers
 const exporterPath = fileURLToPath(import.meta.url);
 const manifest = {
   schema_version: '1.0', evidence_kind: 'native_cesium_quatops_converter_capture',
+  semantic_contract: { file: path.relative(repositoryRoot, semanticContractPath).split(path.sep).join('/'), sha256: sha(semanticContractPath) },
   target: { name: 'CesiumJS', package_version: packageVersion, api_version: C.VERSION, package_entry_sha256: sha(path.join(packageRoot, 'node_modules/cesium/Build/Cesium/Cesium.js')) },
   execution: { was_run: true, utc: new Date().toISOString(), node: process.version, v8: process.versions.v8, platform: os.platform(), architecture: os.arch() },
   inputs: { path: path.relative(here, inputPath), sha256: sha(inputPath), kind: 'QuatOps-generated explicit-frame converter inputs' },

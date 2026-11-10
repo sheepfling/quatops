@@ -8,6 +8,13 @@ what its capture actually establishes.
 For a cross-target summary of measured conventions and evidence status, see the
 [interoperability evidence atlas](../INTEROPERABILITY_EVIDENCE.md).
 
+## Game engine captures
+
+Native engine captures are indexed separately because they prove behavior in
+the pinned engine runtime. See the [engine adapter index](../engines/README.md)
+for Unreal, Unity, Godot, and Blender, with runtime contracts and witnesses
+linked from the [engine proof matrix](../engines/proof-matrix.md).
+
 ## Captured
 
 - [CesiumJS 1.124.0](cesium.md): local-ENU quaternion conversion and native WGS84 ENU/ECEF placement.

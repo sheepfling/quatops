@@ -70,3 +70,10 @@ class NativeCaptureModel(BaseModel):
     """Strict typed model for target-specific capture packages."""
 
     model_config = ConfigDict(extra="forbid", frozen=True, strict=True)
+
+
+class SemanticContractReference(NativeCaptureModel):
+    """Manifest link to an experiment-owned semantic contract file."""
+
+    file: str
+    sha256: SHA256

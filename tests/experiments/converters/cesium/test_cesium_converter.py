@@ -8,8 +8,14 @@ import json
 import numpy as np
 from scipy.spatial.transform import Rotation
 
+from quatops.experimental.semantics import (
+    Ellipsoid,
+    GeodeticOrigin,
+    bind_cesium_enu_frame,
+)
 from quatops.python import hamilton
 from tests.support.paths import REPOSITORY_ROOT
+from tests.support.provenance_archives import read_provenance_source
 
 ROOT = REPOSITORY_ROOT
 FIXTURE = ROOT / "tests/golden/transports/cesium/1.124.0"
@@ -121,9 +127,12 @@ def test_cesium_capture_provenance_and_explicit_frame_contract():
     }
     for field, path in reproduction_paths.items():
         assert hashlib.sha256(path.read_bytes()).hexdigest() == reproduction[field]
-    assert hashlib.sha256(
-        (ROOT / reproduction["input_generator_archive"]).read_bytes()
-    ).hexdigest() == MANIFEST["provenance"]["captured_input_generator_sha256"]
+    assert (
+        hashlib.sha256(
+            read_provenance_source(ROOT, reproduction["input_generator_archive"])
+        ).hexdigest()
+        == MANIFEST["provenance"]["captured_input_generator_sha256"]
+    )
 
 
 def test_quatops_generated_local_quaternions_match_cesium_native_actions_and_roundtrips():
@@ -240,3 +249,32 @@ def test_cesium_composition_antipode_and_geographic_branch_witnesses_are_discrim
         )
         > 0.1
     )
+
+
+def test_enu_semantic_binding_matches_cesium_native_world_basis_at_site():
+    case_id = "mixed_a@geo-03"
+    item = next(row for row in INPUTS["cases"] if row["case_id"] == case_id)
+    output = OBSERVATIONS[case_id]["outputs"]
+    geodetic_origin = GeodeticOrigin(
+        item["longitude_degrees"], item["latitude_degrees"], item["height_m"]
+    )
+    binding = bind_cesium_enu_frame(
+        name=f"enu@{case_id}",
+        origin=geodetic_origin,
+        ellipsoid=Ellipsoid("WGS84", 6_378_137.0, 6_356_752.314245179),
+    )
+
+    # Recover Cesium's local ENU-to-ECEF basis from its captured world basis
+    # action and the independently recorded local orientation input.
+    native_world_basis = np.asarray(
+        values(output["world_directions_xyz"])[:3], dtype=float
+    ).T
+    local_rotation = rotation_matrix(item["canonical_wxyz"])
+    native_enu_to_ecef = native_world_basis @ local_rotation.T
+    check(
+        binding.coordinate_frame.basis_to_reference.matrix,
+        native_enu_to_ecef,
+        "semantic ENU frame binding matches Cesium's native basis action",
+    )
+    assert binding.origin == geodetic_origin
+    assert binding.ellipsoid is not None and binding.ellipsoid.name == "WGS84"

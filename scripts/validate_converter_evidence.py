@@ -9,7 +9,7 @@ from scripts.converter_evidence import (
     converter_fixture_directories,
     load_converter_evidence,
 )
-from scripts.evidence_schema.engine_product import ENGINE_VERSIONS, load_engine_package
+from scripts.evidence_schema.engine_evidence import ENGINE_VERSIONS, load_engine_package
 
 
 def main() -> None:
