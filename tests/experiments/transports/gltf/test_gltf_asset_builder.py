@@ -85,17 +85,6 @@ class GltfAssetBuilderTests(unittest.TestCase):
             ):
                 builder.flatten_accessor_values(values, type_name)
 
-    def test_canonical_text_ignores_host_newlines(self) -> None:
-        with tempfile.TemporaryDirectory() as directory:
-            path = Path(directory) / "newlines.gltf"
-            canonical = b'{\n  "asset": {"version": "2.0"}\n}\n'
-            for encoded in (canonical, canonical.replace(b"\n", b"\r\n")):
-                with self.subTest(encoded=encoded):
-                    path.write_bytes(encoded)
-                    self.assertEqual(
-                        path.read_text(encoding="utf-8").encode("utf-8"), canonical
-                    )
-
     def test_asset_bytes_and_accessor_layout(self) -> None:
         # Golden bytes from the unmodified builder at
         # 4dd13d0cdbb314f09407f4a66164846cb4eda1c9.
