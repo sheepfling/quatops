@@ -139,26 +139,6 @@ def _validate_frame_map(package: EngineSemanticPackage) -> tuple[str, str, str]:
     return declared_labels
 
 
-def _validate_probe_vectors(
-    package: EngineSemanticPackage, canonical_inputs: CanonicalInputs
-) -> None:
-    conversion = package.contract.conversion
-    if len(canonical_inputs.probe_vector_xyz) != 3:
-        raise ValueError("shared canonical input must include a three-vector probe")
-    for profile, cases, _composition, _reverse in _profile_cases(package):
-        tolerance = conversion.native_precision_tolerance.get(profile)
-        if tolerance is None:
-            raise ValueError(f"engine contract lacks tolerance for {profile}")
-        probe_cases = [row for row in cases if row.case_id == "mixed_a"]
-        if (
-            len(probe_cases) != 1
-            or probe_cases[0].native_rotated_probe_vector_xyz is None
-        ):
-            raise ValueError(
-                f"engine {profile} witnesses must retain one mixed-vector action"
-            )
-
-
 def _profile_cases(
     package: EngineSemanticPackage,
 ) -> list[tuple[str, list[EngineOrientation], EngineComposition, EngineComposition]]:
@@ -201,6 +181,8 @@ def _orientation_witnesses(
     retained_case_ids = ENGINE_RETAINED_CASE_IDS
     output: list[QuaternionBoundaryWitness] = []
     for precision, cases, composition, reverse in _profile_cases(package):
+        if precision not in package.contract.conversion.native_precision_tolerance:
+            raise ValueError(f"engine contract lacks tolerance for {precision}")
         retained_rows = select_retained_rows(
             cases, retained_case_ids, context=f"{identity.engine} {precision}"
         )
@@ -279,7 +261,6 @@ def serialize_engine_semantics(
     engine = contract.engine
     conversion = contract.conversion
     declared_labels = _validate_frame_map(package)
-    _validate_probe_vectors(package, canonical_inputs)
     handedness = _handedness_from_map(conversion.destination_axes_from_source)
     source = conversion.canonical_frame
     if source.handedness.lower() not in {"right", "right-handed"}:

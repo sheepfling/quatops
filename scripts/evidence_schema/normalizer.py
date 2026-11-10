@@ -250,14 +250,14 @@ def _validate_contract_basis(
 def _validate_witnesses(
     serialization: SemanticSerialization, native_precision: Sequence[str]
 ) -> None:
+    if not serialization.witnesses:
+        raise ValueError("target semantic serialization contains no witnesses")
     if isinstance(
         serialization,
         (EngineQuaternionSerialization, NativeQuaternionApiSerialization),
     ):
         contract = serialization.contract
         witnesses = serialization.witnesses
-        if not witnesses:
-            raise ValueError("target semantic serialization contains no witnesses")
         for witness in witnesses:
             if witness.coefficient_order != contract.native_order:
                 raise ValueError(
@@ -272,8 +272,6 @@ def _validate_witnesses(
 
     if isinstance(serialization, RotationVectorSerialization):
         witnesses = serialization.witnesses
-        if not witnesses:
-            raise ValueError("target semantic serialization contains no witnesses")
         if any(witness.precision not in native_precision for witness in witnesses):
             raise ValueError(
                 "rotation-vector witness precision is absent from target metadata"
@@ -283,8 +281,6 @@ def _validate_witnesses(
     if isinstance(serialization, FrameChainSerialization):
         contract = serialization.contract
         witnesses = serialization.witnesses
-        if not witnesses:
-            raise ValueError("target semantic serialization contains no witnesses")
         mappings = {row.frame for row in contract.frame_mappings}
         for witness in witnesses:
             transforms = (
@@ -328,8 +324,6 @@ def _validate_witnesses(
     if isinstance(serialization, GeographicSerialization):
         contract = serialization.contract
         witnesses = serialization.witnesses
-        if not witnesses:
-            raise ValueError("target semantic serialization contains no witnesses")
         for witness in witnesses:
             if witness.coefficient_order != contract.quaternion_order:
                 raise ValueError(
@@ -341,8 +335,6 @@ def _validate_witnesses(
     if isinstance(serialization, SceneTransportSerialization):
         contract = serialization.contract
         witnesses = serialization.witnesses
-        if not witnesses:
-            raise ValueError("target semantic serialization contains no witnesses")
         for witness in witnesses:
             if witness.coefficient_order != contract.quaternion_order:
                 raise ValueError(
