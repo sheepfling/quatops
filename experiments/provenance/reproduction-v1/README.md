@@ -5,6 +5,7 @@ kept in [`../reproduction-v1.zip`](../reproduction-v1.zip). Evidence metadata
 references a member as `experiments/provenance/reproduction-v1.zip#<member>`;
 the member's SHA-256 remains the source identity recorded by the capture.
 
-The archive groups the earlier standalone `.py.txt` and `.cpp.txt` snapshots
-without changing their contents. New reproduction sources belong beside their
-experiment and should use a typed capture model at the export boundary.
+The archive groups historical standalone `.py.txt` and `.cpp.txt` snapshots
+without changing their contents, including the later Cesium input-generator
+snapshot. New reproduction sources belong beside their experiment and should
+use a typed capture model at the export boundary.

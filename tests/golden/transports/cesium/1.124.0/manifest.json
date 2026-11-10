@@ -29,7 +29,7 @@
     "contract_sha256": "18b97f79b455cf197421566bec02fae6380c4060cecbc0439bdfc8aa15f5c5d9",
     "input_serialization_note": "JSON formatting changed only; parsed native input values are unchanged.",
     "captured_input_generator_sha256": "53fc7b1ebaa120677a08ba1d578983de7b2694ea8b17a5321dcb2e6797d9b6a0",
-    "captured_input_generator_archive": "experiments/provenance/reproduction-v2/cesium-1.124.0-create_inputs.py.txt"
+    "captured_input_generator_archive": "experiments/provenance/reproduction-v1.zip#cesium-1.124.0-create_inputs-v2.py"
   },
   "reproduction": {
     "input_generator_sha256": "39db4feb151d0584b028a861f25e7e63d733aba8a1d381623e0a3c48f9c26137",
@@ -42,7 +42,7 @@
     "retention_formatter_sha256": "56961d6be101a2bdfb1b21372c823ec86dfd636547d851901b7284f2ae20e0b3",
     "package_lock_sha256": "5e331bee862cbdff2a96dec2d325e86aa996b780821833899f4053e9476002e0",
     "geographic_inputs_sha256": "619099b732593c6c45f4f7eb64714e4c7d79b2c96dcd070777522e3736e4f085",
-    "input_generator_archive": "experiments/provenance/reproduction-v2/cesium-1.124.0-create_inputs.py.txt"
+    "input_generator_archive": "experiments/provenance/reproduction-v1.zip#cesium-1.124.0-create_inputs-v2.py"
   },
   "selection": {
     "retained_observations": 5,

@@ -17,15 +17,13 @@ from scripts.evidence_schema.openxr import (
     finite_max_abs,
 )
 from tests.support.paths import REPOSITORY_ROOT
+from tests.support.provenance_archives import read_provenance_source
 
 ROOT = REPOSITORY_ROOT
 CAPTURE_DIR = ROOT / "experiments/oracles/openxr/1.1.65"
 MANIFEST_PATH = CAPTURE_DIR / "manifest.json"
 WITNESS_PATH = CAPTURE_DIR / "witnesses/test_runtime_frame_chain.json"
 VERIFIER_PATH = CAPTURE_DIR / "verify_test_runtime.py"
-HISTORICAL_VERIFIER = (
-    ROOT / "experiments/provenance/source-v1/openxr-1.1.65/verify_test_runtime.py.txt"
-)
 
 
 def _capture_document() -> dict:
@@ -39,7 +37,12 @@ def test_openxr_producer_hash_and_current_replay_identity_are_distinct() -> None
     ]
     current_hash = manifest["replay"]["verifier_script_sha256"]
     assert (
-        hashlib.sha256(HISTORICAL_VERIFIER.read_bytes()).hexdigest() == historical_hash
+        hashlib.sha256(
+            read_provenance_source(
+                ROOT, manifest["artifacts"]["historical_verifier_archive"]
+            )
+        ).hexdigest()
+        == historical_hash
     )
     assert hashlib.sha256(VERIFIER_PATH.read_bytes()).hexdigest() == current_hash
     assert historical_hash != current_hash

@@ -123,6 +123,7 @@
       "source.json": "d91745c6bf6d99503fe2d91da2996d2fe7703eb68cc5a2d4b63aa1476c5bebe0",
       "verify_test_runtime.py": "e118aa3f80525f45c5bfd8671fbe6ce0f4cec60bc350a1f34ae8849be416d424"
     },
+    "historical_verifier_archive": "experiments/provenance/reproduction-v1.zip#openxr-1.1.65-verify_test_runtime.py",
     "input_sha256": null,
     "native_executable_sha256": "f4584c5f26a147cc396d171f2fffb2853d3bb7a0f38be26a5f44ac15f4a112fd",
     "native_output": "header_abi.json",
