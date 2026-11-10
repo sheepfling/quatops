@@ -2,7 +2,8 @@
 
 from __future__ import annotations
 
-from typing import Annotated, Literal, Optional, Union
+import math
+from typing import Annotated, Literal, Union
 
 from pydantic import Field, FiniteFloat, model_validator
 
@@ -15,8 +16,6 @@ FiniteVector3 = Annotated[list[FiniteFloat], Field(min_length=3, max_length=3)]
 FiniteQuaternion4 = Annotated[list[FiniteFloat], Field(min_length=4, max_length=4)]
 FiniteMatrix3 = Annotated[list[FiniteVector3], Field(min_length=3, max_length=3)]
 InputVector3 = Annotated[list[FiniteInputNumber], Field(min_length=3, max_length=3)]
-InputQuaternion4 = Annotated[list[FiniteInputNumber], Field(min_length=4, max_length=4)]
-InputMatrix3 = Annotated[list[InputVector3], Field(min_length=3, max_length=3)]
 
 
 def reject_lost_nonfinite_values(value: object) -> None:
@@ -40,60 +39,17 @@ class RosFullTransform(NativeCaptureModel):
     matrix_rows: FiniteMatrix3
 
 
-class RosEulerInputs(NativeCaptureModel):
-    roll_pitch_yaw_radians: InputVector3
-    probe_vectors_xyz: list[FiniteVector3]
+class RosChainEdge(NativeCaptureModel):
+    rpy_radians: InputVector3
+    translation_xyz: InputVector3
 
 
-class RosEulerOutputs(NativeCaptureModel):
-    quaternion_xyzw: FiniteQuaternion4
-    matrix_rows: FiniteMatrix3
-    readback_rpy: FiniteVector3
-    message_xyzw: FiniteQuaternion4
-    message_roundtrip_xyzw: FiniteQuaternion4
-    basis_and_probe_images: list[FiniteVector3]
-
-
-class RosEulerObservation(NativeCaptureModel):
-    case_id: str
-    operation_id: Literal["setRPY-message-action"]
-    native_entry_point: str
-    native_inputs: RosEulerInputs
-    native_outputs: RosEulerOutputs
-
-
-class RosProductsInputs(NativeCaptureModel):
-    a_xyzw: FiniteQuaternion4
-    b_xyzw: FiniteQuaternion4
-
-
-class RosProductsOutputs(NativeCaptureModel):
-    ab_xyzw: FiniteQuaternion4
-    ba_xyzw: FiniteQuaternion4
-
-
-class RosProductsObservation(NativeCaptureModel):
-    case_id: str
-    operation_id: Literal["products"]
-    native_entry_point: str
-    native_inputs: RosProductsInputs
-    native_outputs: RosProductsOutputs
-
-
-class RosMatrixInputs(NativeCaptureModel):
-    matrix_rows: FiniteMatrix3
-
-
-class RosMatrixOutputs(NativeCaptureModel):
-    quaternion_xyzw: FiniteQuaternion4
-
-
-class RosMatrixObservation(NativeCaptureModel):
-    case_id: str
-    operation_id: Literal["matrix-to-quaternion"]
-    native_entry_point: str
-    native_inputs: RosMatrixInputs
-    native_outputs: RosMatrixOutputs
+class RosChainInputs(NativeCaptureModel):
+    case_id: Literal["world-base-sensor"]
+    world_from_base: RosChainEdge
+    base_from_sensor: RosChainEdge
+    probe_in_source_xyz: InputVector3
+    stamp_sec: int
 
 
 class RosLookupInputs(NativeCaptureModel):
@@ -103,6 +59,8 @@ class RosLookupInputs(NativeCaptureModel):
     world_from_base: RosFullTransform
     base_from_sensor: RosFullTransform
     probe_in_source_xyz: FiniteVector3
+    world_from_base_rpy: InputVector3
+    base_from_sensor_rpy: InputVector3
 
 
 class RosLookupMessage(NativeCaptureModel):
@@ -141,13 +99,7 @@ class RosSensorLookupObservation(NativeCaptureModel):
 
 
 RosFullObservation = Annotated[
-    Union[
-        RosEulerObservation,
-        RosProductsObservation,
-        RosMatrixObservation,
-        RosWorldLookupObservation,
-        RosSensorLookupObservation,
-    ],
+    Union[RosWorldLookupObservation, RosSensorLookupObservation],
     Field(discriminator="operation_id"),
 ]
 
@@ -191,9 +143,14 @@ class RosFullCapture(NativeCaptureModel):
                         f"{row.operation_id} message timestamp does not match its input"
                     )
                 lookup = row.native_outputs.lookup
-                if (
-                    message.translation_xyz != lookup.translation_xyz
-                    or message.rotation_xyzw != lookup.quaternion_xyzw
+                if message.translation_xyz != lookup.translation_xyz or not any(
+                    all(
+                        math.isclose(left, sign * right, rel_tol=0.0, abs_tol=2e-12)
+                        for left, right in zip(
+                            message.rotation_xyzw, lookup.quaternion_xyzw
+                        )
+                    )
+                    for sign in (-1.0, 1.0)
                 ):
                     raise ValueError(
                         f"{row.operation_id} message fields differ from the lookup"
@@ -227,123 +184,21 @@ class RosFullCapture(NativeCaptureModel):
         return self
 
 
-class RosCorpusEuler(NativeCaptureModel):
-    case_id: str
-    xyz: InputVector3
-    actual_bits_hex: list[str]
-    family: str
-    numeric_format: str
-    order_label: Optional[str]  # noqa: UP045 -- Pydantic evaluates this on the Python 3.9 floor.
-    units: str
-
-
-class RosCorpusProduct(NativeCaptureModel):
-    case_id: str
-    a_wxyz: InputQuaternion4
-    b_wxyz: InputQuaternion4
-    family: str
-
-
-class RosCorpusMatrix(NativeCaptureModel):
-    case_id: str
-    domain: str
-    rows: InputMatrix3
-
-
-class RosSelectedCorpus(NativeCaptureModel):
-    euler_inputs: list[RosCorpusEuler]
-    multiplication_pairs: list[RosCorpusProduct]
-    matrix_inputs: list[RosCorpusMatrix]
-    vectors_xyz: list[InputVector3]
-
-    @model_validator(mode="after")
-    def validate_unique_case_ids(self) -> RosSelectedCorpus:
-        for label, rows in (
-            ("Euler", self.euler_inputs),
-            ("product", self.multiplication_pairs),
-            ("matrix", self.matrix_inputs),
-        ):
-            ids = [row.case_id for row in rows]
-            if any(not case_id for case_id in ids) or len(ids) != len(set(ids)):
-                raise ValueError(
-                    f"ROS selected {label} case IDs must be nonempty and unique"
-                )
-        return self
-
-
-def validate_ros_capture_corpus_link(
-    capture: RosFullCapture, corpus: RosSelectedCorpus
+def validate_ros_capture_inputs(
+    capture: RosFullCapture, inputs: RosChainInputs
 ) -> None:
-    """Link echoed native inputs and consumed probes to the selected source corpus."""
-    by_key = {(row.case_id, row.operation_id): row for row in capture.observations}
-    expected_keys = {
-        *((row.case_id, "setRPY-message-action") for row in corpus.euler_inputs),
-        *((row.case_id, "products") for row in corpus.multiplication_pairs),
-        *(
-            (row.case_id, "matrix-to-quaternion")
-            for row in corpus.matrix_inputs
-            if row.domain == "proper_rotation"
-        ),
-        ("world-base-sensor", "lookup-world-from-sensor"),
-        ("world-base-sensor", "lookup-sensor-from-world"),
-    }
-    if set(by_key) != expected_keys:
-        raise ValueError("ROS stdout operation IDs do not match the selected corpus")
-
-    for source in corpus.euler_inputs:
-        observation = by_key[(source.case_id, "setRPY-message-action")]
-        if not isinstance(observation, RosEulerObservation):
-            raise TypeError(
-                f"ROS Euler case {source.case_id!r} has the wrong operation"
-            )
-        if observation.native_inputs.roll_pitch_yaw_radians != source.xyz:
-            raise ValueError(
-                f"ROS Euler input {source.case_id!r} differs from its corpus row"
-            )
-        expected_probes = [
-            [float(value) for value in probe] for probe in corpus.vectors_xyz
-        ]
-        if observation.native_inputs.probe_vectors_xyz != expected_probes:
-            raise ValueError(
-                f"ROS Euler probe inputs {source.case_id!r} differ from the selected corpus"
-            )
-        if len(observation.native_outputs.basis_and_probe_images) != len(
-            expected_probes
-        ):
-            raise ValueError(
-                f"ROS Euler output {source.case_id!r} has the wrong probe count"
-            )
-
-    for source in corpus.multiplication_pairs:
-        observation = by_key[(source.case_id, "products")]
-        if not isinstance(observation, RosProductsObservation):
-            raise TypeError(
-                f"ROS product case {source.case_id!r} has the wrong operation"
-            )
-        expected_a = [float(value) for value in source.a_wxyz[1:]] + [
-            float(source.a_wxyz[0])
-        ]
-        expected_b = [float(value) for value in source.b_wxyz[1:]] + [
-            float(source.b_wxyz[0])
-        ]
+    """Link both native frame-chain observations to the exact declared inputs."""
+    for row in capture.observations:
+        native = row.native_inputs
         if (
-            observation.native_inputs.a_xyzw != expected_a
-            or observation.native_inputs.b_xyzw != expected_b
+            row.case_id != inputs.case_id
+            or native.stamp_sec != inputs.stamp_sec
+            or native.world_from_base_rpy != inputs.world_from_base.rpy_radians
+            or native.base_from_sensor_rpy != inputs.base_from_sensor.rpy_radians
+            or native.world_from_base.translation_xyz
+            != inputs.world_from_base.translation_xyz
+            or native.base_from_sensor.translation_xyz
+            != inputs.base_from_sensor.translation_xyz
+            or native.probe_in_source_xyz != inputs.probe_in_source_xyz
         ):
-            raise ValueError(
-                f"ROS product inputs {source.case_id!r} differ from its corpus row"
-            )
-
-    for source in corpus.matrix_inputs:
-        if source.domain != "proper_rotation":
-            continue
-        observation = by_key[(source.case_id, "matrix-to-quaternion")]
-        if not isinstance(observation, RosMatrixObservation):
-            raise TypeError(
-                f"ROS matrix case {source.case_id!r} has the wrong operation"
-            )
-        expected_rows = [[float(value) for value in row] for row in source.rows]
-        if observation.native_inputs.matrix_rows != expected_rows:
-            raise ValueError(
-                f"ROS matrix input {source.case_id!r} differs from its corpus row"
-            )
+            raise ValueError("ROS native chain inputs differ from the declared recipe")

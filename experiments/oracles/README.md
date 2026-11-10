@@ -10,10 +10,9 @@ captures and their pinned environments belong together under
 Read the [shared native capture inputs and helpers](shared/README.md) for the
 corpus and capture-envelope conventions.
 
-[`shared/orientation_inputs_v1.json`](shared/orientation_inputs_v1.json)
-contains only the fields consumed by the ROS/tf2 capture. Other converter
-acceptance packages use the canonical witness inputs in
-[`experiments/interoperability`](../interoperability/README.md).
+Converter acceptance packages use the canonical witness inputs in
+[`experiments/interoperability`](../interoperability/README.md) or a
+target-specific input recipe.
 
 ## Supporting captures
 

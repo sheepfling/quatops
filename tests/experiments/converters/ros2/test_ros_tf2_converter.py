@@ -9,7 +9,7 @@ import numpy as np
 
 from quatops.experimental.engines import QuaternionFrameMap, SignedAxisMap
 from quatops.python import hamilton
-from scripts.evidence_schema.ros_capture import RosSelectedCorpus
+from scripts.evidence_schema.ros_capture import RosChainInputs
 from tests.support.paths import REPOSITORY_ROOT
 from tests.support.provenance_archives import read_provenance_source
 
@@ -107,25 +107,20 @@ def test_ros_capture_is_native_pinned_and_selected_values_are_lossless():
         / "experiments/converters/ros2/0.36.23/native/src/capture_ros.cpp",
         "runner_sha256": ROOT / "experiments/converters/ros2/0.36.23/capture_native.py",
         "capture_helper_sha256": ROOT / "experiments/oracles/shared/capture_io.py",
+        "capture_schema_sha256": ROOT / "scripts/evidence_schema/ros_capture.py",
         "retention_script_sha256": ROOT / "scripts/retain_ros_tf2_witnesses.py",
         "retention_helper_sha256": ROOT / "scripts/evidence_json.py",
         "retention_formatter_sha256": ROOT / "scripts/evidence_format.py",
         "dockerfile_sha256": ROOT / "experiments/converters/ros2/0.36.23/Dockerfile",
         "build_recipe_sha256": ROOT
         / "experiments/converters/ros2/0.36.23/native/CMakeLists.txt",
-        "corpus_sha256": ROOT / "experiments/oracles/shared/orientation_inputs_v1.json",
+        "corpus_sha256": ROOT / "experiments/converters/ros2/0.36.23/chain_inputs.json",
     }
     for field, path in file_hashes.items():
         assert hashlib.sha256(path.read_bytes()).hexdigest() == reproduction[field]
 
     corpus = json.loads(file_hashes["corpus_sha256"].read_text(encoding="utf-8"))
-    assert set(corpus) == {
-        "euler_inputs",
-        "multiplication_pairs",
-        "matrix_inputs",
-        "vectors_xyz",
-    }
-    RosSelectedCorpus.model_validate(corpus, strict=True)
+    RosChainInputs.model_validate(corpus, strict=True)
 
     archived_exporter = read_provenance_source(
         ROOT, reproduction["exporter_source_archive"]
@@ -135,9 +130,7 @@ def test_ros_capture_is_native_pinned_and_selected_values_are_lossless():
         == reproduction["previous_checkout_exporter_source_sha256"]
         == provenance["exporter_source_sha256"]
     )
-    assert reproduction["exporter_source_identity_note"].endswith(
-        "has not been rebuilt or recaptured."
-    )
+    assert "historical producer" in reproduction["exporter_source_identity_note"]
 
     archived_capture_helper = read_provenance_source(
         ROOT, reproduction["capture_helper_archive"]

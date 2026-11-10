@@ -20,10 +20,10 @@ from experiments.oracles.shared.capture_io import (
 )
 from scripts.evidence_json import dump_evidence_json, read_evidence_document
 from scripts.evidence_schema.ros_capture import (
+    RosChainInputs,
     RosFullCapture,
-    RosSelectedCorpus,
     reject_lost_nonfinite_values,
-    validate_ros_capture_corpus_link,
+    validate_ros_capture_inputs,
 )
 
 
@@ -67,7 +67,9 @@ def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--repository-root", type=Path, required=True)
     parser.add_argument(
+        "--inputs",
         "--corpus",
+        dest="inputs",
         type=Path,
     )
     parser.add_argument("--output", type=Path, required=True)
@@ -76,9 +78,8 @@ def main() -> None:
     args = parser.parse_args()
     repository_root = args.repository_root.resolve(strict=True)
     package_dir = repository_root / "experiments/converters/ros2/0.36.23"
-    corpus = args.corpus or (
-        repository_root / "experiments/oracles/shared/orientation_inputs_v1.json"
-    )
+    corpus = args.inputs or package_dir / "chain_inputs.json"
+    inputs = RosChainInputs.model_validate(read_evidence_document(corpus), strict=True)
 
     package_versions = [
         {
@@ -140,21 +141,8 @@ def main() -> None:
 
     result = read_evidence_document(stdout)
     reject_lost_nonfinite_values(result)
-    corpus_document = read_evidence_document(corpus)
-    relevant_corpus = RosSelectedCorpus.model_validate(
-        {
-            key: corpus_document[key]
-            for key in (
-                "euler_inputs",
-                "multiplication_pairs",
-                "matrix_inputs",
-                "vectors_xyz",
-            )
-        },
-        strict=True,
-    )
     checked = RosFullCapture.model_validate(result, strict=True)
-    validate_ros_capture_corpus_link(checked, relevant_corpus)
+    validate_ros_capture_inputs(checked, inputs)
     if checked.native_scalar_bytes != 8:
         raise ValueError(
             "This wrapper requires double tf2Scalar; capture 32-bit fields separately"
@@ -188,11 +176,13 @@ def main() -> None:
                 repository_root / "experiments/oracles/shared/capture_io.py",
                 "capture_envelope_helper",
             ),
+            (
+                repository_root / "scripts/evidence_schema/ros_capture.py",
+                "capture_validation_schema",
+            ),
         ]
     )
-    manifest_path = capture.finish(
-        ["EULER", "ALGEBRA", "MATRIX", "ACTION", "FRAME", "FORMAT"]
-    )
+    manifest_path = capture.finish(["ACTION", "FRAME", "FORMAT"])
     manifest = read_evidence_document(manifest_path)
     manifest["semantic_contract"] = {
         "file": semantic_contract.relative_to(repository_root).as_posix(),

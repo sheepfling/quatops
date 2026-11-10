@@ -31,9 +31,10 @@ def main() -> None:
     dockerfile = package_dir / "Dockerfile"
     cmake = package_dir / "native/CMakeLists.txt"
     capture_helper = repository_root / "experiments/oracles/shared/capture_io.py"
+    capture_schema = repository_root / "scripts/evidence_schema/ros_capture.py"
     retention_helper = repository_root / "scripts/evidence_json.py"
     retention_formatter = repository_root / "scripts/evidence_format.py"
-    corpus = repository_root / "experiments/oracles/shared/orientation_inputs_v1.json"
+    corpus = package_dir / "chain_inputs.json"
     destination = repository_root / "tests/golden/oracles/ros2/0.36.23"
     capture_dir = args.capture_dir.resolve()
     manifest = read_evidence_document(capture_dir / "manifest.json")
@@ -153,6 +154,7 @@ def main() -> None:
                         "exporter_source_sha256": sha256(source),
                         "runner_sha256": sha256(runner),
                         "capture_helper_sha256": sha256(capture_helper),
+                        "capture_schema_sha256": sha256(capture_schema),
                         "retention_script_sha256": sha256(Path(__file__)),
                         "retention_helper_sha256": sha256(retention_helper),
                         "retention_formatter_sha256": sha256(retention_formatter),
@@ -160,8 +162,8 @@ def main() -> None:
                         "build_recipe_sha256": sha256(cmake),
                         "corpus_sha256": sha256(corpus),
                         "input_serialization_note": (
-                            "The reproduction corpus retains only exporter-consumed fields; "
-                            "the historical capture has its own input digest."
+                            "The frame-chain recipe is the capture input; "
+                            "historical captures retain their own input digest."
                         ),
                     },
                 },
