@@ -133,24 +133,6 @@
   },
   "review": {
     "state": "header_abi_spec_contract_and_khronos_test_runtime_frame_chain_reviewed",
-    "specification_facts_reviewed": [
-      "XrQuaternionf is a unit quaternion with float x, y, z, w members.",
-      "XrPosef stores orientation and position; position is in meters and orientation is applied before translation.",
-      "xrLocateSpace returns the pose of space in baseSpace at the requested time; results may change as reference-space origins are revised.",
-      "VIEW, LOCAL, and LOCAL_FLOOR use +X right, +Y up, -Z forward; STAGE uses +Y up with runtime-defined XZ bounds and optional support."
-    ],
-    "frame_direction_interpretation": "The specification defines xrLocateSpace(target, baseSpace) as the pose of target in baseSpace; the test-runtime witness natively exercises that argument direction and frame chain.",
-    "specification_sources": [
-      "https://registry.khronos.org/OpenXR/specs/1.1/man/html/XrQuaternionf.html",
-      "https://registry.khronos.org/OpenXR/specs/1.1/man/html/XrPosef.html",
-      "https://registry.khronos.org/OpenXR/specs/1.1/man/html/xrLocateSpace.html",
-      "https://registry.khronos.org/OpenXR/specs/1.1/man/html/XrReferenceSpaceType.html"
-    ],
-    "limitations": [
-      "No system or vendor OpenXR runtime was installed or registered; the pinned Khronos software test runtime was loaded directly.",
-      "The test runtime uses static supplied reference-space offsets; this does not establish headset tracking, vendor behavior, or real-time pose location.",
-      "The synthetic XrTime value is specific to the test runtime capture and is not a production display-time example.",
-      "OpenXR does not define a universal world frame, and this capture does not validate a QuatOps adapter."
-    ]
+    "details_file": "README.md"
   }
 }

@@ -67,12 +67,7 @@
   },
   "review": {
     "state": "selected_native_discovery_witnesses_reviewed",
-    "native_findings": [
-      "Both scalar profiles normalize non-unit Eigen::Quaternion construction; constructor arguments are WXYZ and SO3::params() exposes XYZW.",
-      "Both profiles preserve opposite stored signs for antipodes while producing equivalent native vector actions.",
-      "Both profiles capture exp/log through the selected near-zero, exact-pi, and above-pi cases.",
-      "Both profiles capture noncommuting product orders, inverse, and distinct left/right perturbation products with native vector actions."
-    ],
+    "details_file": "README.md",
     "derived_reference_review_by_profile": {
       "float32": {
         "evidence_kind": "derived_reference",
@@ -100,11 +95,6 @@
         "maximum_absolute_error": 1.7763568394002505e-15,
         "result": "pass"
       }
-    },
-    "limitations": [
-      "This is supporting SO(3) evidence, not an accepted QuatOps converter.",
-      "Jacobian and tangent-derivative behavior was not captured.",
-      "The assigned probe frame is explicit for these experiments and is not a universal Sophus frame."
-    ]
+    }
   }
 }

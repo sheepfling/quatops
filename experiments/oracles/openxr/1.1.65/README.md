@@ -48,7 +48,9 @@ validated QuatOps adapter or universal OpenXR world frame.
 
 OpenXR specifies the handedness and natural axes for reference spaces:
 `LOCAL` uses +X right, +Y up, and -Z forward, while the particular LOCAL origin
-is runtime-selected. These specification facts are not observations of a
+is runtime-selected. `VIEW` and `LOCAL_FLOOR` use the same axis directions;
+`STAGE` uses +Y up with runtime-defined XZ bounds and optional support.
+These specification facts are not observations of a
 vendor runtime. No source model-forward axis is inferred from an engine or
 runtime name.
 
