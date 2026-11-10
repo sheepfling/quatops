@@ -57,17 +57,14 @@ class ContractTargetIdentity(NativeCaptureModel):
     openusd_version_tuple: Optional[list[int]] = None
 
 
-class ContractFrame(NativeCaptureModel):
-    handedness: str
-    positive_x: str
-    positive_y: str
-    positive_z: str
-
-
 class CanonicalAxesContract(NativeCaptureModel):
     positive_x: str
     positive_y: str
     positive_z: str
+
+
+class ContractFrame(CanonicalAxesContract):
+    handedness: str
 
 
 class CanonicalRotationContract(NativeCaptureModel):
@@ -80,10 +77,7 @@ class CanonicalRotationContract(NativeCaptureModel):
     frame: CanonicalAxesContract
 
 
-class ProbeFrameAssignment(NativeCaptureModel):
-    positive_x: str
-    positive_y: str
-    positive_z: str
+class ProbeFrameAssignment(CanonicalAxesContract):
     meaning: str
 
 
@@ -132,7 +126,6 @@ class OpenCVBoundaryContract(BoundaryContractBase):
     representation: str
     rotation_vector_from_canonical: str
     native_matrix_action: str
-    native_to_canonical: str
     coordinate_map: Annotated[list[str], Field(min_length=3, max_length=3)]
     matrix_layout: str
 
