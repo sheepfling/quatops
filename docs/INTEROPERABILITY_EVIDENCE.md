@@ -72,7 +72,8 @@ outside this converter evidence set. OpenUSD evidence is limited to its
 converter stage proof.
 
 The capture exporters and retained witnesses remain auxiliary evidence outside
-`src/`. The common field-level converter profiles under `src/quatops/converters`
+`src/`. The common field-level converter profiles under
+`src/quatops/experimental/converters`
 map explicitly labelled orientation values into the declared target layouts;
 they do not perform target SDK object construction or complete asset, message,
 geographic, or scene serialization. Separate native proofs compare canonical
