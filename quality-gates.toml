@@ -53,11 +53,7 @@ code_limit = 3000
 hard_limit = 5000
 initializer_name = "__init__.py"
 initializer_limit = 100
-# These two JSON files are generated input corpora with stable case IDs. They
-# remain under JSON syntax and consumer checks; line count is not code size.
-exclude = [
-  "experiments/oracles/shared/orientation_inputs_v1.json",
-]
+exclude = []
 
 [checks.numeric_literals]
 extensions = [".py"]

@@ -160,7 +160,8 @@ def main() -> None:
                         "build_recipe_sha256": sha256(cmake),
                         "corpus_sha256": sha256(corpus),
                         "input_serialization_note": (
-                            "JSON formatting changed only; parsed replay input values are unchanged."
+                            "The reproduction corpus retains only exporter-consumed fields; "
+                            "the historical capture has its own input digest."
                         ),
                     },
                 },

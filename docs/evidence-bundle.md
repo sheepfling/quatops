@@ -17,9 +17,7 @@ the bundle does not claim those engine runtimes were re-executed during bundle
 creation.
 
 The [semantic source audit](semantic-source-audit.md) records the reviewed
-axes, source scope, and exclusions. The original detailed
-[frame semantics audit](../quatops_frame_semantics_audit_138b730.md) is retained
-for research. The
+axes, source scope, exclusions, and decisions from the earlier detailed audit. The
 [historical source archive notes](../experiments/provenance/reproduction-v1/README.md)
 describe the bundled capture sources, and the
 [evidence schema guide](../scripts/evidence_schema/README.md) documents the

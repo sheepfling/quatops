@@ -25,5 +25,22 @@ implementation also carries each role's scope/exclusions in
 `quatops.experimental.semantics.roles`; the generated registry reports native evidence
 scope separately from source authority and application alignment.
 
-See the retained [detailed frame semantics audit](../quatops_frame_semantics_audit_138b730.md)
-for the broader source-by-source research notes.
+## Review findings and decisions
+
+The frame-semantics audit of snapshot `138b730` distinguished native numeric
+behavior, documented frame conventions, and application-assigned alignment.
+It found that the glTF transform fixture used a camera-like probe basis; that
+does not establish the separate glTF asset-front convention. The fixture is
+therefore described as a declared probe, while the asset-front role and its
+source are recorded separately above. Neutral quaternion APIs likewise use
+fixture-assigned frames; native vector action cannot determine physical axis
+labels. Engine world axes do not establish object or camera axes. ROS named
+frames and Cesium ENU have documented meanings only within their respective
+API and context. Parent and child mappings remain explicit, including for
+shared-basis conversion.
+
+The audit replayed frozen glTF values using SciPy but did not launch native
+engines or run the full suite. Its
+[historical research notes](https://github.com/sheepfling/quatops/blob/a5510f68ea8d4d8ebea9725492265ac8d773de9a/quatops_frame_semantics_audit_138b730.md)
+refer to that earlier snapshot; this page and the target contracts describe
+the current scope.

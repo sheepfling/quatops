@@ -9,6 +9,7 @@ import numpy as np
 
 from quatops.experimental.engines import QuaternionFrameMap, SignedAxisMap
 from quatops.python import hamilton
+from scripts.evidence_schema.ros_capture import RosSelectedCorpus
 from tests.support.paths import REPOSITORY_ROOT
 from tests.support.provenance_archives import read_provenance_source
 
@@ -100,9 +101,7 @@ def test_ros_capture_is_native_pinned_and_selected_values_are_lossless():
     )
     reproduction = provenance["reproduction"]
     assert len(provenance["full_observation_sha256"]) == 64
-    assert reproduction["input_serialization_note"].startswith(
-        "JSON formatting changed only"
-    )
+    assert "historical capture" in reproduction["input_serialization_note"]
     file_hashes = {
         "exporter_source_sha256": ROOT
         / "experiments/converters/ros2/0.36.23/native/src/capture_ros.cpp",
@@ -118,6 +117,15 @@ def test_ros_capture_is_native_pinned_and_selected_values_are_lossless():
     }
     for field, path in file_hashes.items():
         assert hashlib.sha256(path.read_bytes()).hexdigest() == reproduction[field]
+
+    corpus = json.loads(file_hashes["corpus_sha256"].read_text(encoding="utf-8"))
+    assert set(corpus) == {
+        "euler_inputs",
+        "multiplication_pairs",
+        "matrix_inputs",
+        "vectors_xyz",
+    }
+    RosSelectedCorpus.model_validate(corpus, strict=True)
 
     archived_exporter = read_provenance_source(
         ROOT, reproduction["exporter_source_archive"]

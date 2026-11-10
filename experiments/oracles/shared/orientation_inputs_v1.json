@@ -1,98 +1,4 @@
 {
-  "axis_angle_inputs": [
-    {
-      "angle_radians": 0.0,
-      "axis_xyz": [1.0, 0.0, 0.0],
-      "case_id": "axis-angle-0-00"
-    },
-    {
-      "angle_radians": 1.5707963267948966,
-      "axis_xyz": [0.0, 1.0, 0.0],
-      "case_id": "axis-angle-1-05"
-    },
-    {
-      "angle_radians": 1.5707963267948966,
-      "axis_xyz": [0.0, 0.0, 1.0],
-      "case_id": "axis-angle-2-05"
-    },
-    {
-      "angle_radians": 1.5707963267948966,
-      "axis_xyz": [0.2672612419124244, 0.5345224838248488, 0.8017837257372732],
-      "case_id": "axis-angle-3-05"
-    },
-    {
-      "angle_radians": -6.283185307179586,
-      "axis_xyz": [0.2672612419124244, 0.5345224838248488, 0.8017837257372732],
-      "case_id": "axis-angle-3-14"
-    }
-  ],
-  "default_matrix_action": "active_column_vector",
-  "default_quaternion_order": "wxyz",
-  "euler_boundaries": [
-    {
-      "actual_bits_hex": ["41880000", "c2b40008", "422c0000"],
-      "case_id": "boundary-XYZ-binary32-degrees--1--8",
-      "family": "native-unit-ulp-boundary",
-      "numeric_format": "binary32",
-      "order_label": "XYZ",
-      "units": "degrees",
-      "xyz": [17.0, -90.00006103515625, 43.0]
-    },
-    {
-      "actual_bits_hex": ["41880000", "c1e80000", "c2b40008"],
-      "case_id": "boundary-XZY-binary32-degrees--1--8",
-      "family": "native-unit-ulp-boundary",
-      "numeric_format": "binary32",
-      "order_label": "XZY",
-      "units": "degrees",
-      "xyz": [17.0, -29.0, -90.00006103515625]
-    },
-    {
-      "actual_bits_hex": ["c2b40008", "c1e80000", "422c0000"],
-      "case_id": "boundary-YXZ-binary32-degrees--1--8",
-      "family": "native-unit-ulp-boundary",
-      "numeric_format": "binary32",
-      "order_label": "YXZ",
-      "units": "degrees",
-      "xyz": [-90.00006103515625, -29.0, 43.0]
-    },
-    {
-      "actual_bits_hex": ["41880000", "c1e80000", "c2b40008"],
-      "case_id": "boundary-YZX-binary32-degrees--1--8",
-      "family": "native-unit-ulp-boundary",
-      "numeric_format": "binary32",
-      "order_label": "YZX",
-      "units": "degrees",
-      "xyz": [17.0, -29.0, -90.00006103515625]
-    },
-    {
-      "actual_bits_hex": ["c2b40008", "c1e80000", "422c0000"],
-      "case_id": "boundary-ZXY-binary32-degrees--1--8",
-      "family": "native-unit-ulp-boundary",
-      "numeric_format": "binary32",
-      "order_label": "ZXY",
-      "units": "degrees",
-      "xyz": [-90.00006103515625, -29.0, 43.0]
-    },
-    {
-      "actual_bits_hex": ["41880000", "c2b40008", "422c0000"],
-      "case_id": "boundary-ZYX-binary32-degrees--1--8",
-      "family": "native-unit-ulp-boundary",
-      "numeric_format": "binary32",
-      "order_label": "ZYX",
-      "units": "degrees",
-      "xyz": [17.0, -90.00006103515625, 43.0]
-    },
-    {
-      "actual_bits_hex": ["3fd3d70a3d70a3d7", "3ff922642fcfd989", "3fe75c28f5c28f5c"],
-      "case_id": "boundary-offset-ZYX-+1-+1e-04",
-      "family": "radian-distance-boundary",
-      "numeric_format": "binary64",
-      "order_label": "ZYX",
-      "units": "radians",
-      "xyz": [0.31, 1.5708963267948965, 0.73]
-    }
-  ],
   "euler_inputs": [
     {
       "actual_bits_hex": ["c01921fb54442d18", "0000000000000000", "0000000000000000"],
@@ -104,85 +10,26 @@
       "xyz": [-6.283185307179586, 0.0, 0.0]
     }
   ],
-  "euler_orders": ["XYZ", "XZY", "YXZ", "YZX", "ZXY", "ZYX"],
-  "generator": "tools/build_corpus.py",
-  "integration_inputs": [
+  "multiplication_pairs": [
     {
-      "case_id": "integration-0-0-0",
-      "dt_seconds": 0.0,
-      "initial_wxyz": [1.0, 0.0, 0.0, 0.0],
-      "omega_frame": "native_api_frame_to_identify",
-      "omega_xyz": [1.0, 0.0, 0.0]
+      "a_wxyz": [1.0, 2.0, 3.0, 4.0],
+      "b_wxyz": [5.0, 6.0, 7.0, 8.0],
+      "case_id": "product-general",
+      "family": "algebra"
     },
     {
-      "case_id": "integration-0-1-1",
-      "dt_seconds": 1e-06,
-      "initial_wxyz": [1.0, 0.0, 0.0, 0.0],
-      "omega_frame": "native_api_frame_to_identify",
-      "omega_xyz": [0.0, 1.0, 0.0]
+      "a_wxyz": [0.7071067811865476, 0.7071067811865475, 0.0, 0.0],
+      "b_wxyz": [0.8660254037844387, 0.0, 0.49999999999999994, 0.0],
+      "case_id": "product-noncommuting",
+      "family": "unit_rotation"
     },
     {
-      "case_id": "integration-1-0-1",
-      "dt_seconds": 1e-06,
-      "initial_wxyz": [0.7071067811865476, 0.7071067811865475, 0.0, 0.0],
-      "omega_frame": "native_api_frame_to_identify",
-      "omega_xyz": [1.0, 0.0, 0.0]
-    },
-    {
-      "case_id": "integration-2-3-3",
-      "dt_seconds": 0.1,
-      "initial_wxyz": [0.18257418583505536, 0.3651483716701107, -0.5477225575051661, 0.7302967433402214],
-      "omega_frame": "native_api_frame_to_identify",
-      "omega_xyz": [0.2, -0.3, 0.5]
+      "a_wxyz": [0.0, 1.0, 0.0, 0.0],
+      "b_wxyz": [0.0, 0.0, 1.0, 0.0],
+      "case_id": "product-pure-ij",
+      "family": "algebra"
     }
   ],
-  "interpolation_pairs": [
-    {
-      "a_wxyz": [1.0, 0.0, 0.0, 0.0],
-      "b_wxyz": [0.7071067811865476, 0.7071067811865475, 0.0, 0.0],
-      "case_id": "interp-quarter-turn",
-      "family": "ordinary"
-    },
-    {
-      "a_wxyz": [0.7071067811865476, 0.7071067811865475, 0.0, 0.0],
-      "b_wxyz": [0.18257418583505536, 0.3651483716701107, -0.5477225575051661, 0.7302967433402214],
-      "case_id": "interp-mixed",
-      "family": "ordinary"
-    },
-    {
-      "a_wxyz": [0.7071067811865476, 0.7071067811865475, 0.0, 0.0],
-      "b_wxyz": [0.7071067811865476, 0.7071067811865475, 0.0, 0.0],
-      "case_id": "interp-identical",
-      "family": "identical"
-    },
-    {
-      "a_wxyz": [0.7071067811865476, 0.7071067811865475, 0.0, 0.0],
-      "b_wxyz": [-0.7071067811865476, -0.7071067811865475, -0.0, -0.0],
-      "case_id": "interp-antipodal",
-      "family": "antipodal_nonunique_full_path"
-    },
-    {
-      "a_wxyz": [0.7071067811865476, 0.7071067811865475, 0.0, 0.0],
-      "b_wxyz": [-0.8660254037844387, -0.0, -0.49999999999999994, -0.0],
-      "case_id": "interp-negative-dot",
-      "family": "negative_dot"
-    },
-    {
-      "a_wxyz": [1.0, 0.0, 0.0, 0.0],
-      "b_wxyz": [0.999999999999875, 0.0, 0.0, 4.999999999999791e-07],
-      "case_id": "interp-tiny",
-      "family": "nearly_identical"
-    },
-    {
-      "a_wxyz": [1.0, 0.0, 0.0, 0.0],
-      "b_wxyz": [5.000000001311005e-07, 0.267261241912391, 0.534522483824782, 0.8017837257371729],
-      "case_id": "interp-near-pi",
-      "family": "near_pi_so3"
-    }
-  ],
-  "interpolation_weights": [0.5],
-  "invalid_input_policy": "Never send invalid_rotation records to unit-only APIs in the normal capture process.",
-  "kind": "inputs_only_not_goldens",
   "matrix_inputs": [
     {
       "case_id": "matrix-identity",
@@ -209,167 +56,5 @@
       "rows": [[1.0, 0.01, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]]
     }
   ],
-  "multiplication_pairs": [
-    {
-      "a_wxyz": [1.0, 2.0, 3.0, 4.0],
-      "b_wxyz": [5.0, 6.0, 7.0, 8.0],
-      "case_id": "product-general",
-      "family": "algebra"
-    },
-    {
-      "a_wxyz": [0.7071067811865476, 0.7071067811865475, 0.0, 0.0],
-      "b_wxyz": [0.8660254037844387, 0.0, 0.49999999999999994, 0.0],
-      "case_id": "product-noncommuting",
-      "family": "unit_rotation"
-    },
-    {
-      "a_wxyz": [0.0, 1.0, 0.0, 0.0],
-      "b_wxyz": [0.0, 0.0, 1.0, 0.0],
-      "case_id": "product-pure-ij",
-      "family": "algebra"
-    }
-  ],
-  "order_note": "Order labels select axes; each native adapter must declare intrinsic/extrinsic interpretation and argument mapping.",
-  "quaternion_inputs": [
-    {
-      "case_id": "algebra-0",
-      "domain": "general_algebra",
-      "wxyz": [1.0, 2.0, 3.0, 4.0]
-    },
-    {
-      "case_id": "algebra-6",
-      "domain": "general_algebra",
-      "wxyz": [0.0, 0.0, 0.0, 0.0]
-    },
-    {
-      "case_id": "algebra-7",
-      "domain": "general_algebra",
-      "wxyz": [1.0, 1e-12, -2e-12, 3e-12]
-    },
-    {
-      "case_id": "rotation-identity",
-      "domain": "unit_rotation",
-      "wxyz": [1.0, 0.0, 0.0, 0.0]
-    },
-    {
-      "case_id": "rotation-random-000",
-      "domain": "unit_rotation",
-      "wxyz": [-0.6392567295103422, 0.3846997498496689, -0.5757764781236799, -0.33442246258413133]
-    },
-    {
-      "case_id": "rotation-random-000-antipodal",
-      "domain": "unit_rotation",
-      "wxyz": [0.6392567295103422, -0.3846997498496689, 0.5757764781236799, 0.33442246258413133]
-    },
-    {
-      "case_id": "invalid-rotation-zero",
-      "domain": "invalid_rotation",
-      "wxyz": [0.0, 0.0, 0.0, 0.0]
-    },
-    {
-      "case_id": "invalid-rotation-nonunit",
-      "domain": "invalid_rotation",
-      "wxyz": [2.0, 3.0, 4.0, 5.0]
-    },
-    {
-      "case_id": "invalid-rotation-tiny",
-      "domain": "invalid_rotation",
-      "wxyz": [1e-30, 2e-30, -1e-30, 3e-30]
-    }
-  ],
-  "random_note": "Frozen values are authoritative; do not reproduce Python RNG in another runtime.",
-  "schema_version": "1.0",
-  "seed": 20903,
-  "trajectories": [
-    {
-      "case_id": "trajectory-wrap",
-      "input_kind": "axis_labelled_euler_degrees",
-      "order_label": "XYZ",
-      "times_seconds": [0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0],
-      "values_xyz_degrees": [
-        [0.0, 0.0, 170.0],
-        [0.0, 0.0, 175.0],
-        [0.0, 0.0, 179.0],
-        [0.0, 0.0, 180.0],
-        [0.0, 0.0, 181.0],
-        [0.0, 0.0, 185.0],
-        [0.0, 0.0, 190.0]
-      ]
-    },
-    {
-      "case_id": "trajectory-multiple-turns",
-      "input_kind": "axis_labelled_euler_degrees",
-      "order_label": "XYZ",
-      "times_seconds": [0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 12.0, 13.0, 14.0, 15.0, 16.0],
-      "values_xyz_degrees": [
-        [0.0, 0.0, 0.0],
-        [0.0, 0.0, 45.0],
-        [0.0, 0.0, 90.0],
-        [0.0, 0.0, 135.0],
-        [0.0, 0.0, 180.0],
-        [0.0, 0.0, 225.0],
-        [0.0, 0.0, 270.0],
-        [0.0, 0.0, 315.0],
-        [0.0, 0.0, 360.0],
-        [0.0, 0.0, 405.0],
-        [0.0, 0.0, 450.0],
-        [0.0, 0.0, 495.0],
-        [0.0, 0.0, 540.0],
-        [0.0, 0.0, 585.0],
-        [0.0, 0.0, 630.0],
-        [0.0, 0.0, 675.0],
-        [0.0, 0.0, 720.0]
-      ]
-    },
-    {
-      "case_id": "trajectory-gimbal",
-      "input_kind": "axis_labelled_euler_degrees",
-      "order_label": "XYZ",
-      "times_seconds": [0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0],
-      "values_xyz_degrees": [
-        [17.0, 85.0, 43.0],
-        [17.0, 86.0, 43.0],
-        [17.0, 87.0, 43.0],
-        [17.0, 88.0, 43.0],
-        [17.0, 89.0, 43.0],
-        [17.0, 90.0, 43.0],
-        [17.0, 91.0, 43.0],
-        [17.0, 92.0, 43.0],
-        [17.0, 93.0, 43.0],
-        [17.0, 94.0, 43.0],
-        [17.0, 95.0, 43.0]
-      ]
-    }
-  ],
-  "vectors_xyz": [[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0], [1.0, 2.0, -3.0]],
-  "retention": {
-    "policy": "selected inputs for retained native witnesses; successful discovery sweeps removed",
-    "source_discovery_corpus_sha256": "07e4d809f7eb75ad6e5454febf2b725b0b8fb389536743dd7196566d4640135f",
-    "retained_native_case_groups": {
-      "axis_angle_inputs": 5,
-      "euler_boundaries": 7,
-      "euler_inputs": 1,
-      "euler_orders": 6,
-      "integration_inputs": 4,
-      "interpolation_pairs": 7,
-      "interpolation_weights": 1,
-      "matrix_inputs": 4,
-      "multiplication_pairs": 3,
-      "quaternion_inputs": 9,
-      "trajectories": 3,
-      "vectors_xyz": 4
-    },
-    "discovery_counts": {
-      "axis_angle_inputs": 60,
-      "euler_boundaries": 540,
-      "euler_inputs": 89,
-      "integration_inputs": 48,
-      "interpolation_pairs": 7,
-      "matrix_inputs": 11,
-      "multiplication_pairs": 3,
-      "quaternion_inputs": 140,
-      "signed_axis_maps": 48,
-      "trajectories": 3
-    }
-  }
+  "vectors_xyz": [[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0], [1.0, 2.0, -3.0]]
 }

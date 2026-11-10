@@ -15,7 +15,6 @@ INCLUDE_PATHS = (
     "uv.lock",
     "MANIFEST.in",
     "quality-gates.toml",
-    "quatops_frame_semantics_audit_138b730.md",
     "docs",
     "src/quatops",
     "experiments",

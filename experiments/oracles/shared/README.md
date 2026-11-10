@@ -1,9 +1,10 @@
 # Shared native-capture inputs and helpers
 
-[`orientation_inputs_v1.json`](orientation_inputs_v1.json) is a shared input
-corpus for mathematical oracle tests and selected ROS 2/tf2 cases. The broader
-discovery outputs are not retained per target; converter packages refer to
-the smaller selected set under `experiments/interoperability/v1/`.
+[`orientation_inputs_v1.json`](orientation_inputs_v1.json) contains the input
+fields consumed by the ROS 2/tf2 capture exporter. The unrelated discovery
+inputs have been removed; the values used by that exporter are unchanged.
+Other converter captures use the canonical inputs under
+`experiments/interoperability/v1/`.
 
 [`capture_io.py`](capture_io.py) provides a typed JSON capture envelope for
 native Python wrappers. Target-specific capture models validate observations
