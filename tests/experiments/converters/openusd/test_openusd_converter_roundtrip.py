@@ -105,16 +105,18 @@ def test_openusd_converter_stage_provenance_and_frame_declarations():
     for field, path in {
         "capture_script_sha256": ROOT
         / "experiments/converters/openusd/26.11/capture_native.py",
-        "retention_script_sha256": ROOT
-        / "scripts/retain_openusd_converter_witnesses.py",
         "retention_digest_helper_sha256": ROOT / "scripts/evidence_schema/utilities.py",
         "retention_helper_sha256": ROOT / "scripts/evidence_json.py",
         "retention_formatter_sha256": ROOT / "scripts/evidence_format.py",
     }.items():
         assert hashlib.sha256(path.read_bytes()).hexdigest() == reproduction[field]
-    assert reproduction["capture_script_identity_note"].startswith(
-        "The current capture entry point adds the semantic contract to the output; "
-        "provenance.native_capture_script_sha256 remains the producer identity"
+    assert (
+        MANIFEST["direct_reproduction"]["capture_script_sha256"]
+        == reproduction["capture_script_sha256"]
+    )
+    assert (
+        MANIFEST["direct_reproduction"]["witnesses_sha256"]
+        == provenance["native_observations_sha256"]
     )
 
 

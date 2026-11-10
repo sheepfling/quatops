@@ -6,45 +6,21 @@ import argparse
 import hashlib
 import platform
 import sys
-from collections.abc import Iterable, Sequence
+from collections.abc import Iterable
 from datetime import datetime, timezone
 from importlib import resources
 from importlib.metadata import version
 from pathlib import Path
 
 from pxr import Gf, Usd, UsdGeom
-from pydantic import BaseModel, ConfigDict
 
 from scripts.evidence_format import dump_evidence_json
-from scripts.evidence_schema.converter_captures import OpenUsdInputs
-from scripts.evidence_schema.primitives import Matrix4, Quaternion4, Vector3
-
-
-class NativeOpenUsdOutputs(BaseModel):
-    """Typed raw OpenUSD API observations before witness reduction."""
-
-    model_config = ConfigDict(extra="forbid", strict=True)
-
-    orient_op_wxyz: Quaternion4
-    local_matrix_rows: Matrix4
-    world_matrix_rows: Matrix4
-    ordered_xform_ops: list[str]
-    resets_xform_stack: bool
-    local_points_xyz: list[Vector3]
-    world_points_xyz: list[Vector3]
-    world_directions_xyz: list[Vector3]
-    world_to_local_point_roundtrip_xyz: list[Vector3]
-
-
-class NativeOpenUsdObservation(BaseModel):
-    """One captured prim and the exact native operations read from it."""
-
-    model_config = ConfigDict(extra="forbid", strict=True)
-
-    node: str
-    prim_path: str
-    native_entry_points: list[str]
-    outputs: NativeOpenUsdOutputs
+from scripts.evidence_schema.converter_captures import (
+    OpenUsdCapture,
+    OpenUsdInputs,
+    OpenUsdNodeObservation,
+    OpenUsdOutputs,
+)
 
 
 def sha(path: Path) -> str:
@@ -53,10 +29,6 @@ def sha(path: Path) -> str:
 
 def vec(value: Iterable[float]) -> list[float]:
     return [float(x) for x in value]
-
-
-def matrix_rows(matrix: Sequence[Sequence[float]]) -> list[list[float]]:
-    return [[float(matrix[r][c]) for c in range(4)] for r in range(4)]
 
 
 def q_wxyz(quaternion: Gf.Quatd) -> list[float]:
@@ -72,6 +44,8 @@ def main() -> None:
     args = parser.parse_args()
     repository_root = args.repository_root.resolve(strict=True)
     target_dir = repository_root / "experiments/converters/openusd/26.11"
+    if version("usd-core") != "26.11":
+        raise ValueError("This capture requires usd-core 26.11")
     stage_path = (args.stage or target_dir / "quatops_hierarchy.usda").resolve()
     inputs_path = (args.inputs or target_dir / "converter_inputs.json").resolve()
     inputs = OpenUsdInputs.model_validate_json(inputs_path.read_bytes(), strict=True)
@@ -80,7 +54,8 @@ def main() -> None:
         raise RuntimeError(f"OpenUSD could not open {stage_path}")
     cache = UsdGeom.XformCache()
     probe_vectors = [Gf.Vec3d(*row) for row in inputs.usd_probe_vectors_xyz]
-    raw_observations: list[dict[str, object]] = []
+    observations: list[OpenUsdNodeObservation] = []
+    ordered_xform_ops: list[str] | None = None
     for node, prim_path in (
         ("parent", "/Scene/Parent"),
         ("child", "/Scene/Parent/Child"),
@@ -88,50 +63,49 @@ def main() -> None:
     ):
         prim = stage.GetPrimAtPath(prim_path)
         xformable = UsdGeom.Xformable(prim)
-        local = xformable.GetLocalTransformation()
+        xformable.GetLocalTransformation()
         world = cache.GetLocalToWorldTransform(prim)
         ops = xformable.GetOrderedXformOps()
         orient = next(op for op in ops if op.GetOpType() == UsdGeom.XformOp.TypeOrient)
         qnative = orient.Get()
-        inverse = world.GetInverse()
-        raw_observations.append(
-            {
-                "node": node,
-                "prim_path": prim_path,
-                "native_entry_points": [
-                    "Usd.Stage.Open",
-                    "UsdGeom.Xformable.GetOrderedXformOps",
-                    "GetLocalTransformation",
-                    "UsdGeom.XformCache.GetLocalToWorldTransform",
-                    "Gf.Matrix4d.Transform",
-                    "Gf.Matrix4d.TransformDir",
-                ],
-                "outputs": {
-                    "orient_op_wxyz": q_wxyz(qnative),
-                    "local_matrix_rows": matrix_rows(local),
-                    "world_matrix_rows": matrix_rows(world),
-                    "ordered_xform_ops": [op.GetOpName() for op in ops],
-                    "resets_xform_stack": bool(xformable.GetResetXformStack()),
-                    "local_points_xyz": [
-                        vec(local.Transform(p)) for p in probe_vectors
+        names = [op.GetOpName() for op in ops]
+        if ordered_xform_ops is not None and ordered_xform_ops != names:
+            raise ValueError("authored nodes must have the same transform-op order")
+        ordered_xform_ops = names
+        world_probe = world.Transform(probe_vectors[-1])
+        observations.append(
+            OpenUsdNodeObservation(
+                node=node,
+                prim_path=prim_path,
+                outputs=OpenUsdOutputs(
+                    orient_op_wxyz=q_wxyz(qnative),
+                    resets_xform_stack=bool(xformable.GetResetXformStack()),
+                    world_basis_images_xyz=[
+                        vec(world.TransformDir(p)) for p in probe_vectors[:3]
                     ],
-                    "world_points_xyz": [
-                        vec(world.Transform(p)) for p in probe_vectors
-                    ],
-                    "world_directions_xyz": [
-                        vec(world.TransformDir(p)) for p in probe_vectors
-                    ],
-                    "world_to_local_point_roundtrip_xyz": [
-                        vec(inverse.Transform(world.Transform(p)))
-                        for p in probe_vectors
-                    ],
-                },
-            }
+                    world_probe_point_xyz=vec(world_probe),
+                    roundtrip_probe_point_xyz=vec(
+                        world.GetInverse().Transform(world_probe)
+                    )
+                    if node == "child"
+                    else None,
+                ),
+            )
         )
-    observations = [
-        NativeOpenUsdObservation.model_validate(row, strict=True)
-        for row in raw_observations
-    ]
+    witnesses = OpenUsdCapture(
+        schema_version="1.0",
+        evidence_kind="native_openusd_quatops_converter_capture",
+        native_entry_points=[
+            "Usd.Stage.Open",
+            "UsdGeom.Xformable.GetOrderedXformOps",
+            "GetLocalTransformation",
+            "UsdGeom.XformCache.GetLocalToWorldTransform",
+            "Gf.Matrix4d.Transform",
+            "Gf.Matrix4d.TransformDir",
+        ],
+        ordered_xform_ops=ordered_xform_ops or [],
+        observations=observations,
+    )
     package_dir = Path(str(resources.files("pxr")))
     binaries = {}
     for relative in (
@@ -146,9 +120,9 @@ def main() -> None:
     output_path.mkdir(parents=True, exist_ok=True)
     semantic_contract_path = target_dir / "semantic_contract.json"
     (output_path / "contract.json").write_bytes(semantic_contract_path.read_bytes())
-    observations_path = output_path / "observations.json"
+    observations_path = output_path / "witnesses.json"
     observations_path.write_text(
-        dump_evidence_json([row.model_dump(mode="json") for row in observations]),
+        dump_evidence_json(witnesses.model_dump(mode="json", exclude_none=True)),
         encoding="utf-8",
         newline="\n",
     )
@@ -189,7 +163,7 @@ def main() -> None:
         "lockfile_sha256": sha(target_dir / "uv.lock"),
         "canonical_inputs_sha256": inputs.canonical_input_sha256,
         "observations": {
-            "path": "observations.json",
+            "path": "witnesses.json",
             "sha256": sha(observations_path),
             "count": len(observations),
         },

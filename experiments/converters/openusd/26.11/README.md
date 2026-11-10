@@ -4,19 +4,21 @@ This pinned `usd-core==26.11` runtime reopens and evaluates the USDA stage
 generated from explicit canonical-frame inputs. The fixture retains only the
 three native stage observations used by the converter proof.
 
-From the repository root, regenerate the input stage, capture into a temporary
-directory, then retain the selected native witnesses:
+From the repository root, regenerate the input stage and capture the selected
+native witnesses into a temporary directory:
 
 ```powershell
+$env:PYTHONPATH = (Get-Location).Path
 uv run --project experiments/converters/openusd/26.11 --locked --python 3.14.6 `
   python experiments/converters/openusd/26.11/create_stage.py --repository-root .
 $captureDir = Join-Path $env:TEMP "quatops-openusd-26.11-capture"
 uv run --project experiments/converters/openusd/26.11 --locked --python 3.14.6 `
   python experiments/converters/openusd/26.11/capture_native.py --repository-root . `
   --output $captureDir
-uv run --project experiments/converters/openusd/26.11 --locked --python 3.14.6 `
-  python -m scripts.retain_openusd_converter_witnesses $captureDir --repository-root .
 ```
+
+The direct capture writes `witnesses.json` and `manifest.json`. The original
+fixture and its historical provenance are retained separately.
 
 The contract declares a right-handed canonical frame with +X right, +Y
 forward, and +Z up, plus the OpenUSD stage frame and explicit axis map. The
