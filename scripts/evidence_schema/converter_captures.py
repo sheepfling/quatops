@@ -372,10 +372,15 @@ class EigenObservations(NativeCaptureModel):
     profiles: list[EigenPrecisionProfile]
 
 
-class EigenCapture(NativeCaptureModel):
+class NativeLibraryCapture(NativeCaptureModel):
+    """Common identity fields for the direct native-library captures."""
+
     schema_version: Literal["1.0"]
     evidence_kind: Literal["native_runtime_selected_converter_witnesses"]
     target: TargetIdentity
+
+
+class EigenCapture(NativeLibraryCapture):
     observations: EigenObservations
 
 
@@ -396,10 +401,7 @@ class MuJoCoObservations(NativeCaptureModel):
     composition: list[MuJoCoOrientation]
 
 
-class MuJoCoCapture(NativeCaptureModel):
-    schema_version: Literal["1.0"]
-    evidence_kind: Literal["native_runtime_selected_converter_witnesses"]
-    target: TargetIdentity
+class MuJoCoCapture(NativeLibraryCapture):
     observations: MuJoCoObservations
 
 
@@ -428,10 +430,7 @@ class OpenCVComposition(NativeCaptureModel):
     native_matrix_to_rotation_vector_xyz_radians: Vector3
 
 
-class OpenCVCapture(NativeCaptureModel):
-    schema_version: Literal["1.0"]
-    evidence_kind: Literal["native_runtime_selected_converter_witnesses"]
-    target: TargetIdentity
+class OpenCVCapture(NativeLibraryCapture):
     observations: OpenCVObservations
 
 
@@ -512,10 +511,7 @@ class SpiceyPyObservations(NativeCaptureModel):
         return self
 
 
-class SpiceyPyCapture(NativeCaptureModel):
-    schema_version: Literal["1.0"]
-    evidence_kind: Literal["native_runtime_selected_converter_witnesses"]
-    target: TargetIdentity
+class SpiceyPyCapture(NativeLibraryCapture):
     observations: SpiceyPyObservations
 
 
