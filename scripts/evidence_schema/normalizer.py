@@ -91,7 +91,9 @@ def _validate_mapped_frame_handedness(
 
 
 def _validate_contract_semantics(contract: EvidenceContract) -> None:
-    if isinstance(contract, QuaternionBoundaryContract):
+    if isinstance(
+        contract, (QuaternionBoundaryContract, RotationVectorBoundaryContract)
+    ):
         _validate_coordinate_frame(contract.source_frame, context="source frame")
         _validate_coordinate_frame(
             contract.destination_frame, context="destination frame"
@@ -105,24 +107,11 @@ def _validate_contract_semantics(contract: EvidenceContract) -> None:
             contract.source_frame,
             contract.destination_frame,
             contract.destination_axes_from_source,
-            context="quaternion destination frame",
-        )
-        return
-    if isinstance(contract, RotationVectorBoundaryContract):
-        _validate_coordinate_frame(contract.source_frame, context="source frame")
-        _validate_coordinate_frame(
-            contract.destination_frame, context="destination frame"
-        )
-        for label, semantics in (
-            ("source frame", contract.source_frame_semantics),
-            ("destination frame", contract.destination_frame_semantics),
-        ):
-            _validate_frame_semantics(semantics, context=label)
-        _validate_mapped_frame_handedness(
-            contract.source_frame,
-            contract.destination_frame,
-            contract.destination_axes_from_source,
-            context="rotation-vector destination frame",
+            context=(
+                "quaternion destination frame"
+                if isinstance(contract, QuaternionBoundaryContract)
+                else "rotation-vector destination frame"
+            ),
         )
         return
     if isinstance(contract, FrameChainContract):
