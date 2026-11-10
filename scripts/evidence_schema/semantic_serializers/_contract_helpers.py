@@ -18,7 +18,6 @@ from scripts.evidence_schema.converter_captures import (
 from scripts.evidence_schema.crystallized import (
     CoordinateFrame,
     FrameSemantics,
-    canonical_source_frame_semantics,
 )
 from scripts.evidence_schema.primitives import validate_signed_axis_map
 
@@ -86,10 +85,6 @@ def probe_frame(contract: _QuaternionBoundaryTarget) -> CoordinateFrame:
         canonical.handedness,
         probe_axes,
     )
-
-
-def canonical_frame_semantics() -> FrameSemantics:
-    return canonical_source_frame_semantics()
 
 
 def numeric_probe_semantics(statement: str) -> FrameSemantics:

@@ -36,7 +36,8 @@
     "input_builder_sha256": "0ff76107de79307db85deda097f63891e9c2464102482f14613769cf0c0c03a9",
     "capture_script_sha256": "e856856b36948c08215e21a8eb9b1e38b56ec5d856dcc45dd46c1ca375ee2da7",
     "numeric_helper_sha256": "c0eaaa45990c0de90b8fc183fc820faccdce4c39c064111acaa7501a1e82a944",
-    "retention_script_sha256": "bba3dba3a5f9abfc90c6b2455d0b548475f6ddfb318ea3a8ac4a95939c69fe76",
+    "retention_script_sha256": "4cc2ca111fa99ffd4f80431b5a77b810e62b08c94005c18c388499080fa2a1d6",
+    "retention_digest_helper_sha256": "293ac5c75393f99f783ba412be80983ec21dce39d89bc570623fb428194ea785",
     "retention_script_identity_note": "Current capture and selector use finite binary64 JSON with signed zero preserved. A pinned native rerun reproduced the retained witness bytes; original capture identities remain in provenance.",
     "finite_json_replay": {
       "utc": "2026-11-10T08:20:52.098Z",

@@ -13,9 +13,9 @@ from scripts.evidence_schema.crystallized import (
     FrameSemantics,
     FrameTransform,
     PointAction,
+    canonical_source_frame_semantics,
 )
 from scripts.evidence_schema.semantic_serializers._contract_helpers import (
-    canonical_frame_semantics,
     coefficient_order,
     coordinate_frame,
     signed_axis_map,
@@ -52,7 +52,7 @@ def serialize_ros2_contract(
             contract.frames.canonical_axes.handedness,
             contract.frames.canonical_axes.model_dump(),
         ),
-        canonical_frame_semantics=canonical_frame_semantics(),
+        canonical_frame_semantics=canonical_source_frame_semantics(),
         quaternion_order=coefficient_order(contract.rotation.native_order),
         vector_action=contract.rotation.action,
         lookup_direction=contract.frame_direction,

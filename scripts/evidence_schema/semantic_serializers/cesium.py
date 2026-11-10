@@ -16,9 +16,9 @@ from scripts.evidence_schema.crystallized import (
     GeographicContract,
     GeographicOrientationWitness,
     GeographicSerialization,
+    canonical_source_frame_semantics,
 )
 from scripts.evidence_schema.semantic_serializers._contract_helpers import (
-    canonical_frame_semantics,
     coefficient_order,
     coordinate_frame,
     signed_axis_map,
@@ -79,7 +79,7 @@ def serialize_cesium_contract(
             canonical.handedness,
             canonical.model_dump(),
         ),
-        canonical_frame_semantics=canonical_frame_semantics(),
+        canonical_frame_semantics=canonical_source_frame_semantics(),
         local_frame=coordinate_frame(
             "Cesium local ENU", local.handedness, local.model_dump()
         ),

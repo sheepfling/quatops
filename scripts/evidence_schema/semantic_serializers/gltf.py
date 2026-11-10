@@ -15,9 +15,9 @@ from scripts.evidence_schema.crystallized import (
     SceneNodeWitness,
     SceneTransportContract,
     SceneTransportSerialization,
+    canonical_source_frame_semantics,
 )
 from scripts.evidence_schema.semantic_serializers._contract_helpers import (
-    canonical_frame_semantics,
     coefficient_order,
     coordinate_frame,
     signed_axis_map,
@@ -74,7 +74,7 @@ def serialize_gltf_contract(
         canonical_frame=coordinate_frame(
             "QuatOps canonical frame", canonical.handedness, canonical.model_dump()
         ),
-        canonical_frame_semantics=canonical_frame_semantics(),
+        canonical_frame_semantics=canonical_source_frame_semantics(),
         target_frame=coordinate_frame(
             "glTF caller-assigned probe frame", probe.handedness, probe.model_dump()
         ),

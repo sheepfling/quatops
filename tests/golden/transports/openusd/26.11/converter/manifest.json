@@ -38,7 +38,8 @@
     "contract_sha256": "0340bf759e3687c4432902446ef64ce10e46554749f86dabdf7e5303ac56820a"
   },
   "reproduction": {
-    "retention_script_sha256": "39abe8dad1704c6f0f3dcbb1f44af904093fb1139c0b906dc5c24fb271d51840",
+    "retention_script_sha256": "6eeb17029d14995f5afe0e52e178ff38596928ba593dcd573723df887551a990",
+    "retention_digest_helper_sha256": "293ac5c75393f99f783ba412be80983ec21dce39d89bc570623fb428194ea785",
     "input_builder_sha256": "967540c58422b8b863022bac55e96b5c961f4063cf890b8e77c409c2dad9bee2",
     "retention_helper_sha256": "3eea651a4485c4dd3e5a85bf0085edeff14d775badeaf7c07288de74d6519ed3",
     "retention_formatter_sha256": "56961d6be101a2bdfb1b21372c823ec86dfd636547d851901b7284f2ae20e0b3",

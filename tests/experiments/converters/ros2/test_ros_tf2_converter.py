@@ -99,6 +99,7 @@ def test_ros_capture_is_native_pinned_and_selected_values_are_lossless():
         "capture_helper_sha256": ROOT / "experiments/oracles/shared/capture_io.py",
         "capture_schema_sha256": ROOT / "scripts/evidence_schema/ros_capture.py",
         "retention_script_sha256": ROOT / "scripts/retain_ros_tf2_witnesses.py",
+        "retention_digest_helper_sha256": ROOT / "scripts/evidence_schema/utilities.py",
         "retention_helper_sha256": ROOT / "scripts/evidence_json.py",
         "retention_formatter_sha256": ROOT / "scripts/evidence_format.py",
         "dockerfile_sha256": ROOT / "experiments/converters/ros2/0.36.23/Dockerfile",

@@ -107,6 +107,7 @@ def test_openusd_converter_stage_provenance_and_frame_declarations():
         / "experiments/converters/openusd/26.11/capture_native.py",
         "retention_script_sha256": ROOT
         / "scripts/retain_openusd_converter_witnesses.py",
+        "retention_digest_helper_sha256": ROOT / "scripts/evidence_schema/utilities.py",
         "retention_helper_sha256": ROOT / "scripts/evidence_json.py",
         "retention_formatter_sha256": ROOT / "scripts/evidence_format.py",
     }.items():

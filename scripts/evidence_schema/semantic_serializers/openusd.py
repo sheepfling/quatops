@@ -15,9 +15,9 @@ from scripts.evidence_schema.crystallized import (
     SceneNodeWitness,
     SceneTransportContract,
     SceneTransportSerialization,
+    canonical_source_frame_semantics,
 )
 from scripts.evidence_schema.semantic_serializers._contract_helpers import (
-    canonical_frame_semantics,
     coefficient_order,
     coordinate_frame,
     signed_axis_map,
@@ -85,7 +85,7 @@ def serialize_openusd_contract(
                 "positive_z": frame_match.group(4),
             },
         ),
-        canonical_frame_semantics=canonical_frame_semantics(),
+        canonical_frame_semantics=canonical_source_frame_semantics(),
         target_frame=coordinate_frame(
             "OpenUSD declared stage frame", stage.handedness, stage.model_dump()
         ),

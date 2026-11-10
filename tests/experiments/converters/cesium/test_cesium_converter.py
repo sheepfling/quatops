@@ -117,6 +117,7 @@ def test_cesium_capture_provenance_and_explicit_frame_contract():
         / "experiments/converters/shared/numeric_evidence.mjs",
         "retention_script_sha256": ROOT
         / "scripts/retain_cesium_converter_witnesses.py",
+        "retention_digest_helper_sha256": ROOT / "scripts/evidence_schema/utilities.py",
         "retention_helper_sha256": ROOT / "scripts/evidence_json.py",
         "retention_formatter_sha256": ROOT / "scripts/evidence_format.py",
     }

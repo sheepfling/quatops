@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-import argparse
-import hashlib
 from pathlib import Path
 
 from scripts.evidence_json import (
@@ -12,18 +10,12 @@ from scripts.evidence_json import (
     read_evidence_document,
 )
 from scripts.evidence_schema.converter_captures import Ros2Contract
-
-
-def sha256(path: Path) -> str:
-    return hashlib.sha256(path.read_bytes()).hexdigest()
+from scripts.evidence_schema.utilities import retention_paths, retention_provenance
+from scripts.evidence_schema.utilities import sha256_file as sha256
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("capture_dir", type=Path, help="Full native capture folder")
-    parser.add_argument("--repository-root", type=Path, required=True)
-    args = parser.parse_args()
-    repository_root = args.repository_root.resolve(strict=True)
+    capture_dir, repository_root = retention_paths(__doc__)
     package_dir = repository_root / "experiments/converters/ros2/0.36.23"
     source = package_dir / "native/src/capture_ros.cpp"
     runner = package_dir / "capture_native.py"
@@ -31,11 +23,8 @@ def main() -> None:
     cmake = package_dir / "native/CMakeLists.txt"
     capture_helper = repository_root / "experiments/oracles/shared/capture_io.py"
     capture_schema = repository_root / "scripts/evidence_schema/ros_capture.py"
-    retention_helper = repository_root / "scripts/evidence_json.py"
-    retention_formatter = repository_root / "scripts/evidence_format.py"
     corpus = package_dir / "chain_inputs.json"
     destination = repository_root / "tests/golden/oracles/ros2/0.36.23"
-    capture_dir = args.capture_dir.resolve()
     manifest = read_evidence_document(capture_dir / "manifest.json")
     native = read_evidence_document(capture_dir / "native-stdout.json")
     observations = [
@@ -152,9 +141,7 @@ def main() -> None:
                         "runner_sha256": sha256(runner),
                         "capture_helper_sha256": sha256(capture_helper),
                         "capture_schema_sha256": sha256(capture_schema),
-                        "retention_script_sha256": sha256(Path(__file__)),
-                        "retention_helper_sha256": sha256(retention_helper),
-                        "retention_formatter_sha256": sha256(retention_formatter),
+                        **retention_provenance(repository_root, Path(__file__)),
                         "dockerfile_sha256": sha256(dockerfile),
                         "build_recipe_sha256": sha256(cmake),
                         "corpus_sha256": sha256(corpus),

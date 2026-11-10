@@ -98,6 +98,7 @@ def test_gltf_converter_artifact_loader_and_provenance_are_pinned():
         "numeric_helper_sha256": ROOT
         / "experiments/converters/shared/numeric_evidence.mjs",
         "retention_script_sha256": ROOT / "scripts/retain_gltf_converter_witnesses.py",
+        "retention_digest_helper_sha256": ROOT / "scripts/evidence_schema/utilities.py",
         "retention_helper_sha256": ROOT / "scripts/evidence_json.py",
         "retention_formatter_sha256": ROOT / "scripts/evidence_format.py",
     }

@@ -14,10 +14,10 @@ from scripts.evidence_schema.crystallized import (
     RotationVectorCompositionWitness,
     RotationVectorSerialization,
     RotationVectorWitness,
+    canonical_source_frame_semantics,
 )
 from scripts.evidence_schema.semantic_serializers._contract_helpers import (
     canonical_frame,
-    canonical_frame_semantics,
     canonical_order,
     numeric_probe_semantics,
     probe_frame,
@@ -66,7 +66,7 @@ def serialize_opencv_contract(
         canonical_order=canonical_coefficient_order,
         rotation_action="active",
         source_frame=canonical_frame(contract),
-        source_frame_semantics=canonical_frame_semantics(),
+        source_frame_semantics=canonical_source_frame_semantics(),
         destination_frame=probe_frame(contract),
         destination_frame_semantics=numeric_probe_semantics(
             boundary.probe_frame_assignment.meaning

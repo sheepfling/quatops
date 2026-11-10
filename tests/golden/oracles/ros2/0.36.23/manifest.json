@@ -94,7 +94,8 @@
       "runner_sha256": "6177ca151ac91efce01b00b3db1df1a59266cba3539ed5e8c5f81b75e850c906",
       "previous_checkout_runner_sha256": "be4047a273917756c9f0f9154a0990b8318797048744be360457a391e80c8d7b",
       "capture_helper_sha256": "c0eb259e3aaccd6e76c1023db0104b887350777fa777d1b54995b7100566cf38",
-      "retention_script_sha256": "c75b6e6172668495e4672d78a7319113ee510f27806b9e4b31507572d61d92d6",
+      "retention_script_sha256": "8fb2fc09dd05ddfc165be468d241169cfe8819e9e270852fde840467a4e9b2d4",
+      "retention_digest_helper_sha256": "293ac5c75393f99f783ba412be80983ec21dce39d89bc570623fb428194ea785",
       "retention_script_identity_note": "The current selector reads the frame-chain recipe; the stored witness values remain from the historical capture.",
       "retention_helper_sha256": "3eea651a4485c4dd3e5a85bf0085edeff14d775badeaf7c07288de74d6519ed3",
       "direct_json_replay": {

@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-import argparse
-import hashlib
 from pathlib import Path
 
 from scripts.evidence_json import (
@@ -13,10 +11,8 @@ from scripts.evidence_json import (
     select_numeric_evidence,
 )
 from scripts.evidence_schema.converter_captures import CesiumContract
-
-
-def sha256(path: Path) -> str:
-    return hashlib.sha256(path.read_bytes()).hexdigest()
+from scripts.evidence_schema.utilities import retention_paths, retention_provenance
+from scripts.evidence_schema.utilities import sha256_file as sha256
 
 
 def _vectors(value: dict, *, start: int = 0, stop: int | None = None) -> dict:
@@ -47,14 +43,9 @@ def _retained_outputs(case_id: str, outputs: dict) -> dict:
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("capture_dir", type=Path)
-    parser.add_argument("--repository-root", type=Path, required=True)
-    args = parser.parse_args()
-    repository_root = args.repository_root.resolve(strict=True)
+    capture, repository_root = retention_paths(__doc__)
     source_dir = repository_root / "experiments/converters/cesium/1.124.0"
     destination = repository_root / "tests/golden/transports/cesium/1.124.0"
-    capture = args.capture_dir.resolve()
     run = read_evidence_document(capture / "manifest.json")
     observations = read_evidence_rows(capture / "observations.json")
     inputs = read_evidence_document(source_dir / "converter_inputs.json")
@@ -152,13 +143,7 @@ def main() -> None:
             "numeric_helper_sha256": sha256(
                 repository_root / "experiments/converters/shared/numeric_evidence.mjs"
             ),
-            "retention_script_sha256": sha256(Path(__file__)),
-            "retention_helper_sha256": sha256(
-                repository_root / "scripts/evidence_json.py"
-            ),
-            "retention_formatter_sha256": sha256(
-                repository_root / "scripts/evidence_format.py"
-            ),
+            **retention_provenance(repository_root, Path(__file__)),
             "package_lock_sha256": sha256(source_dir / "package-lock.json"),
             "geographic_inputs_sha256": sha256(geo_inputs),
         },
