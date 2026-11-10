@@ -13,7 +13,6 @@ from pyproj.enums import TransformDirection
 from experiments.oracles.shared.capture_io import (
     Capture,
     Observation,
-    contract,
 )
 from scripts.evidence_schema.proj_capture import (
     ProjCaptureContract,
@@ -100,7 +99,7 @@ def main() -> None:
             for point in probes
         ]
         probe_readback = local.transform(*ecef_points[-1], errcheck=True)
-        typed_observation = ProjObservation(
+        observation = ProjObservation(
             case_id=item.case_id,
             operation_id="geographic-enu-ecef",
             native_entry_point=(
@@ -131,24 +130,7 @@ def main() -> None:
             diagnostic=None,
             schema_version="1.0",
         )
-        capture.add(
-            Observation(
-                typed_observation.case_id,
-                typed_observation.operation_id,
-                typed_observation.native_entry_point,
-                contract(
-                    units=typed_observation.contract.units,
-                    order=typed_observation.contract.quaternion_order,
-                    action=typed_observation.contract.matrix_action,
-                    frame=typed_observation.contract.frame_direction,
-                ),
-                typed_observation.native_inputs.model_dump(mode="json"),
-                typed_observation.native_outputs.model_dump(mode="json"),
-                status=typed_observation.status,
-                diagnostic=typed_observation.diagnostic,
-                schema_version=typed_observation.schema_version,
-            )
-        )
+        capture.add(Observation(**observation.model_dump(mode="json")))
 
     print(capture.finish(["FRAME"], observation_role="selected_native_observations"))
 
