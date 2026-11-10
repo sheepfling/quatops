@@ -195,6 +195,7 @@ def main() -> None:
             "selected_inputs_sha256": sha256_file(shared_path),
             "witnesses_sha256": sha256_file(witnesses_path),
             "pinned_lockfile_sha256": sha256_file(target_dir / "uv.lock"),
+            "reproduction_lockfile_sha256": sha256_file(target_dir / "uv.lock"),
             "exact_invocation": (
                 "uv run --locked --project experiments/converters/mujoco/3.17.0 "
                 "--python 3.10.11 "

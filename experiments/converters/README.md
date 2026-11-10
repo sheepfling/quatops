@@ -40,7 +40,12 @@ do not import the common normalizer; the repository-side pipeline imports the
 target adapter after the native runtime has exited. Capture exporters use
 shared input files and typed evidence models where the target runtime permits
 them. Version-specific locks keep native environments reproducible without
-putting their dependencies in QuatOps' regular install.
+putting their dependencies in QuatOps' regular install. CI checks that each
+lock matches current package metadata. The retained historical capture locks
+predate the `alphus-trial` to `dev-experimental` extra rename; replacing the
+new name with the old name in those lockfiles recovers their exact recorded
+bytes. Native package versions and artifact hashes did not change in that
+metadata repair.
 `python -m scripts.validate_converter_evidence --repository-root .` checks the
 normalized evidence in memory without generating a second data product.
 

@@ -122,6 +122,7 @@ def main() -> None:
                     "contract_sha256": sha256(contract_path),
                 },
                 "reproduction": {
+                    "lockfile_sha256": sha256(source_dir / "uv.lock"),
                     "retention_script_sha256": sha256(Path(__file__)),
                     "retention_helper_sha256": sha256(
                         repository_root / "scripts/evidence_json.py"

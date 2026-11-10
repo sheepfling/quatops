@@ -14,10 +14,7 @@
     "distribution": "opencv-python-headless",
     "distribution_version": "4.13.0.92",
     "numpy_version": "2.3.5",
-    "native_scalar_profiles": [
-      "float32",
-      "float64"
-    ]
+    "native_scalar_profiles": ["float32", "float64"]
   },
   "selection": {
     "orientation_cases_per_precision": 5,
@@ -56,7 +53,7 @@
     "reproduction_contract_note": "Current reproduction uses the shared contract; the previous digest identifies the earlier script. Native witnesses were not recaptured.",
     "previous_checkout_capture_script_sha256": "ce6df5cbbbb0983633e7ee64df2b39219b7c8e1a69731a480b152f780fda499b",
     "preparation_script_sha256": "b46f9bbb0f7422d7b940cab33682443be84225335d270be5ac323a7396e3368d",
-    "lockfile_sha256": "8288ebf7e36753cc45b10f2fa0594bd5b55aee6b6405055ee8f8a972ce6ac9bf",
+    "lockfile_sha256": "433156bce46415d69095141dd148117ddd3e4c2eeab2174aae3d9225b6cd1248",
     "capture_script_identity_note": "The reproduction script now uses equivalent list extension; provenance.capture_script_sha256 preserves the historical producer used for the retained capture."
   },
   "semantic_contract": {

@@ -201,6 +201,7 @@ def main() -> None:
             "selected_inputs_sha256": sha256_file(shared_path),
             "witnesses_sha256": sha256_file(witnesses_path),
             "pinned_lockfile_sha256": sha256_file(target_dir / "uv.lock"),
+            "reproduction_lockfile_sha256": sha256_file(target_dir / "uv.lock"),
             "loaded_cspice_binary_path": str(library_path),
             "loaded_cspice_binary_sha256": sha256_file(library_path),
             "exact_invocation": (

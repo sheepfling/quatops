@@ -18,6 +18,17 @@ jobs:
         with:
           python-version: "3.13"
           cache: pip
+      - name: Check capture environment locks
+        run: |
+          python -m pip install uv==0.11.28
+          for project in \
+            experiments/converters/eigen/5.0.1 \
+            experiments/converters/mujoco/3.17.0 \
+            experiments/converters/opencv/4.13.0 \
+            experiments/converters/openusd/26.11 \
+            experiments/converters/spiceypy/8.3.0; do
+            uv lock --check --project "$project"
+          done
       - name: Build evidence bundle
         run: >-
           python -m scripts.package_evidence_bundle

@@ -86,6 +86,8 @@ def test_eigen_contract_source_pin_and_native_build_provenance():
         "witnesses_sha256": FIXTURE / "witnesses.json",
         "eigen_source_metadata_sha256": ROOT
         / "experiments/oracles/eigen/5.0.1/source.json",
+        "reproduction_lockfile_sha256": ROOT
+        / "experiments/converters/eigen/5.0.1/uv.lock",
     }
     for field, path in paths.items():
         assert hashlib.sha256(path.read_bytes()).hexdigest() == provenance[field], field

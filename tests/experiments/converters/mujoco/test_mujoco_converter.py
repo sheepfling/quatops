@@ -87,7 +87,8 @@ def test_mujoco_boundary_contract_and_capture_provenance_are_explicit():
         / "experiments/converters/mujoco/3.17.0/converter_inputs.json",
         "selected_inputs_sha256": SHARED_PATH,
         "witnesses_sha256": FIXTURE / "witnesses.json",
-        "pinned_lockfile_sha256": ROOT / "experiments/converters/mujoco/3.17.0/uv.lock",
+        "reproduction_lockfile_sha256": ROOT
+        / "experiments/converters/mujoco/3.17.0/uv.lock",
     }
     for field, path in paths.items():
         assert (

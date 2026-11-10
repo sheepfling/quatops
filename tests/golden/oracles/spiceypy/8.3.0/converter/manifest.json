@@ -23,7 +23,7 @@
   },
   "provenance": {
     "capture_script_sha256": "9f086a289cc3a3ffa4e7c1503575b74e4291b53a0bcd72b687bf93d680b0f4b6",
-    "reproduction_capture_script_sha256": "40e09318841e67f9a8ee96c8606eb6597edc1f61318656b8e319efd073eefa1c",
+    "reproduction_capture_script_sha256": "11cf014273b61010ddfe52cc0207ee93c11a6715087701c808a98ba45d1da596",
     "previous_reproduction_capture_script_sha256": "a5eb9c215a2ac4b8922d16a83463149dd03d795488ef6759e0557b7ceff19e82",
     "reproduction_contract_note": "Current reproduction uses the shared contract; the previous digest identifies the earlier script. Native witnesses were not recaptured.",
     "contract_sha256": "3897449f31edcb43c0f81234a95e539d84f702b0ce9c0f61adac410679c05bc9",
@@ -36,7 +36,9 @@
     "loaded_cspice_binary_path": "C:\\Users\\peanu\\GIT\\sheepfling\\quatops\\experiments\\converters\\spiceypy\\8.3.0\\.venv\\lib\\site-packages\\spiceypy\\utils\\cspice.dll",
     "loaded_cspice_binary_sha256": "7fd2dcc58d73ed5293847e67109897caba34240b8f9c38ad739c0b2ec6ce7715",
     "exact_invocation": "uv run --locked --project experiments/converters/spiceypy/8.3.0 --python 3.10.11 python experiments/converters/spiceypy/8.3.0/capture_native.py --repository-root <repository>",
-    "capture_script_archive": "experiments/provenance/reproduction-v1.zip#spiceypy-8.3.0-capture_native.py"
+    "capture_script_archive": "experiments/provenance/reproduction-v1.zip#spiceypy-8.3.0-capture_native.py",
+    "reproduction_lockfile_sha256": "4d00653d2ac0617602271456b801d0c38f1aaf472d73833dec13dcacad887031",
+    "before_lock_metadata_repair_reproduction_capture_script_sha256": "40e09318841e67f9a8ee96c8606eb6597edc1f61318656b8e319efd073eefa1c"
   },
   "semantic_contract": {
     "file": "experiments/converters/spiceypy/8.3.0/semantic_contract.json",

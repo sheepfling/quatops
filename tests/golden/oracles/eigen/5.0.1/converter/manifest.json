@@ -33,7 +33,7 @@
   },
   "provenance": {
     "capture_runner_sha256": "87352500fe2a8fdd18443648d7194d846accd10824114dc5ccde2df6e6bc1510",
-    "reproduction_capture_runner_sha256": "6351749b6c1f80605dbb51eada36c445c85358702fb712be72eef42f618ad19e",
+    "reproduction_capture_runner_sha256": "9526dea618ab79eb5fd6bdfcfebf1aec6700edd67e2fa7b747c607449fbe7c66",
     "previous_reproduction_capture_runner_sha256": "2f144920257de2669beea4982f97949a38a6e5c234cf4a76ddf4ada13cb53c09",
     "reproduction_contract_note": "The current native harness emits the selected witness shape directly; original producer identity and witness values remain unchanged.",
     "native_cpp_source_sha256": "766952b362ed5a48fd6d826e90c23db4e6e6cfb86c2f6fbff2c748918368eb9b",
@@ -69,7 +69,9 @@
     "native_cpp_source_archive": "experiments/provenance/reproduction-v1.zip#eigen-5.0.1-capture_native.cpp",
     "reproduction_prepared_inputs_sha256": "83a747d9fb4613c8af96b06881e9f071c8d926e58d89b5f70d00abfad2e454d1",
     "reproduction_native_input_stream_sha256": "a4d707a7014e18f1a3c8c92ceb603e36650719e69dfb329b660f3f4cd8f2e7a3",
-    "reproduction_witness_sha256": "42197e181c727fb845f07553465aa72c40855a1eee1a93367077c5cb9c409fa2"
+    "reproduction_witness_sha256": "42197e181c727fb845f07553465aa72c40855a1eee1a93367077c5cb9c409fa2",
+    "reproduction_lockfile_sha256": "bf81c34e574e4353861b0fe746ee0826e1b9d4a521d287223b819ba046b5bb51",
+    "before_lock_metadata_repair_reproduction_capture_runner_sha256": "6351749b6c1f80605dbb51eada36c445c85358702fb712be72eef42f618ad19e"
   },
   "semantic_contract": {
     "file": "experiments/converters/eigen/5.0.1/semantic_contract.json",

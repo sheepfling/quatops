@@ -358,6 +358,7 @@ def main() -> None:
             "prepared_inputs_sha256": prepared_inputs_sha256,
             "native_input_stream_sha256": native_input_sha256,
             "witnesses_sha256": sha256_file(witnesses_path),
+            "reproduction_lockfile_sha256": sha256_file(target_dir / "uv.lock"),
             "eigen_source_archive_sha256": sha256_file(archive_path),
             "eigen_source_metadata_sha256": sha256_file(source_metadata),
             "eigen_version_header_sha256": sha256_file(version_header),

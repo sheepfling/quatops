@@ -106,7 +106,7 @@ source = { editable = "../../../../" }
 
 [package.metadata]
 requires-dist = [
-    { name = "mdrepo", marker = "python_full_version >= '3.11' and extra == 'alphus-trial'", specifier = "==0.0.1.post0" },
+    { name = "mdrepo", marker = "python_full_version >= '3.11' and extra == 'dev-experimental'", specifier = "==0.0.1.post0" },
     { name = "mypy", marker = "extra == 'dev'", specifier = ">=1.10" },
     { name = "numba", marker = "python_full_version >= '3.10' and python_full_version < '3.14' and extra == 'dev'", specifier = ">=0.61" },
     { name = "numba", marker = "python_full_version >= '3.10' and python_full_version < '3.14' and extra == 'performance'", specifier = ">=0.61" },
@@ -128,16 +128,16 @@ requires-dist = [
     { name = "pytest", marker = "extra == 'dev'", specifier = ">=7" },
     { name = "pytest-benchmark", marker = "extra == 'dev'", specifier = ">=4.0" },
     { name = "ruff", marker = "extra == 'dev'", specifier = ">=0.8" },
-    { name = "rumdl", marker = "extra == 'alphus-trial'", specifier = "==0.2.79" },
+    { name = "rumdl", marker = "extra == 'dev-experimental'", specifier = "==0.2.79" },
     { name = "scipy", marker = "extra == 'dev'", specifier = ">=1.7" },
     { name = "scipy", marker = "extra == 'experiments'", specifier = ">=1.7" },
     { name = "scipy-stubs", marker = "python_full_version >= '3.10' and extra == 'dev'" },
     { name = "tomli", marker = "python_full_version < '3.11' and extra == 'dev'", specifier = ">=2" },
     { name = "typing-extensions", marker = "extra == 'dev'", specifier = ">=4.6" },
-    { name = "yamllint", marker = "python_full_version >= '3.10' and extra == 'alphus-trial'", specifier = "==1.38.0" },
-    { name = "yamllint", marker = "python_full_version < '3.10' and extra == 'alphus-trial'", specifier = "==1.37.1" },
+    { name = "yamllint", marker = "python_full_version >= '3.10' and extra == 'dev-experimental'", specifier = "==1.38.0" },
+    { name = "yamllint", marker = "python_full_version < '3.10' and extra == 'dev-experimental'", specifier = "==1.37.1" },
 ]
-provides-extras = ["numpy", "experiments", "alphus-trial", "performance", "dev", "typecheck"]
+provides-extras = ["numpy", "experiments", "dev-experimental", "performance", "dev", "typecheck"]
 
 [[package]]
 name = "quatops-experiments"
