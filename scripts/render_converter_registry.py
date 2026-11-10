@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import argparse
+from html import escape
 from pathlib import Path
 from textwrap import fill
 from typing import cast
@@ -26,6 +27,10 @@ def _wrapped(label: str, value: str) -> str:
     )
 
 
+def _cell(value: str) -> str:
+    return escape(value, quote=False).replace("|", "\\|")
+
+
 def render_registry() -> str:
     lines = [
         "# Converter and evidence-target registry",
@@ -36,6 +41,8 @@ def render_registry() -> str:
         "",
         "## Target profiles",
         "",
+        "| Profile | Target, API, and version | Role and representation | Evidence, authority, and state | Scope |",
+        "| --- | --- | --- | --- | --- |",
     ]
     for declaration in TARGET_DECLARATIONS.values():
         profile = CONVERTERS.get(declaration.converter_id or "")
@@ -46,21 +53,18 @@ def render_registry() -> str:
         )
         evidence = profile.representation_evidence if profile is not None else "—"
         authority = profile.semantic_authority if profile is not None else "—"
-        lines.extend(
-            [
-                _wrapped(
-                    f"- `{declaration.target_id}`: ",
-                    f"{declaration.target}: {declaration.api}; {declaration.version}; "
-                    f"{declaration.role}; {representation}; evidence={evidence}; "
-                    f"semantic authority={authority}; state={declaration.state}.",
-                ),
-                _wrapped("  Scope: ", declaration.scope),
-                "",
-            ]
+        cells = (
+            f"`{declaration.target_id}`",
+            f"{declaration.target}: {declaration.api}; {declaration.version}",
+            f"{declaration.role}; {representation}",
+            f"evidence={evidence}; semantic authority={authority}; state={declaration.state}",
+            declaration.scope,
         )
+        lines.append("| " + " | ".join(_cell(cell) for cell in cells) + " |")
 
     lines.extend(
         [
+            "",
             "## Semantic assurance matrix",
             "",
             "R identifies representation evidence. S records the declared role source. B is a",
