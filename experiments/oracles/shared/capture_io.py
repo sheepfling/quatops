@@ -9,7 +9,7 @@ import platform
 import struct
 import sys
 from collections import Counter
-from dataclasses import dataclass, field
+from dataclasses import asdict, dataclass, field
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Literal, Optional, TypedDict
@@ -134,21 +134,7 @@ class Capture:
         rows = self.output_dir / "observations.jsonl"
         rows.write_text(
             "".join(
-                json.dumps(
-                    {
-                        "case_id": item.case_id,
-                        "operation_id": item.operation_id,
-                        "native_entry_point": item.native_entry_point,
-                        "contract": item.contract,
-                        "native_inputs": item.native_inputs,
-                        "native_outputs": item.native_outputs,
-                        "status": item.status,
-                        "diagnostic": item.diagnostic,
-                        "schema_version": item.schema_version,
-                    },
-                    allow_nan=False,
-                )
-                + "\n"
+                json.dumps(asdict(item), allow_nan=False) + "\n"
                 for item in self.observations
             ),
             encoding="utf-8",

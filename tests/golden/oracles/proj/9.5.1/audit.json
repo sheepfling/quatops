@@ -8,7 +8,7 @@
   },
   "native_baseline": {
     "manifest": "manifest.json",
-    "manifest_sha256": "462407090afa3ea681b3dc93c9e793ac351a93461673bff5479b5ff7e9a2cc91",
+    "manifest_sha256": "281ea752613bf2238a3e15008033124067f8fa390c0ee47a8edfe102ef0adc51",
     "observations": "observations.jsonl",
     "observations_sha256": "44d6c6ed0c27339ad0f718436dbacc89ac22778209790428919883f6e74c1ab8",
     "input_corpus": "experiments/oracles/shared/geographic_inputs_v1.json",

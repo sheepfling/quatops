@@ -89,7 +89,7 @@
     "previous_manifest_exporter_sha256": "9295111b0a0d2ddf36c207ee50c7078a28202b60911a5589301299622a665a9a",
     "previous_checkout_exporter_sha256": "b1924e77c6a449b3c86af70f8fb870cb06fa2eecd160f8a1d6937b3bbe4254a6",
     "capture_helper_path": "experiments/oracles/shared/capture_io.py",
-    "capture_helper_sha256": "deda0df66c47cf7aebd1b992a2fb7ea634e4dd8aa5bb95d4c12386b27d2a0af8",
+    "capture_helper_sha256": "c0eb259e3aaccd6e76c1023db0104b887350777fa777d1b54995b7100566cf38",
     "input_path": "experiments/oracles/shared/geographic_inputs_v1.json",
     "input_sha256": "ca5c70314444c14cead0cc196f319e5d189657bb818eb59751c07e55ec23ff85",
     "requirements_path": "experiments/oracles/proj/9.5.1/requirements.txt",
