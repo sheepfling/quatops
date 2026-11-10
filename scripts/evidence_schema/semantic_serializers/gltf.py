@@ -23,9 +23,6 @@ from scripts.evidence_schema.semantic_serializers._contract_helpers import (
     signed_axis_map,
 )
 from scripts.evidence_schema.semantic_serializers._witness_helpers import (
-    basis_images as _basis,
-)
-from scripts.evidence_schema.semantic_serializers._witness_helpers import (
     validate_canonical_input_digest,
 )
 from scripts.evidence_schema.semantic_serializers.context import (
@@ -140,9 +137,9 @@ def serialize_gltf_witnesses(
                     if output.world_probe_point_xyz is not None
                     else None
                 ),
-                local_basis_images_xyz=_basis(output.local_basis_images_xyz.values),
+                local_basis_images_xyz=output.local_basis_images_xyz.values,
                 world_basis_images_xyz=(
-                    _basis(output.world_basis_images_xyz.values)
+                    output.world_basis_images_xyz.values
                     if output.world_basis_images_xyz is not None
                     else None
                 ),

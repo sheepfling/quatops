@@ -23,9 +23,6 @@ from scripts.evidence_schema.semantic_serializers._contract_helpers import (
     signed_axis_map,
 )
 from scripts.evidence_schema.semantic_serializers._witness_helpers import (
-    basis_images as _basis,
-)
-from scripts.evidence_schema.semantic_serializers._witness_helpers import (
     canonical_orientations_by_case,
     validate_canonical_input_digest,
     validate_canonical_quaternion,
@@ -157,7 +154,7 @@ def serialize_openusd_witnesses(
                 coefficient_order="wxyz",
                 local_translation_xyz=item.usd_translation_xyz,
                 probe_point_local_xyz=inputs.usd_probe_vectors_xyz[-1],
-                world_basis_images_xyz=_basis(output.world_basis_images_xyz),
+                world_basis_images_xyz=output.world_basis_images_xyz,
                 world_probe_point_xyz=output.world_probe_point_xyz,
                 roundtrip_probe_point_xyz=output.roundtrip_probe_point_xyz,
                 ordered_ops=capture.ordered_xform_ops,
