@@ -27,6 +27,7 @@ from scripts.evidence_schema.crystallized import (
     RotationVectorBoundaryContract,
     SceneTransportContract,
 )
+from scripts.evidence_schema.engine_captures import EngineSemanticConfig
 from scripts.evidence_schema.engine_evidence import load_engine_package
 from scripts.evidence_schema.normalizer import normalize_capture
 from scripts.evidence_schema.semantic_serializers.eigen import serialize_eigen_witnesses
@@ -95,6 +96,18 @@ def test_engine_rejects_changed_shared_contract(tmp_path):
         stream.write(b"\n")
     with pytest.raises(ValueError, match="semantic config digest differs"):
         load_engine_package(tmp_path, "unity", "6000.5.2f1")
+
+
+def test_godot_shared_contract_names_only_captured_versions():
+    stable = load_engine_package(ROOT, "godot", "4.7-stable")
+    dev = load_engine_package(ROOT, "godot", "4.8-dev1")
+    assert stable.semantic_config_path == dev.semantic_config_path
+    config = EngineSemanticConfig.model_validate(
+        read_evidence_document(stable.semantic_config_path), strict=True
+    )
+    assert config.engine.supports_version("4.7-stable")
+    assert config.engine.supports_version("4.8-dev1")
+    assert not config.engine.supports_version("4.7.1-rc1")
 
 
 def test_converter_rejects_modified_native_witness(tmp_path):

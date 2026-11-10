@@ -22,6 +22,7 @@ if __package__:
         EngineCanonicalFrame,
         EngineFrame,
         EngineSemanticConfig,
+        engine_semantic_contract_path,
     )
 else:
     from evidence_json import (
@@ -34,6 +35,7 @@ else:
         EngineCanonicalFrame,
         EngineFrame,
         EngineSemanticConfig,
+        engine_semantic_contract_path,
     )
 
 JsonRecord = dict[str, JsonValue]
@@ -249,13 +251,13 @@ def retain(
     config = ENGINE_CONFIG[engine]
     if config.version and version != config.version:
         raise ValueError(f"{engine} version must be {config.version}")
-    semantic_config_path = (
-        repository_root / "experiments" / engine / version / "semantic_contract.json"
+    semantic_config_path = engine_semantic_contract_path(
+        repository_root, engine, version
     )
     semantic_config = EngineSemanticConfig.model_validate(
         read_evidence_document(semantic_config_path), strict=True
     )
-    if semantic_config.engine.version != version:
+    if not semantic_config.engine.supports_version(version):
         raise ValueError(f"{engine} semantic config version must be {version}")
     capture_source_name = config.source.format(version=version)
     original_bytes = source_path.read_bytes()
@@ -300,6 +302,13 @@ def retain(
     engine_info = _record(captured.get("engine"), context="engine")
     if engine_info.get("name") != semantic_config.engine.engine:
         raise ValueError("native capture engine identity differs from semantic config")
+    if engine == "godot":
+        native_version = engine_info.get("version")
+        if (
+            not isinstance(native_version, str)
+            or native_version.split(" ", 1)[0] != version
+        ):
+            raise ValueError("native Godot version differs from requested version")
     if engine == "unreal":
         native_semantics = _record(
             captured.get("native_semantics"), context="native_semantics"

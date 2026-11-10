@@ -33,7 +33,7 @@
     },
     "capture_method": "Godot headless GDScript SceneTree script",
     "retention_method": "selected native outputs retained losslessly; inputs linked by case ID; redundant inputs and probe actions omitted",
-    "semantic_contract_file": "experiments/godot/4.7-stable/semantic_contract.json",
-    "semantic_contract_sha256": "7a56af428c472a54f11a90af4557afc9f165a331729f279f83232d73fa32dfa7"
+    "semantic_contract_file": "experiments/godot/semantic_contract.json",
+    "semantic_contract_sha256": "81c3c5f2e435af6607bb460736368e32fb89813e50ccbb2e0ac367647744ce99"
   }
 }

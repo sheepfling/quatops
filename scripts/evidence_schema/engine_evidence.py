@@ -10,6 +10,7 @@ from scripts.evidence_schema.engine_captures import (
     EngineContractDocument,
     EngineProvenance,
     EngineSemanticConfig,
+    engine_semantic_contract_path,
 )
 from scripts.evidence_schema.utilities import sha256_file
 
@@ -52,8 +53,8 @@ def load_engine_package(
     provenance = EngineProvenance.model_validate(
         raw_contract["provenance"], strict=True
     )
-    semantic_config_path = (
-        repository_root / "experiments" / engine / version / "semantic_contract.json"
+    semantic_config_path = engine_semantic_contract_path(
+        repository_root, engine, version
     )
     semantic_config = EngineSemanticConfig.model_validate(
         read_evidence_document(semantic_config_path), strict=True
@@ -80,7 +81,6 @@ def load_engine_package(
     for field in (
         "engine",
         "api",
-        "version",
         "native_scalar_profiles",
         "native_quaternion_order",
         "native_algebra",
@@ -91,6 +91,12 @@ def load_engine_package(
                 f"{directory}: retained engine {field} differs from "
                 "experiment semantic config"
             )
+    if actual_identity.version != version or not expected_identity.supports_version(
+        version
+    ):
+        raise ValueError(
+            f"{directory}: engine version differs from experiment semantic config"
+        )
     witness_name = contract.provenance.witness_file or "witnesses.json"
     witness_path = (directory / witness_name).resolve()
     witness_document = read_evidence_document(witness_path)

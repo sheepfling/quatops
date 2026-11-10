@@ -26,8 +26,8 @@ The typed input models and normalization boundaries are indexed in the
   native-output shape. It preserves native field names and does not assign
   shared physical meaning to them.
 - Each pinned experiment owns `semantic_contract.json` beside its capture
-  code and inputs. Its retained manifest carries the repository-relative path
-  and SHA-256 digest, which the loader checks before normalization.
+  code and inputs. Versions may share a contract only when it explicitly names
+  each version; each retained manifest records its path and SHA-256 digest.
 - `scripts/evidence_schema/semantic_serializers/` contains one adapter for
   each converter experiment: Eigen, MuJoCo, OpenCV, SpiceyPy, ROS 2, Cesium,
   glTF/Three.js, and OpenUSD. Each adapter owns its evidence layer, contract,

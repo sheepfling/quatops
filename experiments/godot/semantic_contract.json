@@ -3,7 +3,7 @@
   "engine": {
     "engine": "Godot Engine",
     "api": "Quaternion(x,y,z,w); Quaternion * Vector3",
-    "version": "4.8-dev1",
+    "version": ["4.7-stable", "4.8-dev1"],
     "native_scalar_profiles": [
       "float32"
     ],

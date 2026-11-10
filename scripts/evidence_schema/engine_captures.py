@@ -5,6 +5,7 @@
 
 from __future__ import annotations
 
+from pathlib import Path
 from typing import Annotated, Literal, Optional, Union
 
 from pydantic import Field
@@ -130,11 +131,26 @@ class EngineSemanticIdentity(NativeCaptureModel):
 
     engine: str
     api: str
-    version: str
+    version: Union[str, list[str]]
     native_scalar_profiles: list[str]
     native_quaternion_order: Literal["wxyz", "xyzw"]
     native_algebra: Literal["Hamilton", "JPL"]
     native_vector_action: str
+
+    def supports_version(self, version: str) -> bool:
+        """Allow only versions explicitly named by the experiment contract."""
+        return (
+            version in self.version
+            if isinstance(self.version, list)
+            else version == self.version
+        )
+
+
+def engine_semantic_contract_path(root: Path, engine: str, version: str) -> Path:
+    """Select a version-specific contract or an explicitly shared engine contract."""
+    directory = root / "experiments" / engine
+    versioned = directory / version / "semantic_contract.json"
+    return versioned if versioned.is_file() else directory / "semantic_contract.json"
 
 
 class EngineSemanticConfig(NativeCaptureModel):

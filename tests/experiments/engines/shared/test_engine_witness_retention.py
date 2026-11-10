@@ -2,16 +2,37 @@
 
 from __future__ import annotations
 
+import json
 from copy import deepcopy
 from math import copysign
 
 import pytest
 
+import scripts.retain_engine_witnesses as retention
 from scripts.evidence_schema.engine_captures import ENGINE_RETAINED_CASE_IDS
 from scripts.retain_engine_witnesses import (
     compact_native_vectors,
     retain_canonical_interop,
 )
+from tests.support.paths import REPOSITORY_ROOT
+
+
+def test_godot_retention_rejects_a_different_native_version(tmp_path, monkeypatch):
+    capture = tmp_path / "capture.json"
+    capture.write_text(
+        json.dumps(
+            {
+                "canonical_interop": {"reverse_composition": {}},
+                "engine": {"name": "Godot Engine", "version": "4.8-dev1 (official)"},
+            }
+        ),
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(
+        retention, "retain_canonical_interop", lambda capture, _: capture
+    )
+    with pytest.raises(ValueError, match="native Godot version differs"):
+        retention.retain("godot", "4.7-stable", capture, tmp_path, REPOSITORY_ROOT)
 
 
 def test_retention_selects_the_reviewed_engine_cases():
