@@ -13,7 +13,6 @@
   "provenance": {
     "witness_file": "../shared/witnesses.json",
     "witness_sha256": "96c0dbc6fb0c3a650bba748b7bf536c25534bdbc553b12f55a151ad38f143747",
-    "previous_witness_sha256": "918fd07acd669639123da5622b7cce569bf9b8a6f54742bd9cd7c7eef9fed807",
     "capture_source": "experiments/godot/capture.gd",
     "capture_source_sha256": "e9ffcd08ef64471a2016894576059f1be3ed2e1d12a549562c4f0b6351013c61",
     "original_capture_sha256": "87b2ae2ab1fa4d15a9c5eead13828c6afcae76f4fca84e8e5b1acc421ae69f8f",

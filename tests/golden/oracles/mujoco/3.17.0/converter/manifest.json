@@ -37,12 +37,10 @@
     "converter_input_spec_sha256": "cfc5dbbc1729c6d22b9f0c2e8f7d3f335ff0b32a65a968f2f48f65a4aaa0eb82",
     "selected_inputs_sha256": "a6f0630806b69d3b3b29a036aa10f63bfe214668329c661598951f84f8f41eec",
     "witnesses_sha256": "0c5eb585275c19930d6b0ee2a1ebe92cfd65dff0b66776f52b9f85bfda0e3485",
-    "previous_witnesses_sha256": "5e9d4cadbc1db1a0abd4a1c6642f0fa4e0e6af2cd0c1b32e32ae001eabeccfa4",
     "witness_selection_note": "Quarter-turn rows were removed from the retained subset; original native capture identity and selected values are unchanged.",
     "pinned_lockfile_sha256": "9043b65cd8be3132dc0302638cc5d80886951cbee64fbc0612c3437acd0070a8",
     "exact_invocation": "uv run --locked --project experiments/converters/mujoco/3.17.0 --python 3.10.11 python experiments/converters/mujoco/3.17.0/capture_native.py --repository-root <repository>",
-    "reproduction_lockfile_sha256": "d033290b2f70f1de10463dfb1672d28f533f180bceab0989224801ba7eec39a6",
-    "before_lock_metadata_repair_reproduction_capture_script_sha256": "e26a49c452cfb78d7629435f6f0c3a1a89d0c3fd0e716bf9bcd7c8df7f325ba6"
+    "reproduction_lockfile_sha256": "d033290b2f70f1de10463dfb1672d28f533f180bceab0989224801ba7eec39a6"
   },
   "semantic_contract": {
     "file": "experiments/converters/mujoco/3.17.0/semantic_contract.json",

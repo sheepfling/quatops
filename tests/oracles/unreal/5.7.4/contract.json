@@ -13,7 +13,6 @@
   "provenance": {
     "witness_file": "witnesses.json",
     "witness_sha256": "9579b62fbee2956c13e52d71544a139e77c9aae5b42feabe60602dffc35112c2",
-    "previous_witness_sha256": "cb1976aae80c980be86d740534374fbd7a7c0bfafa03dc206892beaded3276c3",
     "capture_source": "experiments/unreal/5.7.4/Source/QuatOpsUnrealCapture/Private/QuatOpsUnrealCaptureTests.cpp",
     "capture_source_sha256": "7ed0a481c8af4a08c8eedf34609fc48339a3560e725c1b10f8c4881d45833a10",
     "original_capture_sha256": "c763289dab91ea523bc2695fc270f063b777819a5bd9dc630b095dfb0412fe00",

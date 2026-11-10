@@ -30,15 +30,13 @@
     "converter_input_spec_sha256": "aa7756f7c655246f53fbd4e34b1a48d72942c2bcb41fc181f8021fd666bfa058",
     "selected_inputs_sha256": "a6f0630806b69d3b3b29a036aa10f63bfe214668329c661598951f84f8f41eec",
     "witnesses_sha256": "ea498c1a3b326bb76531aa94004ecaf66bc15098111ff2b6669a479f0d9dbe60",
-    "previous_witnesses_sha256": "182188b8c1768b4b40b69b5d9cea983d394dd676376c7e0066f6bb8f5b440873",
     "witness_selection_note": "Quarter-turn rows were removed from the retained subset; original native capture identity and selected values are unchanged.",
     "pinned_lockfile_sha256": "cb4c7d5ec7d098acc31b61dec5362335b1c2f41423532598a823ced5e2a2845e",
     "loaded_cspice_binary_path": "C:\\Users\\peanu\\GIT\\sheepfling\\quatops\\experiments\\converters\\spiceypy\\8.3.0\\.venv\\lib\\site-packages\\spiceypy\\utils\\cspice.dll",
     "loaded_cspice_binary_sha256": "7fd2dcc58d73ed5293847e67109897caba34240b8f9c38ad739c0b2ec6ce7715",
     "exact_invocation": "uv run --locked --project experiments/converters/spiceypy/8.3.0 --python 3.10.11 python experiments/converters/spiceypy/8.3.0/capture_native.py --repository-root <repository>",
     "capture_script_archive": "experiments/provenance/reproduction-v1.zip#spiceypy-8.3.0-capture_native.py",
-    "reproduction_lockfile_sha256": "4d00653d2ac0617602271456b801d0c38f1aaf472d73833dec13dcacad887031",
-    "before_lock_metadata_repair_reproduction_capture_script_sha256": "40e09318841e67f9a8ee96c8606eb6597edc1f61318656b8e319efd073eefa1c"
+    "reproduction_lockfile_sha256": "4d00653d2ac0617602271456b801d0c38f1aaf472d73833dec13dcacad887031"
   },
   "semantic_contract": {
     "file": "experiments/converters/spiceypy/8.3.0/semantic_contract.json",

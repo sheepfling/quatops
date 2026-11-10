@@ -41,7 +41,6 @@
     "preparation_spec_sha256": "9f17f3eafd3186d3460488eff91e0f50771f2ee7c5e6d42409b1e93df5fc084e",
     "shared_canonical_inputs_sha256": "a6f0630806b69d3b3b29a036aa10f63bfe214668329c661598951f84f8f41eec",
     "witnesses_sha256": "821e7a22515c724672dd12f453a1388b3ac09ef32c59548b2c79ee69275242d4",
-    "previous_witnesses_sha256": "1dd125262a81c17136eb8a99ac0926b1d94d5d2960a669b8e85bf099f4458766",
     "witness_selection_note": "Quarter-turn rows were removed from the retained subset; original native capture identity and selected values are unchanged.",
     "lockfile_sha256": "8288ebf7e36753cc45b10f2fa0594bd5b55aee6b6405055ee8f8a972ce6ac9bf",
     "cv2_extension_directory": "site-packages/cv2",

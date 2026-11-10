@@ -117,7 +117,6 @@ class EngineProvenance(NativeCaptureModel):
     retention_method: Optional[str] = None
     witness_file: Optional[str] = None
     witness_sha256: Optional[SHA256] = None
-    previous_witness_sha256: Optional[SHA256] = None
 
 
 class EngineContractDocument(NativeCaptureModel):

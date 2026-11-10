@@ -13,7 +13,6 @@
   "provenance": {
     "witness_file": "witnesses.json",
     "witness_sha256": "e8f9a4080c98f9484d4f6895361457bd2070ffb99415b4c1afe17643a812f763",
-    "previous_witness_sha256": "245c13b6c254734025baa87a9b3229fdc620d0dbf60dbdfa899183ab596705cb",
     "capture_source": "experiments/provenance/reproduction-v1.zip#blender-5.1.2-capture.py",
     "capture_source_sha256": "f61b09cbed8fe6ce3f0615745bd438d168a552d184558f8d6fc78b849e093cc4",
     "original_capture_sha256": "e1a46351cf32f5a3937defb8e669458e34cb50c4a4131e03bf34c8ecb8009b76",
