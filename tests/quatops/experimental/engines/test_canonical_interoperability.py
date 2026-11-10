@@ -50,15 +50,11 @@ def _capture_rows(fixture):
     capture = fixture["canonical_interop"]
     if "precision_captures" in capture:
         return capture, capture["precision_captures"]
-    if "float32" in capture and "float64" in capture:
-        return capture, {key: capture[key] for key in ("float32", "float64")}
     profiles = fixture["target"]["native_scalar_profiles"]
     return capture, {profiles[0]: capture}
 
 
 def _vec(value):
-    if isinstance(value, dict):
-        return np.asarray((value["x"], value["y"], value["z"]), dtype=float)
     return np.asarray(value, dtype=float)
 
 
