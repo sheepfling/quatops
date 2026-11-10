@@ -113,9 +113,8 @@ class EigenBoundaryContract(BoundaryContractBase):
     native_matrix_storage: str
 
 
-class MuJoCoBoundaryContract(BoundaryContractBase):
+class DirectQuaternionBoundaryContract(BoundaryContractBase):
     coefficient_order: str
-    observed_quat2mat_vector_action: str
     observed_product: str
     source_to_target_coordinate_map: Annotated[
         list[str], Field(min_length=3, max_length=3)
@@ -123,6 +122,10 @@ class MuJoCoBoundaryContract(BoundaryContractBase):
     native_matrix_layout: str
     canonical_to_native: str
     reverse_matrix_route: str
+
+
+class MuJoCoBoundaryContract(DirectQuaternionBoundaryContract):
+    observed_quat2mat_vector_action: str
 
 
 class OpenCVBoundaryContract(BoundaryContractBase):
@@ -134,16 +137,8 @@ class OpenCVBoundaryContract(BoundaryContractBase):
     matrix_layout: str
 
 
-class SpiceyPyBoundaryContract(BoundaryContractBase):
-    coefficient_order: str
+class SpiceyPyBoundaryContract(DirectQuaternionBoundaryContract):
     observed_q2m_vector_action: str
-    observed_product: str
-    source_to_target_coordinate_map: Annotated[
-        list[str], Field(min_length=3, max_length=3)
-    ]
-    native_matrix_layout: str
-    canonical_to_native: str
-    reverse_matrix_route: str
 
 
 class EigenContract(LibraryContractBase):
@@ -600,12 +595,12 @@ class Ros2Capture(NativeCaptureModel):
     observations: Annotated[list[RosObservation], Field(min_length=2, max_length=2)]
 
 
-class CesiumNumericVector3(NativeCaptureModel):
+class Binary64Vector3(NativeCaptureModel):
     values: Vector3
     dtype: Literal["binary64"]
 
 
-class CesiumNumericQuaternion(NativeCaptureModel):
+class Binary64Quaternion(NativeCaptureModel):
     values: Quaternion4
     dtype: Literal["binary64"]
 
@@ -617,12 +612,12 @@ class CesiumNumericVectors3(NativeCaptureModel):
 
 class CesiumOutputs(NativeCaptureModel):
     local_basis_and_probe_images: Optional[CesiumNumericVectors3] = None
-    model_to_ecef_quaternion_xyzw: CesiumNumericQuaternion
-    local_quaternion_recovered_from_ecef_xyzw: CesiumNumericQuaternion
+    model_to_ecef_quaternion_xyzw: Binary64Quaternion
+    local_quaternion_recovered_from_ecef_xyzw: Binary64Quaternion
     world_points_xyz_m: CesiumNumericVectors3
     world_directions_xyz: CesiumNumericVectors3
     point_roundtrip_local_xyz_m: CesiumNumericVectors3
-    ecef_origin_xyz_m: CesiumNumericVector3
+    ecef_origin_xyz_m: Binary64Vector3
 
 
 class CesiumObservation(NativeCaptureModel):
@@ -675,27 +670,17 @@ class CesiumInputs(NativeCaptureModel):
     cases: list[CesiumInputCase]
 
 
-class ThreeNumericVector(NativeCaptureModel):
-    values: Vector3
-    dtype: Literal["binary64"]
-
-
-class ThreeNumericQuaternion(NativeCaptureModel):
-    values: Quaternion4
-    dtype: Literal["binary64"]
-
-
 class ThreeNumericBasisImages(NativeCaptureModel):
     values: Annotated[list[Vector3], Field(min_length=3, max_length=3)]
     dtype: Literal["binary64"]
 
 
 class ThreeOutputs(NativeCaptureModel):
-    local_quaternion_xyzw: ThreeNumericQuaternion
+    local_quaternion_xyzw: Binary64Quaternion
     local_basis_images_xyz: ThreeNumericBasisImages
     world_basis_images_xyz: Optional[ThreeNumericBasisImages] = None
-    world_probe_point_xyz: Optional[ThreeNumericVector] = None
-    roundtrip_probe_point_xyz: Optional[ThreeNumericVector] = None
+    world_probe_point_xyz: Optional[Binary64Vector3] = None
+    roundtrip_probe_point_xyz: Optional[Binary64Vector3] = None
 
 
 class ThreeNodeObservation(NativeCaptureModel):
