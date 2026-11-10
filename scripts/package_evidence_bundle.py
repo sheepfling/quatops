@@ -43,6 +43,10 @@ EXCLUDED_PARTS = {
     ".nox",
     ".cache",
 }
+GENERATED_INPUTS = {
+    "experiments/transports/gltf/2.0.0/assets/rotation_transport.gltf",
+    "experiments/transports/gltf/2.0.0/assets/rotation_transport.bin",
+}
 
 
 def included_files(root: Path) -> list[Path]:
@@ -56,6 +60,8 @@ def included_files(root: Path) -> list[Path]:
                 if not candidate.is_file():
                     continue
                 relative_candidate = candidate.relative_to(root)
+                if relative_candidate.as_posix() in GENERATED_INPUTS:
+                    continue
                 if any(
                     part.casefold() in EXCLUDED_PARTS
                     for part in relative_candidate.parts
