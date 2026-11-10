@@ -10,6 +10,7 @@ from scipy.spatial.transform import Rotation
 
 from quatops.python import hamilton
 from scripts.evidence_schema.primitives import NATIVE_RETAINED_CASE_IDS
+from tests.support.evidence_oracles import matrix_from_wxyz as matrix
 from tests.support.paths import REPOSITORY_ROOT
 
 ROOT = REPOSITORY_ROOT
@@ -33,11 +34,6 @@ CANONICAL = {
 PROBE = np.asarray(SHARED["probe_vector_xyz"], dtype=float)
 BASIS = np.eye(3)
 ATOL = 3e-12
-
-
-def matrix(q_wxyz):
-    q = np.asarray(q_wxyz, dtype=float)
-    return Rotation.from_quat(q[[1, 2, 3, 0]]).as_matrix()
 
 
 def check(actual, expected, message):

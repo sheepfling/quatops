@@ -7,10 +7,10 @@ import json
 from urllib.parse import urlsplit
 
 import numpy as np
-from scipy.spatial.transform import Rotation
 
 from quatops.python import hamilton
 from scripts.evidence_schema.primitives import NATIVE_RETAINED_CASE_IDS
+from tests.support.evidence_oracles import matrix_from_wxyz as matrix
 from tests.support.paths import REPOSITORY_ROOT
 from tests.support.provenance_archives import read_provenance_source
 
@@ -33,11 +33,6 @@ CANONICAL = {
 }
 BASIS = np.eye(3)
 ATOL = {"float32": 2e-6, "float64": 4e-12}
-
-
-def matrix(q_wxyz):
-    q = np.asarray(q_wxyz, dtype=float)
-    return Rotation.from_quat(q[[1, 2, 3, 0]]).as_matrix()
 
 
 def check(actual, expected, dtype, message):

@@ -10,6 +10,7 @@ import numpy as np
 from quatops.experimental.engines import QuaternionFrameMap, SignedAxisMap
 from quatops.python import hamilton
 from scripts.evidence_schema.ros_capture import RosChainInputs
+from tests.support.evidence_oracles import native_values as values
 from tests.support.paths import REPOSITORY_ROOT
 from tests.support.provenance_archives import read_provenance_source
 
@@ -24,17 +25,6 @@ WORLD = SignedAxisMap(("x", "y", "z"))
 BASE = SignedAxisMap(("y", "-x", "z"))
 SENSOR = SignedAxisMap(("x", "-z", "y"))
 ATOL = 4e-12
-
-
-def values(item):
-    """Unwrap the capture envelope, preserving numeric values as captured."""
-    if isinstance(item, dict) and "values" in item and "dtype" in item:
-        return item["values"]
-    if isinstance(item, dict):
-        return {key: values(value) for key, value in item.items()}
-    if isinstance(item, list):
-        return [values(value) for value in item]
-    return item
 
 
 def native_wxyz(xyzw):

@@ -14,6 +14,8 @@ from quatops.experimental.semantics import (
     bind_cesium_enu_frame,
 )
 from quatops.python import hamilton
+from tests.support.evidence_oracles import matrix_from_wxyz as rotation_matrix
+from tests.support.evidence_oracles import native_values as values
 from tests.support.paths import REPOSITORY_ROOT
 from tests.support.provenance_archives import read_provenance_source
 
@@ -27,21 +29,6 @@ INPUTS = json.loads(INPUTS_PATH.read_text(encoding="utf-8"))
 CAPTURE = json.loads((FIXTURE / "witnesses.json").read_text(encoding="utf-8"))
 OBSERVATIONS = {row["case_id"]: row for row in CAPTURE["observations"]}
 ATOL = 2e-11
-
-
-def values(item):
-    if isinstance(item, dict) and "values" in item and "dtype" in item:
-        return item["values"]
-    if isinstance(item, list):
-        return [values(child) for child in item]
-    if isinstance(item, dict):
-        return {key: values(child) for key, child in item.items()}
-    return item
-
-
-def rotation_matrix(q_wxyz):
-    q = np.asarray(q_wxyz, dtype=float)
-    return Rotation.from_quat(q[[1, 2, 3, 0]]).as_matrix()
 
 
 def enu_to_ecef(origin_xyz):

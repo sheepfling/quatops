@@ -6,9 +6,9 @@ import hashlib
 import json
 
 import numpy as np
-from scipy.spatial.transform import Rotation
 
 from quatops.experimental.engines import QuaternionFrameMap, SignedAxisMap
+from tests.support.evidence_oracles import matrix_from_wxyz as rotation
 from tests.support.paths import REPOSITORY_ROOT
 from tests.support.provenance_archives import read_provenance_source
 
@@ -29,23 +29,8 @@ MAP = np.asarray(FRAME.matrix, dtype=float)
 ATOL = 3e-12
 
 
-def values(item):
-    if isinstance(item, dict) and "values" in item and "dtype" in item:
-        return item["values"]
-    if isinstance(item, list):
-        return [values(child) for child in item]
-    if isinstance(item, dict):
-        return {key: values(child) for key, child in item.items()}
-    return item
-
-
 def check(actual, expected, message):
     np.testing.assert_allclose(actual, expected, rtol=0.0, atol=ATOL, err_msg=message)
-
-
-def rotation(q_wxyz):
-    q = np.asarray(q_wxyz, dtype=float)
-    return Rotation.from_quat(q[[1, 2, 3, 0]]).as_matrix()
 
 
 def usd_row_transform(q_wxyz, translation):
