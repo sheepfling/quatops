@@ -113,11 +113,6 @@ def select_retained_rows(
     return [by_case_id[case_id] for case_id in retained_case_ids]
 
 
-def basis_images(images: list[list[float]]) -> list[list[float]]:
-    """Keep three basis actions and omit an optional discovery probe."""
-    return images[:3]
-
-
 def native_product_case_ids(case_id: str) -> tuple[str, str]:
     """Read the native capture's stable ``left_times_right`` case label."""
     try:

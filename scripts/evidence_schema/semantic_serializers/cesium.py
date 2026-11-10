@@ -24,9 +24,6 @@ from scripts.evidence_schema.semantic_serializers._contract_helpers import (
     signed_axis_map,
 )
 from scripts.evidence_schema.semantic_serializers._witness_helpers import (
-    basis_images as _basis,
-)
-from scripts.evidence_schema.semantic_serializers._witness_helpers import (
     canonical_orientations_by_case,
     validate_canonical_input_digest,
     validate_canonical_quaternion,
@@ -176,13 +173,13 @@ def serialize_cesium_witnesses(
                 recovered_local_coefficients=(
                     output.local_quaternion_recovered_from_ecef_xyzw.values
                 ),
-                local_basis_images_xyz=_basis(local_actions) if local_actions else None,
+                local_basis_images_xyz=local_actions[:3] if local_actions else None,
                 local_probe_image_xyz=(
                     local_actions[3]
                     if local_actions is not None and len(local_actions) > 3
                     else None
                 ),
-                world_directions_xyz=_basis(world_directions),
+                world_directions_xyz=world_directions[:3],
                 world_probe_direction_xyz=(
                     world_directions[3] if len(world_directions) > 3 else None
                 ),
