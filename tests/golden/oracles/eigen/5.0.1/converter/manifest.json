@@ -12,26 +12,15 @@
     "name": "Eigen",
     "version": "5.0.1",
     "header": "Eigen/Geometry",
-    "scalar_profiles": [
-      "float32",
-      "float64"
-    ]
+    "scalar_profiles": ["float32", "float64"]
   },
   "native_build": {
     "compiler_path": "C:\\Users\\peanu\\scoop\\apps\\gcc\\15.2.0\\bin\\g++.exe",
     "compiler_version": "g++.exe (GCC) 15.2.0\nCopyright (C) 2025 Free Software Foundation, Inc.\nThis is free software; see the source for copying conditions.  There is NO\nwarranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.",
     "cxx_standard": "C++17",
-    "compiler_flags": [
-      "-O2",
-      "-DNDEBUG"
-    ],
+    "compiler_flags": ["-O2", "-DNDEBUG"],
     "native_executable_sha256": "3545964878906aa925b1cd4c33fa0c96c8774decd472b7260fd90a9a8fa3c1fb",
-    "version_macros": [
-      3,
-      5,
-      0,
-      1
-    ]
+    "version_macros": [3, 5, 0, 1]
   },
   "selection": {
     "orientation_cases_per_scalar_profile": 5,
@@ -39,19 +28,16 @@
     "noncommuting_product_orders_per_scalar_profile": 2,
     "native_basis_images_per_orientation": 3,
     "native_mixed_probe_case_id": "mixed_a",
-    "matrix_to_quaternion_case_ids": [
-      "mixed_a",
-      "nonprincipal_halfturn"
-    ],
+    "matrix_to_quaternion_case_ids": ["mixed_a", "nonprincipal_halfturn"],
     "matrix_layout_case_id": "mixed_a"
   },
   "provenance": {
     "capture_runner_sha256": "87352500fe2a8fdd18443648d7194d846accd10824114dc5ccde2df6e6bc1510",
-    "reproduction_capture_runner_sha256": "cd1fa0364ea985b9307ebfa31a7df178015bff7b013d7aac6559ba0bc47486ae",
+    "reproduction_capture_runner_sha256": "6351749b6c1f80605dbb51eada36c445c85358702fb712be72eef42f618ad19e",
     "previous_reproduction_capture_runner_sha256": "2f144920257de2669beea4982f97949a38a6e5c234cf4a76ddf4ada13cb53c09",
-    "reproduction_contract_note": "Current reproduction uses the shared contract; the previous digest identifies the earlier script. Native witnesses were not recaptured.",
+    "reproduction_contract_note": "The current native harness emits the selected witness shape directly; original producer identity and witness values remain unchanged.",
     "native_cpp_source_sha256": "766952b362ed5a48fd6d826e90c23db4e6e6cfb86c2f6fbff2c748918368eb9b",
-    "reproduction_native_cpp_source_sha256": "766952b362ed5a48fd6d826e90c23db4e6e6cfb86c2f6fbff2c748918368eb9b",
+    "reproduction_native_cpp_source_sha256": "c79bc9f7b878a84b06dfc6b210da156973b02094f02a25377ac31ff9b124d825",
     "contract_sha256": "80d24bf67748f0f315a99261d1b32f25f45548cb1e1bb3ce67ee3c812dfc845a",
     "converter_input_spec_sha256": "cdcecfa512477580a1b04d0f7aed32eca4512e585de8c41711fa9e84301a50b9",
     "selected_inputs_sha256": "a6f0630806b69d3b3b29a036aa10f63bfe214668329c661598951f84f8f41eec",
@@ -78,7 +64,12 @@
       "C:\\Users\\peanu\\AppData\\Local\\Temp\\quatops-eigen-5.0.1-capture-4hvv3rke\\capture_eigen.exe",
       "C:\\Users\\peanu\\AppData\\Local\\Temp\\quatops-eigen-5.0.1-capture-4hvv3rke\\native-input.tsv"
     ],
-    "exact_invocation": "C:\\Users\\peanu\\GIT\\sheepfling\\quatops\\experiments\\converters\\eigen\\5.0.1\\.venv\\Scripts\\python.exe C:\\Users\\peanu\\GIT\\sheepfling\\quatops\\experiments\\converters\\eigen\\5.0.1\\capture_native.py --eigen-root C:\\Users\\peanu\\AppData\\Local\\Temp\\quatops-eigen-5.0.1\\eigen-5.0.1 --eigen-archive C:\\Users\\peanu\\AppData\\Local\\Temp\\eigen-5.0.1.tar.gz --compiler g++ --repository-root C:\\Users\\peanu\\GIT\\sheepfling\\quatops"
+    "exact_invocation": "C:\\Users\\peanu\\GIT\\sheepfling\\quatops\\experiments\\converters\\eigen\\5.0.1\\.venv\\Scripts\\python.exe C:\\Users\\peanu\\GIT\\sheepfling\\quatops\\experiments\\converters\\eigen\\5.0.1\\capture_native.py --eigen-root C:\\Users\\peanu\\AppData\\Local\\Temp\\quatops-eigen-5.0.1\\eigen-5.0.1 --eigen-archive C:\\Users\\peanu\\AppData\\Local\\Temp\\eigen-5.0.1.tar.gz --compiler g++ --repository-root C:\\Users\\peanu\\GIT\\sheepfling\\quatops",
+    "previous_compact_runner_sha256": "cd1fa0364ea985b9307ebfa31a7df178015bff7b013d7aac6559ba0bc47486ae",
+    "native_cpp_source_archive": "experiments/provenance/reproduction-v1.zip#eigen-5.0.1-capture_native.cpp",
+    "reproduction_prepared_inputs_sha256": "83a747d9fb4613c8af96b06881e9f071c8d926e58d89b5f70d00abfad2e454d1",
+    "reproduction_native_input_stream_sha256": "a4d707a7014e18f1a3c8c92ceb603e36650719e69dfb329b660f3f4cd8f2e7a3",
+    "reproduction_witness_sha256": "42197e181c727fb845f07553465aa72c40855a1eee1a93367077c5cb9c409fa2"
   },
   "semantic_contract": {
     "file": "experiments/converters/eigen/5.0.1/semantic_contract.json",

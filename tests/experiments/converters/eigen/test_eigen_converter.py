@@ -12,6 +12,7 @@ from scipy.spatial.transform import Rotation
 from quatops.python import hamilton
 from scripts.evidence_schema.primitives import NATIVE_RETAINED_CASE_IDS
 from tests.support.paths import REPOSITORY_ROOT
+from tests.support.provenance_archives import read_provenance_source
 
 ROOT = REPOSITORY_ROOT
 FIXTURE = ROOT / "tests/golden/oracles/eigen/5.0.1/converter"
@@ -93,6 +94,14 @@ def test_eigen_contract_source_pin_and_native_build_provenance():
     }
     for field, path in paths.items():
         assert hashlib.sha256(path.read_bytes()).hexdigest() == provenance[field], field
+    archived_source = read_provenance_source(
+        ROOT, provenance["native_cpp_source_archive"]
+    )
+    assert (
+        hashlib.sha256(archived_source).hexdigest()
+        == provenance["native_cpp_source_sha256"]
+    )
+    assert provenance["reproduction_witness_sha256"] == provenance["witnesses_sha256"]
     assert provenance["eigen_source_archive_sha256"] == SOURCE["archive_sha256"]
     assert provenance["eigen_version_header_sha256"] == SOURCE["version_header_sha256"]
     archive_url = urlsplit(SOURCE["official_archive_url"])

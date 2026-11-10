@@ -84,20 +84,22 @@ template <typename T>
 void write_orientation(std::ostream& out, const InputCase& item, const Vector3<double>& probe) {
   const Quaternion<T> q(static_cast<T>(item.w), static_cast<T>(item.x),
                         static_cast<T>(item.y), static_cast<T>(item.z));
-  const Matrix3<T> matrix = q.toRotationMatrix();
-  const Quaternion<T> recovered(matrix);
   out << "{\"case_id\":\"" << item.id << "\",\"quaternion\":";
   write_quaternion(out, q);
-  out << ",\"rotation_matrix\":";
-  write_matrix(out, matrix);
+  if (item.id == "mixed_a") {
+    out << ",\"rotation_matrix\":";
+    write_matrix(out, q.toRotationMatrix());
+  }
   out << ",\"native_quaternion_basis_actions_xyz\":";
   write_basis_actions(out, q);
   if (item.id == "mixed_a") {
     out << ",\"native_quaternion_probe_action_xyz\":";
     write_probe_action(out, q, probe);
   }
-  out << ",\"matrix_to_quaternion\":";
-  write_quaternion(out, recovered, false);
+  if (item.id == "mixed_a" || item.id == "nonprincipal_halfturn") {
+    out << ",\"matrix_to_quaternion\":";
+    write_quaternion(out, Quaternion<T>(q.toRotationMatrix()), false);
+  }
   out << '}';
 }
 
@@ -106,13 +108,10 @@ void write_composition(std::ostream& out, const std::string& case_id,
                        const std::string& lhs_id, const std::string& rhs_id,
                        const Quaternion<T>& lhs, const Quaternion<T>& rhs) {
   const Quaternion<T> product = lhs * rhs;
-  const Matrix3<T> matrix = product.toRotationMatrix();
   out << "{\"case_id\":\"" << case_id << "\",\"lhs_case_id\":\""
       << lhs_id << "\",\"rhs_case_id\":\"" << rhs_id
       << "\",\"product_order\":\"lhs * rhs; rhs acts first\",\"quaternion\":";
   write_quaternion(out, product, false);
-  out << ",\"rotation_matrix\":";
-  write_matrix(out, matrix);
   out << ",\"native_quaternion_basis_actions_xyz\":";
   write_basis_actions(out, product);
   out << '}';
@@ -144,13 +143,8 @@ void write_profile(std::ostream& out, const std::string& dtype,
   const Matrix3<T> native_matrix = native_q.toRotationMatrix();
   const Quaternion<T> native_recovered(native_matrix);
   out << "{\"case_id\":\"" << axis_angle.id
-      << "\",\"constructor\":\"Eigen::Quaternion(Eigen::AngleAxis)\",\"input_axis_xyz\":["
-      << static_cast<T>(axis_angle.x) << ',' << static_cast<T>(axis_angle.y) << ','
-      << static_cast<T>(axis_angle.z) << "],\"input_angle_radians\":"
-      << static_cast<T>(axis_angle.angle) << ",\"quaternion\":";
+      << "\",\"constructor\":\"Eigen::Quaternion(Eigen::AngleAxis)\",\"quaternion\":";
   write_quaternion(out, native_q, false);
-  out << ",\"rotation_matrix\":";
-  write_matrix(out, native_matrix);
   out << ",\"native_quaternion_basis_actions_xyz\":";
   write_basis_actions(out, native_q);
   out << ",\"matrix_to_quaternion\":";

@@ -19,18 +19,12 @@ from pydantic import BaseModel, ConfigDict
 from scripts.evidence_format import dump_evidence_json
 from scripts.evidence_json import parse_evidence_document, read_evidence_document
 from scripts.evidence_schema.converter_captures import (
-    BasisActions,
     CompositionInput,
     EigenCapture,
-    EigenComposition,
-    EigenConstructedOrientation,
     EigenInputs,
-    EigenMatrix,
     EigenObservations,
-    EigenOrientation,
     EigenPrecisionProfile,
     NativeConstructedInput,
-    QuaternionValues,
     TargetIdentity,
 )
 from scripts.evidence_schema.primitives import NATIVE_RETAINED_CASE_IDS, Vector3
@@ -41,45 +35,6 @@ from scripts.evidence_schema.shared_inputs import (
 from scripts.platform_probe import executable_suffix
 
 
-class NativeEigenOrientation(BaseModel):
-    """Full quaternion and matrix result from the Eigen C++ harness."""
-
-    model_config = ConfigDict(extra="forbid", strict=True)
-
-    case_id: str
-    quaternion: QuaternionValues
-    rotation_matrix: EigenMatrix
-    native_quaternion_basis_actions_xyz: BasisActions
-    native_quaternion_probe_action_xyz: Vector3 | None = None
-    matrix_to_quaternion: QuaternionValues
-
-
-class NativeEigenConstructedOrientation(NativeEigenOrientation):
-    """Native AngleAxis result with its explicit construction input."""
-
-    constructor: str
-    input_axis_xyz: Vector3
-    input_angle_radians: float
-
-
-class NativeEigenComposition(EigenComposition):
-    """Full native matrix view of one noncommuting product."""
-
-    rotation_matrix: EigenMatrix
-
-
-class NativeEigenProfile(BaseModel):
-    """One native Eigen scalar profile before compact witness selection."""
-
-    model_config = ConfigDict(extra="forbid", strict=True)
-
-    dtype: Literal["float32", "float64"]
-    scalar_bytes: Literal[4, 8]
-    orientations: list[NativeEigenOrientation]
-    native_created: list[NativeEigenConstructedOrientation]
-    composition: list[NativeEigenComposition]
-
-
 class NativeEigenCapture(BaseModel):
     """Pydantic envelope for the full native C++ harness output."""
 
@@ -87,7 +42,7 @@ class NativeEigenCapture(BaseModel):
 
     eigen_version: str
     version_macros: list[int]
-    profiles: list[NativeEigenProfile]
+    profiles: list[EigenPrecisionProfile]
 
 
 class PreparedEigenOrientation(BaseModel):
@@ -129,60 +84,6 @@ def write_json(path: Path, value: BaseModel) -> None:
         dump_evidence_json(value.model_dump(mode="json", exclude_none=True)),
         encoding="utf-8",
         newline="\n",
-    )
-
-
-def retain_profile(profile: NativeEigenProfile) -> EigenPrecisionProfile:
-    """Drop redundant matrix views from the permanent witness set."""
-    matrix_case_ids = {"mixed_a", "nonprincipal_halfturn"}
-
-    def orientation(row: NativeEigenOrientation) -> EigenOrientation:
-        case_id = row.case_id
-        return EigenOrientation(
-            case_id=case_id,
-            quaternion=row.quaternion,
-            rotation_matrix=row.rotation_matrix if case_id == "mixed_a" else None,
-            native_quaternion_basis_actions_xyz=row.native_quaternion_basis_actions_xyz,
-            native_quaternion_probe_action_xyz=row.native_quaternion_probe_action_xyz,
-            matrix_to_quaternion=(
-                row.matrix_to_quaternion
-                if case_id in matrix_case_ids
-                or isinstance(row, NativeEigenConstructedOrientation)
-                else None
-            ),
-        )
-
-    constructed = [
-        EigenConstructedOrientation(
-            case_id=row.case_id,
-            constructor=row.constructor,
-            quaternion=row.quaternion,
-            matrix_to_quaternion=row.matrix_to_quaternion,
-            native_quaternion_basis_actions_xyz=row.native_quaternion_basis_actions_xyz,
-        )
-        for row in profile.native_created
-    ]
-    compositions = [
-        EigenComposition(
-            case_id=row.case_id,
-            lhs_case_id=row.lhs_case_id,
-            rhs_case_id=row.rhs_case_id,
-            product_order=row.product_order,
-            quaternion=row.quaternion,
-            native_quaternion_basis_actions_xyz=row.native_quaternion_basis_actions_xyz,
-        )
-        for row in profile.composition
-    ]
-    return EigenPrecisionProfile(
-        dtype=profile.dtype,
-        scalar_bytes=profile.scalar_bytes,
-        orientations=[
-            orientation(row)
-            for row in profile.orientations
-            if row.case_id in NATIVE_RETAINED_CASE_IDS
-        ],
-        native_created=constructed,
-        composition=compositions,
     )
 
 
@@ -245,6 +146,7 @@ def main() -> None:
                 canonical_wxyz=shared_by_id[case_id].canonical_wxyz,
             )
             for case_id in spec.retained_case_ids
+            if case_id in NATIVE_RETAINED_CASE_IDS
         ],
         native_constructed_orientation=spec.native_constructed_orientation,
         composition=spec.composition,
@@ -334,6 +236,65 @@ def main() -> None:
         raise RuntimeError(
             f"Native harness reports Eigen {native_capture.eigen_version}, expected {source['version']}"
         )
+    if {profile.dtype for profile in native_capture.profiles} != set(
+        spec.scalar_profiles
+    ):
+        raise ValueError("native Eigen scalar profiles differ from the input contract")
+    if len(native_capture.profiles) != len(spec.scalar_profiles):
+        raise ValueError("native Eigen scalar profiles contain duplicates")
+    for profile in native_capture.profiles:
+        if profile.scalar_bytes != (4 if profile.dtype == "float32" else 8):
+            raise ValueError(f"native Eigen {profile.dtype} scalar width differs")
+        if (
+            tuple(row.case_id for row in profile.orientations)
+            != NATIVE_RETAINED_CASE_IDS
+        ):
+            raise ValueError(f"native Eigen {profile.dtype} orientation cases differ")
+        if len(profile.native_created) != 1 or len(profile.composition) != 2:
+            raise ValueError(
+                f"native Eigen {profile.dtype} constructor or products are missing"
+            )
+        for row in profile.orientations:
+            if row.quaternion.coeffs_xyzw is None:
+                raise ValueError(
+                    f"native Eigen {row.case_id} lacks coefficient storage"
+                )
+            if (row.rotation_matrix is not None) != (row.case_id == "mixed_a"):
+                raise ValueError(
+                    f"native Eigen {row.case_id} has unexpected matrix evidence"
+                )
+            if (row.matrix_to_quaternion is not None) != (
+                row.case_id in {"mixed_a", "nonprincipal_halfturn"}
+            ):
+                raise ValueError(
+                    f"native Eigen {row.case_id} has unexpected matrix readback"
+                )
+            if (row.native_quaternion_probe_action_xyz is not None) != (
+                row.case_id == "mixed_a"
+            ):
+                raise ValueError(
+                    f"native Eigen {row.case_id} has unexpected probe evidence"
+                )
+        constructor = profile.native_created[0]
+        if (
+            constructor.case_id
+            != (spec.native_constructed_orientation.case_id or "native_axis_angle")
+            or constructor.matrix_to_quaternion is None
+            or constructor.constructor != "Eigen::Quaternion(Eigen::AngleAxis)"
+        ):
+            raise ValueError(
+                f"native Eigen {profile.dtype} constructor evidence differs"
+            )
+        if [(row.lhs_case_id, row.rhs_case_id) for row in profile.composition] != [
+            (spec.composition.left_case_id, spec.composition.right_case_id),
+            (spec.composition.right_case_id, spec.composition.left_case_id),
+        ]:
+            raise ValueError(f"native Eigen {profile.dtype} product order differs")
+        if any(
+            row.product_order != "lhs * rhs; rhs acts first"
+            for row in profile.composition
+        ):
+            raise ValueError(f"native Eigen {profile.dtype} product semantics differ")
     witnesses_path = output_dir / "witnesses.json"
     witnesses = EigenCapture(
         schema_version="1.0",
@@ -343,9 +304,7 @@ def main() -> None:
             version=native_capture.eigen_version,
             version_macros=native_capture.version_macros,
         ),
-        observations=EigenObservations(
-            profiles=[retain_profile(profile) for profile in native_capture.profiles]
-        ),
+        observations=EigenObservations(profiles=native_capture.profiles),
     )
     write_json(witnesses_path, witnesses)
     capture_runner_sha256 = sha256_file(Path(__file__))
