@@ -60,15 +60,6 @@ QUAT_JPL_BATCH_RHS = quaternion.as_quat_array(
 )
 
 
-def _scipy_hamilton(q):
-    return Rotation.from_quat(hamilton_scalar.to_xyzw(q))
-
-
-def _scipy_jpl(q):
-    hamilton_q = jpl_scalar.to_hamilton(q)
-    return Rotation.from_quat(hamilton_scalar.to_xyzw(hamilton_q))
-
-
 def _quaternion_rotate_batch(q):
     """Use the package's matrix based API for the repeated vector workload."""
     return quaternion.rotate_vectors(q, VECTOR)

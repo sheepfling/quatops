@@ -86,12 +86,6 @@ def _rotation(xyzw):
     return Rotation.from_quat(np.asarray(xyzw, dtype=float))
 
 
-def _matrix_error(lhs, rhs):
-    return float(
-        np.max(np.abs(np.asarray(lhs, dtype=float) - np.asarray(rhs, dtype=float)))
-    )
-
-
 def _basis_blender():
     images = BLENDER.observations.source_translation_axis_images_in_blender_xyz
     basis = np.column_stack([getattr(images, axis) for axis in "xyz"])
