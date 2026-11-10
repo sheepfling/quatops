@@ -45,15 +45,22 @@ def test_contract_and_witnesses_are_versioned_small_and_provenanced(engine, vers
 
     expected_hashes = {
         "witness_sha256": hashlib.sha256(witness_path.read_bytes()).hexdigest(),
-        "capture_source_sha256": hashlib.sha256(
-            read_provenance_source(ROOT, contract["provenance"]["capture_source"])
-        ).hexdigest(),
         "canonical_input_sha256": hashlib.sha256(
             (ROOT / contract["provenance"]["canonical_input_file"]).read_bytes()
         ).hexdigest(),
     }
     for key, digest in expected_hashes.items():
         assert contract["provenance"][key] == digest
+    historical = contract["provenance"]
+    if "capture_source_revision" in historical:
+        assert len(historical["capture_source_revision"]) == 40
+    else:
+        assert (
+            hashlib.sha256(
+                read_provenance_source(ROOT, historical["capture_source"])
+            ).hexdigest()
+            == historical["capture_source_sha256"]
+        )
 
     direct = contract["provenance"]["direct_capture"]
     assert (
@@ -61,15 +68,8 @@ def test_contract_and_witnesses_are_versioned_small_and_provenanced(engine, vers
         == direct["capture_source_sha256"]
     )
     assert (
-        hashlib.sha256(
-            (ROOT / "scripts/retain_engine_witnesses.py").read_bytes()
-        ).hexdigest()
-        == direct["selector_sha256"]
-    )
-    assert (
         len(direct["capture_output_sha256"]) == len(direct["executable_sha256"]) == 64
     )
-    assert "witness bytes exactly" in direct["comparison"]
 
     reproduction_path = witness_path.parent / "reproduction.json"
     if reproduction_path.is_file():

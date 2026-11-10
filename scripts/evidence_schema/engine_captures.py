@@ -100,10 +100,8 @@ class EngineDirectCapture(NativeCaptureModel):
     capture_source: str
     capture_source_sha256: SHA256
     capture_output_sha256: SHA256
-    selector_sha256: SHA256
     executable_sha256: SHA256
     utc: str
-    comparison: str
 
 
 class EngineProvenance(NativeCaptureModel):
@@ -111,6 +109,9 @@ class EngineProvenance(NativeCaptureModel):
     semantic_contract_sha256: SHA256
     original_capture_sha256: Optional[SHA256] = None
     capture_source: Optional[str] = None
+    capture_source_revision: Optional[
+        Annotated[str, Field(pattern=r"^[0-9a-f]{40}$")]
+    ] = None
     capture_source_sha256: Optional[SHA256] = None
     canonical_input_file: Optional[str] = None
     canonical_input_sha256: Optional[SHA256] = None

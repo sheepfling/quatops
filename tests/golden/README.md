@@ -8,6 +8,8 @@ set per build. The direct capture emits the selected values; the validator at
 [`scripts/retain_engine_witnesses.py`](../../scripts/retain_engine_witnesses.py)
 checks inputs, frame declarations, products and native values without
 recomputing them, then records hashes in a separate review directory.
+Historical Unreal, Unity and Godot exporter hashes point to an immutable Git
+revision; current exporters independently reproduce the retained witness bytes.
 
 ## Converter-boundary witnesses
 
