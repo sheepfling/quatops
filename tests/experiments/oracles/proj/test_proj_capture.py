@@ -40,10 +40,18 @@ def test_proj_capture_observations_use_a_target_specific_strict_schema() -> None
 
 def test_proj_reproduction_hashes_preserve_prior_and_current_source_identity() -> None:
     root = REPOSITORY_ROOT
-    manifest = read_evidence_document(
-        root / "tests/golden/oracles/proj/9.5.1/manifest.json"
+    fixture = root / "tests/golden/oracles/proj/9.5.1"
+    manifest = read_evidence_document(fixture / "manifest.json")
+    baseline = read_evidence_document(fixture / "audit.json")["native_baseline"]
+    assert (
+        hashlib.sha256((fixture / baseline["observations"]).read_bytes()).hexdigest()
+        == baseline["observations_sha256"]
     )
     reproduction = manifest["reproduction"]
+    assert (
+        hashlib.sha256((root / reproduction["input_path"]).read_bytes()).hexdigest()
+        == reproduction["input_sha256"]
+    )
     archived = read_provenance_source(
         root, "experiments/provenance/reproduction-v1.zip#proj-9.5.1/capture_proj.py"
     )
