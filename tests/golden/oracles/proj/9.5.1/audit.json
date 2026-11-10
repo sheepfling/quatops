@@ -8,7 +8,8 @@
   },
   "native_baseline": {
     "manifest": "manifest.json",
-    "manifest_sha256": "3d24ca9c5f1bf08116753bf698ff117faf07aeeb57cec4d51ff22a196b5cfb3c",
+    "manifest_sha256": "7552a0c1d07c66228fe8575a1ec6f570f27263692be33c58a8f77dff63be7025",
+    "before_direct_json_manifest_sha256": "3d24ca9c5f1bf08116753bf698ff117faf07aeeb57cec4d51ff22a196b5cfb3c",
     "observations": "observations.jsonl",
     "observations_sha256": "90e3a7dd5fc29607d4786f2cd1b76380c74abdbc07203474219c707077854d52",
     "input_corpus": "experiments/oracles/shared/geographic_inputs_v1.json",

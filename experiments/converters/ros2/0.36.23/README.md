@@ -5,6 +5,8 @@ container pin, and capture wrapper for the selected two-direction frame-chain
 proof. Inputs come from the explicit [frame-chain recipe](chain_inputs.json).
 The committed witness file retains the exact native values used by the
 replay test; broad capture output belongs in a temporary directory.
+The current wrapper records finite binary64 values directly, including signed
+zero; older raw sidecar captures require the selector from their historical revision.
 The message-to-transform check accepts either quaternion sign and float64
 rounding within `2e-12`; the stored native values are never normalized or
 rewritten by that comparison.

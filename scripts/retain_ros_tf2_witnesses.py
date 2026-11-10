@@ -7,7 +7,6 @@ import hashlib
 from pathlib import Path
 
 from scripts.evidence_json import (
-    compact_numeric_evidence,
     dump_evidence_json,
     parse_evidence_document,
     read_evidence_document,
@@ -88,12 +87,10 @@ def main() -> None:
         "stamp_sec": inputs["stamp_sec"],
         "target_frame": inputs["target_frame"],
     }
-    selected = compact_numeric_evidence(
-        {
-            "native_inputs": retained_inputs,
-            "observations": [observation(row) for row in selected],
-        }
-    )
+    selected = {
+        "native_inputs": retained_inputs,
+        "observations": [observation(row) for row in selected],
+    }
 
     destination.mkdir(parents=True, exist_ok=True)
     witnesses_path = destination / "witnesses.json"
@@ -175,8 +172,7 @@ def main() -> None:
                         "once and keep one forward message, point action, and round trip"
                     ),
                     "numeric_values": (
-                        "round-trippable decimals and dtype; exact bits only for "
-                        "signed-zero or nonfinite values"
+                        "round-trippable finite binary64 decimals, including signed zero"
                     ),
                 },
             }

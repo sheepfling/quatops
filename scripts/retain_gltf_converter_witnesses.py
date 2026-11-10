@@ -7,7 +7,6 @@ import hashlib
 from pathlib import Path
 
 from scripts.evidence_json import (
-    compact_numeric_evidence,
     dump_evidence_json,
     read_evidence_document,
     read_evidence_rows,
@@ -40,9 +39,7 @@ def main() -> None:
     )
     capture = args.capture_dir.resolve()
     native_manifest = read_evidence_document(capture / "manifest.json")
-    observations = compact_numeric_evidence(
-        read_evidence_rows(capture / "observations.json")
-    )
+    observations = read_evidence_rows(capture / "observations.json")
     if len(observations) != 2 or {row["node"] for row in observations} != {
         "QuatOpsParent",
         "QuatOpsChild",

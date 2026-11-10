@@ -53,50 +53,26 @@ def sha256(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
-def numeric(
-    values: object, dtype: NumericType = "binary64", *, include_bits: bool = True
-) -> dict[str, JsonValue]:
-    """Serialize a numeric array, retaining post-binding bits and negative zero.
-
-    NumPy is deliberately not required. Foreign vector/matrix objects must first
-    be converted to explicit lists by the exporter that knows their layout.
-    """
+def numeric(values: object, dtype: NumericType = "binary64") -> dict[str, JsonValue]:
+    """Serialize finite native values at their declared precision, including signed zero."""
     code = ">f" if dtype == "binary32" else ">d"
-    bits: list[str] = []
 
-    def visit(value: object) -> JsonValue:
+    def visit(value: object) -> tuple[JsonValue, tuple[int, ...]]:
         if isinstance(value, (list, tuple)):
-            return [visit(item) for item in value]
+            children = [visit(item) for item in value]
+            shape = children[0][1] if children else ()
+            if any(child_shape != shape for _, child_shape in children):
+                raise ValueError("Ragged numeric arrays are not allowed")
+            return [item for item, _ in children], (len(children), *shape)
+        if isinstance(value, bool) or not isinstance(value, (int, float)):
+            raise TypeError("Numeric values must be scalars or arrays")
         native = struct.unpack(code, struct.pack(code, float(value)))[0]
-        if include_bits:
-            bits.append(struct.pack(code, native).hex())
         if not math.isfinite(native):
-            return {
-                "nonfinite": "nan"
-                if math.isnan(native)
-                else ("+inf" if native > 0 else "-inf")
-            }
-        return native
+            raise ValueError("Native numeric values must be finite")
+        return native, ()
 
-    def shape(value: object) -> list[int]:
-        if not isinstance(value, (list, tuple)):
-            return []
-        if not value:
-            return [0]
-        child = shape(value[0])
-        if any(shape(item) != child for item in value):
-            raise ValueError("Ragged numeric arrays are not allowed")
-        return [len(value), *child]
-
-    dimensions = shape(values)
-    result: dict[str, JsonValue] = {
-        "values": visit(values),
-        "dtype": dtype,
-        "shape": dimensions,
-    }
-    if include_bits:
-        result["ieee754_hex_be"] = bits
-    return result
+    result, _ = visit(values)
+    return {"values": result, "dtype": dtype}
 
 
 def write_json(path: Path, value: JsonValue) -> None:

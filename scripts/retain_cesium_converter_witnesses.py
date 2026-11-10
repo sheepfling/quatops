@@ -7,7 +7,6 @@ import hashlib
 from pathlib import Path
 
 from scripts.evidence_json import (
-    compact_numeric_evidence,
     dump_evidence_json,
     read_evidence_document,
     read_evidence_rows,
@@ -44,7 +43,7 @@ def _retained_outputs(case_id: str, outputs: dict) -> dict:
         retained["local_basis_and_probe_images"] = outputs[
             "local_basis_and_probe_images"
         ]
-    return compact_numeric_evidence(retained)
+    return retained
 
 
 def main() -> None:
