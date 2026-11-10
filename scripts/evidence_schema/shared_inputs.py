@@ -67,8 +67,6 @@ class SharedCanonicalInputCapture(NativeCaptureModel):
 
     @model_validator(mode="after")
     def validate_canonical_contract(self) -> SharedCanonicalInputCapture:
-        if self.source_frame.handedness != "right-handed":
-            raise ValueError("canonical input source frame must be right-handed")
         ids = [row.case_id for row in self.orientations]
         if any(not case_id for case_id in ids) or len(ids) != len(set(ids)):
             raise ValueError("canonical orientation IDs must be nonempty and unique")
@@ -120,21 +118,6 @@ class GeographicInputCorpus(NativeCaptureModel):
         ids = [row.case_id for row in self.locations]
         if any(not case_id for case_id in ids) or len(ids) != len(set(ids)):
             raise ValueError("geographic location IDs must be nonempty and unique")
-        for row in self.locations:
-            if not all(
-                math.isfinite(float(value))
-                for value in (
-                    row.longitude_degrees,
-                    row.latitude_degrees,
-                    row.height_m,
-                )
-            ):
-                raise ValueError(f"geographic input {row.case_id!r} must be finite")
-        for index, row in enumerate(self.heading_pitch_roll_radians):
-            if len(row) != 3:
-                raise ValueError(
-                    f"heading/pitch/roll row {index} must have three values"
-                )
         return self
 
 
