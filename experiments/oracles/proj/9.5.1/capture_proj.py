@@ -115,19 +115,16 @@ def main() -> None:
             ),
             native_inputs=ProjNativeInputs(),
             native_outputs=ProjNativeOutputs(
-                origin_ecef_m=ProjNumericVector3(
-                    values=list(origin), dtype="binary64", shape=[3]
-                ),
+                origin_ecef_m=ProjNumericVector3(values=list(origin), dtype="binary64"),
                 enu_basis_endpoints_ecef_m=ProjNumericBasisImages(
                     values=[list(point) for point in ecef_points[1:4]],
                     dtype="binary64",
-                    shape=[3, 3],
                 ),
                 probe_endpoint_ecef_m=ProjNumericVector3(
-                    values=list(ecef_points[-1]), dtype="binary64", shape=[3]
+                    values=list(ecef_points[-1]), dtype="binary64"
                 ),
                 probe_roundtrip_local_xyz_m=ProjNumericVector3(
-                    values=list(probe_readback), dtype="binary64", shape=[3]
+                    values=list(probe_readback), dtype="binary64"
                 ),
             ),
             status="ok",

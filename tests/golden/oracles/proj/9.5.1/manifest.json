@@ -53,7 +53,7 @@
   "artifacts": [
     {
       "path": "observations.jsonl",
-      "sha256": "90e3a7dd5fc29607d4786f2cd1b76380c74abdbc07203474219c707077854d52",
+      "sha256": "44d6c6ed0c27339ad0f718436dbacc89ac22778209790428919883f6e74c1ab8",
       "role": "selected_native_observations",
       "source_capture_sha256": "67adb8fcedc1cd9b6aca1b203a6109b8b57f2d8fe3f381951cbcb0dcd56e5f5a"
     },
@@ -85,7 +85,8 @@
   },
   "reproduction": {
     "exporter_path": "experiments/oracles/proj/9.5.1/capture_proj.py",
-    "exporter_sha256": "5018e271746484619dd54a86218853f2cee432deef7bca890fb850c50f528cbd",
+    "exporter_sha256": "613457449ca132b12be3f308d5c2e8145a3dd0b3aacc365873ef611ba389f0b6",
+    "before_shape_elision_exporter_sha256": "5018e271746484619dd54a86218853f2cee432deef7bca890fb850c50f528cbd",
     "previous_manifest_exporter_sha256": "9295111b0a0d2ddf36c207ee50c7078a28202b60911a5589301299622a665a9a",
     "previous_checkout_exporter_sha256": "b1924e77c6a449b3c86af70f8fb870cb06fa2eecd160f8a1d6937b3bbe4254a6",
     "capture_helper_path": "experiments/oracles/shared/capture_io.py",
@@ -99,6 +100,7 @@
     "capture_helper_archive": "experiments/provenance/reproduction-v1.zip#capture_io.py"
   },
   "retention": {
+    "before_shape_elision_observations_sha256": "90e3a7dd5fc29607d4786f2cd1b76380c74abdbc07203474219c707077854d52",
     "source_observations_sha256": "67adb8fcedc1cd9b6aca1b203a6109b8b57f2d8fe3f381951cbcb0dcd56e5f5a",
     "original_full_capture_sha256": "d908e22625445f11e0167b136587cfe511161885f22f35fddea53b5e6069e20d",
     "selection": "For each of 11 locations, retain native ECEF origin, three ENU unit-axis endpoints, one mixed-point ECEF endpoint, and its local inverse readback. Inputs resolve by case ID in the shared geographic corpus.",

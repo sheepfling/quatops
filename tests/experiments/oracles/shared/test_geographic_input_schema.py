@@ -98,11 +98,16 @@ def test_proj_capture_observations_use_a_target_specific_strict_schema() -> None
     ]
 
     assert len(observations) == 11
-    assert observations[0].native_outputs.origin_ecef_m.shape == [3]
-    assert observations[0].native_outputs.enu_basis_endpoints_ecef_m.shape == [3, 3]
+    assert len(observations[0].native_outputs.origin_ecef_m.values) == 3
+    assert len(observations[0].native_outputs.enu_basis_endpoints_ecef_m.values) == 3
 
     malformed = json.loads(lines[0])
-    malformed["native_outputs"]["origin_ecef_m"]["shape"] = [4]
+    malformed["native_outputs"]["origin_ecef_m"]["values"].append(1.0)
+    with pytest.raises(ValidationError):
+        ProjObservation.model_validate_json(json.dumps(malformed), strict=True)
+
+    malformed = json.loads(lines[0])
+    malformed["native_outputs"]["enu_basis_endpoints_ecef_m"]["values"][0].pop()
     with pytest.raises(ValidationError):
         ProjObservation.model_validate_json(json.dumps(malformed), strict=True)
 

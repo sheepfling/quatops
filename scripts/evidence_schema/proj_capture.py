@@ -2,9 +2,7 @@
 
 from __future__ import annotations
 
-from typing import Annotated, Literal
-
-from pydantic import Field
+from typing import Literal
 
 from scripts.evidence_schema.primitives import BasisImages, NativeCaptureModel, Vector3
 
@@ -27,7 +25,6 @@ class ProjNumericVector3(NativeCaptureModel):
 
     values: Vector3
     dtype: Literal["binary64"]
-    shape: Annotated[list[Literal[3]], Field(min_length=1, max_length=1)]
 
 
 class ProjNumericBasisImages(NativeCaptureModel):
@@ -35,7 +32,6 @@ class ProjNumericBasisImages(NativeCaptureModel):
 
     values: BasisImages
     dtype: Literal["binary64"]
-    shape: Annotated[list[Literal[3]], Field(min_length=2, max_length=2)]
 
 
 class ProjNativeOutputs(NativeCaptureModel):
