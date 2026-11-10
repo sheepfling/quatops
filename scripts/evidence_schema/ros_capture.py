@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import math
-from typing import Annotated, Literal, Union
+from typing import Annotated, Literal
 
 from pydantic import Field, FiniteFloat, model_validator
 
@@ -82,26 +82,12 @@ class RosLookupOutputs(NativeCaptureModel):
     world_probe_sequential: FiniteVector3
 
 
-class RosWorldLookupObservation(NativeCaptureModel):
+class RosLookupObservation(NativeCaptureModel):
     case_id: str
-    operation_id: Literal["lookup-world-from-sensor"]
+    operation_id: Literal["lookup-world-from-sensor", "lookup-sensor-from-world"]
     native_entry_point: str
     native_inputs: RosLookupInputs
     native_outputs: RosLookupOutputs
-
-
-class RosSensorLookupObservation(NativeCaptureModel):
-    case_id: str
-    operation_id: Literal["lookup-sensor-from-world"]
-    native_entry_point: str
-    native_inputs: RosLookupInputs
-    native_outputs: RosLookupOutputs
-
-
-RosFullObservation = Annotated[
-    Union[RosWorldLookupObservation, RosSensorLookupObservation],
-    Field(discriminator="operation_id"),
-]
 
 
 class RosFullCapture(NativeCaptureModel):
@@ -109,7 +95,7 @@ class RosFullCapture(NativeCaptureModel):
     compiler: str
     cpp_standard: int
     flags: str
-    observations: list[RosFullObservation]
+    observations: list[RosLookupObservation]
 
     @model_validator(mode="after")
     def validate_operation_identity(self) -> RosFullCapture:
@@ -117,49 +103,44 @@ class RosFullCapture(NativeCaptureModel):
         if len(keys) != len(set(keys)):
             raise ValueError("ROS stdout contains duplicate (case_id, operation_id)")
         for row in self.observations:
-            if isinstance(row, (RosWorldLookupObservation, RosSensorLookupObservation)):
-                expected = (
-                    ("world", "sensor")
-                    if row.operation_id == "lookup-world-from-sensor"
-                    else ("sensor", "world")
+            expected = (
+                ("world", "sensor")
+                if row.operation_id == "lookup-world-from-sensor"
+                else ("sensor", "world")
+            )
+            if (
+                row.native_inputs.target_frame,
+                row.native_inputs.source_frame,
+            ) != expected:
+                raise ValueError(
+                    f"{row.operation_id} frame direction does not match its operation"
                 )
-                if (
-                    row.native_inputs.target_frame,
-                    row.native_inputs.source_frame,
-                ) != expected:
-                    raise ValueError(
-                        f"{row.operation_id} frame direction does not match its operation"
+            message = row.native_outputs.lookup_message
+            if (message.parent_frame, message.child_frame) != expected:
+                raise ValueError(
+                    f"{row.operation_id} message frames do not match its lookup"
+                )
+            if (
+                message.stamp_sec != row.native_inputs.stamp_sec
+                or message.stamp_nanosec != 0
+            ):
+                raise ValueError(
+                    f"{row.operation_id} message timestamp does not match its input"
+                )
+            lookup = row.native_outputs.lookup
+            if message.translation_xyz != lookup.translation_xyz or not any(
+                all(
+                    math.isclose(left, sign * right, rel_tol=0.0, abs_tol=2e-12)
+                    for left, right in zip(
+                        message.rotation_xyzw, lookup.quaternion_xyzw
                     )
-                message = row.native_outputs.lookup_message
-                if (message.parent_frame, message.child_frame) != expected:
-                    raise ValueError(
-                        f"{row.operation_id} message frames do not match its lookup"
-                    )
-                if (
-                    message.stamp_sec != row.native_inputs.stamp_sec
-                    or message.stamp_nanosec != 0
-                ):
-                    raise ValueError(
-                        f"{row.operation_id} message timestamp does not match its input"
-                    )
-                lookup = row.native_outputs.lookup
-                if message.translation_xyz != lookup.translation_xyz or not any(
-                    all(
-                        math.isclose(left, sign * right, rel_tol=0.0, abs_tol=2e-12)
-                        for left, right in zip(
-                            message.rotation_xyzw, lookup.quaternion_xyzw
-                        )
-                    )
-                    for sign in (-1.0, 1.0)
-                ):
-                    raise ValueError(
-                        f"{row.operation_id} message fields differ from the lookup"
-                    )
-        lookups = [
-            row
-            for row in self.observations
-            if isinstance(row, (RosWorldLookupObservation, RosSensorLookupObservation))
-        ]
+                )
+                for sign in (-1.0, 1.0)
+            ):
+                raise ValueError(
+                    f"{row.operation_id} message fields differ from the lookup"
+                )
+        lookups = self.observations
         lookup_ops = {row.operation_id for row in lookups}
         required = {"lookup-world-from-sensor", "lookup-sensor-from-world"}
         if lookup_ops != required:

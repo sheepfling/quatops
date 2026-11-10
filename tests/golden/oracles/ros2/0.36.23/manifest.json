@@ -115,7 +115,7 @@
       "exporter_source_archive": "experiments/provenance/reproduction-v1.zip#ros2-0.36.23/capture_ros.cpp",
       "exporter_source_identity_note": "The current reproduction exporter captures only the frame chain; the archived source is the historical producer. A separate native rerun reproduced the retained values.",
       "previous_corpus_sha256": "4af272e762f402cb4b3a60ff063bcc2ef1b79aa82e6890207abfa1bf16890db7",
-      "capture_schema_sha256": "9c47c9fbe29632da6679d1e05a8083bafee3abd3aa76812444835f7693ea6483"
+      "capture_schema_sha256": "f3b9cb097cdeee39b0f632adebe4169c7add5769de6976e544b90e0ccee6edc6"
     }
   },
   "selection": {
