@@ -1,42 +1,17 @@
-"""Strict schemas for the complete stdout emitted by the ROS 2 native exporter."""
+"""Typed validation for the selected ROS 2 native frame-chain capture."""
 
 from __future__ import annotations
 
 import math
-from typing import Annotated, Literal
+from typing import Annotated, Literal, Optional
 
 from pydantic import Field, FiniteFloat, model_validator
 
-from scripts.evidence_schema.primitives import (
-    FiniteInputNumber,
-    NativeCaptureModel,
-)
+from scripts.evidence_schema.primitives import FiniteInputNumber, NativeCaptureModel
 
-FiniteVector3 = Annotated[list[FiniteFloat], Field(min_length=3, max_length=3)]
-FiniteQuaternion4 = Annotated[list[FiniteFloat], Field(min_length=4, max_length=4)]
-FiniteMatrix3 = Annotated[list[FiniteVector3], Field(min_length=3, max_length=3)]
+Vector3 = Annotated[list[FiniteFloat], Field(min_length=3, max_length=3)]
+Quaternion = Annotated[list[FiniteFloat], Field(min_length=4, max_length=4)]
 InputVector3 = Annotated[list[FiniteInputNumber], Field(min_length=3, max_length=3)]
-
-
-def reject_lost_nonfinite_values(value: object) -> None:
-    """Reject nulls emitted by nlohmann for non-finite native numbers."""
-    if value is None:
-        raise ValueError(
-            "Native ROS stdout contains null; nlohmann JSON maps NaN/Infinity to null, "
-            "so the original non-finite value is lost and cannot be captured safely"
-        )
-    if isinstance(value, dict):
-        for item in value.values():
-            reject_lost_nonfinite_values(item)
-    elif isinstance(value, list):
-        for item in value:
-            reject_lost_nonfinite_values(item)
-
-
-class RosFullTransform(NativeCaptureModel):
-    quaternion_xyzw: FiniteQuaternion4
-    translation_xyz: FiniteVector3
-    matrix_rows: FiniteMatrix3
 
 
 class RosChainEdge(NativeCaptureModel):
@@ -52,127 +27,94 @@ class RosChainInputs(NativeCaptureModel):
     stamp_sec: int
 
 
-class RosLookupInputs(NativeCaptureModel):
-    target_frame: str
-    source_frame: str
+class RosTransform(NativeCaptureModel):
+    quaternion_xyzw: Quaternion
+    translation_xyz: Vector3
+
+
+class RosNativeInputs(NativeCaptureModel):
+    world_from_base: RosTransform
+    base_from_sensor: RosTransform
+    probe_in_source_xyz: Vector3
+    source_frame: Literal["sensor"]
+    target_frame: Literal["world"]
     stamp_sec: int
-    world_from_base: RosFullTransform
-    base_from_sensor: RosFullTransform
-    probe_in_source_xyz: FiniteVector3
     world_from_base_rpy: InputVector3
     base_from_sensor_rpy: InputVector3
 
 
-class RosLookupMessage(NativeCaptureModel):
-    parent_frame: str
-    child_frame: str
+class RosMessage(NativeCaptureModel):
+    parent_frame: Literal["world"]
+    child_frame: Literal["sensor"]
     stamp_sec: int
-    stamp_nanosec: int
-    translation_xyz: FiniteVector3
-    rotation_xyzw: FiniteQuaternion4
+    stamp_nanosec: Literal[0]
+    translation_xyz: Vector3
+    rotation_xyzw: Quaternion
 
 
-class RosLookupOutputs(NativeCaptureModel):
-    lookup_message: RosLookupMessage
-    lookup: RosFullTransform
-    message_roundtrip: RosFullTransform
-    probe_in_target_xyz: FiniteVector3
-    direct_world_from_sensor: RosFullTransform
-    direct_sensor_from_world: RosFullTransform
-    world_probe_sequential: FiniteVector3
+class RosOutputs(NativeCaptureModel):
+    lookup: RosTransform
+    lookup_message: Optional[RosMessage] = None  # noqa: UP045 -- Python 3.9
+    message_roundtrip: Optional[RosTransform] = None  # noqa: UP045 -- Python 3.9
+    probe_in_target_xyz: Optional[Vector3] = None  # noqa: UP045 -- Python 3.9
 
 
-class RosLookupObservation(NativeCaptureModel):
-    case_id: str
+class RosObservation(NativeCaptureModel):
     operation_id: Literal["lookup-world-from-sensor", "lookup-sensor-from-world"]
-    native_entry_point: str
-    native_inputs: RosLookupInputs
-    native_outputs: RosLookupOutputs
+    native_outputs: RosOutputs
 
 
-class RosFullCapture(NativeCaptureModel):
-    native_scalar_bytes: int
+class RosDirectCapture(NativeCaptureModel):
+    native_scalar_bytes: Literal[8]
     compiler: str
     cpp_standard: int
     flags: str
-    observations: list[RosLookupObservation]
+    case_id: Literal["world-base-sensor"]
+    native_inputs: RosNativeInputs
+    observations: Annotated[list[RosObservation], Field(min_length=2, max_length=2)]
 
     @model_validator(mode="after")
-    def validate_operation_identity(self) -> RosFullCapture:
-        keys = [(row.case_id, row.operation_id) for row in self.observations]
-        if len(keys) != len(set(keys)):
-            raise ValueError("ROS stdout contains duplicate (case_id, operation_id)")
-        for row in self.observations:
-            expected = (
-                ("world", "sensor")
-                if row.operation_id == "lookup-world-from-sensor"
-                else ("sensor", "world")
-            )
-            if (
-                row.native_inputs.target_frame,
-                row.native_inputs.source_frame,
-            ) != expected:
-                raise ValueError(
-                    f"{row.operation_id} frame direction does not match its operation"
-                )
-            message = row.native_outputs.lookup_message
-            if (message.parent_frame, message.child_frame) != expected:
-                raise ValueError(
-                    f"{row.operation_id} message frames do not match its lookup"
-                )
-            if (
-                message.stamp_sec != row.native_inputs.stamp_sec
-                or message.stamp_nanosec != 0
-            ):
-                raise ValueError(
-                    f"{row.operation_id} message timestamp does not match its input"
-                )
-            lookup = row.native_outputs.lookup
-            if message.translation_xyz != lookup.translation_xyz or not any(
-                all(
-                    math.isclose(left, sign * right, rel_tol=0.0, abs_tol=2e-12)
-                    for left, right in zip(
-                        message.rotation_xyzw, lookup.quaternion_xyzw
-                    )
-                )
-                for sign in (-1.0, 1.0)
-            ):
-                raise ValueError(
-                    f"{row.operation_id} message fields differ from the lookup"
-                )
-        lookups = self.observations
-        lookup_ops = {row.operation_id for row in lookups}
-        required = {"lookup-world-from-sensor", "lookup-sensor-from-world"}
-        if lookup_ops != required:
+    def validate_lookup(self) -> RosDirectCapture:
+        if [item.operation_id for item in self.observations] != [
+            "lookup-world-from-sensor",
+            "lookup-sensor-from-world",
+        ]:
+            raise ValueError("ROS capture must contain both lookup directions in order")
+        forward, reverse = (item.native_outputs for item in self.observations)
+        message = forward.lookup_message
+        if (
+            message is None
+            or forward.message_roundtrip is None
+            or forward.probe_in_target_xyz is None
+        ):
             raise ValueError(
-                f"ROS stdout must contain both lookup directions: {sorted(required)}"
+                "forward lookup requires message, roundtrip and point action"
             )
-        if len({row.case_id for row in lookups}) != 1:
-            raise ValueError("ROS lookup directions must belong to one case ID")
-        chain_signatures = {
-            (
-                row.native_inputs.stamp_sec,
-                row.native_inputs.world_from_base.model_dump_json(),
-                row.native_inputs.base_from_sensor.model_dump_json(),
-                tuple(row.native_inputs.probe_in_source_xyz),
+        if any(
+            value is not None
+            for value in (
+                reverse.lookup_message,
+                reverse.message_roundtrip,
+                reverse.probe_in_target_xyz,
             )
-            for row in lookups
-        }
-        if len(chain_signatures) != 1:
-            raise ValueError(
-                "ROS lookup directions must share the same chain, probe and timestamp"
+        ):
+            raise ValueError("reverse lookup contains unexpected extra observations")
+        if message.stamp_sec != self.native_inputs.stamp_sec:
+            raise ValueError("lookup message timestamp differs from the input")
+        if message.translation_xyz != forward.lookup.translation_xyz or not any(
+            all(
+                math.isclose(a, sign * b, rel_tol=0.0, abs_tol=2e-12)
+                for a, b in zip(message.rotation_xyzw, forward.lookup.quaternion_xyzw)
             )
+            for sign in (-1.0, 1.0)
+        ):
+            raise ValueError("lookup message fields differ from the lookup")
         return self
 
-
-def validate_ros_capture_inputs(
-    capture: RosFullCapture, inputs: RosChainInputs
-) -> None:
-    """Link both native frame-chain observations to the exact declared inputs."""
-    for row in capture.observations:
-        native = row.native_inputs
+    def validate_inputs(self, inputs: RosChainInputs) -> None:
+        native = self.native_inputs
         if (
-            row.case_id != inputs.case_id
+            self.case_id != inputs.case_id
             or native.stamp_sec != inputs.stamp_sec
             or native.world_from_base_rpy != inputs.world_from_base.rpy_radians
             or native.base_from_sensor_rpy != inputs.base_from_sensor.rpy_radians

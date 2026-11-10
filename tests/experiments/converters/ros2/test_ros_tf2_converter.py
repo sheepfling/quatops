@@ -93,12 +93,7 @@ def test_ros_capture_is_native_pinned_and_selected_values_are_lossless():
     assert len(provenance["full_observation_sha256"]) == 64
     assert "historical capture" in reproduction["input_serialization_note"]
     file_hashes = {
-        "exporter_source_sha256": ROOT
-        / "experiments/converters/ros2/0.36.23/native/src/capture_ros.cpp",
-        "runner_sha256": ROOT / "experiments/converters/ros2/0.36.23/capture_native.py",
         "capture_helper_sha256": ROOT / "experiments/oracles/shared/capture_io.py",
-        "capture_schema_sha256": ROOT / "scripts/evidence_schema/ros_capture.py",
-        "retention_script_sha256": ROOT / "scripts/retain_ros_tf2_witnesses.py",
         "retention_digest_helper_sha256": ROOT / "scripts/evidence_schema/utilities.py",
         "retention_helper_sha256": ROOT / "scripts/evidence_json.py",
         "retention_formatter_sha256": ROOT / "scripts/evidence_format.py",
@@ -109,6 +104,28 @@ def test_ros_capture_is_native_pinned_and_selected_values_are_lossless():
     }
     for field, path in file_hashes.items():
         assert hashlib.sha256(path.read_bytes()).hexdigest() == reproduction[field]
+
+    for field, name in {
+        "exporter_source_sha256": "capture_ros.cpp",
+        "runner_sha256": "capture_native.py",
+        "capture_schema_sha256": "ros_capture.py",
+        "retention_script_sha256": "retain_ros_tf2_witnesses.py",
+    }.items():
+        source = read_provenance_source(
+            ROOT, reproduction["pre_direct_source_archive"] + name
+        )
+        assert hashlib.sha256(source).hexdigest() == reproduction[field]
+
+    direct = MANIFEST["direct_capture"]
+    assert direct["packages"]["tf2"]["version"] == "0.36.23"
+    assert "bit-for-bit" in direct["comparison"]
+    for field, path in {
+        "native_source": ROOT
+        / "experiments/converters/ros2/0.36.23/native/src/capture_ros.cpp",
+        "runner": ROOT / "experiments/converters/ros2/0.36.23/capture_native.py",
+        "schema": ROOT / "scripts/evidence_schema/ros_capture.py",
+    }.items():
+        assert hashlib.sha256(path.read_bytes()).hexdigest() == direct["sha256"][field]
 
     corpus = json.loads(file_hashes["corpus_sha256"].read_text(encoding="utf-8"))
     RosChainInputs.model_validate(corpus, strict=True)

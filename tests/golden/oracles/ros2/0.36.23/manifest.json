@@ -116,7 +116,9 @@
       "exporter_source_archive": "experiments/provenance/reproduction-v1.zip#ros2-0.36.23/capture_ros.cpp",
       "exporter_source_identity_note": "The current reproduction exporter captures only the frame chain; the archived source is the historical producer. A separate native rerun reproduced the retained values.",
       "previous_corpus_sha256": "4af272e762f402cb4b3a60ff063bcc2ef1b79aa82e6890207abfa1bf16890db7",
-      "capture_schema_sha256": "f3b9cb097cdeee39b0f632adebe4169c7add5769de6976e544b90e0ccee6edc6"
+      "capture_schema_sha256": "f3b9cb097cdeee39b0f632adebe4169c7add5769de6976e544b90e0ccee6edc6",
+      "pre_direct_source_archive": "experiments/provenance/reproduction-v1.zip#ros2-0.36.23/pre-direct/",
+      "identity_note": "Reproduction hashes in this object describe the pre-direct capture tools archived at pre_direct_source_archive; direct_capture records the current tools and their native rerun."
     }
   },
   "selection": {
@@ -128,5 +130,48 @@
   "semantic_contract": {
     "file": "experiments/converters/ros2/0.36.23/semantic_contract.json",
     "sha256": "4fef1703f0d2a982c2087d058b0703272f3e1cc5608673ea9890f0655c42ce48"
+  },
+  "direct_capture": {
+    "kind": "direct_native_ros2_tf2_capture",
+    "utc": "2026-11-10T14:39:23.898669+00:00",
+    "runtime_image": "ros:jazzy-ros-base@sha256:8eed0a4669bbf43ee331878a4c39bd8ebddea8e3312a58b4fae8edb14526b617",
+    "ros_distro": "jazzy",
+    "packages": {
+      "tf2": {
+        "version": "0.36.23",
+        "package_xml_sha256": "a4aa5ea795e6375f07e1322c191c30e11ce1f85525a1be16643ebe97c8c26eae"
+      },
+      "tf2_geometry_msgs": {
+        "version": "0.36.23",
+        "package_xml_sha256": "e3231888f8ac6bcdaf74ce800497a95b59955201c8107fe311d470b21f7a36db"
+      },
+      "geometry_msgs": {
+        "version": "5.3.8",
+        "package_xml_sha256": "879da7003d6d2952701aa23146f0d78096143d5107dd6e775a23e591c2c376a0"
+      }
+    },
+    "platform": "Linux-6.18.33.2-microsoft-standard-WSL2-x86_64-with-glibc2.39",
+    "python": "3.12.3",
+    "native_build": {
+      "native_scalar_bytes": 8,
+      "compiler": "13.3.0",
+      "cpp_standard": 202002,
+      "flags": "CMake: -Wall -Wextra -Wpedantic -fno-fast-math; C++20"
+    },
+    "sha256": {
+      "input": "e5dd788cdbed73ca0dbd5d4a619b5526282c0656737abdfdf9593bd732a01746",
+      "contract": "4fef1703f0d2a982c2087d058b0703272f3e1cc5608673ea9890f0655c42ce48",
+      "native_source": "3f792807563b75bff742ad8b1aaeb15a83743325f8d4e8eb5f82c70be9b78fd6",
+      "runner": "b6f4f42e41a658c89f717c4c74c2070870767e2cda2535f2db2cd93f37c57da3",
+      "schema": "718141efc5546a7625c24dda6e9d2fd867c04e8e43d4de76d8844aa3441ecc4a",
+      "dockerfile": "70cd2720db531d2debdb37ea6d41ac12095b2f3912baa0e3b22bc522dd941e25",
+      "build_recipe": "65e75f02b743ef65eab8f0041ba8f286c767a60e3e02a64921e1a822af00e835",
+      "native_binary": "2ee2a64e333771b008e67d0b1ca9a3217c0cd7030e058c0c882d84776b7c1a18",
+      "native_stdout": "6330a794b4ab780d0183c43c39cf09f02b8c9c559fed672c4f6a890f28817de4",
+      "witnesses": "f72e13ff5d45a1ee25a50ca43598c01247b6b427bad1005f56e3f9080fd08645"
+    },
+    "scope": "static same-time BufferCore chain; no DDS, interpolation or hardware transport",
+    "comparison_witness_sha256": "a6e2569b79295b44c3598decc70efba233f1ddd20e420c22c0673ee3aee64920",
+    "comparison": "All retained native values match the historical witnesses bit-for-bit; the historical selection count is 9 and the direct capture contains 2 observations."
   }
 }
