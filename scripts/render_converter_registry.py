@@ -28,7 +28,9 @@ def _wrapped(label: str, value: str) -> str:
 
 
 def _cell(value: str) -> str:
-    return escape(value, quote=False).replace("|", "\\|")
+    if "|" in value or "\n" in value or "\r" in value:
+        raise ValueError("registry table cells cannot contain pipes or newlines")
+    return escape(value, quote=False)
 
 
 def render_registry() -> str:
