@@ -12,7 +12,6 @@ INCLUDE_PATHS = (
     "LICENSE",
     "CHANGELOG.md",
     "pyproject.toml",
-    "uv.lock",
     "MANIFEST.in",
     "quality-gates.toml",
     "docs",
