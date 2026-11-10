@@ -18,15 +18,7 @@ from scripts.evidence_schema.primitives import (
     Vector3,
 )
 
-NativeVector3 = Union[Vector3, "Vector3Object"]
-
 ENGINE_RETAINED_CASE_IDS = NATIVE_RETAINED_CASE_IDS
-
-
-class Vector3Object(NativeCaptureModel):
-    x: float
-    y: float
-    z: float
 
 
 class EngineIdentity(NativeCaptureModel):
@@ -164,9 +156,9 @@ class EngineOrientation(NativeCaptureModel):
     case_id: str
     native_quaternion: Quaternion4
     native_rotated_positive_basis_vectors_xyz: Annotated[
-        list[NativeVector3], Field(min_length=3, max_length=3)
+        list[Vector3], Field(min_length=3, max_length=3)
     ]
-    native_rotated_probe_vector_xyz: Optional[NativeVector3] = None
+    native_rotated_probe_vector_xyz: Optional[Vector3] = None
 
 
 class EngineComposition(NativeCaptureModel):
@@ -175,7 +167,7 @@ class EngineComposition(NativeCaptureModel):
     product_order: str
     native_product_quaternion: Quaternion4
     native_rotated_positive_basis_vectors_xyz: Annotated[
-        list[NativeVector3], Field(min_length=3, max_length=3)
+        list[Vector3], Field(min_length=3, max_length=3)
     ]
 
 

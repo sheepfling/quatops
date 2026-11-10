@@ -24,8 +24,6 @@ from scripts.evidence_schema.engine_captures import (
     EngineComposition,
     EngineContractDocument,
     EngineOrientation,
-    NativeVector3,
-    Vector3Object,
 )
 from scripts.evidence_schema.primitives import mapped_handedness
 from scripts.evidence_schema.semantic_serializers._witness_helpers import (
@@ -40,12 +38,6 @@ class EngineSemanticPackage(Protocol):
     witness_path: Path
     contract: EngineContractDocument
     capture: EngineCaptureDocument
-
-
-def _vector(value: NativeVector3) -> list[float]:
-    if isinstance(value, Vector3Object):
-        return [value.x, value.y, value.z]
-    return value
 
 
 def _opposite_axis_meaning(value: str) -> str:
@@ -184,12 +176,9 @@ def _orientation_witnesses(
                     precision=precision,
                     coefficient_order=identity.native_quaternion_order,
                     coefficients=row.native_quaternion,
-                    basis_images_xyz=[
-                        _vector(value)
-                        for value in row.native_rotated_positive_basis_vectors_xyz
-                    ],
+                    basis_images_xyz=row.native_rotated_positive_basis_vectors_xyz,
                     probe_image_xyz=(
-                        _vector(probe_image)
+                        probe_image
                         if row.case_id == "mixed_a" and probe_image is not None
                         else None
                     ),
@@ -226,10 +215,7 @@ def _orientation_witnesses(
                     precision=precision,
                     coefficient_order=identity.native_quaternion_order,
                     coefficients=row.native_product_quaternion,
-                    basis_images_xyz=[
-                        _vector(value)
-                        for value in row.native_rotated_positive_basis_vectors_xyz
-                    ],
+                    basis_images_xyz=row.native_rotated_positive_basis_vectors_xyz,
                 )
             )
     return output
