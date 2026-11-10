@@ -30,8 +30,8 @@ Replay the formula and frozen native-witness checks with:
 
 ```powershell
 $engineProofs = @(
-  'tests\quatops\engines\test_canonical_interoperability.py',
-  'tests\quatops\engines\test_engine_basis_oracle.py',
+  'tests\quatops\experimental\engines\test_canonical_interoperability.py',
+  'tests\quatops\experimental\engines\test_engine_basis_oracle.py',
   'tests\experiments\engines\shared\test_engine_proof_profiles.py'
 )
 .venv\Scripts\python.exe -m pytest -q $engineProofs
