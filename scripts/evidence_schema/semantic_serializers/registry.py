@@ -18,13 +18,12 @@ from scripts.evidence_schema.converter_captures import (
 from scripts.evidence_schema.crystallized import SemanticSerialization
 from scripts.evidence_schema.semantic_serializers import (
     cesium,
+    direct_quaternion,
     eigen,
     gltf,
-    mujoco,
     opencv,
     openusd,
     ros2,
-    spiceypy,
 )
 from scripts.evidence_schema.semantic_serializers.context import (
     SemanticSerializationContext,
@@ -36,10 +35,10 @@ _Serializer = Callable[
 
 _SERIALIZERS: dict[type, _Serializer] = {
     EigenContract: eigen.serialize,
-    MuJoCoContract: mujoco.serialize,
+    MuJoCoContract: direct_quaternion.serialize,
     OpenCVContract: opencv.serialize,
     Ros2Contract: ros2.serialize,
-    SpiceyPyContract: spiceypy.serialize,
+    SpiceyPyContract: direct_quaternion.serialize,
     CesiumContract: cesium.serialize,
     ThreeGltfContract: gltf.serialize,
     OpenUsdContract: openusd.serialize,

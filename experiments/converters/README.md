@@ -12,10 +12,10 @@ inventory, accepted evidence, and remaining scope are maintained in the
 - `tests/golden/{oracles,transports}/<target>/<version>/` contains selected
   native witnesses, contracts, and provenance.
 - `tests/experiments/converters/<target>/` contains replay acceptance checks.
-- `scripts/evidence_schema/semantic_serializers/<target>.py` maps each
-  validated target capture, contract, and input document into semantic
-  witnesses; `normalizer.py` validates that serialization against the shared
-  evidence contract.
+- `scripts/evidence_schema/semantic_serializers/` maps validated target
+  captures, contracts, and inputs into semantic witnesses. MuJoCo and CSPICE
+  share a serializer while retaining their target-specific capture models;
+  `normalizer.py` validates the resulting shared evidence contract.
 - `experiments/pyproject.toml` packages shared evidence helpers and Pydantic
   schemas and declares optional target dependency sets. Each pinned Python
   capture project selects its target extra and keeps a version-specific
