@@ -297,30 +297,24 @@ class DirectLibraryInputBase(NativeCaptureModel):
     schema_version: Literal["1.0"]
     contract_id: str
     native_constructed_orientation: NativeConstructedInput
+    shared_canonical_inputs: str
+    retained_case_ids: list[str]
 
 
 class EigenInputs(DirectLibraryInputBase):
-    shared_canonical_inputs: str
-    retained_case_ids: list[str]
     scalar_profiles: list[Literal["float32", "float64"]]
     composition: CompositionInput
 
 
 class MuJoCoInputs(DirectLibraryInputBase):
-    shared_canonical_inputs: str
-    retained_case_ids: list[str]
+    pass
 
 
 class OpenCVInputs(DirectLibraryInputBase):
-    shared_canonical_inputs: str
-    retained_case_ids: list[str]
     precision_profiles: list[Literal["float32", "float64"]]
 
 
 class SpiceyPyInputs(DirectLibraryInputBase):
-    shared_canonical_inputs: str
-    retained_case_ids: list[str]
-
     @model_validator(mode="after")
     def validate_native_constructor(self) -> SpiceyPyInputs:
         constructor = self.native_constructed_orientation
