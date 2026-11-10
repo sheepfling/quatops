@@ -26,10 +26,26 @@ def test_generated_gltf_inputs_are_excluded_but_witnesses_are_included(
     witness = tmp_path / "tests/golden/native/witnesses.json"
     witness.parent.mkdir(parents=True)
     witness.write_text("{}", encoding="utf-8")
+    unity = tmp_path / "experiments/unity/6000.5.2f1"
+    (unity / "ProjectSettings").mkdir(parents=True)
+    (unity / "ProjectSettings/ProjectVersion.txt").write_text("version")
+    (unity / "ProjectSettings/GraphicsSettings.asset").write_text("generated")
+    (unity / "Logs").mkdir()
+    (unity / "Logs/editor.log").write_text("generated")
+    (unity / "UserSettings").mkdir()
+    (unity / "UserSettings/editor.asset").write_text("generated")
+    (unity / "capture.log").write_text("generated")
+    unreal_config = tmp_path / "experiments/unreal/5.7.4/Config"
+    unreal_config.mkdir(parents=True)
+    (unreal_config / "DefaultEngine.ini").write_text("generated")
+    egg_info = tmp_path / "experiments/quatops_experiments.egg-info"
+    egg_info.mkdir()
+    (egg_info / "PKG-INFO").write_text("generated")
 
     assert {
         path.relative_to(tmp_path).as_posix() for path in included_files(tmp_path)
     } == {
         "experiments/transports/gltf/2.0.0/assets/build_asset.py",
+        "experiments/unity/6000.5.2f1/ProjectSettings/ProjectVersion.txt",
         "tests/golden/native/witnesses.json",
     }

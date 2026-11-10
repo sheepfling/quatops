@@ -28,6 +28,8 @@ EXCLUDED_PARTS = {
     "binaries",
     "saved",
     "library",
+    "logs",
+    "usersettings",
     ".godot",
     "__pycache__",
     ".pytest_cache",
@@ -68,10 +70,20 @@ def included_files(root: Path) -> list[Path]:
                     continue
                 if any(
                     part.casefold() in EXCLUDED_PARTS
+                    or part.casefold().endswith(".egg-info")
                     for part in relative_candidate.parts
                 ):
                     continue
-                if candidate.suffix in {".pyc", ".pyo"}:
+                if candidate.suffix.casefold() in {".pyc", ".pyo", ".log"}:
+                    continue
+                parts = relative_candidate.parts
+                if (
+                    parts[:2] == ("experiments", "unity")
+                    and "ProjectSettings" in parts
+                    and candidate.name != "ProjectVersion.txt"
+                ):
+                    continue
+                if parts[:2] == ("experiments", "unreal") and "Config" in parts:
                     continue
                 files.add(candidate)
     return sorted(files)
