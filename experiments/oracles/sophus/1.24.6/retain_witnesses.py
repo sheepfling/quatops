@@ -295,7 +295,7 @@ def reduce_capture(
     capture.validate_pinned_inputs(Path(__file__).with_name("capture_inputs.tsv"))
 
     return SophusDiscoveryWitnessSet(
-        schema_version="1.0",
+        schema_version="2.0",
         evidence_kind="selected_native_discovery_witnesses",
         target=profile.witness_target,
         probe_frame=config.probe_frame.description,
@@ -330,14 +330,12 @@ def reduce_capture(
             )
             for item in (exp_log[case_id] for case_id in _EXP_LOG_CASES)
         ),
-        composition_columns=ROTATION_COLUMNS,
+        rotation_columns=ROTATION_COLUMNS,
         composition=(
             _rotation_witness(compositions["mixed_a_times_mixed_b"], probe_image=True),
             _rotation_witness(compositions["mixed_b_times_mixed_a"], probe_image=True),
         ),
-        inverse_columns=ROTATION_COLUMNS,
         inverse=_rotation_witness(capture.inverse, probe_image=False),
-        perturbation_columns=ROTATION_COLUMNS,
         perturbation_side=(
             _rotation_witness(perturbations["delta_times_mixed_a"], probe_image=False),
             _rotation_witness(perturbations["mixed_a_times_delta"], probe_image=False),

@@ -1,5 +1,5 @@
 {
-  "schema_version": "1.0",
+  "schema_version": "2.0",
   "evidence_kind": "selected_native_discovery_witnesses",
   "target": "Sophus 1.24.6 SO3d / Eigen 5.0.1",
   "probe_frame": "+X right, +Y forward, +Z up; right-handed",
@@ -174,7 +174,7 @@
       null
     ]
   ],
-  "composition_columns": ["case_id", "native_params_xyzw", "native_basis_images_xyz", "native_probe_image_xyz_or_null"],
+  "rotation_columns": ["case_id", "native_params_xyzw", "native_basis_images_xyz", "native_probe_image_xyz_or_null"],
   "composition": [
     [
       "mixed_a_times_mixed_b",
@@ -197,7 +197,6 @@
       [4.466370979272391, -4.18219511788651, 0.748848630525313]
     ]
   ],
-  "inverse_columns": ["case_id", "native_params_xyzw", "native_basis_images_xyz", "native_probe_image_xyz_or_null"],
   "inverse": [
     "inverse_mixed_a",
     [-0.3400239334600911, -0.09714969527431175, 0.1942993905486235, 0.914982736566581],
@@ -208,7 +207,6 @@
     ],
     null
   ],
-  "perturbation_columns": ["case_id", "native_params_xyzw", "native_basis_images_xyz", "native_probe_image_xyz_or_null"],
   "perturbation_side": [
     [
       "delta_times_mixed_a",

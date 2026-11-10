@@ -148,7 +148,7 @@ ROTATION_COLUMNS = (
 class SophusDiscoveryWitnessSet(NativeCaptureModel):
     """Strict schema for the compact table-shaped retained Sophus JSON."""
 
-    schema_version: Literal["1.0"]
+    schema_version: Literal["2.0"]
     evidence_kind: Literal["selected_native_discovery_witnesses"]
     target: Literal[
         "Sophus 1.24.6 SO3d / Eigen 5.0.1",
@@ -163,11 +163,9 @@ class SophusDiscoveryWitnessSet(NativeCaptureModel):
     ]
     exp_log_columns: tuple[str, ...]
     exp_log: Annotated[tuple[ExpLogRow, ...], Field(min_length=6, max_length=6)]
-    composition_columns: tuple[str, ...]
+    rotation_columns: tuple[str, ...]
     composition: Annotated[tuple[RotationRow, ...], Field(min_length=2, max_length=2)]
-    inverse_columns: tuple[str, ...]
     inverse: RotationRow
-    perturbation_columns: tuple[str, ...]
     perturbation_side: Annotated[
         tuple[RotationRow, ...], Field(min_length=2, max_length=2)
     ]
@@ -177,9 +175,7 @@ class SophusDiscoveryWitnessSet(NativeCaptureModel):
         expected_columns = {
             "quaternion_construction_columns": CONSTRUCTOR_COLUMNS,
             "exp_log_columns": EXP_LOG_COLUMNS,
-            "composition_columns": ROTATION_COLUMNS,
-            "inverse_columns": ROTATION_COLUMNS,
-            "perturbation_columns": ROTATION_COLUMNS,
+            "rotation_columns": ROTATION_COLUMNS,
         }
         if any(
             getattr(self, name) != expected

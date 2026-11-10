@@ -52,7 +52,7 @@
       "verify_scipy.py": "548bb54929ef570477c2b6a8d17756610af610ceb41979bba369d27485d35124"
     },
     "repair_replay_sources_sha256": {
-      "retain_witnesses.py": "15009d7abfc8e5774f1d6c0eeeb2e2ca33b8983516c957f21e0a54e351a9ac8d",
+      "retain_witnesses.py": "f6e4c320c8eee73a5f1866c9b4563e5029585ffe2f1443e13f2b52870f4d4580",
       "verify_scipy.py": "1866df20f16ac74d591c5557a677f35505ab78060526776cac22a076ae6f7940"
     },
     "previous_repair_replay_verifier_sha256": "f979939ccaaad092de2c0f97c8bca93ed9fb0169dd6c3e0e0b7e400139d14b86",
@@ -69,17 +69,17 @@
         "raw_capture_sha256": "e0b3cea54fbe2770376143a3ce9c82ddfc3c6c275397b43c4eb71c0d7856710a",
         "raw_capture_retained": false,
         "selected_witness_file": "witnesses/float32.json",
-        "selected_witness_sha256": "5e955c6c7c075dff454ff6ebefac93b758433ef38a77ec502b96fc92486f3691"
+        "selected_witness_sha256": "ef2b4118b180c0a9d7d69bf6714367c74fe4e450a533b843d1482a4fd5bee687"
       },
       "float64": {
         "raw_capture_sha256": "f2a9caf8dd60c37e4f344f852ccf74afc4714702ff81980d7445600d9749378f",
         "raw_capture_retained": false,
         "selected_witness_file": "witnesses/float64.json",
-        "selected_witness_sha256": "000002c68ffad82d1bfcdb9787219bf4a9635036a21a1f56890d5280a2d0b8b4"
+        "selected_witness_sha256": "25124f291a5ab5f21d61e17c27cb3ab58f8ebc2f608870e210b6bee04648f3ef"
       }
     },
     "previous_repair_replay_reducer_sha256": "a9b708e0ac515c37b395ea47b4c0cb821b38ba35b68de8cf9842acd1c65b4c2b",
-    "retained_schema_sha256": "c880fbafc54109da132a4133028d1a2b60d03e268d51d0791fe97932e2d27574"
+    "retained_schema_sha256": "aeb357ff68f63a90192d7ee045ce2cb4357612ff0c39e0e4c69064becdfd8ce0"
   },
   "review": {
     "state": "selected_native_discovery_witnesses_reviewed",
