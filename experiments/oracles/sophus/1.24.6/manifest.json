@@ -39,7 +39,6 @@
       "retain_witnesses.py": "54ac049c808bf51136969777c8eb35938a6e35ac6b42fb3e8b85be86395784c5",
       "verify_scipy.py": "1866df20f16ac74d591c5557a677f35505ab78060526776cac22a076ae6f7940"
     },
-    "previous_repair_replay_verifier_sha256": "f979939ccaaad092de2c0f97c8bca93ed9fb0169dd6c3e0e0b7e400139d14b86",
     "input_file": "capture_inputs.tsv",
     "input_sha256": "713fece6dbad561b864c3f625c740190f92210318af4fa09f4467930a04a3048",
     "native_executable_sha256": "fd164cf8c34f1b731c8eafd6ea4bd336eb59b8941004e866edcfc3fc07016767",
@@ -62,7 +61,6 @@
         "selected_witness_sha256": "25124f291a5ab5f21d61e17c27cb3ab58f8ebc2f608870e210b6bee04648f3ef"
       }
     },
-    "previous_repair_replay_reducer_sha256": "a9b708e0ac515c37b395ea47b4c0cb821b38ba35b68de8cf9842acd1c65b4c2b",
     "retained_schema_sha256": "aeb357ff68f63a90192d7ee045ce2cb4357612ff0c39e0e4c69064becdfd8ce0"
   },
   "review": {

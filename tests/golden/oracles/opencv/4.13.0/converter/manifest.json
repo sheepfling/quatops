@@ -48,8 +48,6 @@
   },
   "reproduction": {
     "capture_script_sha256": "e99e3805b990a92085b8d8b43bed0821bafee77fb3c475fa421e1df923de4e6c",
-    "previous_reproduction_capture_script_sha256": "cf26f6deaa8ba40f54f6013124d7286f2bc67b44e647298cb6e4626695c0865f",
-    "reproduction_contract_note": "Current reproduction uses the shared contract; the previous digest identifies the earlier script. Native witnesses were not recaptured.",
     "previous_checkout_capture_script_sha256": "ce6df5cbbbb0983633e7ee64df2b39219b7c8e1a69731a480b152f780fda499b",
     "preparation_script_sha256": "b46f9bbb0f7422d7b940cab33682443be84225335d270be5ac323a7396e3368d",
     "lockfile_sha256": "433156bce46415d69095141dd148117ddd3e4c2eeab2174aae3d9225b6cd1248",

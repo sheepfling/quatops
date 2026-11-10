@@ -34,7 +34,6 @@
   "provenance": {
     "capture_runner_sha256": "87352500fe2a8fdd18443648d7194d846accd10824114dc5ccde2df6e6bc1510",
     "reproduction_capture_runner_sha256": "aa7699dcd4933cda1a8f1a2e9ab93eceea714224102bb2a64a15ec7386f9b5fd",
-    "previous_reproduction_capture_runner_sha256": "2f144920257de2669beea4982f97949a38a6e5c234cf4a76ddf4ada13cb53c09",
     "reproduction_contract_note": "The native harness emits the selected witness shape directly; one mixed-axis coeffs() observation per precision establishes storage order. Original producer identity and retained native values remain unchanged.",
     "native_cpp_source_sha256": "766952b362ed5a48fd6d826e90c23db4e6e6cfb86c2f6fbff2c748918368eb9b",
     "reproduction_native_cpp_source_sha256": "3847835205536a0748127536e2102852b47e6c93dc88b8f020a55dd860c1244e",
@@ -69,7 +68,6 @@
       "C:\\Users\\peanu\\AppData\\Local\\Temp\\quatops-eigen-5.0.1-capture-4hvv3rke\\native-input.tsv"
     ],
     "exact_invocation": "C:\\Users\\peanu\\GIT\\sheepfling\\quatops\\experiments\\converters\\eigen\\5.0.1\\.venv\\Scripts\\python.exe C:\\Users\\peanu\\GIT\\sheepfling\\quatops\\experiments\\converters\\eigen\\5.0.1\\capture_native.py --eigen-root C:\\Users\\peanu\\AppData\\Local\\Temp\\quatops-eigen-5.0.1\\eigen-5.0.1 --eigen-archive C:\\Users\\peanu\\AppData\\Local\\Temp\\eigen-5.0.1.tar.gz --compiler g++ --repository-root C:\\Users\\peanu\\GIT\\sheepfling\\quatops",
-    "previous_compact_runner_sha256": "cd1fa0364ea985b9307ebfa31a7df178015bff7b013d7aac6559ba0bc47486ae",
     "native_cpp_source_archive": "experiments/provenance/reproduction-v1.zip#eigen-5.0.1-capture_native.cpp",
     "reproduction_prepared_inputs_sha256": "83a747d9fb4613c8af96b06881e9f071c8d926e58d89b5f70d00abfad2e454d1",
     "reproduction_native_input_stream_sha256": "a4d707a7014e18f1a3c8c92ceb603e36650719e69dfb329b660f3f4cd8f2e7a3",
