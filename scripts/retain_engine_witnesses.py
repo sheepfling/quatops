@@ -11,32 +11,18 @@ from typing import Union, cast
 
 from pydantic import JsonValue
 
-if __package__:
-    from scripts.evidence_json import (
-        dump_evidence_json,
-        parse_evidence_document,
-        read_evidence_document,
-    )
-    from scripts.evidence_schema.engine_captures import (
-        ENGINE_RETAINED_CASE_IDS,
-        EngineCanonicalFrame,
-        EngineFrame,
-        EngineSemanticConfig,
-        engine_semantic_contract_path,
-    )
-else:
-    from evidence_json import (
-        dump_evidence_json,
-        parse_evidence_document,
-        read_evidence_document,
-    )
-    from evidence_schema.engine_captures import (
-        ENGINE_RETAINED_CASE_IDS,
-        EngineCanonicalFrame,
-        EngineFrame,
-        EngineSemanticConfig,
-        engine_semantic_contract_path,
-    )
+from scripts.evidence_json import (
+    dump_evidence_json,
+    parse_evidence_document,
+    read_evidence_document,
+)
+from scripts.evidence_schema.engine_captures import (
+    ENGINE_RETAINED_CASE_IDS,
+    EngineCanonicalFrame,
+    EngineFrame,
+    EngineSemanticConfig,
+    engine_semantic_contract_path,
+)
 
 JsonRecord = dict[str, JsonValue]
 
