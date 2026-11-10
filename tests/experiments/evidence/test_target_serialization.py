@@ -9,6 +9,7 @@ import pytest
 from pydantic import ValidationError
 
 from scripts.converter_evidence import (
+    converter_fixture_directories,
     load_converter_evidence,
 )
 from scripts.evidence_json import read_evidence_document
@@ -57,6 +58,15 @@ EXPECTED_WITNESS_COUNTS = MappingProxyType(
         ("OpenUSD", "26.11"): 3,
     }
 )
+
+
+def test_converter_inputs_are_loaded_from_the_contract_package():
+    for directory in converter_fixture_directories(ROOT):
+        package = load_converter_evidence(directory, repository_root=ROOT)
+        if package.inputs is not None:
+            assert package.inputs_source_path == (
+                package.contract_source_path.parent / "converter_inputs.json"
+            )
 
 
 def test_converter_rejects_changed_shared_contract(tmp_path):

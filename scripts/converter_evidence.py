@@ -101,28 +101,6 @@ _TARGET_MODELS = {
     "OpenUSD": _TargetModels(OpenUsdCapture, OpenUsdContract, OpenUsdInputs),
 }
 
-# Converter input documents are authored beside their experiment adapters. When
-# a retained native package uses the same bytes, load that source directly
-# instead of checking in a duplicate under tests/golden.
-_INPUT_DOCUMENT_PATHS = {
-    ("Eigen", "5.0.1"): "experiments/converters/eigen/5.0.1/converter_inputs.json",
-    ("MuJoCo", "3.17.0"): "experiments/converters/mujoco/3.17.0/converter_inputs.json",
-    ("OpenCV", "4.13.0"): "experiments/converters/opencv/4.13.0/converter_inputs.json",
-    (
-        "SpiceyPy / CSPICE",
-        "8.3.0",
-    ): "experiments/converters/spiceypy/8.3.0/converter_inputs.json",
-    (
-        "CesiumJS",
-        "1.124.0",
-    ): "experiments/converters/cesium/1.124.0/converter_inputs.json",
-    (
-        "Three.js GLTFLoader",
-        "0.187.0",
-    ): "experiments/converters/gltf/2.0.0/converter_inputs.json",
-    ("OpenUSD", "26.11"): "experiments/converters/openusd/26.11/converter_inputs.json",
-}
-
 
 def _target_capture(
     name: str, document: dict[str, JsonValue], *, directory: Path
@@ -212,15 +190,6 @@ def load_converter_evidence(
     manifest = read_evidence_document(directory / "manifest.json")
     witnesses = read_evidence_document(directory / "witnesses.json")
     target = _target_identity(manifest)
-    inputs_path = directory / "inputs.json"
-    if not inputs_path.is_file():
-        shared_inputs = _INPUT_DOCUMENT_PATHS.get((target.name, target.version))
-        if shared_inputs is not None:
-            inputs_path = repository_root / shared_inputs
-    inputs_document = (
-        read_evidence_document(inputs_path) if inputs_path.is_file() else None
-    )
-    inputs_source_path = inputs_path.resolve() if inputs_document is not None else None
     contract_reference = SemanticContractReference.model_validate(
         manifest.get("semantic_contract"), strict=True
     )
@@ -245,6 +214,15 @@ def load_converter_evidence(
         ) from error
     if sha256_file(semantic_contract_path) != contract_reference.sha256:
         raise ValueError(f"{directory}: semantic contract digest differs from manifest")
+    # Converter input recipes live beside the authenticated semantic contract.
+    # A fixture-local copy takes precedence when a capture retains its own input.
+    inputs_path = directory / "inputs.json"
+    if not inputs_path.is_file():
+        inputs_path = semantic_contract_path.parent / "converter_inputs.json"
+    inputs_document = (
+        read_evidence_document(inputs_path) if inputs_path.is_file() else None
+    )
+    inputs_source_path = inputs_path.resolve() if inputs_document is not None else None
     semantic_contract_document = read_evidence_document(semantic_contract_path)
     contract = _target_contract(
         target.name, semantic_contract_document, directory=semantic_contract_path
