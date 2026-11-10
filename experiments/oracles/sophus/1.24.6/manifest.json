@@ -36,7 +36,7 @@
       "verify_scipy.py": "548bb54929ef570477c2b6a8d17756610af610ceb41979bba369d27485d35124"
     },
     "repair_replay_sources_sha256": {
-      "retain_witnesses.py": "f6e4c320c8eee73a5f1866c9b4563e5029585ffe2f1443e13f2b52870f4d4580",
+      "retain_witnesses.py": "54ac049c808bf51136969777c8eb35938a6e35ac6b42fb3e8b85be86395784c5",
       "verify_scipy.py": "1866df20f16ac74d591c5557a677f35505ab78060526776cac22a076ae6f7940"
     },
     "previous_repair_replay_verifier_sha256": "f979939ccaaad092de2c0f97c8bca93ed9fb0169dd6c3e0e0b7e400139d14b86",

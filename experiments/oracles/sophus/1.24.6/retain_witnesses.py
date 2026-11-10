@@ -7,29 +7,32 @@ import hashlib
 import math
 import struct
 from pathlib import Path
-from typing import Annotated, Literal
+from typing import Literal
 
 from pydantic import (
-    BaseModel,
-    ConfigDict,
-    Field,
-    FiniteFloat,
     model_validator,
 )
 
 from scripts.evidence_format import dump_evidence_json
 from scripts.evidence_json import read_evidence_document
-from scripts.evidence_schema.primitives import SemanticContractReference
+from scripts.evidence_schema.primitives import (
+    NativeCaptureModel,
+    SemanticContractReference,
+)
 from scripts.evidence_schema.sophus import (
     CONSTRUCTION_CASES,
     CONSTRUCTOR_COLUMNS,
     EXP_LOG_CASES,
     EXP_LOG_COLUMNS,
     ROTATION_COLUMNS,
+    Matrix3,
+    Quaternion4,
     RotationRow,
     SophusDiscoveryWitnessSet,
     SophusScalarProfile,
     SophusSemanticConfig,
+    StrictFiniteFloat,
+    Vector3,
 )
 from scripts.evidence_schema.utilities import sha256_file
 
@@ -40,27 +43,15 @@ _PINNED_INPUT_SHA256 = (
     "713fece6dbad561b864c3f625c740190f92210318af4fa09f4467930a04a3048"
 )
 
-StrictFiniteFloat = Annotated[FiniteFloat, Field(strict=True)]
-Vector3 = tuple[StrictFiniteFloat, StrictFiniteFloat, StrictFiniteFloat]
-Quaternion4 = tuple[
-    StrictFiniteFloat, StrictFiniteFloat, StrictFiniteFloat, StrictFiniteFloat
-]
-Matrix3 = tuple[Vector3, Vector3, Vector3]
 VectorActions = tuple[Vector3, Vector3, Vector3, Vector3]
 
 
-class StrictModel(BaseModel):
-    """Reject untyped or unexpected capture fields."""
-
-    model_config = ConfigDict(extra="forbid", strict=True, frozen=True)
-
-
-class NativeQuaternion(StrictModel):
+class NativeQuaternion(NativeCaptureModel):
     wxyz: Quaternion4
     coeffs_xyzw: Quaternion4
 
 
-class NativeRotation(StrictModel):
+class NativeRotation(NativeCaptureModel):
     case_id: str
     unit_quaternion: NativeQuaternion
     params_xyzw: Quaternion4
@@ -81,7 +72,7 @@ class NativeRotation(StrictModel):
         return self
 
 
-class QuaternionConstruction(StrictModel):
+class QuaternionConstruction(NativeCaptureModel):
     case_id: str
     input_wxyz: Quaternion4
     input_norm: StrictFiniteFloat
@@ -89,14 +80,14 @@ class QuaternionConstruction(StrictModel):
     log_xyz: Vector3
 
 
-class ExpLog(StrictModel):
+class ExpLog(NativeCaptureModel):
     case_id: str
     tangent_xyz: Vector3
     exp_result: NativeRotation
     log_of_exp_xyz: Vector3
 
 
-class NativeCapture(StrictModel):
+class NativeCapture(NativeCaptureModel):
     capture_schema: Literal["quatops-sophus-discovery-v1"]
     target: Literal["Sophus SO3d", "Sophus SO3f"]
     probe_xyz: Vector3
