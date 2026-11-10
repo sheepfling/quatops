@@ -23,10 +23,10 @@ $arguments = @(
 $capture = Start-Process -FilePath $unity -ArgumentList $arguments -PassThru -Wait -WindowStyle Hidden
 if ($capture.ExitCode -ne 0) { throw "Unity capture failed with exit code $($capture.ExitCode). See $log" }
 .venv\Scripts\python.exe -m scripts.retain_engine_witnesses unity 6000.5.2f1 `
-  $output tests\oracles\unity\6000.5.2f1 --repository-root .
+  $output "$env:TEMP\quatops-engine-review\unity\6000.5.2f1" --repository-root .
 ```
 
-The capture emits eight canonical orientations, native quaternion
+The capture emits five canonical orientations, native quaternion
 coefficients and native basis/mixed-vector actions, and both orders of one
 noncommuting product. The contract records API, component order, frame map,
 precision, build, and capture provenance. Euler and animation adapters are

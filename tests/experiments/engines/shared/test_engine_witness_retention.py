@@ -31,30 +31,19 @@ def test_godot_retention_rejects_a_different_native_version(tmp_path, monkeypatc
     monkeypatch.setattr(
         retention, "retain_canonical_interop", lambda capture, _: capture
     )
-    with pytest.raises(ValueError, match="native Godot version differs"):
+    with pytest.raises(ValueError, match="native godot version differs"):
         retention.retain("godot", "4.7-stable", capture, tmp_path, REPOSITORY_ROOT)
 
 
-def test_retention_selects_the_reviewed_engine_cases():
-    inputs = {
-        case_id: [1.0, 0.0, 0.0, 0.0]
-        for case_id in (
-            *ENGINE_RETAINED_CASE_IDS,
-            "quarter_x",
-            "quarter_y",
-            "quarter_z",
-        )
-    }
+def test_direct_capture_rejects_unselected_cases():
+    inputs = {case_id: [1.0, 0.0, 0.0, 0.0] for case_id in ENGINE_RETAINED_CASE_IDS}
     capture = {
         "orientation_cases": [
-            {"case_id": case_id, "canonical_wxyz": value}
-            for case_id, value in inputs.items()
+            {"case_id": "quarter_x", "canonical_wxyz": [1.0, 0.0, 0.0, 0.0]}
         ]
     }
-    retained = retain_canonical_interop(capture, inputs)
-    assert {row["case_id"] for row in retained["orientation_cases"]} == set(
-        ENGINE_RETAINED_CASE_IDS
-    )
+    with pytest.raises(ValueError, match="unexpected"):
+        retain_canonical_interop(capture, inputs)
 
 
 def test_native_basis_vectors_are_compacted_without_changing_components():
@@ -127,52 +116,28 @@ def test_precision_profiles_are_rebuilt_without_mutating_capture_rows():
     assert canonical_input == [0.5, -0.5, 0.5, -0.5]
 
 
-def test_retention_keeps_mixed_probe_only_and_drops_composition_probe_copies():
+def test_unity_mixed_probe_is_attached_without_changing_its_values():
     capture = {
-        "probe_vector_canonical_xyz": [0.25, -1.5, 2.75],
-        "probe_vector_native_xyz": [0.25, -1.5, 2.75],
+        "native_mixed_probe_xyz": {"x": -0.0, "y": 1.0, "z": 2.0},
         "orientation_cases": [
-            {
-                "case_id": "mixed_a",
-                "canonical_wxyz": [0.8, 0.2, -0.4, 0.4],
-                "native_quaternion": [0.4, -0.2, -0.4, 0.8],
-                "native_rotated_positive_basis_vectors_xyz": [
-                    [1.0, 0.0, 0.0],
-                    [0.0, 1.0, 0.0],
-                    [0.0, 0.0, 1.0],
-                ],
-                "native_rotated_probe_vector_xyz": [1.0, 2.0, 3.0],
-            },
-            {
-                "case_id": "identity",
-                "canonical_wxyz": [1.0, 0.0, 0.0, 0.0],
-                "native_quaternion": [0.0, 0.0, 0.0, 1.0],
-                "native_rotated_positive_basis_vectors_xyz": [
-                    [1.0, 0.0, 0.0],
-                    [0.0, 1.0, 0.0],
-                    [0.0, 0.0, 1.0],
-                ],
-                "native_rotated_probe_vector_xyz": [4.0, 5.0, 6.0],
-            },
+            {"case_id": "mixed_a", "canonical_wxyz": [0.8, 0.2, -0.4, 0.4]}
         ],
-        "composition": {"native_rotated_probe_vector_xyz": [1.0, 2.0, 3.0]},
-        "reverse_composition": {"native_rotated_probe_vector_xyz": [4.0, 5.0, 6.0]},
     }
-    retained = retain_canonical_interop(
-        capture,
-        {
-            "mixed_a": [0.8, 0.2, -0.4, 0.4],
-            "identity": [1.0, 0.0, 0.0, 0.0],
-        },
+    retained = retain_canonical_interop(capture, {"mixed_a": [0.8, 0.2, -0.4, 0.4]})
+    assert retained["orientation_cases"][0]["native_rotated_probe_vector_xyz"] == [
+        -0.0,
+        1.0,
+        2.0,
+    ]
+    assert (
+        copysign(
+            1.0, retained["orientation_cases"][0]["native_rotated_probe_vector_xyz"][0]
+        )
+        == -1.0
     )
-
-    assert "probe_vector_canonical_xyz" not in retained
-    assert "probe_vector_native_xyz" not in retained
-    cases = {row["case_id"]: row for row in retained["orientation_cases"]}
-    assert "native_rotated_probe_vector_xyz" in cases["mixed_a"]
-    assert "native_rotated_probe_vector_xyz" not in cases["identity"]
-    assert "native_rotated_probe_vector_xyz" not in retained["composition"]
-    assert "native_rotated_probe_vector_xyz" not in retained["reverse_composition"]
+    capture["orientation_cases"][0]["native_rotated_probe_vector_xyz"] = [0.0, 1.0, 2.0]
+    with pytest.raises(ValueError, match="only once"):
+        retain_canonical_interop(capture, {"mixed_a": [0.8, 0.2, -0.4, 0.4]})
 
 
 @pytest.mark.parametrize(
@@ -207,7 +172,7 @@ def test_retention_rejects_unexpected_duplicate_and_missing_cases(cases, message
 
 
 def test_retention_rejects_non_quaternion_native_inputs():
-    with pytest.raises(TypeError, match="four numeric coefficients"):
+    with pytest.raises(ValueError, match="at least 4"):
         retain_canonical_interop(
             {
                 "orientation_cases": [

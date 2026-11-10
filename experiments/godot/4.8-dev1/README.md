@@ -14,9 +14,9 @@ $output = Join-Path $env:TEMP 'quatops-godot48-witnesses.json'
 & $godot --headless --path $project --script $script -- $output
 if ($LASTEXITCODE -ne 0) { throw "Godot capture failed: $LASTEXITCODE" }
 .venv\Scripts\python.exe -m scripts.retain_engine_witnesses godot 4.8-dev1 `
-  $output tests\oracles\godot\4.8-dev1 --repository-root .
+  $output "$env:TEMP\quatops-engine-review\godot\4.8-dev1" --repository-root .
 ```
 
-The output contains eight canonical orientations, exact native quaternions,
+The output contains five canonical orientations, exact native quaternions,
 native basis/mixed-vector actions, both noncommuting product orders, and the
 engine build record.

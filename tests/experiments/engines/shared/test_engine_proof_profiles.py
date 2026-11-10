@@ -55,6 +55,22 @@ def test_contract_and_witnesses_are_versioned_small_and_provenanced(engine, vers
     for key, digest in expected_hashes.items():
         assert contract["provenance"][key] == digest
 
+    direct = contract["provenance"]["direct_capture"]
+    assert (
+        hashlib.sha256((ROOT / direct["capture_source"]).read_bytes()).hexdigest()
+        == direct["capture_source_sha256"]
+    )
+    assert (
+        hashlib.sha256(
+            (ROOT / "scripts/retain_engine_witnesses.py").read_bytes()
+        ).hexdigest()
+        == direct["selector_sha256"]
+    )
+    assert (
+        len(direct["capture_output_sha256"]) == len(direct["executable_sha256"]) == 64
+    )
+    assert "witness bytes exactly" in direct["comparison"]
+
     reproduction_path = witness_path.parent / "reproduction.json"
     if reproduction_path.is_file():
         reproduction = json.loads(reproduction_path.read_text(encoding="utf-8"))

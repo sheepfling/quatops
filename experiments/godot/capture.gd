@@ -2,9 +2,6 @@ extends SceneTree
 
 const ORIENTATIONS := [
     ["identity", [1.0, 0.0, 0.0, 0.0]],
-    ["quarter_x", [0.7071067811865476, 0.7071067811865476, 0.0, 0.0]],
-    ["quarter_y", [0.7071067811865476, 0.0, 0.7071067811865476, 0.0]],
-    ["quarter_z", [0.7071067811865476, 0.0, 0.0, 0.7071067811865476]],
     ["mixed_a", [0.8, 0.2, -0.4, 0.4]],
     ["mixed_b", [0.7, -0.3, 0.2, 0.6164414002968976]],
     ["antipode_mixed_a", [-0.8, -0.2, 0.4, -0.4]],
@@ -80,28 +77,28 @@ func capture_canonical_interop() -> Dictionary:
         "contract_id": "quatops-canonical-hamilton-wxyz-active-rh-v1",
         "native_quaternion_order": "xyzw",
         "frame_map_destination_axes_from_source": DESTINATION_AXES,
-        "probe_vector_canonical_xyz": vector(CANONICAL_PROBE),
-        "probe_vector_native_xyz": vector(native_probe),
         "orientation_cases": cases,
-        "composition": capture_composition("mixed_a", "mixed_b", lhs_rhs, native_probe),
-        "reverse_composition": capture_composition("mixed_b", "mixed_a", rhs_lhs, native_probe),
+        "composition": capture_composition("mixed_a", "mixed_b", lhs_rhs),
+        "reverse_composition": capture_composition("mixed_b", "mixed_a", rhs_lhs),
     }
 
 
 func capture_orientation(
     case_id: String, canonical_wxyz: Array, native: Quaternion, native_probe: Vector3
 ) -> Dictionary:
-    return {
+    var result := {
         "case_id": case_id,
         "canonical_wxyz": canonical_wxyz,
         "native_quaternion": quaternion_xyzw(native),
         "native_rotated_positive_basis_vectors_xyz": rotated_axes(native),
-        "native_rotated_probe_vector_xyz": vector(native * native_probe),
     }
+    if case_id == "mixed_a":
+        result["native_rotated_probe_vector_xyz"] = vector(native * native_probe)
+    return result
 
 
 func capture_composition(
-    left_id: String, right_id: String, product: Quaternion, native_probe: Vector3
+    left_id: String, right_id: String, product: Quaternion
 ) -> Dictionary:
     return {
         "left_case_id": left_id,
@@ -109,7 +106,6 @@ func capture_composition(
         "product_order": "lhs * rhs; rhs acts first",
         "native_product_quaternion": quaternion_xyzw(product),
         "native_rotated_positive_basis_vectors_xyz": rotated_axes(product),
-        "native_rotated_probe_vector_xyz": vector(product * native_probe),
     }
 
 

@@ -96,6 +96,16 @@ class EngineNativeBuildRecord(NativeCaptureModel):
     capture_method: Optional[str] = None
 
 
+class EngineDirectCapture(NativeCaptureModel):
+    capture_source: str
+    capture_source_sha256: SHA256
+    capture_output_sha256: SHA256
+    selector_sha256: SHA256
+    executable_sha256: SHA256
+    utc: str
+    comparison: str
+
+
 class EngineProvenance(NativeCaptureModel):
     semantic_contract_file: str
     semantic_contract_sha256: SHA256
@@ -109,6 +119,7 @@ class EngineProvenance(NativeCaptureModel):
     retention_method: Optional[str] = None
     witness_file: Optional[str] = None
     witness_sha256: Optional[SHA256] = None
+    direct_capture: Optional[EngineDirectCapture] = None
 
 
 class EngineContractDocument(NativeCaptureModel):

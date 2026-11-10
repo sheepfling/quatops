@@ -7,16 +7,13 @@ import json
 import sys
 import tempfile
 from pathlib import Path
-from typing import TypedDict
+from typing import NotRequired, TypedDict
 
 import bpy
 from mathutils import Quaternion, Vector
 
 ORIENTATIONS = (
     ("identity", (1.0, 0.0, 0.0, 0.0)),
-    ("quarter_x", (0.7071067811865476, 0.7071067811865476, 0.0, 0.0)),
-    ("quarter_y", (0.7071067811865476, 0.0, 0.7071067811865476, 0.0)),
-    ("quarter_z", (0.7071067811865476, 0.0, 0.0, 0.7071067811865476)),
     ("mixed_a", (0.8, 0.2, -0.4, 0.4)),
     ("mixed_b", (0.7, -0.3, 0.2, 0.6164414002968976)),
     ("antipode_mixed_a", (-0.8, -0.2, 0.4, -0.4)),
@@ -36,7 +33,7 @@ class OrientationCase(TypedDict):
     canonical_wxyz: list[float]
     native_quaternion: list[float]
     native_rotated_positive_basis_vectors_xyz: list[list[float]]
-    native_rotated_probe_vector_xyz: list[float]
+    native_rotated_probe_vector_xyz: NotRequired[list[float]]
 
 
 class CompositionCase(TypedDict):
@@ -45,15 +42,12 @@ class CompositionCase(TypedDict):
     product_order: str
     native_product_quaternion: list[float]
     native_rotated_positive_basis_vectors_xyz: list[list[float]]
-    native_rotated_probe_vector_xyz: list[float]
 
 
 class CanonicalInterop(TypedDict):
     contract_id: str
     native_quaternion_order: str
     frame_map_destination_axes_from_source: list[str]
-    probe_vector_canonical_xyz: list[float]
-    probe_vector_native_xyz: list[float]
     orientation_cases: list[OrientationCase]
     composition: CompositionCase
     reverse_composition: CompositionCase
@@ -119,7 +113,15 @@ def capture_canonical_interop() -> CanonicalInterop:
             "canonical_wxyz": list(wxyz),
             "native_quaternion": vector_values(native[case_id]),
             "native_rotated_positive_basis_vectors_xyz": rotated_axes(native[case_id]),
-            "native_rotated_probe_vector_xyz": vector_values(native[case_id] @ PROBE),
+            **(
+                {
+                    "native_rotated_probe_vector_xyz": vector_values(
+                        native[case_id] @ PROBE
+                    )
+                }
+                if case_id == "mixed_a"
+                else {}
+            ),
         }
         for case_id, wxyz in ORIENTATIONS
     ]
@@ -132,15 +134,12 @@ def capture_canonical_interop() -> CanonicalInterop:
             "product_order": "lhs * rhs; rhs acts first",
             "native_product_quaternion": vector_values(product),
             "native_rotated_positive_basis_vectors_xyz": rotated_axes(product),
-            "native_rotated_probe_vector_xyz": vector_values(product @ PROBE),
         }
 
     return {
         "contract_id": "quatops-canonical-hamilton-wxyz-active-rh-v1",
         "native_quaternion_order": "wxyz",
         "frame_map_destination_axes_from_source": list(DESTINATION_AXES),
-        "probe_vector_canonical_xyz": vector_values(PROBE),
-        "probe_vector_native_xyz": vector_values(PROBE),
         "orientation_cases": orientation_cases,
         "composition": composition("mixed_a", "mixed_b"),
         "reverse_composition": composition("mixed_b", "mixed_a"),

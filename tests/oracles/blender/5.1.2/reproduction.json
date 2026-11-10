@@ -12,7 +12,8 @@
   },
   "reproduction": {
     "capture_source": "experiments/blender/5.1.2/capture.py",
-    "capture_source_sha256": "c5b6ef2a9514cb6ac571d9d81f530394c33c338ca093eb02756e2d627952ff4f",
-    "identity_note": "The current source adds TypedDict return records. It has not been run in Blender; the historical capture identity and archived source are preserved separately."
+    "capture_source_sha256": "e9d4ba7f7fbb3f20d15d66aeffd054d2fa7d6c6832d5cda386a4851e55a64173",
+    "identity_note": "The current direct source was run in pinned Blender 5.1.2; the historical source and capture remain separate.",
+    "previous_capture_source_sha256": "c5b6ef2a9514cb6ac571d9d81f530394c33c338ca093eb02756e2d627952ff4f"
   }
 }

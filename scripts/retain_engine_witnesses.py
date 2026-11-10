@@ -7,9 +7,9 @@ import hashlib
 from copy import deepcopy
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Union, cast
+from typing import cast
 
-from pydantic import JsonValue
+from pydantic import JsonValue, TypeAdapter
 
 from scripts.evidence_json import (
     dump_evidence_json,
@@ -19,12 +19,16 @@ from scripts.evidence_json import (
 from scripts.evidence_schema.engine_captures import (
     ENGINE_RETAINED_CASE_IDS,
     EngineCanonicalFrame,
+    EngineCanonicalInterop,
     EngineFrame,
     EngineSemanticConfig,
     engine_semantic_contract_path,
 )
+from scripts.evidence_schema.primitives import Quaternion4, validate_signed_axis_map
+from scripts.evidence_schema.shared_inputs import SharedCanonicalInputCapture
 
 JsonRecord = dict[str, JsonValue]
+QUATERNION = TypeAdapter(Quaternion4)
 
 
 @dataclass(frozen=True)
@@ -69,42 +73,12 @@ def _record(value: object, *, context: str) -> JsonRecord:
     return cast(JsonRecord, value)
 
 
-def _axis_map(value: object) -> list[str]:
-    """Validate signed source-axis labels while preserving their order."""
-    labels = {"x", "-x", "y", "-y", "z", "-z"}
-    if (
-        not isinstance(value, list)
-        or len(value) != 3
-        or any(not isinstance(label, str) or label not in labels for label in value)
-        or len({label.lstrip("-") for label in value}) != 3
-    ):
-        raise TypeError(
-            "destination_axes_from_source must be a signed axis permutation"
-        )
-    return value
-
-
 def _rows(value: object, *, context: str) -> list[JsonRecord]:
     if not isinstance(value, list):
         raise TypeError(f"{context} must be a JSON array")
     return [
         _record(row, context=f"{context}[{index}]") for index, row in enumerate(value)
     ]
-
-
-def _quaternion(row: JsonRecord, field: str) -> list[float]:
-    value = row.get(field)
-    if (
-        not isinstance(value, list)
-        or len(value) != 4
-        or any(
-            isinstance(component, bool) or not isinstance(component, (int, float))
-            for component in value
-        )
-    ):
-        raise TypeError(f"{field} must contain four numeric coefficients")
-    numeric_values = cast(list[Union[int, float]], value)
-    return [float(component) for component in numeric_values]
 
 
 def _native_vector(value: JsonValue) -> list[JsonValue]:
@@ -170,6 +144,7 @@ def _retain_profile(
     cases = _rows(profile.get("orientation_cases"), context="orientation_cases")
     seen: set[str] = set()
     retained_cases: list[JsonRecord] = []
+    mixed_probe = profile.get("native_mixed_probe_xyz")
     input_tolerance = 2e-14 if precision == "float64" else 2e-6
     for row in cases:
         case_id = row.get("case_id")
@@ -180,22 +155,23 @@ def _retain_profile(
         if case_id in seen:
             raise ValueError(f"duplicate native orientation case: {case_id}")
         seen.add(case_id)
-        native_input = _quaternion(row, "canonical_wxyz")
+        native_input = QUATERNION.validate_python(
+            row.get("canonical_wxyz"), strict=True
+        )
         expected_input = expected_inputs[case_id]
         if any(
             abs(float(actual) - float(expected)) > input_tolerance
             for actual, expected in zip(native_input, expected_input)
         ):
             raise ValueError(f"native input differs from shared case {case_id!r}")
-        retained = {
-            key: value
-            for key, value in row.items()
-            if key not in {"canonical_wxyz", "native_input_wxyz"}
-        }
-        if case_id != "mixed_a":
-            retained.pop("native_rotated_probe_vector_xyz", None)
-        if case_id in ENGINE_RETAINED_CASE_IDS:
-            retained_cases.append(compact_native_vectors(cast(JsonRecord, retained)))
+        retained = {key: value for key, value in row.items() if key != "canonical_wxyz"}
+        if case_id == "mixed_a" and mixed_probe is not None:
+            if "native_rotated_probe_vector_xyz" in retained:
+                raise ValueError("native mixed probe must appear only once")
+            retained["native_rotated_probe_vector_xyz"] = mixed_probe
+        if ("native_rotated_probe_vector_xyz" in retained) != (case_id == "mixed_a"):
+            raise ValueError("native mixed probe must appear only on mixed_a")
+        retained_cases.append(compact_native_vectors(cast(JsonRecord, retained)))
     missing = set(expected_inputs) - seen
     if missing:
         raise ValueError(
@@ -206,8 +182,7 @@ def _retain_profile(
         for key, value in profile.items()
         if key
         not in {
-            "probe_vector_canonical_xyz",
-            "probe_vector_native_xyz",
+            "native_mixed_probe_xyz",
             "orientation_cases",
         }
     }
@@ -215,7 +190,6 @@ def _retain_profile(
         product = retained_profile.get(product_key)
         if isinstance(product, dict):
             retained_product = dict(product)
-            retained_product.pop("native_rotated_probe_vector_xyz", None)
             retained_profile[product_key] = compact_native_vectors(retained_product)
     return cast(
         JsonRecord,
@@ -250,51 +224,75 @@ def retain(
     captured = _record(
         parse_evidence_document(original_bytes), context="native capture"
     )
+    engine_info = _record(captured.get("engine"), context="engine")
+    if engine_info.get("name") != semantic_config.engine.engine:
+        raise ValueError("native capture engine identity differs from semantic config")
+    native_version = engine_info.get("version")
+    if not isinstance(native_version, str) or not (
+        native_version == version
+        or native_version.startswith((version + "-", version + " "))
+    ):
+        raise ValueError(f"native {engine} version differs from requested version")
     canonical_interop = _record(
         captured.get("canonical_interop"), context="canonical_interop"
     )
     canonical_inputs = (
         repository_root / "experiments/interoperability/v1/canonical_inputs.json"
     )
-    input_document = read_evidence_document(canonical_inputs)
-    input_rows = _rows(input_document.get("orientations"), context="orientations")
-    expected_inputs: dict[str, list[float]] = {}
-    for row in input_rows:
-        case_id = row.get("case_id")
-        if not isinstance(case_id, str):
-            raise TypeError("canonical input must have a string case_id")
-        if case_id in expected_inputs:
-            raise ValueError(f"duplicate canonical input case: {case_id}")
-        expected_inputs[case_id] = _quaternion(row, "canonical_wxyz")
-
-    profiles_to_check = (
-        {
-            name: _record(profile, context=f"precision_captures.{name}")
-            for name, profile in _record(
-                canonical_interop["precision_captures"],
-                context="precision_captures",
-            ).items()
-        }
-        if "precision_captures" in canonical_interop
-        else {"default": canonical_interop}
+    inputs = SharedCanonicalInputCapture.model_validate(
+        read_evidence_document(canonical_inputs), strict=True
     )
-    for name, profile in profiles_to_check.items():
-        if "reverse_composition" not in profile:
-            raise ValueError(
-                f"native capture profile {name!r} lacks reverse composition"
-            )
-    canonical_interop = retain_canonical_interop(canonical_interop, expected_inputs)
+    expected_inputs = {
+        row.case_id: [float(value) for value in row.canonical_wxyz]
+        for row in inputs.orientations
+        if row.case_id in ENGINE_RETAINED_CASE_IDS
+    }
+    if set(expected_inputs) != set(ENGINE_RETAINED_CASE_IDS):
+        raise ValueError("canonical input corpus lacks retained orientation cases")
 
-    engine_info = _record(captured.get("engine"), context="engine")
-    if engine_info.get("name") != semantic_config.engine.engine:
-        raise ValueError("native capture engine identity differs from semantic config")
-    if engine == "godot":
-        native_version = engine_info.get("version")
-        if (
-            not isinstance(native_version, str)
-            or native_version.split(" ", 1)[0] != version
+    canonical_interop = retain_canonical_interop(canonical_interop, expected_inputs)
+    checked = EngineCanonicalInterop.model_validate(canonical_interop, strict=True)
+    validate_signed_axis_map(
+        checked.frame_map_destination_axes_from_source, context="native frame map"
+    )
+    if (
+        checked.contract_id != semantic_config.conversion.contract_id
+        or checked.native_quaternion_order
+        != semantic_config.engine.native_quaternion_order
+        or checked.frame_map_destination_axes_from_source
+        != semantic_config.conversion.destination_axes_from_source
+    ):
+        raise ValueError("native capture quaternion or axis-map contract differs")
+    if checked.precision_captures is not None and set(
+        checked.precision_captures
+    ) != set(semantic_config.engine.native_scalar_profiles):
+        raise ValueError("native capture scalar profiles differ from semantic config")
+    if checked.precision_captures is None:
+        if len(semantic_config.engine.native_scalar_profiles) != 1 or (
+            checked.orientation_cases is None
+            or checked.composition is None
+            or checked.reverse_composition is None
         ):
-            raise ValueError("native Godot version differs from requested version")
+            raise ValueError("flat native capture lacks its single complete profile")
+        products = [(checked.composition, checked.reverse_composition)]
+    else:
+        products = [
+            (profile.composition, profile.reverse_composition)
+            for profile in checked.precision_captures.values()
+        ]
+    left, right = inputs.composition.left_case_id, inputs.composition.right_case_id
+    for forward, reverse in products:
+        if (forward.left_case_id, forward.right_case_id) != (left, right) or (
+            reverse.left_case_id,
+            reverse.right_case_id,
+        ) != (right, left):
+            raise ValueError("native capture product operands differ from the recipe")
+        if any(
+            product.product_order != "lhs * rhs; rhs acts first"
+            for product in (forward, reverse)
+        ):
+            raise ValueError("native capture product action differs from the recipe")
+
     if engine == "unreal":
         native_semantics = _record(
             captured.get("native_semantics"), context="native_semantics"
@@ -316,7 +314,7 @@ def retain(
             ),
             context=config.frame_key,
         )
-    axes_from_source = _axis_map(map_record.get("destination_axes_from_source"))
+    axes_from_source = map_record.get("destination_axes_from_source")
     observed_source_frame = EngineCanonicalFrame.model_validate(
         source_frame, strict=True
     )
@@ -327,74 +325,34 @@ def retain(
         raise ValueError("native capture target frame differs from semantic config")
     if axes_from_source != semantic_config.conversion.destination_axes_from_source:
         raise ValueError("native capture axis map differs from semantic config")
-    capture_source = repository_root / capture_source_name
-    target = {
-        "engine": semantic_config.engine.engine,
-        "api": semantic_config.engine.api,
-        "version": version,
-        "build": engine_info.get("build_hash")
-        or engine_info.get("changelist")
-        or engine_info.get("build"),
-        "platform": engine_info.get("platform"),
-        "native_scalar_profiles": semantic_config.engine.native_scalar_profiles,
-        "native_quaternion_order": semantic_config.engine.native_quaternion_order,
-        "native_algebra": semantic_config.engine.native_algebra,
-        "native_vector_action": semantic_config.engine.native_vector_action,
-    }
+    if output_dir.exists() and any(output_dir.iterdir()):
+        raise FileExistsError(f"Refusing to overwrite capture: {output_dir}")
     output_dir.mkdir(parents=True, exist_ok=True)
-    output_path = (
-        output_dir.parent / "shared" / "witnesses.json"
-        if engine == "godot"
-        else output_dir / "witnesses.json"
+    output_path = output_dir / "witnesses.json"
+    output_path.write_text(
+        dump_evidence_json(
+            {"schema_version": 1, "canonical_interop": canonical_interop}
+        ),
+        encoding="utf-8",
+        newline="\n",
     )
-    retained_witness = {"schema_version": 1, "canonical_interop": canonical_interop}
-    output_path.parent.mkdir(parents=True, exist_ok=True)
-    if engine == "godot" and output_path.exists():
-        if read_evidence_document(output_path) != retained_witness:
-            raise ValueError(
-                "Godot version produced different selected values; retain a "
-                "separate versioned witness instead of sharing this file"
-            )
-    else:
-        output_path.write_text(
-            dump_evidence_json(retained_witness), encoding="utf-8", newline="\n"
-        )
-    if engine == "godot":
-        (output_dir / "witnesses.json").unlink(missing_ok=True)
-    contract_provenance: JsonRecord = {
-        "witness_file": "../shared/witnesses.json"
-        if engine == "godot"
-        else "witnesses.json",
-        "witness_sha256": sha256(output_path),
+    manifest = {
+        "engine": engine_info,
+        "requested_version": version,
+        "capture_method": captured.get("capture_method"),
+        "native_capture_sha256": hashlib.sha256(original_bytes).hexdigest(),
         "capture_source": capture_source_name,
-        "capture_source_sha256": sha256(capture_source),
-        "original_capture_sha256": hashlib.sha256(original_bytes).hexdigest(),
-        "canonical_input_file": "experiments/interoperability/v1/canonical_inputs.json",
+        "capture_source_sha256": sha256(repository_root / capture_source_name),
+        "selector_sha256": sha256(Path(__file__)),
         "canonical_input_sha256": sha256(canonical_inputs),
+        "semantic_contract": semantic_config_path.relative_to(
+            repository_root
+        ).as_posix(),
+        "semantic_contract_sha256": sha256(semantic_config_path),
+        "witness_sha256": sha256(output_path),
     }
-    if engine == "godot":
-        contract_provenance.update(
-            {
-                "native_build_record": engine_info,
-                "capture_method": captured.get("capture_method"),
-                "retention_method": (
-                    "selected native outputs retained losslessly; shared inputs "
-                    "referenced by case ID; redundant input copies and probe samples removed"
-                ),
-            }
-        )
-    contract = {
-        "engine": target,
-        "provenance": {
-            **contract_provenance,
-            "semantic_contract_file": semantic_config_path.relative_to(
-                repository_root
-            ).as_posix(),
-            "semantic_contract_sha256": sha256(semantic_config_path),
-        },
-    }
-    (output_dir / "contract.json").write_text(
-        dump_evidence_json(contract), encoding="utf-8", newline="\n"
+    (output_dir / "manifest.json").write_text(
+        dump_evidence_json(manifest), encoding="utf-8", newline="\n"
     )
 
 
@@ -408,7 +366,7 @@ def main() -> None:
     parser.add_argument(
         "output_dir",
         type=Path,
-        help="versioned directory for retained contract and witnesses",
+        help="new or empty directory for reviewed witnesses and run manifest",
     )
     parser.add_argument("--repository-root", type=Path, required=True)
     args = parser.parse_args()

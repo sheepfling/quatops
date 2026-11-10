@@ -30,9 +30,6 @@ namespace
 
     constexpr FCanonicalQuaternionCase CanonicalQuaternionCases[] = {
         { TEXT("identity"), 1.0, 0.0, 0.0, 0.0 },
-        { TEXT("quarter_x"), 0.7071067811865476, 0.7071067811865476, 0.0, 0.0 },
-        { TEXT("quarter_y"), 0.7071067811865476, 0.0, 0.7071067811865476, 0.0 },
-        { TEXT("quarter_z"), 0.7071067811865476, 0.0, 0.0, 0.7071067811865476 },
         { TEXT("mixed_a"), 0.8, 0.2, -0.4, 0.4 },
         { TEXT("mixed_b"), 0.7, -0.3, 0.2, 0.6164414002968976 },
         { TEXT("antipode_mixed_a"), -0.8, -0.2, 0.4, -0.4 },
@@ -95,7 +92,8 @@ namespace
         Result->SetArrayField(TEXT("canonical_wxyz"), NumberArray({ Input.W, Input.X, Input.Y, Input.Z }));
         Result->SetArrayField(TEXT("native_quaternion"), QuaternionArray(Native));
         Result->SetArrayField(TEXT("native_rotated_positive_basis_vectors_xyz"), BasisImages);
-        Result->SetArrayField(TEXT("native_rotated_probe_vector_xyz"), VectorArray(Native.RotateVector(NativeProbe)));
+        if (FCString::Strcmp(Input.CaseId, TEXT("mixed_a")) == 0)
+            Result->SetArrayField(TEXT("native_rotated_probe_vector_xyz"), VectorArray(Native.RotateVector(NativeProbe)));
         return Result;
     }
 
@@ -103,8 +101,7 @@ namespace
     FJsonObjectRef CaptureComposition(
         const TCHAR* LeftId,
         const TCHAR* RightId,
-        const UE::Math::TQuat<T>& Product,
-        const UE::Math::TVector<T>& NativeProbe)
+        const UE::Math::TQuat<T>& Product)
     {
         using TVector = UE::Math::TVector<T>;
         const TVector Axes[] = { TVector(1, 0, 0), TVector(0, 1, 0), TVector(0, 0, 1) };
@@ -120,7 +117,6 @@ namespace
         Result->SetStringField(TEXT("product_order"), TEXT("lhs * rhs; rhs acts first"));
         Result->SetArrayField(TEXT("native_product_quaternion"), QuaternionArray(Product));
         Result->SetArrayField(TEXT("native_rotated_positive_basis_vectors_xyz"), BasisImages);
-        Result->SetArrayField(TEXT("native_rotated_probe_vector_xyz"), VectorArray(Product.RotateVector(NativeProbe)));
         return Result;
     }
 
@@ -156,13 +152,11 @@ namespace
         }
 
         FJsonObjectRef Result = MakeShared<FJsonObject>();
-        Result->SetArrayField(TEXT("probe_vector_canonical_xyz"), VectorArray(CanonicalProbe));
-        Result->SetArrayField(TEXT("probe_vector_native_xyz"), VectorArray(NativeProbe));
         Result->SetArrayField(TEXT("orientation_cases"), Orientations);
         Result->SetObjectField(TEXT("composition"), CaptureComposition(
-            TEXT("mixed_a"), TEXT("mixed_b"), NativeLeft * NativeRight, NativeProbe));
+            TEXT("mixed_a"), TEXT("mixed_b"), NativeLeft * NativeRight));
         Result->SetObjectField(TEXT("reverse_composition"), CaptureComposition(
-            TEXT("mixed_b"), TEXT("mixed_a"), NativeRight * NativeLeft, NativeProbe));
+            TEXT("mixed_b"), TEXT("mixed_a"), NativeRight * NativeLeft));
         return Result;
     }
 

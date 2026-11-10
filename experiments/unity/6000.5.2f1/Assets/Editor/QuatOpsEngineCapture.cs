@@ -62,7 +62,6 @@ public static class QuatOpsEngineCapture
         public float[] canonical_wxyz;
         public float[] native_quaternion;
         public VectorRecord[] native_rotated_positive_basis_vectors_xyz;
-        public VectorRecord native_rotated_probe_vector_xyz;
     }
 
     [Serializable]
@@ -73,7 +72,6 @@ public static class QuatOpsEngineCapture
         public string product_order;
         public float[] native_product_quaternion;
         public VectorRecord[] native_rotated_positive_basis_vectors_xyz;
-        public VectorRecord native_rotated_probe_vector_xyz;
     }
 
     [Serializable]
@@ -82,8 +80,7 @@ public static class QuatOpsEngineCapture
         public string contract_id;
         public string native_quaternion_order;
         public string[] frame_map_destination_axes_from_source;
-        public VectorRecord probe_vector_canonical_xyz;
-        public VectorRecord probe_vector_native_xyz;
+        public VectorRecord native_mixed_probe_xyz;
         public OrientationRecord[] orientation_cases;
         public CompositionRecord composition;
         public CompositionRecord reverse_composition;
@@ -105,9 +102,6 @@ public static class QuatOpsEngineCapture
     private static readonly OrientationInput[] Orientations =
     {
         new() { case_id = "identity", canonical_wxyz = new[] { 1f, 0f, 0f, 0f } },
-        new() { case_id = "quarter_x", canonical_wxyz = new[] { 0.7071067811865476f, 0.7071067811865476f, 0f, 0f } },
-        new() { case_id = "quarter_y", canonical_wxyz = new[] { 0.7071067811865476f, 0f, 0.7071067811865476f, 0f } },
-        new() { case_id = "quarter_z", canonical_wxyz = new[] { 0.7071067811865476f, 0f, 0f, 0.7071067811865476f } },
         new() { case_id = "mixed_a", canonical_wxyz = new[] { 0.8f, 0.2f, -0.4f, 0.4f } },
         new() { case_id = "mixed_b", canonical_wxyz = new[] { 0.7f, -0.3f, 0.2f, 0.6164414002968976f } },
         new() { case_id = "antipode_mixed_a", canonical_wxyz = new[] { -0.8f, -0.2f, 0.4f, -0.4f } },
@@ -173,7 +167,7 @@ public static class QuatOpsEngineCapture
             var input = Orientations[index];
             var native = MapCanonicalQuaternion(input.canonical_wxyz);
             nativeById[input.case_id] = native;
-            cases[index] = CaptureOrientation(input, native, nativeProbe);
+            cases[index] = CaptureOrientation(input, native);
         }
 
         return new CanonicalInteropRecord
@@ -181,36 +175,32 @@ public static class QuatOpsEngineCapture
             contract_id = "quatops-canonical-hamilton-wxyz-active-rh-v1",
             native_quaternion_order = "xyzw",
             frame_map_destination_axes_from_source = new[] { "x", "z", "y" },
-            probe_vector_canonical_xyz = new VectorRecord(probe),
-            probe_vector_native_xyz = new VectorRecord(nativeProbe),
+            native_mixed_probe_xyz = new VectorRecord(nativeById["mixed_a"] * nativeProbe),
             orientation_cases = cases,
             composition = CaptureComposition(
-                "mixed_a", "mixed_b", nativeById["mixed_a"] * nativeById["mixed_b"], nativeProbe
+                "mixed_a", "mixed_b", nativeById["mixed_a"] * nativeById["mixed_b"]
             ),
             reverse_composition = CaptureComposition(
-                "mixed_b", "mixed_a", nativeById["mixed_b"] * nativeById["mixed_a"], nativeProbe
+                "mixed_b", "mixed_a", nativeById["mixed_b"] * nativeById["mixed_a"]
             ),
         };
     }
 
     private static OrientationRecord CaptureOrientation(
         OrientationInput input,
-        Quaternion native,
-        Vector3 nativeProbe
+        Quaternion native
     ) => new()
     {
         case_id = input.case_id,
         canonical_wxyz = input.canonical_wxyz,
         native_quaternion = QuaternionXyzw(native),
         native_rotated_positive_basis_vectors_xyz = RotateBasis(native),
-        native_rotated_probe_vector_xyz = new VectorRecord(native * nativeProbe),
     };
 
     private static CompositionRecord CaptureComposition(
         string leftId,
         string rightId,
-        Quaternion product,
-        Vector3 nativeProbe
+        Quaternion product
     ) => new()
     {
         left_case_id = leftId,
@@ -218,7 +208,6 @@ public static class QuatOpsEngineCapture
         product_order = "lhs * rhs; rhs acts first",
         native_product_quaternion = QuaternionXyzw(product),
         native_rotated_positive_basis_vectors_xyz = RotateBasis(product),
-        native_rotated_probe_vector_xyz = new VectorRecord(product * nativeProbe),
     };
 
     private static Quaternion MapCanonicalQuaternion(float[] wxyz)

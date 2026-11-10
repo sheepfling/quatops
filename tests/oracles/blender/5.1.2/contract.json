@@ -19,6 +19,15 @@
     "canonical_input_file": "experiments/interoperability/v1/canonical_inputs.json",
     "canonical_input_sha256": "a6f0630806b69d3b3b29a036aa10f63bfe214668329c661598951f84f8f41eec",
     "semantic_contract_file": "experiments/blender/5.1.2/semantic_contract.json",
-    "semantic_contract_sha256": "7379d87b1aceca5e9be8b75bf556a592dfa3a79c1e59631ac5795cd43af9b0c0"
+    "semantic_contract_sha256": "7379d87b1aceca5e9be8b75bf556a592dfa3a79c1e59631ac5795cd43af9b0c0",
+    "direct_capture": {
+      "capture_source": "experiments/blender/5.1.2/capture.py",
+      "capture_source_sha256": "e9d4ba7f7fbb3f20d15d66aeffd054d2fa7d6c6832d5cda386a4851e55a64173",
+      "capture_output_sha256": "f8eaa558cdf2567673d36b814b9ce24deeae7a8fba68fab630f92c194add791e",
+      "selector_sha256": "88bacc63d0e7b07fbfe9f3da9043effb84e2e30635522032e6fd065b45b2911f",
+      "executable_sha256": "1e6624af112b3c936f4b038b025ebd2bf00ae72c4b62881a6787166d71c58fa5",
+      "utc": "2026-11-10T15:35:14.136384+00:00",
+      "comparison": "Selected native witnesses reproduce the historical witness bytes exactly."
+    }
   }
 }

@@ -4,10 +4,10 @@
 
 The compact, versioned game-engine converter evidence lives in
 [`tests/oracles`](../oracles/), with one contract and selected native witness
-set per build. Full discovery output is temporary; the selector at
+set per build. The direct capture emits the selected values; the validator at
 [`scripts/retain_engine_witnesses.py`](../../scripts/retain_engine_witnesses.py)
-copies the chosen native values without recomputing them and records hashes for
-the capture source, original capture, and shared input.
+checks inputs, frame declarations, products and native values without
+recomputing them, then records hashes in a separate review directory.
 
 ## Converter-boundary witnesses
 

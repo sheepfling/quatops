@@ -12,7 +12,7 @@ $witnesses = Join-Path $env:TEMP 'quatops-blender-witnesses.json'
   -- --output $witnesses
 if ($LASTEXITCODE -ne 0) { throw "Blender capture failed: $LASTEXITCODE" }
 .venv\Scripts\python.exe -m scripts.retain_engine_witnesses blender 5.1.2 `
-  $witnesses tests\oracles\blender\5.1.2 --repository-root .
+  $witnesses "$env:TEMP\quatops-engine-review\blender\5.1.2" --repository-root .
 ```
 
 The retained record contains five canonical inputs, exact native WXYZ
