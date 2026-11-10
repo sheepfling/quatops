@@ -10,6 +10,7 @@ import numpy as np
 from scipy.spatial.transform import Rotation
 
 from quatops.python import hamilton
+from scripts.evidence_schema.primitives import NATIVE_RETAINED_CASE_IDS
 from tests.support.paths import REPOSITORY_ROOT
 
 ROOT = REPOSITORY_ROOT
@@ -69,7 +70,7 @@ def test_eigen_contract_source_pin_and_native_build_provenance():
     )
     assert MANIFEST["native_build"]["version_macros"] == [3, 5, 0, 1]
     assert MANIFEST["selection"] == {
-        "orientation_cases_per_scalar_profile": 8,
+        "orientation_cases_per_scalar_profile": 5,
         "native_created_orientations_per_scalar_profile": 1,
         "noncommuting_product_orders_per_scalar_profile": 2,
         "native_basis_images_per_orientation": 3,
@@ -113,7 +114,7 @@ def test_eigen_wxyz_constructor_xyzw_storage_and_native_actions():
     for dtype, profile in profiles.items():
         assert profile["scalar_bytes"] == (4 if dtype == "float32" else 8)
         rows = {item["case_id"]: item for item in profile["orientations"]}
-        assert set(rows) == set(INPUTS["retained_case_ids"])
+        assert set(rows) == set(NATIVE_RETAINED_CASE_IDS)
         for case_id, row in rows.items():
             canonical = CANONICAL[case_id]
             expected_matrix = matrix(canonical)

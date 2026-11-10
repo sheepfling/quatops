@@ -24,6 +24,7 @@ from scripts.evidence_schema.converter_captures import (
     MuJoCoOrientation,
     TargetIdentity,
 )
+from scripts.evidence_schema.primitives import NATIVE_RETAINED_CASE_IDS
 from scripts.evidence_schema.shared_inputs import SharedCanonicalInputCapture
 
 
@@ -92,6 +93,7 @@ def main() -> None:
             probe,
         )
         for row in selected
+        if row.case_id in NATIVE_RETAINED_CASE_IDS
     ]
     ctor = spec.native_constructed_orientation
     qnative = np.empty(4, dtype=np.float64)
@@ -178,7 +180,7 @@ def main() -> None:
             "native_scalar_dtype": "float64",
         },
         "selection": {
-            "retained_orientation_cases": len(selected),
+            "retained_orientation_cases": len(canonical_to_native),
             "native_created_orientations": 1,
             "noncommuting_product_orders": 2,
             "native_basis_images_per_orientation": 3,

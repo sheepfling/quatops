@@ -6,6 +6,7 @@ from collections.abc import Sequence
 from typing import Protocol, TypeVar
 
 from scripts.evidence_schema.crystallized import CanonicalInputs
+from scripts.evidence_schema.primitives import NATIVE_RETAINED_CASE_IDS
 from scripts.evidence_schema.semantic_serializers.context import (
     SemanticSerializationContext,
 )
@@ -25,15 +26,7 @@ class _DirectInputDocument(Protocol):
 
 _Row = TypeVar("_Row", bound=_CaseRow)
 
-CANONICAL_RETAINED_ORIENTATION_CASE_IDS = (
-    "identity",
-    "quarter_x",
-    "quarter_y",
-    "quarter_z",
-    "mixed_a",
-    "antipode_mixed_a",
-    "nonprincipal_halfturn",
-)
+CANONICAL_RETAINED_ORIENTATION_CASE_IDS = NATIVE_RETAINED_CASE_IDS
 
 
 def canonical_orientation_selection(

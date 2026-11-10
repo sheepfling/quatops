@@ -5,6 +5,12 @@ right-handed source frame, active Hamilton WXYZ contract, eight unit
 orientations, mixed-vector probe, and both noncommuting product orders. The
 native capture programs use the same hand-authored inputs and call each pinned
 target's own vector action; they do not import QuatOps or SciPy.
+The capture inputs include quarter turns for discovery, while the retained
+quaternion witnesses select five orientations: identity, two unequal mixed
+rotations, an antipode, and a non-principal half turn. The native-created
+orientation and both product orders remain where applicable. Tests compare
+the mixed native basis actions against all 48 signed-axis maps; this does not
+assign a physical frame to a mathematics library.
 
 ## Typed target packages and normalization
 

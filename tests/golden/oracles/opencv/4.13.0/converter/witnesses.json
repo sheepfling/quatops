@@ -16,27 +16,6 @@
         "native_matrix_to_rotation_vector_xyz_radians": [0.0, 0.0, 0.0]
       },
       {
-        "case_id": "quarter_x",
-        "dtype": "float32",
-        "native_input_rotation_vector_xyz_radians": [1.5707963705062866, 0.0, 0.0],
-        "native_gemm_basis_actions_xyz": [[1.0, 0.0, 0.0], [0.0, -4.371138828673793e-08, 1.0], [0.0, -1.0, -4.371138828673793e-08]],
-        "native_matrix_to_rotation_vector_xyz_radians": [1.5707963705062866, 0.0, 0.0]
-      },
-      {
-        "case_id": "quarter_y",
-        "dtype": "float32",
-        "native_input_rotation_vector_xyz_radians": [0.0, 1.5707963705062866, 0.0],
-        "native_gemm_basis_actions_xyz": [[-4.371138828673793e-08, 0.0, -1.0], [0.0, 1.0, 0.0], [1.0, 0.0, -4.371138828673793e-08]],
-        "native_matrix_to_rotation_vector_xyz_radians": [0.0, 1.5707963705062866, 0.0]
-      },
-      {
-        "case_id": "quarter_z",
-        "dtype": "float32",
-        "native_input_rotation_vector_xyz_radians": [0.0, 0.0, 1.5707963705062866],
-        "native_gemm_basis_actions_xyz": [[-4.371138828673793e-08, 1.0, 0.0], [-1.0, -4.371138828673793e-08, 0.0], [0.0, 0.0, 1.0]],
-        "native_matrix_to_rotation_vector_xyz_radians": [0.0, 0.0, 1.5707963705062866]
-      },
-      {
         "case_id": "mixed_a",
         "dtype": "float32",
         "native_input_rotation_vector_xyz_radians": [0.42900073528289795, -0.8580014705657959, 0.8580014705657959],
@@ -87,27 +66,6 @@
         "native_input_rotation_vector_xyz_radians": [0.0, 0.0, 0.0],
         "native_gemm_basis_actions_xyz": [[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]],
         "native_matrix_to_rotation_vector_xyz_radians": [0.0, 0.0, 0.0]
-      },
-      {
-        "case_id": "quarter_x",
-        "dtype": "float64",
-        "native_input_rotation_vector_xyz_radians": [1.5707963267948966, 0.0, 0.0],
-        "native_gemm_basis_actions_xyz": [[1.0, 0.0, 0.0], [0.0, 6.123233995736766e-17, 1.0], [0.0, -1.0, 6.123233995736766e-17]],
-        "native_matrix_to_rotation_vector_xyz_radians": [1.5707963267948966, 0.0, 0.0]
-      },
-      {
-        "case_id": "quarter_y",
-        "dtype": "float64",
-        "native_input_rotation_vector_xyz_radians": [0.0, 1.5707963267948966, 0.0],
-        "native_gemm_basis_actions_xyz": [[6.123233995736766e-17, 0.0, -1.0], [0.0, 1.0, 0.0], [1.0, 0.0, 6.123233995736766e-17]],
-        "native_matrix_to_rotation_vector_xyz_radians": [0.0, 1.5707963267948966, 0.0]
-      },
-      {
-        "case_id": "quarter_z",
-        "dtype": "float64",
-        "native_input_rotation_vector_xyz_radians": [0.0, 0.0, 1.5707963267948966],
-        "native_gemm_basis_actions_xyz": [[6.123233995736766e-17, 1.0, 0.0], [-1.0, 6.123233995736766e-17, 0.0], [0.0, 0.0, 1.0]],
-        "native_matrix_to_rotation_vector_xyz_radians": [0.0, 0.0, 1.5707963267948966]
       },
       {
         "case_id": "mixed_a",

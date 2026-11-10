@@ -11,6 +11,7 @@ from typing import Annotated, Literal, Optional, Union
 from pydantic import ConfigDict, Field, model_validator
 
 from scripts.evidence_schema.primitives import (
+    NATIVE_RETAINED_CASE_IDS,
     SHA256,
     Matrix3,
     Matrix4,
@@ -332,7 +333,7 @@ class SpiceyPyInputs(DirectLibraryInputBase):
             raise ValueError(
                 f"SpiceyPy constructor case_id must be {SPICEYPY_CONSTRUCTOR_CASE_ID!r}"
             )
-        if tuple(self.retained_case_ids) != SPICEYPY_RETAINED_CASE_IDS:
+        if tuple(self.retained_case_ids) != SPICEYPY_CAPTURE_INPUT_CASE_IDS:
             raise ValueError(
                 "SpiceyPy inputs must retain the complete ordered recipe selection"
             )
@@ -452,7 +453,7 @@ class OpenCVCapture(NativeCaptureModel):
     observations: OpenCVObservations
 
 
-SPICEYPY_RETAINED_CASE_IDS = (
+SPICEYPY_CAPTURE_INPUT_CASE_IDS = (
     "identity",
     "quarter_x",
     "quarter_y",
@@ -462,6 +463,7 @@ SPICEYPY_RETAINED_CASE_IDS = (
     "antipode_mixed_a",
     "nonprincipal_halfturn",
 )
+SPICEYPY_RETAINED_CASE_IDS = NATIVE_RETAINED_CASE_IDS
 SPICEYPY_CONSTRUCTOR_CASE_ID = "native_axis_angle_mixed"
 SPICEYPY_COMPOSITION_CASE_IDS = (
     "mixed_a_times_mixed_b",

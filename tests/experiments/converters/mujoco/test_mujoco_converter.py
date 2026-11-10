@@ -9,6 +9,7 @@ import numpy as np
 from scipy.spatial.transform import Rotation
 
 from quatops.python import hamilton
+from scripts.evidence_schema.primitives import NATIVE_RETAINED_CASE_IDS
 from tests.support.paths import REPOSITORY_ROOT
 
 ROOT = REPOSITORY_ROOT
@@ -76,7 +77,7 @@ def test_mujoco_boundary_contract_and_capture_provenance_are_explicit():
     assert MANIFEST["target"]["engine_version"] == "3.17.0"
     assert MANIFEST["target"]["native_scalar_dtype"] == "float64"
     assert MANIFEST["selection"] == {
-        "retained_orientation_cases": 8,
+        "retained_orientation_cases": 5,
         "native_created_orientations": 1,
         "noncommuting_product_orders": 2,
         "native_basis_images_per_orientation": 3,
@@ -108,7 +109,7 @@ def test_mujoco_boundary_contract_and_capture_provenance_are_explicit():
 
 
 def test_mujoco_native_quaternion_action_preserves_canonical_orientation():
-    selected_ids = INPUTS["retained_case_ids"]
+    selected_ids = NATIVE_RETAINED_CASE_IDS
     rows = {item["case_id"]: item for item in OBS["canonical_to_native"]}
     assert set(rows) == set(selected_ids)
     for case_id in selected_ids:

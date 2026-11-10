@@ -16,7 +16,7 @@
     "native_scalar_dtype": "float64"
   },
   "selection": {
-    "retained_orientation_cases": 8,
+    "retained_orientation_cases": 5,
     "native_created_orientations": 1,
     "noncommuting_product_orders": 2,
     "native_basis_images_per_orientation": 3,
@@ -30,13 +30,15 @@
   ],
   "provenance": {
     "capture_script_sha256": "ab00e29d284624426f46e88e65a7f2faa964d8e21fdbac08cb7f80a0be3af60e",
-    "reproduction_capture_script_sha256": "9e04445ced1f5d9d43d8bda1ea943fb955daeded787544d5aead5b011cd61dbc",
+    "reproduction_capture_script_sha256": "e26a49c452cfb78d7629435f6f0c3a1a89d0c3fd0e716bf9bcd7c8df7f325ba6",
     "previous_reproduction_capture_script_sha256": "8ce98d000cbea2078b8a54e8086652c64a8e5f9221d6dcf29498579ca27da755",
     "reproduction_contract_note": "Current reproduction uses the shared contract; the previous digest identifies the earlier script. Native witnesses were not recaptured.",
     "contract_sha256": "6a2de9e8a58581109663850419dc39c01b7ae2674e60b969bdebe1fbeacefe8a",
     "converter_input_spec_sha256": "cfc5dbbc1729c6d22b9f0c2e8f7d3f335ff0b32a65a968f2f48f65a4aaa0eb82",
     "selected_inputs_sha256": "a6f0630806b69d3b3b29a036aa10f63bfe214668329c661598951f84f8f41eec",
-    "witnesses_sha256": "5e9d4cadbc1db1a0abd4a1c6642f0fa4e0e6af2cd0c1b32e32ae001eabeccfa4",
+    "witnesses_sha256": "0c5eb585275c19930d6b0ee2a1ebe92cfd65dff0b66776f52b9f85bfda0e3485",
+    "previous_witnesses_sha256": "5e9d4cadbc1db1a0abd4a1c6642f0fa4e0e6af2cd0c1b32e32ae001eabeccfa4",
+    "witness_selection_note": "Quarter-turn rows were removed from the retained subset; original native capture identity and selected values are unchanged.",
     "pinned_lockfile_sha256": "9043b65cd8be3132dc0302638cc5d80886951cbee64fbc0612c3437acd0070a8",
     "exact_invocation": "uv run --locked --project experiments/converters/mujoco/3.17.0 --python 3.10.11 python experiments/converters/mujoco/3.17.0/capture_native.py --repository-root <repository>"
   },

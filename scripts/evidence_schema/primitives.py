@@ -17,6 +17,14 @@ from pydantic import (
 
 Scalar = float
 
+NATIVE_RETAINED_CASE_IDS = (
+    "identity",
+    "mixed_a",
+    "mixed_b",
+    "antipode_mixed_a",
+    "nonprincipal_halfturn",
+)
+
 
 def _ensure_binary64_convertible(value: object) -> object:
     """Reject numeric source values that overflow binary64 without rounding ints."""

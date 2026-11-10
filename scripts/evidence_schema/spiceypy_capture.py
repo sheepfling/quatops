@@ -2,7 +2,11 @@
 
 from __future__ import annotations
 
-from scripts.evidence_schema.converter_captures import SpiceyPyCapture, SpiceyPyInputs
+from scripts.evidence_schema.converter_captures import (
+    SPICEYPY_RETAINED_CASE_IDS,
+    SpiceyPyCapture,
+    SpiceyPyInputs,
+)
 from scripts.evidence_schema.shared_inputs import (
     SharedCanonicalInputCapture,
     resolve_orientation_selection,
@@ -22,8 +26,9 @@ def validate_spiceypy_capture_matches_inputs(
     )
     selected_by_id = {row.case_id: row for row in selected}
     observations = capture.observations
-    if tuple(row.case_id for row in observations.canonical_to_native) != tuple(
-        inputs.retained_case_ids
+    if (
+        tuple(row.case_id for row in observations.canonical_to_native)
+        != SPICEYPY_RETAINED_CASE_IDS
     ):
         raise ValueError(
             "SpiceyPy captured orientations do not match selected input IDs"

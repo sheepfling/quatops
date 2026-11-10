@@ -9,6 +9,7 @@ import numpy as np
 from scipy.spatial.transform import Rotation
 
 from quatops.python import hamilton
+from scripts.evidence_schema.primitives import NATIVE_RETAINED_CASE_IDS
 from tests.support.paths import REPOSITORY_ROOT
 from tests.support.provenance_archives import read_provenance_source
 
@@ -71,7 +72,7 @@ def test_spiceypy_boundary_contract_and_capture_provenance_are_explicit():
     assert MANIFEST["target"]["wrapper_version"] == "8.3.0"
     assert MANIFEST["target"]["toolkit_version"] == "CSPICE_N0067"
     assert MANIFEST["selection"] == {
-        "retained_orientation_cases": 8,
+        "retained_orientation_cases": 5,
         "native_created_orientations": 1,
         "noncommuting_product_orders": 2,
         "native_basis_images_per_orientation": 3,
@@ -116,7 +117,7 @@ def test_spiceypy_boundary_contract_and_capture_provenance_are_explicit():
 
 
 def test_spiceypy_native_quaternion_action_preserves_canonical_physical_action():
-    selected_ids = INPUTS["retained_case_ids"]
+    selected_ids = NATIVE_RETAINED_CASE_IDS
     rows = {item["case_id"]: item for item in OBS["canonical_to_native"]}
     assert set(rows) == set(selected_ids)
     for case_id in selected_ids:

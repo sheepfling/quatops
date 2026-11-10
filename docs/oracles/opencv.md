@@ -9,7 +9,7 @@ converts native matrices back to rotation vectors and then to QuatOps
 quaternions.
 
 The Windows x64 capture used CPython `3.13.14`, NumPy `2.3.5`, and
-`opencv-python-headless==4.13.0.92` (OpenCV `4.13.0`). It retains eight
+`opencv-python-headless==4.13.0.92` (OpenCV `4.13.0`). It retains five
 canonical orientation witnesses, a native-created axis-angle case, and both
 orders of a noncommuting product, for float32 and float64. The native capture
 uses `cv2.Rodrigues` and `cv2.gemm` and does not import QuatOps.

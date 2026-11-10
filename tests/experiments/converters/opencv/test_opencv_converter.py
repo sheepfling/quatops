@@ -9,6 +9,7 @@ import numpy as np
 from scipy.spatial.transform import Rotation
 
 from quatops.python import hamilton
+from scripts.evidence_schema.primitives import NATIVE_RETAINED_CASE_IDS
 from tests.support.paths import REPOSITORY_ROOT
 from tests.support.provenance_archives import read_provenance_source
 
@@ -55,7 +56,7 @@ def test_opencv_contract_and_pinned_capture_provenance():
     assert MANIFEST["target"]["distribution_version"] == "4.13.0.92"
     assert MANIFEST["target"]["native_scalar_profiles"] == ["float32", "float64"]
     assert MANIFEST["selection"] == {
-        "orientation_cases_per_precision": 8,
+        "orientation_cases_per_precision": 5,
         "native_created_orientations_per_precision": 1,
         "noncommuting_product_orders_per_precision": 2,
         "native_basis_images_per_orientation": 3,
@@ -107,7 +108,7 @@ def test_opencv_contract_and_pinned_capture_provenance():
 
 def test_opencv_rodrigues_forward_reverse_and_vector_actions_match_quatops():
     profile_rows = WITNESSES["observations"]["canonical_to_native"]
-    input_case_ids = INPUTS["retained_case_ids"]
+    input_case_ids = NATIVE_RETAINED_CASE_IDS
     for dtype in INPUTS["precision_profiles"]:
         rows = {
             item["case_id"]: item for item in profile_rows if item["dtype"] == dtype

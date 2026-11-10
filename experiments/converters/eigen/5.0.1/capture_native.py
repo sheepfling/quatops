@@ -33,7 +33,7 @@ from scripts.evidence_schema.converter_captures import (
     QuaternionValues,
     TargetIdentity,
 )
-from scripts.evidence_schema.primitives import Vector3
+from scripts.evidence_schema.primitives import NATIVE_RETAINED_CASE_IDS, Vector3
 from scripts.evidence_schema.shared_inputs import (
     SharedCanonicalInputCapture,
     SharedFrameInput,
@@ -176,7 +176,11 @@ def retain_profile(profile: NativeEigenProfile) -> EigenPrecisionProfile:
     return EigenPrecisionProfile(
         dtype=profile.dtype,
         scalar_bytes=profile.scalar_bytes,
-        orientations=[orientation(row) for row in profile.orientations],
+        orientations=[
+            orientation(row)
+            for row in profile.orientations
+            if row.case_id in NATIVE_RETAINED_CASE_IDS
+        ],
         native_created=constructed,
         composition=compositions,
     )
@@ -376,7 +380,7 @@ def main() -> None:
             "version_macros": native_capture.version_macros,
         },
         "selection": {
-            "orientation_cases_per_scalar_profile": len(inputs.orientations),
+            "orientation_cases_per_scalar_profile": len(NATIVE_RETAINED_CASE_IDS),
             "native_created_orientations_per_scalar_profile": 1,
             "noncommuting_product_orders_per_scalar_profile": 2,
             "native_basis_images_per_orientation": 3,

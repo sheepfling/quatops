@@ -10,6 +10,7 @@ from typing import Annotated, Literal, Optional, Union
 from pydantic import Field
 
 from scripts.evidence_schema.primitives import (
+    NATIVE_RETAINED_CASE_IDS,
     SHA256,
     NativeCaptureModel,
     Quaternion4,
@@ -18,13 +19,7 @@ from scripts.evidence_schema.primitives import (
 
 NativeVector3 = Union[Vector3, "Vector3Object"]
 
-ENGINE_RETAINED_CASE_IDS = (
-    "identity",
-    "mixed_a",
-    "mixed_b",
-    "antipode_mixed_a",
-    "nonprincipal_halfturn",
-)
+ENGINE_RETAINED_CASE_IDS = NATIVE_RETAINED_CASE_IDS
 
 
 class Vector3Object(NativeCaptureModel):

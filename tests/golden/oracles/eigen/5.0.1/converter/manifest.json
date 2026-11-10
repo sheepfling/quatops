@@ -12,28 +12,42 @@
     "name": "Eigen",
     "version": "5.0.1",
     "header": "Eigen/Geometry",
-    "scalar_profiles": ["float32", "float64"]
+    "scalar_profiles": [
+      "float32",
+      "float64"
+    ]
   },
   "native_build": {
     "compiler_path": "C:\\Users\\peanu\\scoop\\apps\\gcc\\15.2.0\\bin\\g++.exe",
     "compiler_version": "g++.exe (GCC) 15.2.0\nCopyright (C) 2025 Free Software Foundation, Inc.\nThis is free software; see the source for copying conditions.  There is NO\nwarranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.",
     "cxx_standard": "C++17",
-    "compiler_flags": ["-O2", "-DNDEBUG"],
+    "compiler_flags": [
+      "-O2",
+      "-DNDEBUG"
+    ],
     "native_executable_sha256": "3545964878906aa925b1cd4c33fa0c96c8774decd472b7260fd90a9a8fa3c1fb",
-    "version_macros": [3, 5, 0, 1]
+    "version_macros": [
+      3,
+      5,
+      0,
+      1
+    ]
   },
   "selection": {
-    "orientation_cases_per_scalar_profile": 8,
+    "orientation_cases_per_scalar_profile": 5,
     "native_created_orientations_per_scalar_profile": 1,
     "noncommuting_product_orders_per_scalar_profile": 2,
     "native_basis_images_per_orientation": 3,
     "native_mixed_probe_case_id": "mixed_a",
-    "matrix_to_quaternion_case_ids": ["mixed_a", "nonprincipal_halfturn"],
+    "matrix_to_quaternion_case_ids": [
+      "mixed_a",
+      "nonprincipal_halfturn"
+    ],
     "matrix_layout_case_id": "mixed_a"
   },
   "provenance": {
     "capture_runner_sha256": "87352500fe2a8fdd18443648d7194d846accd10824114dc5ccde2df6e6bc1510",
-    "reproduction_capture_runner_sha256": "3cda70af81d1e30cb3e43eedd234933839c74ee3ad6784dd5e5e3cba5ed3e641",
+    "reproduction_capture_runner_sha256": "cd1fa0364ea985b9307ebfa31a7df178015bff7b013d7aac6559ba0bc47486ae",
     "previous_reproduction_capture_runner_sha256": "2f144920257de2669beea4982f97949a38a6e5c234cf4a76ddf4ada13cb53c09",
     "reproduction_contract_note": "Current reproduction uses the shared contract; the previous digest identifies the earlier script. Native witnesses were not recaptured.",
     "native_cpp_source_sha256": "766952b362ed5a48fd6d826e90c23db4e6e6cfb86c2f6fbff2c748918368eb9b",
@@ -43,7 +57,9 @@
     "selected_inputs_sha256": "a6f0630806b69d3b3b29a036aa10f63bfe214668329c661598951f84f8f41eec",
     "prepared_inputs_sha256": "9a3ad531d3bc644d0a831c5f30f9410736b4a043cc92eb0e82ccaf514c3edc1a",
     "native_input_stream_sha256": "43c76320258bcef5fc7ce5d2438f8f95bee0e1c6ef0bcbacf5ec3e19eea30318",
-    "witnesses_sha256": "6acc59c68ecb459ef2ddcaad8824d6d84f8e0d9d170bcb106b3ff2a06dcc2acf",
+    "witnesses_sha256": "42197e181c727fb845f07553465aa72c40855a1eee1a93367077c5cb9c409fa2",
+    "previous_witnesses_sha256": "6acc59c68ecb459ef2ddcaad8824d6d84f8e0d9d170bcb106b3ff2a06dcc2acf",
+    "witness_selection_note": "Quarter-turn rows were removed from the retained subset; original native capture identity and selected values are unchanged.",
     "eigen_source_archive_sha256": "e9c326dc8c05cd1e044c71f30f1b2e34a6161a3b6ecf445d56b53ff1669e3dec",
     "eigen_source_metadata_sha256": "3e65f2be6206692af7bcfcdf65501d34aeda9762cca895738f19f59a350bff48",
     "eigen_version_header_sha256": "3bb04dc80ede841309fc975fd3ff522a58bbdf2d591e06e49d2456676a89e759",

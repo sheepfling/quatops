@@ -117,7 +117,7 @@ def _load_canonical_inputs():
 
 def test_spice_capture_requires_complete_selected_recipe():
     capture = _load_valid_spice_capture()
-    assert len(capture.observations.canonical_to_native) == 8
+    assert len(capture.observations.canonical_to_native) == 5
     assert len(capture.observations.native_created) == 1
     assert len(capture.observations.composition) == 2
     root = read_evidence_document(

@@ -14,10 +14,13 @@
     "distribution": "opencv-python-headless",
     "distribution_version": "4.13.0.92",
     "numpy_version": "2.3.5",
-    "native_scalar_profiles": ["float32", "float64"]
+    "native_scalar_profiles": [
+      "float32",
+      "float64"
+    ]
   },
   "selection": {
-    "orientation_cases_per_precision": 8,
+    "orientation_cases_per_precision": 5,
     "native_created_orientations_per_precision": 1,
     "noncommuting_product_orders_per_precision": 2,
     "native_basis_images_per_orientation": 3,
@@ -40,13 +43,15 @@
     "preparation_script_sha256": "d48c5017e46355a72fdf4ce96b1a66c8c78779ecbd15edb4b3a430de46c6ac92",
     "preparation_spec_sha256": "9f17f3eafd3186d3460488eff91e0f50771f2ee7c5e6d42409b1e93df5fc084e",
     "shared_canonical_inputs_sha256": "a6f0630806b69d3b3b29a036aa10f63bfe214668329c661598951f84f8f41eec",
-    "witnesses_sha256": "1dd125262a81c17136eb8a99ac0926b1d94d5d2960a669b8e85bf099f4458766",
+    "witnesses_sha256": "821e7a22515c724672dd12f453a1388b3ac09ef32c59548b2c79ee69275242d4",
+    "previous_witnesses_sha256": "1dd125262a81c17136eb8a99ac0926b1d94d5d2960a669b8e85bf099f4458766",
+    "witness_selection_note": "Quarter-turn rows were removed from the retained subset; original native capture identity and selected values are unchanged.",
     "lockfile_sha256": "8288ebf7e36753cc45b10f2fa0594bd5b55aee6b6405055ee8f8a972ce6ac9bf",
     "cv2_extension_directory": "site-packages/cv2",
     "invocation_template": "python experiments/converters/opencv/4.13.0/prepare_inputs.py --output <temporary inputs.json>; then run capture_native.py --inputs <temporary inputs.json>"
   },
   "reproduction": {
-    "capture_script_sha256": "107ba738b8f4377640f64165dc478e576f91466d3ff0a5d4333faaa5bd13d967",
+    "capture_script_sha256": "e99e3805b990a92085b8d8b43bed0821bafee77fb3c475fa421e1df923de4e6c",
     "previous_reproduction_capture_script_sha256": "cf26f6deaa8ba40f54f6013124d7286f2bc67b44e647298cb6e4626695c0865f",
     "reproduction_contract_note": "Current reproduction uses the shared contract; the previous digest identifies the earlier script. Native witnesses were not recaptured.",
     "previous_checkout_capture_script_sha256": "ce6df5cbbbb0983633e7ee64df2b39219b7c8e1a69731a480b152f780fda499b",
