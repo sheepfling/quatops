@@ -52,16 +52,17 @@ def main() -> None:
     parser.add_argument("--repository-root", type=Path, required=True)
     options = parser.parse_args()
     repository_root = options.repository_root.resolve(strict=True)
-    target = options.target
-    if target == "opencv":
-        run_opencv_capture(repository_root)
-        return
-    plan = PLANS[target]
     env = os.environ.copy()
     existing_pythonpath = env.get("PYTHONPATH")
     env["PYTHONPATH"] = str(repository_root) + (
         os.pathsep + existing_pythonpath if existing_pythonpath else ""
     )
+    target = options.target
+    if target == "opencv":
+        run_opencv_capture(repository_root, env)
+        return
+    plan = PLANS[target]
+    python_command = ["uv", "run", "--python", "3.13.14", "--extra", "dev", "python"]
 
     if is_windows():
         npm_ci = "npm.cmd ci"
@@ -76,11 +77,7 @@ def main() -> None:
     )
     run(
         [
-            "uv",
-            "run",
-            "--extra",
-            "dev",
-            "python",
+            *python_command,
             str(repository_root / plan.input_generator),
             "--repository-root",
             str(repository_root),
@@ -97,11 +94,7 @@ def main() -> None:
         )
         run(
             [
-                "uv",
-                "run",
-                "--extra",
-                "dev",
-                "python",
+                *python_command,
                 "-m",
                 plan.retainer_module,
                 str(capture_dir),
@@ -113,26 +106,24 @@ def main() -> None:
         )
 
 
-def run_opencv_capture(repository_root: Path) -> None:
+def run_opencv_capture(repository_root: Path, env: dict[str, str]) -> None:
     """Prepare and capture OpenCV in its pinned target environment."""
     project = "experiments/converters/opencv/4.13.0"
-    capture_env = os.environ.copy()
-    existing_pythonpath = capture_env.get("PYTHONPATH")
-    capture_env["PYTHONPATH"] = str(repository_root) + (
-        os.pathsep + existing_pythonpath if existing_pythonpath else ""
-    )
+    command_prefix = [
+        "uv",
+        "run",
+        "--locked",
+        "--project",
+        project,
+        "--python",
+        "3.13.14",
+        "python",
+    ]
     with tempfile.TemporaryDirectory(prefix="quatops-opencv-input-") as temporary:
         input_path = Path(temporary) / "prepared-inputs.json"
         run(
             [
-                "uv",
-                "run",
-                "--locked",
-                "--project",
-                project,
-                "--python",
-                "3.13.14",
-                "python",
+                *command_prefix,
                 "experiments/converters/opencv/4.13.0/prepare_inputs.py",
                 "--repository-root",
                 str(repository_root),
@@ -140,18 +131,11 @@ def run_opencv_capture(repository_root: Path) -> None:
                 str(input_path),
             ],
             repository_root=repository_root,
-            env=capture_env,
+            env=env,
         )
         run(
             [
-                "uv",
-                "run",
-                "--locked",
-                "--project",
-                project,
-                "--python",
-                "3.13.14",
-                "python",
+                *command_prefix,
                 "experiments/converters/opencv/4.13.0/capture_native.py",
                 "--repository-root",
                 str(repository_root),
@@ -159,7 +143,7 @@ def run_opencv_capture(repository_root: Path) -> None:
                 str(input_path),
             ],
             repository_root=repository_root,
-            env=capture_env,
+            env=env,
         )
 
 
