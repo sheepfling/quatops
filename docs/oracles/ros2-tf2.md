@@ -33,7 +33,7 @@ base, and optical sensor coordinates:
 These are explicit test-frame declarations, not assumptions inferred from ROS
 frame names. Quaternion component order, Hamilton algebra, active source-point
 to target-point action, and transform direction are recorded in the
-[versioned contract](../../tests/golden/oracles/ros2/0.36.23/contract.json).
+[versioned contract](../../experiments/converters/ros2/0.36.23/semantic_contract.json).
 The observations also retain the `TransformStamped` parent/child IDs, stamp,
 translation and quaternion fields, plus the native `tf2::fromMsg` round trip.
 

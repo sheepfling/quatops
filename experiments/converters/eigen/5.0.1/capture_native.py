@@ -259,8 +259,6 @@ def main() -> None:
         or repository_root / "tests/golden/oracles/eigen/5.0.1/converter"
     ).resolve()
     output_dir.mkdir(parents=True, exist_ok=True)
-    semantic_contract_path = target_dir / "semantic_contract.json"
-    (output_dir / "contract.json").write_bytes(semantic_contract_path.read_bytes())
 
     compiler = shutil.which(options.compiler)
     if compiler is None:

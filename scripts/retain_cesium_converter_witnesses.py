@@ -105,15 +105,8 @@ def main() -> None:
         or run["target"].get("package_version") != "1.124.0"
     ):
         raise ValueError("Cesium semantic contract does not match captured package")
-    contract = CesiumContract.model_validate(
-        read_evidence_document(source_dir / "semantic_contract.json"), strict=True
-    )
-    contract_path = destination / "contract.json"
-    contract_path.write_text(
-        dump_evidence_json(contract.model_dump(mode="json")),
-        encoding="utf-8",
-        newline="\n",
-    )
+    contract_path = source_dir / "semantic_contract.json"
+    CesiumContract.model_validate(read_evidence_document(contract_path), strict=True)
     source_inputs = (
         repository_root / "experiments/interoperability/v1/canonical_inputs.json"
     )

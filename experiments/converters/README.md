@@ -33,8 +33,8 @@ uv run --extra dev python -m pytest -q tests/experiments/converters
 ```
 
 Each experiment manifest identifies its `semantic_contract.json` by path and
-digest. The common pipeline loads that experiment-owned contract, verifies the
-retained contract copy against it, and passes typed inputs and native
+digest. The common pipeline verifies and loads that experiment-owned contract,
+then passes typed inputs and native
 observations to the experiment's semantic serializer. Native capture programs
 do not import the common normalizer; the repository-side pipeline imports the
 target adapter after the native runtime has exited. Capture exporters use

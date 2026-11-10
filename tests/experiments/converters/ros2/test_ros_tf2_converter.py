@@ -14,7 +14,8 @@ from tests.support.provenance_archives import read_provenance_source
 
 ROOT = REPOSITORY_ROOT
 FIXTURE = ROOT / "tests/golden/oracles/ros2/0.36.23"
-CONTRACT = json.loads((FIXTURE / "contract.json").read_text(encoding="utf-8"))
+CONTRACT_PATH = ROOT / "experiments/converters/ros2/0.36.23/semantic_contract.json"
+CONTRACT = json.loads(CONTRACT_PATH.read_text(encoding="utf-8"))
 MANIFEST = json.loads((FIXTURE / "manifest.json").read_text(encoding="utf-8"))
 WITNESSES = json.loads((FIXTURE / "witnesses.json").read_text(encoding="utf-8"))
 ROWS = {item["operation_id"]: item for item in WITNESSES["observations"]}

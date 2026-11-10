@@ -23,20 +23,18 @@ CrystallizedCapture / EvidenceProduct
 The typed input models and normalization boundaries are indexed in the
 [evidence schema guide](../../scripts/evidence_schema/README.md).
 
-- `scripts/evidence_schema/targets.py` validates each target's input and
+- `scripts/evidence_schema/converter_captures.py` validates each target's input and
   native-output shape. It preserves native field names and does not assign
   shared physical meaning to them.
 - Each pinned experiment owns `semantic_contract.json` beside its capture
   code and inputs. Its retained manifest carries the repository-relative path
-  and SHA-256 digest; the normalized provenance points back to that file. A
-  retained `contract.json` may travel with the selected witnesses, but it must
-  validate equal to the experiment-owned contract.
+  and SHA-256 digest; the normalized provenance points back to that file.
 - `scripts/evidence_schema/semantic_serializers/` contains one adapter for
   each converter experiment: Eigen, MuJoCo, OpenCV, SpiceyPy, ROS 2, Cesium,
   glTF/Three.js, and OpenUSD. Each adapter owns its evidence layer, contract,
   native field selection, and interpretation of the declared contract and
   inputs. The registry in
-  `semantic_serializers/__init__.py` is keyed by the validated contract model,
+  `semantic_serializers/registry.py` is keyed by the validated contract model,
   never by a product-name string.
 - Each serializer returns a concrete Pydantic model. Its layer, contract type,
   and witness family are linked in the model itself: engine quaternion, native

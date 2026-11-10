@@ -32,7 +32,9 @@
     "loader_script_sha256": "c6e612024383a5e45a74b8081776ea63975874fdbebcc0753d19b7c655595b32",
     "package_lock_sha256": "cede45573d60150ede075f768f955da9890935dfb78764b3cd0b0029cd48365d",
     "numeric_helper_sha256": "aed1da7b180e76ff0e101a477dd6a941ed0ad076509d9716bf2bf9b6896f5fa4",
-    "retention_script_sha256": "14a47c34ea282a9f0cdfe2fbaea4ff32285ebc5c84fc14b17a178c9ae4f7a0da",
+    "retention_script_sha256": "3c57eaf81f94f412572ec3b05780731d70bfed1dde7d8c36e3b429c248173ac1",
+    "previous_retention_script_sha256": "14a47c34ea282a9f0cdfe2fbaea4ff32285ebc5c84fc14b17a178c9ae4f7a0da",
+    "retention_script_identity_note": "Current selector uses the shared contract; previous digest identifies the earlier selector. Native witnesses were not recaptured.",
     "retention_helper_sha256": "373dd7fefdffddbb8cb1a9399859f4168fc2ea97710bd55b9481b68dec693bab",
     "retention_formatter_sha256": "56961d6be101a2bdfb1b21372c823ec86dfd636547d851901b7284f2ae20e0b3"
   },

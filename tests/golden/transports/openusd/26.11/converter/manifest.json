@@ -38,7 +38,9 @@
     "contract_sha256": "0340bf759e3687c4432902446ef64ce10e46554749f86dabdf7e5303ac56820a"
   },
   "reproduction": {
-    "retention_script_sha256": "8d8267371f79a37a675a0cbda0b6fc74caf4822654debb09587752b86873b4bc",
+    "retention_script_sha256": "e92cfbad47cfb4c5ff10802a38b92a65d29c2de3ec9f5d11c33c090f9dfcd247",
+    "previous_retention_script_sha256": "8d8267371f79a37a675a0cbda0b6fc74caf4822654debb09587752b86873b4bc",
+    "retention_script_identity_note": "Current selector uses the shared contract; previous digest identifies the earlier selector. Native witnesses were not recaptured.",
     "retention_helper_sha256": "373dd7fefdffddbb8cb1a9399859f4168fc2ea97710bd55b9481b68dec693bab",
     "retention_formatter_sha256": "56961d6be101a2bdfb1b21372c823ec86dfd636547d851901b7284f2ae20e0b3",
     "generator_sha256": "e07e7643da391c55ad1fa30243f1d087b0e9ad53eedbdc7e170df5449fe1fb74",

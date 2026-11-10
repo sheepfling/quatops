@@ -14,7 +14,8 @@ from tests.support.provenance_archives import read_provenance_source
 
 ROOT = REPOSITORY_ROOT
 FIXTURE = ROOT / "tests/golden/oracles/spiceypy/8.3.0/converter"
-CONTRACT = json.loads((FIXTURE / "contract.json").read_text(encoding="utf-8"))
+CONTRACT_PATH = ROOT / "experiments/converters/spiceypy/8.3.0/semantic_contract.json"
+CONTRACT = json.loads(CONTRACT_PATH.read_text(encoding="utf-8"))
 MANIFEST = json.loads((FIXTURE / "manifest.json").read_text(encoding="utf-8"))
 INPUTS = json.loads(
     (ROOT / "experiments/converters/spiceypy/8.3.0/converter_inputs.json").read_text(
@@ -79,7 +80,7 @@ def test_spiceypy_boundary_contract_and_capture_provenance_are_explicit():
     paths = {
         "reproduction_capture_script_sha256": ROOT
         / "experiments/converters/spiceypy/8.3.0/capture_native.py",
-        "contract_sha256": FIXTURE / "contract.json",
+        "contract_sha256": CONTRACT_PATH,
         "converter_input_spec_sha256": ROOT
         / "experiments/converters/spiceypy/8.3.0/converter_inputs.json",
         "selected_inputs_sha256": SHARED_PATH,
@@ -92,11 +93,14 @@ def test_spiceypy_boundary_contract_and_capture_provenance_are_explicit():
             hashlib.sha256(path.read_bytes()).hexdigest()
             == MANIFEST["provenance"][field]
         ), field
-    assert hashlib.sha256(
-        read_provenance_source(
-            ROOT, MANIFEST["provenance"]["capture_script_archive"]
-        )
-    ).hexdigest() == MANIFEST["provenance"]["capture_script_sha256"]
+    assert (
+        hashlib.sha256(
+            read_provenance_source(
+                ROOT, MANIFEST["provenance"]["capture_script_archive"]
+            )
+        ).hexdigest()
+        == MANIFEST["provenance"]["capture_script_sha256"]
+    )
     capture_source = paths["reproduction_capture_script_sha256"].read_text(
         encoding="utf-8"
     )

@@ -86,15 +86,8 @@ def main() -> None:
     target = native["target"]
     if target.get("name") != "OpenUSD" or target.get("distribution_version") != "26.11":
         raise ValueError("OpenUSD semantic contract does not match captured runtime")
-    contract = OpenUsdContract.model_validate(
-        read_evidence_document(source_dir / "semantic_contract.json"), strict=True
-    )
-    contract_path = destination / "contract.json"
-    contract_path.write_text(
-        dump_evidence_json(contract.model_dump(mode="json")),
-        encoding="utf-8",
-        newline="\n",
-    )
+    contract_path = source_dir / "semantic_contract.json"
+    OpenUsdContract.model_validate(read_evidence_document(contract_path), strict=True)
     (destination / "manifest.json").write_text(
         dump_evidence_json(
             {

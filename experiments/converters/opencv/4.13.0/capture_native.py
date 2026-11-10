@@ -153,8 +153,6 @@ def main() -> None:
 
     output = output_dir.resolve()
     output.mkdir(parents=True, exist_ok=True)
-    semantic_contract_path = target_dir / "semantic_contract.json"
-    (output / "contract.json").write_bytes(semantic_contract_path.read_bytes())
     witnesses_path = output / "witnesses.json"
     witnesses = OpenCVCapture(
         schema_version="1.0",

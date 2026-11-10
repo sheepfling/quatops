@@ -8,7 +8,7 @@ about named SPICE frames, aerospace defaults, or spacecraft attitude models.
 
 The [native witness set](../../tests/golden/oracles/spiceypy/8.3.0/converter/witnesses.json)
 stores selected quaternion values and native basis actions. The
-[versioned contract](../../tests/golden/oracles/spiceypy/8.3.0/converter/contract.json)
+[versioned contract](../../experiments/converters/spiceypy/8.3.0/semantic_contract.json)
 and [manifest](../../tests/golden/oracles/spiceypy/8.3.0/converter/manifest.json)
 record scope, input identity, CSPICE binary, and capture provenance. Replay is
 implemented in

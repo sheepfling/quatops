@@ -23,7 +23,9 @@
   },
   "provenance": {
     "capture_script_sha256": "9f086a289cc3a3ffa4e7c1503575b74e4291b53a0bcd72b687bf93d680b0f4b6",
-    "reproduction_capture_script_sha256": "a5eb9c215a2ac4b8922d16a83463149dd03d795488ef6759e0557b7ceff19e82",
+    "reproduction_capture_script_sha256": "3698a0eb4eaa85292dd6d27db3bd9f6703bdcb1ec2db2315350ecfb455b68b32",
+    "previous_reproduction_capture_script_sha256": "a5eb9c215a2ac4b8922d16a83463149dd03d795488ef6759e0557b7ceff19e82",
+    "reproduction_contract_note": "Current reproduction uses the shared contract; the previous digest identifies the earlier script. Native witnesses were not recaptured.",
     "contract_sha256": "3897449f31edcb43c0f81234a95e539d84f702b0ce9c0f61adac410679c05bc9",
     "converter_input_spec_sha256": "aa7756f7c655246f53fbd4e34b1a48d72942c2bcb41fc181f8021fd666bfa058",
     "selected_inputs_sha256": "a6f0630806b69d3b3b29a036aa10f63bfe214668329c661598951f84f8f41eec",

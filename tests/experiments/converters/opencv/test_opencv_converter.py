@@ -14,7 +14,8 @@ from tests.support.provenance_archives import read_provenance_source
 
 ROOT = REPOSITORY_ROOT
 FIXTURE = ROOT / "tests/golden/oracles/opencv/4.13.0/converter"
-CONTRACT = json.loads((FIXTURE / "contract.json").read_text(encoding="utf-8"))
+CONTRACT_PATH = ROOT / "experiments/converters/opencv/4.13.0/semantic_contract.json"
+CONTRACT = json.loads(CONTRACT_PATH.read_text(encoding="utf-8"))
 MANIFEST = json.loads((FIXTURE / "manifest.json").read_text(encoding="utf-8"))
 SPEC_PATH = ROOT / "experiments/converters/opencv/4.13.0/converter_inputs.json"
 INPUTS = json.loads(SPEC_PATH.read_text(encoding="utf-8"))

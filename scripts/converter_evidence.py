@@ -172,10 +172,9 @@ def converter_fixture_directories(root: Path) -> list[Path]:
     """Find complete converter packages without relying on directory names."""
     golden_root = root / "tests" / "golden"
     return sorted(
-        contract_path.parent
-        for contract_path in golden_root.rglob("contract.json")
-        if (contract_path.parent / "manifest.json").is_file()
-        and (contract_path.parent / "witnesses.json").is_file()
+        manifest_path.parent
+        for manifest_path in golden_root.rglob("manifest.json")
+        if (manifest_path.parent / "witnesses.json").is_file()
     )
 
 
@@ -221,7 +220,6 @@ def load_converter_evidence(
 ) -> ConverterEvidencePackage:
     """Load one proof package into the shared envelope without rewriting it."""
     directory = directory.resolve()
-    contract_document = read_evidence_document(directory / "contract.json")
     manifest = read_evidence_document(directory / "manifest.json")
     witnesses = read_evidence_document(directory / "witnesses.json")
     target = _target_identity(manifest)
@@ -234,9 +232,6 @@ def load_converter_evidence(
         read_evidence_document(inputs_path) if inputs_path.is_file() else None
     )
     inputs_source_path = inputs_path.resolve() if inputs_document is not None else None
-    retained_contract = _target_contract(
-        target.name, contract_document, directory=directory
-    )
     contract_reference = SemanticContractReference.model_validate(
         manifest.get("semantic_contract"), strict=True
     )
@@ -265,11 +260,6 @@ def load_converter_evidence(
     contract = _target_contract(
         target.name, semantic_contract_document, directory=semantic_contract_path
     )
-    if retained_contract != contract:
-        raise ValueError(
-            f"{directory}: retained contract differs from experiment-owned "
-            f"semantic contract {semantic_contract_path}"
-        )
     contract_id = getattr(contract, "contract_id", None)
     if not isinstance(contract_id, str) or not contract_id:
         raise ValueError(f"{directory}: contract must declare contract_id")
@@ -282,7 +272,9 @@ def load_converter_evidence(
         None,
         contract_id,
     ):
-        raise ValueError(f"{directory}: input contract_id does not match contract.json")
+        raise ValueError(
+            f"{directory}: input contract_id does not match semantic contract"
+        )
 
     evidence_kind = witnesses.get("evidence_kind")
     if not isinstance(evidence_kind, str) or not evidence_kind:

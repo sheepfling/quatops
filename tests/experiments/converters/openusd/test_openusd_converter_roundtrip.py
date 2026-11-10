@@ -16,7 +16,8 @@ ROOT = REPOSITORY_ROOT
 FIXTURE = ROOT / "tests/golden/transports/openusd/26.11/converter"
 INPUTS_PATH = ROOT / "experiments/converters/openusd/26.11/converter_inputs.json"
 STAGE_PATH = ROOT / "experiments/converters/openusd/26.11/quatops_hierarchy.usda"
-CONTRACT = json.loads((FIXTURE / "contract.json").read_text(encoding="utf-8"))
+CONTRACT_PATH = ROOT / "experiments/converters/openusd/26.11/semantic_contract.json"
+CONTRACT = json.loads(CONTRACT_PATH.read_text(encoding="utf-8"))
 MANIFEST = json.loads((FIXTURE / "manifest.json").read_text(encoding="utf-8"))
 INPUTS = json.loads(INPUTS_PATH.read_text(encoding="utf-8"))
 STAGE = STAGE_PATH.read_text(encoding="utf-8")
@@ -79,13 +80,16 @@ def test_openusd_converter_stage_provenance_and_frame_declarations():
         "stage_sha256": STAGE_PATH,
         "converter_input_sha256": INPUTS_PATH,
         "native_observations_sha256": FIXTURE / "witnesses.json",
-        "contract_sha256": FIXTURE / "contract.json",
+        "contract_sha256": CONTRACT_PATH,
     }
     for field, path in paths.items():
         assert hashlib.sha256(path.read_bytes()).hexdigest() == provenance[field]
-    assert hashlib.sha256(
-        read_provenance_source(ROOT, MANIFEST["reproduction"]["generator_archive"])
-    ).hexdigest() == provenance["generator_sha256"]
+    assert (
+        hashlib.sha256(
+            read_provenance_source(ROOT, MANIFEST["reproduction"]["generator_archive"])
+        ).hexdigest()
+        == provenance["generator_sha256"]
+    )
     assert (
         provenance["captured_converter_input_sha256"]
         == provenance["converter_input_sha256"]

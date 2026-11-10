@@ -20,7 +20,8 @@ from tests.support.provenance_archives import read_provenance_source
 ROOT = REPOSITORY_ROOT
 FIXTURE = ROOT / "tests/golden/transports/cesium/1.124.0"
 INPUTS_PATH = ROOT / "experiments/converters/cesium/1.124.0/converter_inputs.json"
-CONTRACT = json.loads((FIXTURE / "contract.json").read_text(encoding="utf-8"))
+CONTRACT_PATH = ROOT / "experiments/converters/cesium/1.124.0/semantic_contract.json"
+CONTRACT = json.loads(CONTRACT_PATH.read_text(encoding="utf-8"))
 MANIFEST = json.loads((FIXTURE / "manifest.json").read_text(encoding="utf-8"))
 INPUTS = json.loads(INPUTS_PATH.read_text(encoding="utf-8"))
 CAPTURE = json.loads((FIXTURE / "witnesses.json").read_text(encoding="utf-8"))

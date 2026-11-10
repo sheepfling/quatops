@@ -8,7 +8,7 @@ does not assign axes to a MuJoCo model or simulator.
 
 The [native witness set](../../tests/golden/oracles/mujoco/3.17.0/converter/witnesses.json)
 stores selected quaternion values and native basis actions. The
-[versioned contract](../../tests/golden/oracles/mujoco/3.17.0/converter/contract.json)
+[versioned contract](../../experiments/converters/mujoco/3.17.0/semantic_contract.json)
 and [manifest](../../tests/golden/oracles/mujoco/3.17.0/converter/manifest.json)
 record scope, input identity, native binary, and capture provenance. Replay is
 implemented in

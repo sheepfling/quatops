@@ -40,9 +40,9 @@ named transport adapters under `src/`.
 
 Each converter manifest points to its experiment-owned `semantic_contract.json`
 by repository-relative path and SHA-256 digest. The shared tooling validates
-that contract, the retained contract copy, optional inputs, and native
-observations with strict target-specific Pydantic models before semantic
-serialization. Where an input or serialized asset is already maintained
+that contract, optional inputs, and native observations with strict
+target-specific Pydantic models before semantic serialization. Where an input
+or serialized asset is already maintained
 beside its experiment, the package references that source by path and digest
 instead of retaining a second byte-identical copy. Unknown fields and malformed
 vector, quaternion, or matrix shapes fail validation. Native observations are

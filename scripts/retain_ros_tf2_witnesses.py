@@ -114,11 +114,6 @@ def main() -> None:
         raise ValueError("ROS semantic contract and native capture versions differ")
     if contract.target.native_scalar_bytes != native["native_scalar_bytes"]:
         raise ValueError("ROS semantic contract and native scalar widths differ")
-    (destination / "contract.json").write_text(
-        dump_evidence_json(contract.model_dump(mode="json")),
-        encoding="utf-8",
-        newline="\n",
-    )
     (destination / "manifest.json").write_text(
         dump_evidence_json(
             {

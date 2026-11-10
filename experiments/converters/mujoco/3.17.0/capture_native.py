@@ -138,8 +138,6 @@ def main() -> None:
     native_files = [{"path": "mujoco.dll", "sha256": sha256_file(native_library)}]
     out = output_dir.resolve()
     out.mkdir(parents=True, exist_ok=True)
-    semantic_contract_path = target_dir / "semantic_contract.json"
-    (out / "contract.json").write_bytes(semantic_contract_path.read_bytes())
     witnesses_path = out / "witnesses.json"
     witnesses = MuJoCoCapture(
         schema_version="1.0",

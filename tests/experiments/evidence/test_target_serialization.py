@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import shutil
 from types import MappingProxyType
 
 import pytest
@@ -31,21 +32,37 @@ from scripts.evidence_schema.product import (
 from tests.support.paths import REPOSITORY_ROOT
 
 ROOT = REPOSITORY_ROOT
-EXPECTED_WITNESS_COUNTS = MappingProxyType({
-    ("Unreal Engine", "5.7.4"): 18,
-    ("Unity Editor", "6000.5.2f1"): 9,
-    ("Godot Engine", "4.7-stable"): 9,
-    ("Godot Engine", "4.8-dev1"): 9,
-    ("Blender", "5.1.2"): 9,
-    ("Eigen", "5.0.1"): 20,
-    ("MuJoCo", "3.17.0"): 10,
-    ("OpenCV", "4.13.0"): 20,
-    ("ROS 2 tf2", "0.36.23"): 1,
-    ("SpiceyPy / CSPICE", "8.3.0"): 10,
-    ("CesiumJS", "1.124.0"): 5,
-    ("Three.js GLTFLoader", "0.187.0"): 2,
-    ("OpenUSD", "26.11"): 3,
-})
+EXPECTED_WITNESS_COUNTS = MappingProxyType(
+    {
+        ("Unreal Engine", "5.7.4"): 18,
+        ("Unity Editor", "6000.5.2f1"): 9,
+        ("Godot Engine", "4.7-stable"): 9,
+        ("Godot Engine", "4.8-dev1"): 9,
+        ("Blender", "5.1.2"): 9,
+        ("Eigen", "5.0.1"): 20,
+        ("MuJoCo", "3.17.0"): 10,
+        ("OpenCV", "4.13.0"): 20,
+        ("ROS 2 tf2", "0.36.23"): 1,
+        ("SpiceyPy / CSPICE", "8.3.0"): 10,
+        ("CesiumJS", "1.124.0"): 5,
+        ("Three.js GLTFLoader", "0.187.0"): 2,
+        ("OpenUSD", "26.11"): 3,
+    }
+)
+
+
+def test_converter_rejects_changed_shared_contract(tmp_path):
+    fixture = "tests/golden/oracles/mujoco/3.17.0/converter"
+    contract = "experiments/converters/mujoco/3.17.0/semantic_contract.json"
+    shutil.copytree(ROOT / fixture, tmp_path / fixture)
+    (tmp_path / contract).parent.mkdir(parents=True)
+    shutil.copy2(ROOT / contract, tmp_path / contract)
+    package = load_converter_evidence(tmp_path / fixture, repository_root=tmp_path)
+    assert package.contract_source_path == (tmp_path / contract).resolve()
+    with (tmp_path / contract).open("ab") as stream:
+        stream.write(b"\n")
+    with pytest.raises(ValueError, match="semantic contract digest differs"):
+        load_converter_evidence(tmp_path / fixture, repository_root=tmp_path)
 
 
 def test_target_specific_captures_reduce_to_reproducible_compact_product():
@@ -78,9 +95,10 @@ def test_target_specific_captures_reduce_to_reproducible_compact_product():
         assert record.provenance.witnesses_sha256
         source_capture_paths.update(
             directory / name
-            for name in ("contract.json", "manifest.json", "witnesses.json")
+            for name in ("manifest.json", "witnesses.json")
             if (directory / name).is_file()
         )
+        source_capture_paths.add(package.contract_source_path)
         if package.inputs_source_path is not None:
             source_capture_paths.add(package.inputs_source_path)
 

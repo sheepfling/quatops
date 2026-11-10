@@ -14,7 +14,8 @@ from tests.support.paths import REPOSITORY_ROOT
 
 ROOT = REPOSITORY_ROOT
 FIXTURE = ROOT / "tests/golden/oracles/eigen/5.0.1/converter"
-CONTRACT = json.loads((FIXTURE / "contract.json").read_text(encoding="utf-8"))
+CONTRACT_PATH = ROOT / "experiments/converters/eigen/5.0.1/semantic_contract.json"
+CONTRACT = json.loads(CONTRACT_PATH.read_text(encoding="utf-8"))
 MANIFEST = json.loads((FIXTURE / "manifest.json").read_text(encoding="utf-8"))
 SPEC_PATH = ROOT / "experiments/converters/eigen/5.0.1/converter_inputs.json"
 INPUTS = json.loads(SPEC_PATH.read_text(encoding="utf-8"))
@@ -82,7 +83,7 @@ def test_eigen_contract_source_pin_and_native_build_provenance():
         / "experiments/converters/eigen/5.0.1/capture_native.py",
         "reproduction_native_cpp_source_sha256": ROOT
         / "experiments/converters/eigen/5.0.1/capture_native.cpp",
-        "contract_sha256": FIXTURE / "contract.json",
+        "contract_sha256": CONTRACT_PATH,
         "converter_input_spec_sha256": SPEC_PATH,
         "selected_inputs_sha256": SHARED_PATH,
         "witnesses_sha256": FIXTURE / "witnesses.json",

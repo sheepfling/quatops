@@ -15,7 +15,8 @@ ROOT = REPOSITORY_ROOT
 FIXTURE = ROOT / "tests/golden/transports/gltf/2.0.0/threejs/0.187.0/converter"
 INPUTS_PATH = ROOT / "experiments/converters/gltf/2.0.0/converter_inputs.json"
 ASSET_PATH = ROOT / "experiments/converters/gltf/2.0.0/quatops_hierarchy.gltf"
-CONTRACT = json.loads((FIXTURE / "contract.json").read_text(encoding="utf-8"))
+CONTRACT_PATH = ROOT / "experiments/converters/gltf/2.0.0/semantic_contract.json"
+CONTRACT = json.loads(CONTRACT_PATH.read_text(encoding="utf-8"))
 MANIFEST = json.loads((FIXTURE / "manifest.json").read_text(encoding="utf-8"))
 INPUTS = json.loads(INPUTS_PATH.read_text(encoding="utf-8"))
 ASSET = json.loads(ASSET_PATH.read_text(encoding="utf-8"))
@@ -79,7 +80,7 @@ def test_gltf_converter_artifact_loader_and_provenance_are_pinned():
         "input_sha256": INPUTS_PATH,
         "asset_sha256": ASSET_PATH,
         "native_observations_sha256": FIXTURE / "witnesses.json",
-        "contract_sha256": FIXTURE / "contract.json",
+        "contract_sha256": CONTRACT_PATH,
     }
     for field, path in provenance_paths.items():
         assert (

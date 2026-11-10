@@ -13,7 +13,8 @@ from tests.support.paths import REPOSITORY_ROOT
 
 ROOT = REPOSITORY_ROOT
 FIXTURE = ROOT / "tests/golden/oracles/mujoco/3.17.0/converter"
-CONTRACT = json.loads((FIXTURE / "contract.json").read_text(encoding="utf-8"))
+CONTRACT_PATH = ROOT / "experiments/converters/mujoco/3.17.0/semantic_contract.json"
+CONTRACT = json.loads(CONTRACT_PATH.read_text(encoding="utf-8"))
 MANIFEST = json.loads((FIXTURE / "manifest.json").read_text(encoding="utf-8"))
 INPUTS = json.loads(
     (ROOT / "experiments/converters/mujoco/3.17.0/converter_inputs.json").read_text(
@@ -84,7 +85,7 @@ def test_mujoco_boundary_contract_and_capture_provenance_are_explicit():
     paths = {
         "reproduction_capture_script_sha256": ROOT
         / "experiments/converters/mujoco/3.17.0/capture_native.py",
-        "contract_sha256": FIXTURE / "contract.json",
+        "contract_sha256": CONTRACT_PATH,
         "converter_input_spec_sha256": ROOT
         / "experiments/converters/mujoco/3.17.0/converter_inputs.json",
         "selected_inputs_sha256": SHARED_PATH,
