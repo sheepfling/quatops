@@ -4,7 +4,7 @@ import path from 'node:path';
 import crypto from 'node:crypto';
 import os from 'node:os';
 import { fileURLToPath, pathToFileURL } from 'node:url';
-import { numeric } from '../../shared/numeric_evidence.mjs';
+import { numeric, stringifyEvidence } from '../../shared/numeric_evidence.mjs';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const repositoryRoot = path.resolve(here, '../../../..');
@@ -55,7 +55,7 @@ for (const name of ['QuatOpsParent', 'QuatOpsChild']) {
   });
 }
 const outputFile = path.join(outputPath, 'observations.json');
-fs.writeFileSync(outputFile, JSON.stringify(observations, null, 2) + '\n');
+fs.writeFileSync(outputFile, stringifyEvidence(observations));
 const packageJson = JSON.parse(fs.readFileSync(path.join(packageRoot, 'node_modules/three/package.json'), 'utf8'));
 const manifest = {
   schema_version: '1.0', evidence_kind: 'native_threejs_gltf_converter_capture',

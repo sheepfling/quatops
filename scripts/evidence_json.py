@@ -120,65 +120,35 @@ def compact_numeric_evidence(value: Any) -> Any:
     return value
 
 
-def _numeric_shape(value: object) -> list[int]:
+def _finite_numeric_shape(value: object) -> tuple[int, ...]:
     if isinstance(value, list):
         if not value:
-            return [0]
-        shape = _numeric_shape(value[0])
-        if any(_numeric_shape(child) != shape for child in value[1:]):
+            return (0,)
+        shape = _finite_numeric_shape(value[0])
+        if any(_finite_numeric_shape(child) != shape for child in value[1:]):
             raise ValueError("numeric values must have a rectangular shape")
-        return [len(value), *shape]
+        return (len(value), *shape)
     if isinstance(value, (int, float)) and not isinstance(value, bool):
-        return []
-    if (
-        isinstance(value, dict)
-        and set(value) == {"nonfinite"}
-        and value["nonfinite"] in ("nan", "+inf", "-inf")
-    ):
-        return []
-    raise TypeError("expected a numeric scalar, nonfinite tag, or list")
+        try:
+            finite = math.isfinite(value)
+        except OverflowError:
+            finite = False
+        if not finite:
+            raise ValueError("numeric values must be finite")
+        return ()
+    raise TypeError("expected a finite numeric scalar or list")
 
 
 def select_numeric_evidence(item: object, selection: int | slice) -> dict[str, object]:
-    """Select outer values and their flat scalar bit sidecar without inventing bits."""
-    if not isinstance(item, dict) or "values" not in item or "dtype" not in item:
-        raise TypeError("expected a typed native numeric value")
+    """Select finite binary64 native values from a current JavaScript capture."""
+    if not isinstance(item, dict) or set(item) != {"values", "dtype"}:
+        raise TypeError("expected a compact typed native numeric value")
+    if item["dtype"] != "binary64":
+        raise ValueError("JavaScript capture values must use binary64")
     values = item["values"]
     if not isinstance(values, list):
         raise TypeError("numeric selection requires an outer list")
-    shape = _numeric_shape(values)
-    if "shape" in item:
-        declared = item["shape"]
-        if (
-            not isinstance(declared, list)
-            or any(type(size) is not int or size < 0 for size in declared)
-            or declared[: len(shape)] != shape
-            or (0 not in shape and len(declared) != len(shape))
-        ):
-            raise ValueError("numeric shape does not match values")
-        # Empty axes hide trailing dimensions; retain their declared rank.
-        shape = declared
-    width = math.prod(shape[1:])
+    _finite_numeric_shape(values)
     if isinstance(selection, bool) or not isinstance(selection, (int, slice)):
         raise TypeError("numeric selection must be an integer or slice")
-    selected = values[selection]
-    if isinstance(selection, int):
-        index = selection if selection >= 0 else len(values) + selection
-        indices = range(index, index + 1)
-        selected_shape = shape[1:]
-    else:
-        indices = range(*selection.indices(len(values)))
-        selected_shape = [len(indices), *shape[1:]]
-    result: dict[str, object] = {"values": selected, "dtype": item["dtype"]}
-    if "shape" in item:
-        result["shape"] = selected_shape
-    if "ieee754_hex_be" in item:
-        bits = item["ieee754_hex_be"]
-        if not isinstance(bits, list) or len(bits) != len(values) * width:
-            raise ValueError("numeric bit sidecar length does not match values")
-        result["ieee754_hex_be"] = [
-            bit
-            for index in indices
-            for bit in bits[index * width : (index + 1) * width]
-        ]
-    return result
+    return {"values": values[selection], "dtype": item["dtype"]}

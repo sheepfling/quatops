@@ -161,8 +161,7 @@ def main() -> None:
                         "basis, mixed-point, and inverse-point witness"
                     ),
                     "numeric_values": (
-                        "round-trippable decimals and dtype; exact bits only for "
-                        "signed-zero or nonfinite values"
+                        "round-trippable finite binary64 decimals, including signed zero"
                     ),
                 },
             }

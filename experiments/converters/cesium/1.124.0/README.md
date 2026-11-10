@@ -15,7 +15,9 @@ directory, and retains the selected witnesses:
 uv run --extra dev python -m experiments.run_converter_capture cesium --repository-root .
 ```
 
-The helper requires Node.js and npm on `PATH`; the npm lockfile pins Cesium.
+The helper requires Node.js 24 and npm on `PATH`; the npm lockfile pins Cesium.
+The capture accepts finite binary64 values and preserves signed zero in JSON.
+Older raw sidecar captures require the selector from their historical revision.
 
 The selected native values are retained in
 [`tests/golden/transports/cesium/1.124.0`](../../../../tests/golden/transports/cesium/1.124.0/manifest.json)

@@ -29,13 +29,23 @@
   },
   "reproduction": {
     "generator_sha256": "8e6695d016f0ed356e925c3d827077a9ab3a32228a6cefdaea40db05f29d429e",
-    "loader_script_sha256": "c6e612024383a5e45a74b8081776ea63975874fdbebcc0753d19b7c655595b32",
+    "loader_script_sha256": "920a56c0a8ccbddcbfdded04a9da3d066c7c345e3a999db114e6442ace289110",
     "package_lock_sha256": "cede45573d60150ede075f768f955da9890935dfb78764b3cd0b0029cd48365d",
-    "numeric_helper_sha256": "aed1da7b180e76ff0e101a477dd6a941ed0ad076509d9716bf2bf9b6896f5fa4",
-    "retention_script_sha256": "3c57eaf81f94f412572ec3b05780731d70bfed1dde7d8c36e3b429c248173ac1",
+    "numeric_helper_sha256": "c0eaaa45990c0de90b8fc183fc820faccdce4c39c064111acaa7501a1e82a944",
+    "retention_script_sha256": "645a7cf3b51af306cec93a56f57a3aa69b5f5bf2b218d0f46404f41117ddb584",
+    "before_finite_json_loader_script_sha256": "c6e612024383a5e45a74b8081776ea63975874fdbebcc0753d19b7c655595b32",
+    "before_finite_json_numeric_helper_sha256": "aed1da7b180e76ff0e101a477dd6a941ed0ad076509d9716bf2bf9b6896f5fa4",
+    "before_finite_json_retention_script_sha256": "3c57eaf81f94f412572ec3b05780731d70bfed1dde7d8c36e3b429c248173ac1",
     "previous_retention_script_sha256": "14a47c34ea282a9f0cdfe2fbaea4ff32285ebc5c84fc14b17a178c9ae4f7a0da",
-    "retention_script_identity_note": "Current selector uses the shared contract; previous digest identifies the earlier selector. Native witnesses were not recaptured.",
-    "retention_helper_sha256": "373dd7fefdffddbb8cb1a9399859f4168fc2ea97710bd55b9481b68dec693bab",
+    "retention_script_identity_note": "Current capture and selector use finite binary64 JSON with signed zero preserved. A pinned native rerun reproduced the retained witness bytes; original capture identities remain in provenance.",
+    "finite_json_replay": {
+      "utc": "2026-11-10T08:20:50.153Z",
+      "node": "v24.21.0",
+      "native_observations_sha256": "e202e3374bb010e921327ad47c99158f19fae604e4cfecb23f3fb1e0eae86386",
+      "selected_witnesses_sha256": "691bb98ad41404e7e90cc8713dad55ec38f78e62e9d3181feb7d0a5b1d7d82f1"
+    },
+    "retention_helper_sha256": "e429a76babab3900b1f269c82980de4b42978548577e37e338e172b303a75ae7",
+    "before_finite_json_retention_helper_sha256": "373dd7fefdffddbb8cb1a9399859f4168fc2ea97710bd55b9481b68dec693bab",
     "retention_formatter_sha256": "56961d6be101a2bdfb1b21372c823ec86dfd636547d851901b7284f2ae20e0b3"
   },
   "selection": {

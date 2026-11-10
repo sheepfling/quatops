@@ -14,7 +14,9 @@ directory, and retains the selected native node witnesses:
 uv run --extra dev python -m experiments.run_converter_capture gltf --repository-root .
 ```
 
-The helper requires Node.js and npm on `PATH`; the npm lockfile pins the loader.
+The helper requires Node.js 24 and npm on `PATH`; the npm lockfile pins the loader.
+The capture accepts finite binary64 values and preserves signed zero in JSON.
+Older raw sidecar captures require the selector from their historical revision.
 
 The retained converter fixture is
 [`tests/golden/transports/gltf/2.0.0/threejs/0.187.0/converter`](../../../../tests/golden/transports/gltf/2.0.0/threejs/0.187.0/converter/manifest.json)

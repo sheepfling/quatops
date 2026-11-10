@@ -4,7 +4,7 @@ import path from 'node:path';
 import crypto from 'node:crypto';
 import os from 'node:os';
 import { fileURLToPath, pathToFileURL } from 'node:url';
-import { numeric } from '../../shared/numeric_evidence.mjs';
+import { numeric, stringifyEvidence } from '../../shared/numeric_evidence.mjs';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const packageRoot = here;
@@ -65,7 +65,7 @@ for (const item of input.cases) {
 }
 
 const rowsPath = path.join(outputPath, 'observations.json');
-fs.writeFileSync(rowsPath, JSON.stringify(observations, null, 2) + '\n');
+fs.writeFileSync(rowsPath, stringifyEvidence(observations));
 const lockPath = path.join(packageRoot, 'package-lock.json');
 const packageJsonPath = path.join(packageRoot, 'node_modules/cesium/package.json');
 const packageVersion = JSON.parse(fs.readFileSync(packageJsonPath, 'utf8')).version;
