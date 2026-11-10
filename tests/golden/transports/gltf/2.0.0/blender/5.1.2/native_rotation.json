@@ -105,18 +105,6 @@
             ["CONSTANT", "CONSTANT", "CONSTANT"],
             ["CONSTANT", "CONSTANT", "CONSTANT"],
             ["CONSTANT", "CONSTANT", "CONSTANT"]
-          ],
-          "left_handle_types_by_component": [
-            ["AUTO_CLAMPED", "AUTO_CLAMPED", "AUTO_CLAMPED"],
-            ["AUTO_CLAMPED", "AUTO_CLAMPED", "AUTO_CLAMPED"],
-            ["AUTO_CLAMPED", "AUTO_CLAMPED", "AUTO_CLAMPED"],
-            ["AUTO_CLAMPED", "AUTO_CLAMPED", "AUTO_CLAMPED"]
-          ],
-          "right_handle_types_by_component": [
-            ["AUTO_CLAMPED", "AUTO_CLAMPED", "AUTO_CLAMPED"],
-            ["AUTO_CLAMPED", "AUTO_CLAMPED", "AUTO_CLAMPED"],
-            ["AUTO_CLAMPED", "AUTO_CLAMPED", "AUTO_CLAMPED"],
-            ["AUTO_CLAMPED", "AUTO_CLAMPED", "AUTO_CLAMPED"]
           ]
         },
         "samples": [
@@ -165,18 +153,6 @@
             ["LINEAR", "LINEAR", "LINEAR"],
             ["LINEAR", "LINEAR", "LINEAR"],
             ["LINEAR", "LINEAR", "LINEAR"]
-          ],
-          "left_handle_types_by_component": [
-            ["AUTO_CLAMPED", "AUTO_CLAMPED", "AUTO_CLAMPED"],
-            ["AUTO_CLAMPED", "AUTO_CLAMPED", "AUTO_CLAMPED"],
-            ["AUTO_CLAMPED", "AUTO_CLAMPED", "AUTO_CLAMPED"],
-            ["AUTO_CLAMPED", "AUTO_CLAMPED", "AUTO_CLAMPED"]
-          ],
-          "right_handle_types_by_component": [
-            ["AUTO_CLAMPED", "AUTO_CLAMPED", "AUTO_CLAMPED"],
-            ["AUTO_CLAMPED", "AUTO_CLAMPED", "AUTO_CLAMPED"],
-            ["AUTO_CLAMPED", "AUTO_CLAMPED", "AUTO_CLAMPED"],
-            ["AUTO_CLAMPED", "AUTO_CLAMPED", "AUTO_CLAMPED"]
           ]
         },
         "samples": [

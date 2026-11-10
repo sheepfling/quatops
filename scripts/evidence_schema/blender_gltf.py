@@ -93,6 +93,9 @@ class BlenderGltfFcurveSummary(NativeCaptureModel):
     data_path: Literal["rotation_quaternion"]
     array_indices: Annotated[list[StrictInt], Field(min_length=4, max_length=4)]
     interpolations_by_component: ComponentKeyValues
+
+
+class BlenderGltfCubicFcurveSummary(BlenderGltfFcurveSummary):
     left_handle_types_by_component: ComponentKeyValues
     right_handle_types_by_component: ComponentKeyValues
 
@@ -123,6 +126,7 @@ class BlenderGltfLinearAnimation(BlenderGltfAnimationFields):
 
 class BlenderGltfCubicSplineAnimation(BlenderGltfAnimationFields):
     interpolation: Literal["CUBICSPLINE"]
+    fcurves: BlenderGltfCubicFcurveSummary
 
 
 class BlenderGltfObservations(NativeCaptureModel):

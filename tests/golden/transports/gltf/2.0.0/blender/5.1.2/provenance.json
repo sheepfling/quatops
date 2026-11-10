@@ -12,7 +12,7 @@
   },
   "reproduction": {
     "capture_source": "experiments/transports/gltf/2.0.0/blender/5.1.2/capture_gltf.py",
-    "capture_source_sha256": "44047f74e38ed2361c357e470797f69a8892dc5735f5f0405c1922a90cfe6000",
+    "capture_source_sha256": "630cb34ab2c61c92df0d8dbf7c5c75ef711eaa64b6b9e2da43349c0db4ad956b",
     "previous_checked_in_capture_source_sha256": "4c697aaa7c47fcf9e7e4c67290275ff95b728d9c5c6cf269999084f7c22b3501",
     "previous_checked_in_capture_source_commit": "39fcb3d4dd78a732120b5a6c49f8d4482d1cbc99",
     "asset_builder_source": "experiments/transports/gltf/2.0.0/assets/build_asset.py",

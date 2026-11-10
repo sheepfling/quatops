@@ -34,6 +34,10 @@ class FcurveSummary:
     data_path: str
     array_indices: list[int]
     interpolations_by_component: list[list[str]]
+
+
+@dataclass(frozen=True, slots=True)
+class CubicFcurveSummary(FcurveSummary):
     left_handle_types_by_component: list[list[str]]
     right_handle_types_by_component: list[list[str]]
 
@@ -185,7 +189,7 @@ def object_transform(object_: Any) -> StaticTransform:
     )
 
 
-def action_curves(action: Any) -> CapturedActionCurves:
+def action_curves(action: Any, *, include_handles: bool) -> CapturedActionCurves:
     rows: list[CurveRow] = []
     for layer in action.layers:
         for strip in layer.strips:
@@ -217,22 +221,27 @@ def action_curves(action: Any) -> CapturedActionCurves:
     key_frames = rows[0].key_frames
     if any(row.key_frames != key_frames for row in rows[1:]):
         raise RuntimeError(f"Quaternion F-curve key times differ in {action.name!r}")
-    return CapturedActionCurves(
-        summary=FcurveSummary(
-            data_path=rows[0].data_path,
-            array_indices=[row.array_index for row in rows],
-            interpolations_by_component=[
-                [key.interpolation for key in row.keys] for row in rows
-            ],
+    common = FcurveSummary(
+        data_path=rows[0].data_path,
+        array_indices=[row.array_index for row in rows],
+        interpolations_by_component=[
+            [key.interpolation for key in row.keys] for row in rows
+        ],
+    )
+    summary: FcurveSummary = common
+    if include_handles:
+        summary = CubicFcurveSummary(
+            data_path=common.data_path,
+            array_indices=common.array_indices,
+            interpolations_by_component=common.interpolations_by_component,
             left_handle_types_by_component=[
                 [key.handle_left_type for key in row.keys] for row in rows
             ],
             right_handle_types_by_component=[
                 [key.handle_right_type for key in row.keys] for row in rows
             ],
-        ),
-        key_frames=key_frames,
-    )
+        )
+    return CapturedActionCurves(summary=summary, key_frames=key_frames)
 
 
 def install_action(object_: Any, action: Any) -> None:
@@ -326,7 +335,7 @@ def main() -> None:
                 f"Missing imported {interpolation} action or target node"
             )
         install_action(object_, action)
-        curves = action_curves(action)
+        curves = action_curves(action, include_handles=interpolation == "CUBICSPLINE")
         curve_frames = curves.key_frames
         time_values = sorted(
             {frame * scene.render.fps_base / scene.render.fps for frame in curve_frames}
