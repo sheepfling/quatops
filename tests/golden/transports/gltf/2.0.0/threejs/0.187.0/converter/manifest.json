@@ -62,6 +62,7 @@
     "native_script_sha256": "d90026265fb83de0fd9c542086d92c66dc7b07d33f1270b050b2cb42f1485b86",
     "native_witnesses_sha256": "9bbba3373f8977b53c99ffdb92524a9ae5f50983a810a6a3fbb629899e8b2426",
     "comparison": "All selected native values match bit-for-bit, including signed zero; the point-operation label was corrected and JSON formatting differs.",
-    "runner_sha256": "0ec2d652fc870fcc0da1dcf82c61f7336a3facfb409ff253c922b93b433b3fb5"
+    "runner_sha256": "0ec2d652fc870fcc0da1dcf82c61f7336a3facfb409ff253c922b93b433b3fb5",
+    "reproduction_runner_sha256": "9e5c8220cef64cabd5bf6617395170f8a941a33e25040b35633de762b262de78"
   }
 }

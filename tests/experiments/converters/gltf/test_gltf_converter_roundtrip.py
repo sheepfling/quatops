@@ -109,7 +109,7 @@ def test_gltf_converter_artifact_loader_and_provenance_are_pinned():
         == MANIFEST["reproduction"]["loader_script_sha256"]
     )
     assert (
-        MANIFEST["direct_reproduction"]["runner_sha256"]
+        MANIFEST["direct_reproduction"]["reproduction_runner_sha256"]
         == hashlib.sha256(
             (ROOT / "experiments/run_converter_capture.py").read_bytes()
         ).hexdigest()

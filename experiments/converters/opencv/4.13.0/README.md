@@ -10,7 +10,7 @@ float64 profiles.
 The captured runtime used CPython 3.13.14, NumPy 2.3.5, and
 `opencv-python-headless==4.13.0.92`. The versioned project installs QuatOps,
 the shared experiment models, and this target's optional dependency group in
-one locked environment. From the repository root, run:
+the Python 3.13 lock shared with Eigen. From the repository root, run:
 
 ```shell
 uv run --extra dev python -m experiments.run_converter_capture opencv --repository-root .

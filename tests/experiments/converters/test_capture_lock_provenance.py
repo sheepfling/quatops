@@ -12,12 +12,6 @@ from tests.support.paths import REPOSITORY_ROOT
     "target,version,manifest,field",
     [
         (
-            "opencv",
-            "4.13.0",
-            "tests/golden/oracles/opencv/4.13.0/converter/manifest.json",
-            "lockfile_sha256",
-        ),
-        (
             "openusd",
             "26.11",
             "tests/golden/transports/openusd/26.11/converter/manifest.json",

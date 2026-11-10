@@ -102,7 +102,7 @@ wheels = [
 
 [[package]]
 name = "quatops"
-source = { editable = "../../../../" }
+source = { editable = "../../../" }
 
 [package.metadata]
 requires-dist = [
@@ -142,7 +142,7 @@ provides-extras = ["numpy", "experiments", "dev-experimental", "performance", "d
 [[package]]
 name = "quatops-experiments"
 version = "0.1.0"
-source = { editable = "../../../" }
+source = { editable = "../../" }
 dependencies = [
     { name = "pydantic" },
     { name = "quatops" },
@@ -165,7 +165,7 @@ requires-dist = [
     { name = "pyproj", marker = "python_full_version >= '3.11' and extra == 'proj'", specifier = "==3.7.2" },
     { name = "pyright", extras = ["nodejs"], marker = "extra == 'dev'", specifier = "==1.1.414" },
     { name = "pytest", marker = "extra == 'dev'", specifier = ">=7" },
-    { name = "quatops", editable = "../../../../" },
+    { name = "quatops", editable = "../../../" },
     { name = "ruff", marker = "extra == 'dev'", specifier = ">=0.8" },
     { name = "scipy", marker = "python_full_version >= '3.12' and extra == 'reference'", specifier = ">=1.18" },
     { name = "spiceypy", marker = "python_full_version < '3.14' and extra == 'spiceypy'", specifier = "==8.3.0" },
@@ -174,15 +174,32 @@ requires-dist = [
 provides-extras = ["cesium", "eigen", "gltf", "mujoco", "opencv", "openusd", "spiceypy", "proj", "reference", "dev"]
 
 [[package]]
-name = "quatops-opencv-converter-capture"
+name = "quatops-python313-captures"
 version = "0.1.0"
 source = { virtual = "." }
 dependencies = [
+    { name = "pydantic" },
+    { name = "quatops-experiments" },
+    { name = "typing-inspection" },
+]
+
+[package.optional-dependencies]
+eigen = [
+    { name = "quatops-experiments" },
+]
+opencv = [
     { name = "quatops-experiments", extra = ["opencv"] },
 ]
 
 [package.metadata]
-requires-dist = [{ name = "quatops-experiments", extras = ["opencv"], editable = "../../../" }]
+requires-dist = [
+    { name = "pydantic", specifier = "==2.14.2" },
+    { name = "quatops-experiments", editable = "../../" },
+    { name = "quatops-experiments", extras = ["eigen"], marker = "extra == 'eigen'", editable = "../../" },
+    { name = "quatops-experiments", extras = ["opencv"], marker = "extra == 'opencv'", editable = "../../" },
+    { name = "typing-inspection", specifier = "==0.4.4" },
+]
+provides-extras = ["eigen", "opencv"]
 
 [[package]]
 name = "typing-extensions"

@@ -209,13 +209,15 @@ def validate_capture(target: str, source: Path, capture: Path) -> None:
 
 def run_opencv_capture(repository_root: Path, env: dict[str, str]) -> None:
     """Prepare and capture OpenCV in its pinned target environment."""
-    project = "experiments/converters/opencv/4.13.0"
+    project = "experiments/converters/python313"
     command_prefix = [
         "uv",
         "run",
         "--locked",
         "--project",
         project,
+        "--extra",
+        "opencv",
         "--python",
         "3.13.14",
         "python",

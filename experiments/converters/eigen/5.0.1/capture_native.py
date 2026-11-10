@@ -107,6 +107,7 @@ def main() -> None:
     options = parser.parse_args()
     repository_root = options.repository_root.resolve(strict=True)
     target_dir = repository_root / "experiments/converters/eigen/5.0.1"
+    shared_lock = repository_root / "experiments/converters/python313/uv.lock"
     source_metadata = repository_root / "experiments/oracles/eigen/5.0.1/source.json"
     eigen_root = options.eigen_root.resolve()
     archive_path = options.eigen_archive.resolve()
@@ -358,7 +359,7 @@ def main() -> None:
             "prepared_inputs_sha256": prepared_inputs_sha256,
             "native_input_stream_sha256": native_input_sha256,
             "witnesses_sha256": sha256_file(witnesses_path),
-            "reproduction_lockfile_sha256": sha256_file(target_dir / "uv.lock"),
+            "reproduction_lockfile_sha256": sha256_file(shared_lock),
             "eigen_source_archive_sha256": sha256_file(archive_path),
             "eigen_source_metadata_sha256": sha256_file(source_metadata),
             "eigen_version_header_sha256": sha256_file(version_header),

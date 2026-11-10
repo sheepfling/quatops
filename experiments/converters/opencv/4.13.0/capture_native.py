@@ -75,6 +75,7 @@ def main() -> None:
     options = parser.parse_args()
     repository_root = options.repository_root.resolve(strict=True)
     target_dir = repository_root / "experiments/converters/opencv/4.13.0"
+    shared_lock = repository_root / "experiments/converters/python313/uv.lock"
     output_dir = options.output_dir or (
         repository_root / "tests/golden/oracles/opencv/4.13.0/converter"
     )
@@ -224,7 +225,7 @@ def main() -> None:
             ),
             "shared_canonical_inputs_sha256": inputs.canonical_input_sha256,
             "witnesses_sha256": sha256_file(witnesses_path),
-            "lockfile_sha256": sha256_file(target_dir / "uv.lock"),
+            "lockfile_sha256": sha256_file(shared_lock),
             "cv2_extension_directory": "site-packages/cv2",
             "invocation_template": (
                 "python experiments/converters/opencv/4.13.0/prepare_inputs.py "
@@ -235,7 +236,7 @@ def main() -> None:
         "reproduction": {
             "capture_script_sha256": sha256_file(Path(__file__)),
             "preparation_script_sha256": sha256_file(target_dir / "prepare_inputs.py"),
-            "lockfile_sha256": sha256_file(target_dir / "uv.lock"),
+            "lockfile_sha256": sha256_file(shared_lock),
         },
     }
     (output / "manifest.json").write_text(
