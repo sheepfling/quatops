@@ -3,7 +3,7 @@
 Build the review bundle with:
 
 ```powershell
-uv run python -m scripts.package_evidence_bundle
+uv run python -m scripts.package_evidence_bundle --repository-root .
 ```
 
 The archive includes the maintained documentation, semantic and numerical
@@ -16,5 +16,11 @@ environments are excluded. Native captures are retained as immutable artifacts;
 the bundle does not claim those engine runtimes were re-executed during bundle
 creation.
 
-`docs/semantic-source-audit.md` records the manual review of each promoted role's
-axes, source scope, and exclusions against its cited primary document.
+The [semantic source audit](semantic-source-audit.md) records the reviewed
+axes, source scope, and exclusions. The original detailed
+[frame semantics audit](../quatops_frame_semantics_audit_138b730.md) is retained
+for research. The
+[historical source archive notes](../experiments/provenance/reproduction-v1/README.md)
+describe the bundled capture sources, and the
+[evidence schema guide](../scripts/evidence_schema/README.md) documents the
+typed input and serialization modules.

@@ -81,6 +81,8 @@ state. OpenXR has a declared field converter but no vendor-runtime acceptance;
 Sophus remains a mathematical oracle, and PROJ remains frame-transform
 evidence. The generated [converter registry](converter-registry.md) is the
 single target/API/version/layout/state index.
+The [evidence bundle guide](evidence-bundle.md) explains how to regenerate
+and inspect the compact review bundle.
 
 Run the converter acceptance set with:
 

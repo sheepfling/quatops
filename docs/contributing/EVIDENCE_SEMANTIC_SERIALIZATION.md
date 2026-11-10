@@ -20,6 +20,9 @@ CrystallizedCapture / EvidenceProduct
 
 ## Responsibilities
 
+The typed input models and normalization boundaries are indexed in the
+[evidence schema guide](../../scripts/evidence_schema/README.md).
+
 - `scripts/evidence_schema/targets.py` validates each target's input and
   native-output shape. It preserves native field names and does not assign
   shared physical meaning to them.

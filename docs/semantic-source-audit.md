@@ -24,3 +24,6 @@ The axis claims above were checked against the referenced documents. The
 implementation also carries each role's scope/exclusions in
 `quatops.experimental.semantics.roles`; the generated registry reports native evidence
 scope separately from source authority and application alignment.
+
+See the retained [detailed frame semantics audit](../quatops_frame_semantics_audit_138b730.md)
+for the broader source-by-source research notes.

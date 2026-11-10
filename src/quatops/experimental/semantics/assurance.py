@@ -40,7 +40,8 @@ _EVIDENCE_ITEMS = (
         True,
         "numeric_action",
         True,
-        "Frozen Unreal quaternion vector actions replayed against the declared axis map; no application scene alignment claim.",
+        "Frozen Unreal quaternion vector actions replayed against the declared axis "
+        "map; no application scene alignment claim.",
     ),
     SemanticEvidenceArtifact(
         "unity.native.6000.5.2f1",
@@ -51,7 +52,8 @@ _EVIDENCE_ITEMS = (
         True,
         "numeric_action",
         True,
-        "Frozen Unity quaternion vector actions replayed against the declared axis map; no application scene alignment claim.",
+        "Frozen Unity quaternion vector actions replayed against the declared axis "
+        "map; no application scene alignment claim.",
     ),
     SemanticEvidenceArtifact(
         "godot.native.4.7",
@@ -95,7 +97,8 @@ _EVIDENCE_ITEMS = (
         True,
         "role_specific_action",
         True,
-        "Native ENU-to-fixed frame actions replayed at explicit geodetic origins and ellipsoid; body alignment remains supplied.",
+        "Native ENU-to-fixed frame actions replayed at explicit geodetic origins and "
+        "ellipsoid; body alignment remains supplied.",
     ),
     SemanticEvidenceArtifact(
         "gltf.threejs.loader.0.187.0",
@@ -106,7 +109,8 @@ _EVIDENCE_ITEMS = (
         True,
         "numeric_action",
         True,
-        "A QuatOps-produced static hierarchy was loaded by Three.js GLTFLoader; no oriented mesh geometry verifies asset-front.",
+        "A QuatOps-produced static hierarchy was loaded by Three.js GLTFLoader; no "
+        "oriented mesh geometry verifies asset-front.",
     ),
     SemanticEvidenceArtifact(
         "openxr.test-runtime.1.1.65",
@@ -117,7 +121,8 @@ _EVIDENCE_ITEMS = (
         True,
         "runtime_space_relation",
         False,
-        "Native static-space xrLocateSpace relation from the Khronos test runtime; no vendor hardware or QuatOps adapter acceptance claimed.",
+        "Native static-space xrLocateSpace relation from the Khronos test runtime; "
+        "no vendor hardware or QuatOps adapter acceptance claimed.",
     ),
 )
 

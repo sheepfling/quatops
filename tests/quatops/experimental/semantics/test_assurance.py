@@ -32,19 +32,28 @@ def test_semantic_claims_have_scoped_sources_and_explicit_exclusions():
 def test_registered_axis_claims_match_the_reviewed_primary_sources():
     expected = {
         "unreal.world-axes": (
-            "https://dev.epicgames.com/documentation/en-us/unreal-engine/coordinate-system-and-spaces-in-unreal-engine?application_version=5.7",
+            (
+                "https://dev.epicgames.com/documentation/en-us/unreal-engine/"
+                "coordinate-system-and-spaces-in-unreal-engine?application_version=5.7"
+            ),
             ("forward", "right", "up"),
             "left",
             "world",
         ),
         "unity.world-axes": (
-            "https://docs.unity.com/en-us/engine/6000.5/manual/scripting/programming-math/unity-engine-math/class-quaternion",
+            (
+                "https://docs.unity.com/en-us/engine/6000.5/manual/scripting/"
+                "programming-math/unity-engine-math/class-quaternion"
+            ),
             ("right", "up", "forward"),
             "left",
             "world",
         ),
         "godot.camera-axes": (
-            "https://docs.godotengine.org/en/4.7/tutorials/assets_pipeline/importing_3d_scenes/model_export_considerations.html",
+            (
+                "https://docs.godotengine.org/en/4.7/tutorials/assets_pipeline/"
+                "importing_3d_scenes/model_export_considerations.html"
+            ),
             ("right", "up", "back"),
             "right",
             "sensor",

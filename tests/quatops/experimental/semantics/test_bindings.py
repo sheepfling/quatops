@@ -2,6 +2,7 @@
 
 from dataclasses import replace
 from math import sqrt
+from urllib.parse import urlsplit
 
 import numpy as np
 import pytest
@@ -120,7 +121,9 @@ def test_unity_world_role_binding_and_explicit_model_binding_drive_gateway():
     assert target_batch.child_semantic_binding is None
     assert converter.from_target_batch(target_batch).values.shape == batch.values.shape
     assert unity_world.authority == "target_defined"
-    assert unity_world.evidence_reference.startswith("https://docs.unity.com/")
+    unity_source = urlsplit(unity_world.evidence_reference)
+    assert unity_source.scheme == "https"
+    assert unity_source.netloc == "docs.unity.com"
     assert unity_world.reference_frame is not None
     assert unity_world.reference_frame.has_identical_definition(source_world)
     with pytest.raises(ValueError, match="target family"):

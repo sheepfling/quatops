@@ -1,17 +1,12 @@
-"""Frame-aware conversion to declared target representations.
+"""Frame-aware conversion to declared target representations."""
 
-The scalar front has no mandatory optional dependencies. NumPy batch methods
-load NumPy only when called. Target profiles document the evidence scope and
-never choose coordinate axes for the caller. Physical frame semantics live in
-``quatops.experimental.semantics``; these imports remain available for compatibility.
-"""
-
-from ..semantics import (
+from ._api import (  # noqa: F401
     AEROSPACE_BODY_FRD,
     CANONICAL_BODY_FRAME,
     CANONICAL_BODY_RFU,
     CANONICAL_WORLD_FRAME,
     CANONICAL_WORLD_RFU,
+    CONVERTERS,
     ECEF_FRAME,
     ECEF_WORLD,
     OPENXR_REFERENCE_SPACE_RUB,
@@ -19,8 +14,10 @@ from ..semantics import (
     ROS_BODY_FLU,
     ROS_CAMERA_OPTICAL,
     SEMANTIC_CONTRACTS,
+    TARGET_DECLARATIONS,
     WORLD_ENU,
     WORLD_NED,
+    ConverterProfile,
     CoordinateFrame,
     ECEFBodyOrientation,
     Ellipsoid,
@@ -33,81 +30,26 @@ from ..semantics import (
     GeodeticOrigin,
     OpenXRReferenceSpaceType,
     OpenXRSpaceContext,
+    OrientationConverter,
     PhysicalOrientation,
     PhysicalOrientationBatch,
     SemanticContract,
     SemanticFrameBinding,
     SemanticQuaternionMap,
-    bind_cesium_enu_frame,
-    bind_semantic_role,
-)
-from .gateway import (
-    OrientationConverter,
-    convert_orientation_batch_from_target,
-    convert_orientation_batch_to_target,
-    convert_orientation_from_target,
-    convert_orientation_to_target,
-)
-from .representation import reorder_quaternion_components
-from .targets import (
-    CONVERTERS,
-    TARGET_DECLARATIONS,
-    ConverterProfile,
     TargetDeclaration,
     TargetOrientation,
     TargetOrientationBatch,
     accepted_converters,
+    bind_cesium_enu_frame,
+    bind_semantic_role,
+    convert_orientation_batch_from_target,
+    convert_orientation_batch_to_target,
+    convert_orientation_from_target,
+    convert_orientation_to_target,
     get_converter,
     get_target_declaration,
+    reorder_quaternion_components,
 )
-
-__all__ = [
-    "AEROSPACE_BODY_FRD",
-    "CANONICAL_BODY_FRAME",
-    "CANONICAL_BODY_RFU",
-    "CANONICAL_WORLD_FRAME",
-    "CANONICAL_WORLD_RFU",
-    "CONVERTERS",
-    "ECEF_FRAME",
-    "ECEF_WORLD",
-    "OPENXR_REFERENCE_SPACE_RUB",
-    "OPENXR_SPACE_RUB",
-    "ROS_BODY_FLU",
-    "ROS_CAMERA_OPTICAL",
-    "SEMANTIC_CONTRACTS",
-    "TARGET_DECLARATIONS",
-    "WORLD_ENU",
-    "WORLD_NED",
-    "ConverterProfile",
-    "CoordinateFrame",
-    "ECEFBodyOrientation",
-    "Ellipsoid",
-    "FrameAlignment",
-    "FrameConvention",
-    "FrameCorrespondence",
-    "FrameRole",
-    "FramedOrientation",
-    "FramedOrientationBatch",
-    "GeodeticOrigin",
-    "OpenXRReferenceSpaceType",
-    "OpenXRSpaceContext",
-    "OrientationConverter",
-    "PhysicalOrientation",
-    "PhysicalOrientationBatch",
-    "SemanticContract",
-    "SemanticFrameBinding",
-    "SemanticQuaternionMap",
-    "TargetDeclaration",
-    "TargetOrientation",
-    "TargetOrientationBatch",
-    "accepted_converters",
-    "bind_cesium_enu_frame",
-    "bind_semantic_role",
-    "convert_orientation_batch_from_target",
-    "convert_orientation_batch_to_target",
-    "convert_orientation_from_target",
-    "convert_orientation_to_target",
-    "get_converter",
-    "get_target_declaration",
-    "reorder_quaternion_components",
-]
+from ._api import (
+    __all__ as __all__,
+)

@@ -71,13 +71,19 @@ def included_files(root: Path) -> list[Path]:
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
+        "--repository-root",
+        type=Path,
+        required=True,
+        help="repository root whose files should be included",
+    )
+    parser.add_argument(
         "--output",
         type=Path,
         help="archive destination (default: repository-root/quatops-evidence-bundle.zip)",
     )
     args = parser.parse_args()
 
-    root = Path(__file__).resolve().parents[1]
+    root = args.repository_root.resolve(strict=True)
     output = (args.output or root / "quatops-evidence-bundle.zip").resolve()
     output.parent.mkdir(parents=True, exist_ok=True)
     files = included_files(root)

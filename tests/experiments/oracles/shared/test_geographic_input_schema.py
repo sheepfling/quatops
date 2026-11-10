@@ -101,10 +101,10 @@ def test_proj_capture_observations_use_a_target_specific_strict_schema() -> None
     assert observations[0].native_outputs.origin_ecef_m.shape == [3]
     assert observations[0].native_outputs.enu_basis_endpoints_ecef_m.shape == [3, 3]
 
-    malformed = observations[0].model_dump(mode="json")
+    malformed = json.loads(lines[0])
     malformed["native_outputs"]["origin_ecef_m"]["shape"] = [4]
     with pytest.raises(ValidationError):
-        ProjObservation.model_validate(malformed, strict=True)
+        ProjObservation.model_validate_json(json.dumps(malformed), strict=True)
 
 
 def test_proj_reproduction_hashes_preserve_prior_and_current_source_identity() -> None:

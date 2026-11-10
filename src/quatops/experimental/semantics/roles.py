@@ -6,6 +6,7 @@ from collections.abc import Mapping
 from dataclasses import dataclass
 from types import MappingProxyType
 from typing import Literal
+from urllib.parse import urlsplit
 
 from .frames import FrameRole, Handedness
 
@@ -114,8 +115,9 @@ class SemanticContract:
                 "authoritative semantic contracts require a pinned source URL, "
                 "version, and section"
             )
-        if self.authority in ("target_defined", "standard_defined") and not (
-            self.source_url and self.source_url.startswith("https://")
+        source_url = urlsplit(self.source_url or "")
+        if self.authority in ("target_defined", "standard_defined") and (
+            source_url.scheme != "https" or not source_url.netloc
         ):
             raise ValueError("authoritative source URL must use HTTPS")
         if self.authority in ("target_defined", "standard_defined") and not all(
@@ -212,7 +214,8 @@ _ROLE_ITEMS = (
         "Unreal world axes",
         "target_documentation",
         "fixed_axes",
-        "https://dev.epicgames.com/documentation/en-us/unreal-engine/coordinate-system-and-spaces-in-unreal-engine?application_version=5.7",
+        "https://dev.epicgames.com/documentation/en-us/unreal-engine/"
+        "coordinate-system-and-spaces-in-unreal-engine?application_version=5.7",
         "5.7",
         "Coordinate System; World Space",
         "Unreal",
@@ -236,7 +239,8 @@ _ROLE_ITEMS = (
         "Unity world axes",
         "target_documentation",
         "fixed_axes",
-        "https://docs.unity.com/en-us/engine/6000.5/manual/scripting/programming-math/unity-engine-math/class-quaternion",
+        "https://docs.unity.com/en-us/engine/6000.5/manual/scripting/"
+        "programming-math/unity-engine-math/class-quaternion",
         "6000.5",
         "Coordinate handedness",
         "Unity",
@@ -260,7 +264,8 @@ _ROLE_ITEMS = (
         "Godot Camera3D local axes",
         "target_documentation",
         "fixed_axes",
-        "https://docs.godotengine.org/en/4.7/tutorials/assets_pipeline/importing_3d_scenes/model_export_considerations.html",
+        "https://docs.godotengine.org/en/4.7/tutorials/assets_pipeline/"
+        "importing_3d_scenes/model_export_considerations.html",
         "4.7",
         "3D asset direction conventions",
         "Godot",
@@ -268,8 +273,14 @@ _ROLE_ITEMS = (
         "right",
         "sensor",
         "sensor_mount",
-        source_claim="Godot 4.7 documents right-handed 3D coordinates with +Y up and -Z as the camera-forward direction.",
-        assurance_scope="Godot Camera3D local sensor-axis role, interpreted with the engine's documented 3D coordinates.",
+        source_claim=(
+            "Godot 4.7 documents right-handed 3D coordinates with +Y up and -Z "
+            "as the camera-forward direction."
+        ),
+        assurance_scope=(
+            "Godot Camera3D local sensor-axis role, interpreted with the engine's "
+            "documented 3D coordinates."
+        ),
         exclusions=(
             "arbitrary Node3D world alignment",
             "asset-forward conventions",
@@ -292,7 +303,10 @@ _ROLE_ITEMS = (
         "right",
         "body",
         "body_alignment",
-        source_claim="REP-103 recommends right-handed body frames with +X forward, +Y left, +Z up; it permits documented exceptions.",
+        source_claim=(
+            "REP-103 recommends right-handed body frames with +X forward, +Y left, "
+            "+Z up; it permits documented exceptions."
+        ),
         assurance_scope="ROS conventional body FLU frame under REP-103, not a rule that every ROS frame complies.",
         exclusions=(
             "per-robot body-frame compliance",
@@ -332,12 +346,16 @@ _ROLE_ITEMS = (
         "Cesium local ENU frame",
         "target_documentation",
         "geographic_enu",
-        "https://cesium.com/downloads/cesiumjs/releases/1.124/Build/Documentation/Transforms.html#eastNorthUpToFixedFrame",
+        "https://cesium.com/downloads/cesiumjs/releases/1.124/Build/Documentation/"
+        "Transforms.html#eastNorthUpToFixedFrame",
         "1.124.0",
         "Transforms.eastNorthUpToFixedFrame",
         "CesiumJS",
         frame_role="world",
-        source_claim="Cesium defines local x=east, y=north, z=ellipsoid-surface normal at the supplied origin, mapped to the selected ellipsoid's fixed frame.",
+        source_claim=(
+            "Cesium defines local x=east, y=north, z=ellipsoid-surface normal at the "
+            "supplied origin, mapped to the selected ellipsoid's fixed frame."
+        ),
         assurance_scope="Cesium local ENU-to-ellipsoid-fixed basis at an explicit origin and ellipsoid.",
         exclusions=(
             "body-forward alignment",
@@ -362,7 +380,10 @@ _ROLE_ITEMS = (
         "right",
         "body",
         "model_alignment",
-        source_claim="glTF 2.0 defines +Y up, +Z forward, and -X right, and says the front of an oriented asset faces +Z.",
+        source_claim=(
+            "glTF 2.0 defines +Y up, +Z forward, and -X right, and says the front "
+            "of an oriented asset faces +Z."
+        ),
         assurance_scope="glTF oriented-asset coordinate convention and static node rotation field.",
         exclusions=(
             "proof that arbitrary mesh geometry was authored facing +Z",
@@ -382,7 +403,10 @@ _ROLE_ITEMS = (
         "2.0",
         "3.5.2 Nodes and Hierarchy; 3.5.3 Transformations; 5.25.6 node.rotation",
         "glTF",
-        source_claim="glTF node transforms are local to the node's parent; the node rotation is a unit quaternion stored XYZW.",
+        source_claim=(
+            "glTF node transforms are local to the node's parent; the node rotation "
+            "is a unit quaternion stored XYZW."
+        ),
         assurance_scope="Static glTF node-local rotation field and hierarchy behavior in the pinned loader fixture.",
         exclusions=(
             "general scene-export/import semantics",
@@ -406,8 +430,14 @@ _ROLE_ITEMS = (
         "right",
         "world",
         "space_alignment",
-        source_claim="OpenXR 1.1 LOCAL and LOCAL_FLOOR use +X right, +Y up, -Z forward; their origins are runtime-defined and can be revised.",
-        assurance_scope="Named LOCAL or LOCAL_FLOOR reference-space orientation at the supplied runtime, base-space, and XrTime context.",
+        source_claim=(
+            "OpenXR 1.1 LOCAL and LOCAL_FLOOR use +X right, +Y up, -Z forward; "
+            "their origins are runtime-defined and can be revised."
+        ),
+        assurance_scope=(
+            "Named LOCAL or LOCAL_FLOOR reference-space orientation at the supplied "
+            "runtime, base-space, and XrTime context."
+        ),
         exclusions=(
             "geodetic alignment",
             "vendor-runtime tracking quality",
@@ -431,7 +461,10 @@ _ROLE_ITEMS = (
         "right",
         "sensor",
         "space_alignment",
-        source_claim="OpenXR 1.1 VIEW uses +X right, +Y up, -Z forward and tracks the viewer without gravity alignment.",
+        source_claim=(
+            "OpenXR 1.1 VIEW uses +X right, +Y up, -Z forward and tracks the viewer "
+            "without gravity alignment."
+        ),
         assurance_scope="Named VIEW-space orientation at the supplied runtime, base-space, and XrTime context.",
         exclusions=(
             "gravity-aligned orientation",
@@ -448,7 +481,10 @@ _ROLE_ITEMS = (
         "application_contract",
         "application_frames",
         application_source="docs/semantics.md",
-        source_claim="QuatOps defines q_parent_from_child as the active rotation mapping child coordinates into parent coordinates.",
+        source_claim=(
+            "QuatOps defines q_parent_from_child as the active rotation mapping child "
+            "coordinates into parent coordinates."
+        ),
         assurance_scope="User-declared parent and child coordinate frames for a physical orientation.",
         exclusions=(
             "automatic discovery of frame axes",

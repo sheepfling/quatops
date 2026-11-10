@@ -19,7 +19,10 @@ jobs:
           python-version: "3.13"
           cache: pip
       - name: Build evidence bundle
-        run: python -m scripts.package_evidence_bundle --output "$RUNNER_TEMP/quatops-evidence-bundle.zip"
+        run: >-
+          python -m scripts.package_evidence_bundle
+          --repository-root .
+          --output "$RUNNER_TEMP/quatops-evidence-bundle.zip"
       - name: Extract and verify replay inputs
         run: |
           python - <<'PY'

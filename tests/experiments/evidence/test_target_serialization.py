@@ -133,20 +133,25 @@ def test_concrete_serialization_rejects_mismatched_layer_and_witness_family():
 
     assert isinstance(eigen_record.contract, QuaternionBoundaryContract)
     assert isinstance(frame_chain, FrameChainWitness)
-    serialization = NativeQuaternionApiSerialization(
-        layer="native-quaternion-api",
-        contract=eigen_record.contract,
-        witnesses=[orientation],
-    )
-    payload = serialization.model_dump(mode="python")
-    payload["layer"] = "engine-quaternion"
     with pytest.raises(ValidationError):
-        NativeQuaternionApiSerialization.model_validate(payload, strict=True)
+        NativeQuaternionApiSerialization.model_validate(
+            {
+                "layer": "engine-quaternion",
+                "contract": eigen_record.contract,
+                "witnesses": [orientation],
+            },
+            strict=True,
+        )
 
-    payload = serialization.model_dump(mode="python")
-    payload["witnesses"] = [frame_chain.model_dump(mode="python")]
     with pytest.raises(ValidationError):
-        NativeQuaternionApiSerialization.model_validate(payload, strict=True)
+        NativeQuaternionApiSerialization.model_validate(
+            {
+                "layer": "native-quaternion-api",
+                "contract": eigen_record.contract,
+                "witnesses": [frame_chain],
+            },
+            strict=True,
+        )
 
 
 def test_eigen_storage_view_is_typed_and_matches_native_accessors():

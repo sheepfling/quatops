@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import argparse
 from pathlib import Path
+from textwrap import fill
 from typing import cast
 
 from quatops.experimental.converters import CONVERTERS, TARGET_DECLARATIONS
@@ -12,131 +13,158 @@ from quatops.experimental.semantics.assurance import (
     semantic_assurance_rows,
     validate_semantic_assurance,
 )
-from quatops.experimental.semantics.roles import SemanticContract
+from quatops.experimental.semantics.roles import SEMANTIC_CONTRACTS, SemanticContract
 
 
-def _table_value(value: str) -> str:
-    if any(character in value for character in "|\r\n"):
-        raise ValueError(
-            "converter registry values cannot contain Markdown table delimiters"
-        )
-    return value
+def _wrapped(label: str, value: str) -> str:
+    return fill(
+        f"{label}{value}",
+        width=100,
+        subsequent_indent="  ",
+        break_long_words=False,
+        break_on_hyphens=False,
+    )
 
 
 def render_registry() -> str:
     lines = [
         "# Converter and evidence-target registry",
         "",
-        "This generated view comes from `quatops.experimental.converters.CONVERTERS` and",
-        "`TARGET_DECLARATIONS`. Representation evidence and semantic authority",
-        "are separate; role-specific frame contracts are listed below. Edit",
-        "the registry definitions, then regenerate",
-        "this page with `python -m scripts.render_converter_registry --repository-root .`.",
+        "This generated view comes from the experimental converter declarations.",
+        "Representation evidence and semantic authority are recorded separately.",
+        "Regenerate it with `python -m scripts.render_converter_registry --repository-root .`.",
         "",
-        "| ID | Target API | Version | Role | Representation / order | Representation evidence | Semantic authority | Evidence state | Scope |",
-        "| --- | --- | --- | --- | --- | --- | --- | --- | --- |",
+        "## Target profiles",
+        "",
     ]
     for declaration in TARGET_DECLARATIONS.values():
         profile = CONVERTERS.get(declaration.converter_id or "")
-        layout = "—"
-        if profile is not None:
-            layout = f"{profile.representation} / {profile.component_order or '—'}"
-        values = (
-            declaration.target_id,
-            f"{declaration.target}: {declaration.api}",
-            declaration.version,
-            declaration.role,
-            layout,
-            profile.representation_evidence if profile is not None else "—",
-            profile.semantic_authority if profile is not None else "—",
-            declaration.state,
-            declaration.scope,
+        lines.extend(
+            [
+                f"### `{declaration.target_id}`",
+                "",
+                _wrapped("- Target/API: ", f"{declaration.target}: {declaration.api}"),
+                _wrapped("- Version: ", declaration.version),
+                _wrapped("- Role: ", declaration.role),
+                _wrapped(
+                    "- Representation/order: ",
+                    (
+                        f"{profile.representation} / {profile.component_order or '—'}"
+                        if profile is not None
+                        else "—"
+                    ),
+                ),
+                _wrapped(
+                    "- Representation evidence: ",
+                    profile.representation_evidence if profile is not None else "—",
+                ),
+                _wrapped(
+                    "- Semantic authority: ",
+                    profile.semantic_authority if profile is not None else "—",
+                ),
+                _wrapped("- Evidence state: ", declaration.state),
+                _wrapped("- Scope: ", declaration.scope),
+                "",
+            ]
         )
-        cells = " | ".join(_table_value(value) for value in values)
-        lines.append(f"| {cells} |")
-    from quatops.experimental.semantics.roles import SEMANTIC_CONTRACTS
 
     lines.extend(
         [
-            "",
             "## Role-specific semantic contracts",
             "",
-            "These contracts describe named roles and their required context; they do not make a generic quaternion field intrinsically world-, body-, or asset-oriented.",
+            "These declarations preserve source authority, role scope, axes, and binding context.",
+            "The cited primary documents are collected in the",
+            "[semantic source audit](semantic-source-audit.md).",
             "",
-            "| ID | Authority | Frame role | Description | Target family | Source kind | Source / version / section | Axes / handedness | Binding context |",
-            "| --- | --- | --- | --- | --- | --- | --- | --- | --- |",
         ]
     )
     for contract in SEMANTIC_CONTRACTS.values():
-        values = (
-            contract.contract_id,
-            contract.authority,
-            contract.frame_role,
-            contract.role,
-            contract.target_family or "—",
-            contract.source_kind,
+        source = (
             " / ".join(
-                item
-                for item in (
-                    contract.source_url or contract.application_source or "",
-                    contract.source_version or "",
-                    contract.source_section or "",
+                value
+                for value in (
+                    contract.source_version,
+                    contract.source_section,
+                    contract.application_source,
                 )
-                if item
-            ),
-            (
-                f"{contract.positive_axes}; {contract.handedness}"
-                if contract.positive_axes is not None
-                else "—"
-            ),
-            contract.binding_kind
-            + (
-                f"; alignment={contract.alignment_purpose}"
-                if contract.alignment_purpose
-                else ""
-            ),
+                if value
+            )
+            or "—"
         )
-        lines.append("| " + " | ".join(_table_value(value) for value in values) + " |")
+        axes = (
+            f"{contract.positive_axes}; {contract.handedness}"
+            if contract.positive_axes is not None
+            else "—"
+        )
+        binding = contract.binding_kind
+        if contract.alignment_purpose:
+            binding += f"; alignment={contract.alignment_purpose}"
+        lines.extend(
+            [
+                f"### `{contract.contract_id}`",
+                "",
+                _wrapped("- Authority: ", contract.authority),
+                _wrapped("- Frame role: ", contract.frame_role or "—"),
+                _wrapped("- Description: ", contract.role),
+                _wrapped("- Target family: ", contract.target_family or "—"),
+                _wrapped("- Source: ", f"{contract.source_kind}; {source}"),
+                _wrapped("- Axes/handedness: ", axes),
+                _wrapped("- Binding context: ", binding),
+                _wrapped("- Claim: ", contract.source_claim or "application-defined"),
+                _wrapped("- Scope: ", contract.assurance_scope or "—"),
+                _wrapped("- Exclusions: ", "; ".join(contract.exclusions) or "—"),
+                "",
+            ]
+        )
     lines.extend(
         [
-            "",
             "## Semantic assurance matrix",
             "",
-            "This matrix separates four claims. R is representation evidence; S is the scoped role source; B is an explicit alignment input whose physical truth remains caller/runtime supplied; N reports the native-proof scope. `numeric_action` covers quaternion/vector or static hierarchy behavior, `role_specific_action` exercises the named semantic role, and `runtime_space_relation` exercises a native named-space relation. Adapter conformance is stated separately. None of these proves physical asset or sensor alignment. R does not imply S or B.",
+            "R identifies representation evidence. S records the declared role source. B is a",
+            "caller- or runtime-supplied physical alignment. N states the native proof scope.",
+            "Adapter conformance is reported separately; none of these proves physical",
+            "asset or sensor alignment.",
             "",
-            "| Role | R: representation | S: role authority | B: physical alignment | N: native action | Scope and exclusions | Evidence IDs |",
-            "| --- | --- | --- | --- | --- | --- | --- |",
         ]
     )
     for row in semantic_assurance_rows():
         contract = cast(SemanticContract, row["contract"])
         evidence = cast(tuple[SemanticEvidenceArtifact, ...], row["evidence"])
-        source_reference = contract.source_url or contract.application_source or "—"
-        if contract.source_url is not None:
-            source_reference = (
-                f"[{contract.source_version} source]({contract.source_url})"
-            )
-        values = (
-            contract.contract_id,
-            str(row["representation"]),
-            (
-                f"{contract.source_kind}: {source_reference}; "
-                f"{contract.source_section or '—'}; "
-                f"claim: {contract.source_claim or 'application-defined'}"
-            ),
-            str(row["binding"]),
-            str(row["native"]),
-            f"{contract.assurance_scope or '—'} Excludes: {'; '.join(contract.exclusions) or '—'}",
+        conformance = (
+            "demonstrated"
+            if evidence and all(item.adapter_conformance_checked for item in evidence)
+            else "partially demonstrated"
+            if any(item.adapter_conformance_checked for item in evidence)
+            else "not demonstrated"
+        )
+        evidence_links = (
             "; ".join(
                 f"[{item.evidence_id}](../{item.artifact_path})" for item in evidence
             )
-            or "—",
+            or "—"
         )
-        lines.append("| " + " | ".join(_table_value(value) for value in values) + " |")
+        lines.extend(
+            [
+                f"### `{contract.contract_id}`",
+                "",
+                _wrapped("- R — representation: ", str(row["representation"])),
+                _wrapped(
+                    "- S — role source: ",
+                    f"{row['source']}; see the semantic source audit",
+                ),
+                _wrapped("- B — physical alignment: ", str(row["binding"])),
+                _wrapped("- N — native action: ", str(row["native"])),
+                _wrapped("- Scope: ", contract.assurance_scope or "—"),
+                _wrapped("- Exclusions: ", "; ".join(contract.exclusions) or "—"),
+                _wrapped("- Adapter conformance: ", conformance),
+                _wrapped("- Evidence: ", evidence_links),
+                "",
+            ]
+        )
     lines.extend(
         [
-            "",
-            "Representation-only profiles without a matching semantic role remain coefficient/action converters over caller-supplied frame definitions; their target name never supplies physical axes. Native evidence IDs identify immutable artifacts; each N entry names the narrow proof scope and whether adapter conformance was replayed.",
+            "Representation-only profiles remain coefficient/action converters over",
+            "caller-supplied frame definitions. A target name never supplies physical axes.",
         ]
     )
     return "\n".join(lines) + "\n"

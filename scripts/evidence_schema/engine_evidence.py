@@ -106,9 +106,7 @@ def load_engine_package(
     capture_document = {
         **witness_document,
         "target": witness_document.get("target", raw_contract["engine"]),
-        "contract": witness_document.get(
-            "contract", semantic_config.model_dump(mode="python")["conversion"]
-        ),
+        "contract": witness_document.get("contract", semantic_config.conversion),
         "provenance": witness_document.get("provenance", raw_contract["provenance"]),
     }
     capture = EngineCaptureDocument.model_validate(capture_document, strict=True)
