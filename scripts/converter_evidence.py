@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from pathlib import Path, PurePosixPath
-from typing import Optional, Union
+from typing import NamedTuple, Optional, Union
 
 from pydantic import BaseModel, ConfigDict, Field, JsonValue
 
@@ -80,36 +80,25 @@ class ConverterEvidencePackage(BaseModel):
     inputs_source_path: Optional[Path] = Field(default=None, exclude=True)  # noqa: UP045
 
 
-_CAPTURE_MODELS = {
-    "Eigen": EigenCapture,
-    "MuJoCo": MuJoCoCapture,
-    "OpenCV": OpenCVCapture,
-    "ROS 2 tf2": Ros2Capture,
-    "SpiceyPy / CSPICE": SpiceyPyCapture,
-    "CesiumJS": CesiumCapture,
-    "Three.js GLTFLoader": ThreeGltfCapture,
-    "OpenUSD": OpenUsdCapture,
-}
+class _TargetModels(NamedTuple):
+    capture: type[TargetCapture]
+    contract: type[TargetContract]
+    inputs: Optional[type[TargetInputs]]  # noqa: UP045
 
-_CONTRACT_MODELS = {
-    "Eigen": EigenContract,
-    "MuJoCo": MuJoCoContract,
-    "OpenCV": OpenCVContract,
-    "ROS 2 tf2": Ros2Contract,
-    "SpiceyPy / CSPICE": SpiceyPyContract,
-    "CesiumJS": CesiumContract,
-    "Three.js GLTFLoader": ThreeGltfContract,
-    "OpenUSD": OpenUsdContract,
-}
 
-_INPUT_MODELS = {
-    "Eigen": EigenInputs,
-    "MuJoCo": MuJoCoInputs,
-    "OpenCV": OpenCVInputs,
-    "SpiceyPy / CSPICE": SpiceyPyInputs,
-    "CesiumJS": CesiumInputs,
-    "Three.js GLTFLoader": ThreeGltfInputs,
-    "OpenUSD": OpenUsdInputs,
+_TARGET_MODELS = {
+    "Eigen": _TargetModels(EigenCapture, EigenContract, EigenInputs),
+    "MuJoCo": _TargetModels(MuJoCoCapture, MuJoCoContract, MuJoCoInputs),
+    "OpenCV": _TargetModels(OpenCVCapture, OpenCVContract, OpenCVInputs),
+    "ROS 2 tf2": _TargetModels(Ros2Capture, Ros2Contract, None),
+    "SpiceyPy / CSPICE": _TargetModels(
+        SpiceyPyCapture, SpiceyPyContract, SpiceyPyInputs
+    ),
+    "CesiumJS": _TargetModels(CesiumCapture, CesiumContract, CesiumInputs),
+    "Three.js GLTFLoader": _TargetModels(
+        ThreeGltfCapture, ThreeGltfContract, ThreeGltfInputs
+    ),
+    "OpenUSD": _TargetModels(OpenUsdCapture, OpenUsdContract, OpenUsdInputs),
 }
 
 # Converter input documents are authored beside their experiment adapters. When
@@ -138,26 +127,26 @@ _INPUT_DOCUMENT_PATHS = {
 def _target_capture(
     name: str, document: dict[str, JsonValue], *, directory: Path
 ) -> TargetCapture:
-    model = _CAPTURE_MODELS.get(name)
-    if model is None:
+    models = _TARGET_MODELS.get(name)
+    if models is None:
         raise ValueError(f"{directory}: unsupported typed capture target {name!r}")
-    return model.model_validate(document, strict=True)
+    return models.capture.model_validate(document, strict=True)
 
 
 def _target_contract(name: str, document: dict[str, JsonValue], *, directory: Path):
-    model = _CONTRACT_MODELS.get(name)
-    if model is None:
+    models = _TARGET_MODELS.get(name)
+    if models is None:
         raise ValueError(f"{directory}: unsupported typed contract target {name!r}")
-    return model.model_validate(document, strict=True)
+    return models.contract.model_validate(document, strict=True)
 
 
 def _target_inputs(
     name: str, document: dict[str, JsonValue], *, directory: Path
 ) -> TargetInputs:
-    model = _INPUT_MODELS.get(name)
-    if model is None:
+    models = _TARGET_MODELS.get(name)
+    if models is None or models.inputs is None:
         raise ValueError(f"{directory}: unsupported typed input target {name!r}")
-    return model.model_validate(document, strict=True)
+    return models.inputs.model_validate(document, strict=True)
 
 
 def _observation_group_count(capture: TargetCapture) -> int:
