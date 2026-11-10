@@ -65,11 +65,15 @@ def serialize_eigen_witnesses(
         retained_rows = select_retained_rows(
             profile.orientations, retained_case_ids, context=f"Eigen {profile.dtype}"
         )
-        if not any(
-            row.case_id == "mixed_a" and row.quaternion.coeffs_xyzw is not None
-            for row in retained_rows
-        ):
+        mixed = next(row for row in retained_rows if row.case_id == "mixed_a")
+        storage = mixed.quaternion.coeffs_xyzw
+        if storage is None:
             raise ValueError(f"Eigen {profile.dtype} lacks native coeffs() evidence")
+        wxyz = mixed.quaternion.wxyz
+        if storage != [wxyz[1], wxyz[2], wxyz[3], wxyz[0]]:
+            raise ValueError(
+                f"Eigen {profile.dtype} coeffs() differs from WXYZ accessors"
+            )
         witnesses.extend(
             OrientationWitness(
                 kind="orientation",
