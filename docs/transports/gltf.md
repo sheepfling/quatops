@@ -27,9 +27,10 @@ change the format contract or Three.js results. Details and native values are
 in the [Blender capture notes](../../experiments/transports/gltf/2.0.0/blender/5.1.2/README.md)
 and [frozen output](../../tests/golden/transports/gltf/2.0.0/blender/5.1.2/native_rotation.json).
 
-For glTF, rotational `LINEAR` interpolation is specified to use SLERP, and
-`CUBICSPLINE` data uses in-tangent, value, and out-tangent triples with
-normalization of the resulting quaternion. See the
+For glTF, rotational `LINEAR` interpolation should use SLERP; the specification
+provides a shortest-path reference and permits approximations. `CUBICSPLINE`
+data uses in-tangent, value, and out-tangent triples, and the resulting
+quaternion must be normalized. See the
 [Khronos glTF 2.0 animation sampler rules](https://registry.khronos.org/glTF/specs/2.0/glTF-2.0.html#reference-animation-sampler).
 
 ## QuatOps static-file converter proof
