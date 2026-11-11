@@ -15,40 +15,18 @@ The message-to-transform check accepts either quaternion sign and float64
 rounding within `2e-12`; the stored native values are never normalized or
 rewritten by that comparison.
 
-The capture requires Docker Desktop with Linux containers. From the repository
-root, build the pinned image and run the capture into a temporary host folder:
+The capture requires Docker with Linux containers. From the repository root:
 
-```powershell
-$image = 'quatops-ros2-tf2:jazzy'
-$captureDir = Join-Path $env:TEMP 'quatops-captures\ros2-tf2-0.36.23'
-New-Item -ItemType Directory -Force $captureDir | Out-Null
-docker build --tag $image --file experiments\converters\ros2\0.36.23\Dockerfile experiments\converters\ros2\0.36.23
-$containerCommand = @'
-source /opt/ros/jazzy/setup.bash
-colcon build \
-  --base-paths experiments/converters/ros2/0.36.23/native \
-  --build-base /tmp/ros-build \
-  --install-base /tmp/ros-install
-source /tmp/ros-install/setup.bash
-PYTHONPATH=/workspace /opt/quatops-evidence/bin/python experiments/converters/ros2/0.36.23/capture_native.py \
-  --repository-root /workspace \
-  --inputs experiments/converters/ros2/0.36.23/chain_inputs.json \
-  --output /captures/full \
-  --executable /tmp/ros-install/quatops_ros_capture/lib/quatops_ros_capture/capture_ros \
-  --compare-witnesses tests/golden/oracles/ros2/0.36.23/witnesses.json \
-  --runtime-image ros:jazzy-ros-base@sha256:8eed0a4669bbf43ee331878a4c39bd8ebddea8e3312a58b4fae8edb14526b617
-'@
-docker run --rm `
-  --volume "${PWD}:/workspace" `
-  --volume "${captureDir}:/captures" `
-  $image `
-  $containerCommand
+```shell
+python experiments/converters/ros2/0.36.23/run_capture.py --repository-root .
 ```
 
-The capture writes `witnesses.json` and a run-specific `manifest.json` directly
-under `/captures/full`. Its observation count is two; the historical fixture
+The runner builds the pinned image, compares native values to the retained
+witnesses, and writes the result to a temporary directory. Pass `--output` to
+select a new or empty directory. The capture writes `witnesses.json` and a
+run-specific `manifest.json`; its observation count is two. The historical fixture
 records the nine-observation capture from which it was originally selected.
-The optional comparison checks all selected values, including signed zero,
+The comparison checks all selected values, including signed zero,
 against that historical fixture and records its digest in the new run manifest.
 The retained fixture
 and QuatOps replay are in

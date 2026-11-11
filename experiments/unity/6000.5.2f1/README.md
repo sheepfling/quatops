@@ -34,11 +34,6 @@ outside this converter's retained evidence.
 
 Run the replay and generated frame-map checks with:
 
-```powershell
-$proofTests = @(
-  'tests\quatops\experimental\engines\test_canonical_interoperability.py',
-  'tests\quatops\experimental\engines\test_engine_basis_oracle.py',
-  'tests\experiments\engines\shared\test_engine_proof_profiles.py'
-)
-.venv\Scripts\python.exe -m pytest -q $proofTests
+```shell
+python -m scripts.verify --repository-root . engines
 ```

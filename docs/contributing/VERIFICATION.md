@@ -6,35 +6,27 @@ development tools.
 
 ## Set up the development environment
 
-From the repository root, create the local environment and install the declared
-development dependencies:
+Create and activate a virtual environment, then install the verification
+dependencies from the repository root:
 
-```sh
-python3 -m venv .venv
-.venv/bin/python -m pip install -e '.[dev,typecheck]'
+```shell
+python -m pip install -e ".[dev,typecheck]" build uv==0.11.28
 ```
 
-Use the repository `.venv` for all Python commands. Do not substitute a global
-interpreter when a dependency is missing.
+Use the activated environment for the commands below.
 
 ## Run routine checks
 
-These are the same checks used by CI:
+Run the full local checks, including the CI suite, type checking, the capture
+lock, and package build:
 
-```sh
-.venv/bin/python -m pytest -q
-.venv/bin/python -m mypy tests/typing_tests/foundational_consumer.py \
-    tests/typing_tests/consumer.py tests/typing_tests/float32_consumer.py
-.venv/bin/pyright --pythonpath .venv/bin/python
-.venv/bin/ruff check src tests examples experiments
-.venv/bin/python -m scripts.validate_evidence_json --repository-root .
-.venv/bin/python -m scripts.validate_converter_evidence --repository-root .
-.venv/bin/python -m scripts.render_converter_registry --repository-root . --check
-.venv/bin/ruff check --select B,C4,E4,PERF,RUF,SIM,UP \
-    experiments/oracles experiments/converters scripts
-.venv/bin/ruff format --check experiments scripts
-.venv/bin/python -m build
+```shell
+python -m scripts.verify --repository-root .
 ```
+
+Use `python -m scripts.verify --help` for the individual evidence, engine,
+interoperability, benchmark, CI, type-check, and lock scopes. The CI matrix
+runs the same `ci` scope; its package and Pyright jobs run separately.
 
 Pytest's default configuration skips opt-in performance cases. The routine
 suite covers API behavior, conventions, numerical edge cases, scalar and NumPy
@@ -50,34 +42,16 @@ not preserve old pass counts or environment snapshots.
 The pinned Alphus quality review runs on pushes and pull requests as a separate
 workflow.
 
-Before pushing, run the relevant checks in a Linux container as well. This
-example bundles the current commit and checks it out inside the container, so
-Git applies Linux file modes and the recorded line-ending rules:
+Before pushing, run the checks in a Linux Docker container as well:
 
-```powershell
-$bundle = Join-Path $env:TEMP 'quatops-linux-check.bundle'
-git bundle create $bundle HEAD
-$checks = @(
-  'apt-get update -qq'
-  'apt-get install -y -qq --no-install-recommends git'
-  'git clone /source.bundle /tmp/quatops'
-  'cd /tmp/quatops'
-  'python -m venv /tmp/quatops-venv'
-  '. /tmp/quatops-venv/bin/activate'
-  'pip install -e ".[dev]" uv==0.11.28'
-  'uv lock --check --project experiments/converters/python'
-  'python -m scripts.validate_evidence_json --repository-root .'
-  'python -m scripts.validate_converter_evidence --repository-root .'
-  'python -m pytest -q'
-  'ruff check src tests examples experiments'
-  'ruff format --check experiments scripts'
-) -join ' && '
-docker run --rm -v "${bundle}:/source.bundle:ro" python:3.12-slim sh -c $checks
+```shell
+python -m scripts.verify --repository-root . linux
 ```
 
-Commit local changes before creating the bundle, and add any change-specific
-checks. This does not replace the CI Python-version matrix or native captures
-in their pinned target runtimes.
+The command requires a clean committed checkout, bundles `HEAD`, and clones it
+inside the container so Git applies Linux file modes and line-ending rules.
+It does not replace the CI Python-version matrix or native captures in their
+pinned target runtimes. Run additional change-specific checks as needed.
 
 The package job also builds both distribution formats, installs the wheel into
 an isolated target directory, checks scalar conversion without optional
@@ -88,36 +62,31 @@ contents are expected to exclude local Numba cache files.
 
 Install the declared development dependencies, then run the benchmark suite:
 
-```sh
-.venv/bin/python -m pytest tests/benchmarks -m benchmark --benchmark-only \
-    --benchmark-group-by=group --benchmark-columns=median \
-    --benchmark-json=/tmp/quatops-benchmarks.json
+```shell
+python -m scripts.verify --repository-root . benchmarks
 ```
 
 To measure reusable versus one-shot scalar and 10k-item orientation conversion
 calls specifically, run:
 
-```sh
-.venv/bin/python -m pytest \
-    tests/benchmarks/quatops/test_orientation_converter.py \
-    -m benchmark --benchmark-only --benchmark-group-by=group \
-    --benchmark-columns=median
+```shell
+python -m scripts.verify --repository-root . converter-benchmark
 ```
 
 The benchmark cases check correctness before timing and warm optional Numba
-kernels where applicable. Results describe only the machine and software
-versions used for that run. Keep raw output with the run artifact; do not treat
-timings or winner rankings in a checked-in document as durable performance
-claims. See [the experiment guide](../../experiments/README.md) for narrower
-commands.
+kernels where applicable. The full suite writes its JSON report to the system
+temporary directory. Results describe only the machine and software versions
+used for that run. Keep raw output with the run artifact; do not treat timings
+or winner rankings in a checked-in document as durable performance claims.
+See [the experiment guide](../../experiments/README.md) for narrower commands.
 
 ## Inspect optional Numba coverage
 
 Numba is an optional accelerator. To inspect the public API route catalog and
 the signatures actually compiled in the current environment, run:
 
-```sh
-.venv/bin/python experiments/numba_coverage.py
+```shell
+python experiments/numba_coverage.py
 ```
 
 The report distinguishes direct Numba paths, compositions that reuse compiled

@@ -25,8 +25,8 @@ the product name.
 Validate and normalize the typed source packages after changing a capture,
 contract, or retention rule:
 
-```powershell
-.venv\Scripts\python.exe -m scripts.validate_converter_evidence --repository-root .
+```shell
+python -m scripts.verify --repository-root . evidence
 ```
 
 The validator checks the target-specific contracts and native witnesses and

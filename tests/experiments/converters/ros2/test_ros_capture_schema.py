@@ -4,6 +4,8 @@ from __future__ import annotations
 
 import copy
 import json
+import subprocess
+import sys
 
 import pytest
 from pydantic import ValidationError
@@ -12,6 +14,27 @@ from scripts.evidence_schema.ros_capture import RosChainInputs, RosDirectCapture
 from tests.support.paths import REPOSITORY_ROOT
 
 ROOT = REPOSITORY_ROOT
+
+
+def test_ros_runner_rejects_nonempty_output_before_capture(tmp_path):
+    existing = tmp_path / "keep.txt"
+    existing.write_text("keep", encoding="utf-8")
+    result = subprocess.run(
+        [
+            sys.executable,
+            str(ROOT / "experiments/converters/ros2/0.36.23/run_capture.py"),
+            "--repository-root",
+            str(ROOT),
+            "--output",
+            str(tmp_path),
+        ],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    assert result.returncode != 0
+    assert "Capture directory is not empty" in result.stderr
+    assert existing.read_text(encoding="utf-8") == "keep"
 
 
 def _untag(value):

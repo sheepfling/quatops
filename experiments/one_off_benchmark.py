@@ -1,7 +1,7 @@
 """Run the pytest benchmarks and print an explicit winner per group.
 
-Run from the repository root with ``.venv/bin/python
-experiments/one_off_benchmark.py`` for scalar cases, or add
+Run from the repository root with ``python experiments/one_off_benchmark.py
+--repository-root .`` for scalar cases, or add
 ``--include-vectorized`` to include 10k NumPy workloads. Benchmark cases live in
 ``tests/benchmarks/`` so correctness checks and timings exercise the same
 callables. Use ``--json results.json`` to save a machine-readable report.

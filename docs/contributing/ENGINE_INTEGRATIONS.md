@@ -61,9 +61,9 @@ choice explicit.
 
 Run the focused and complete suites when changing implementation code:
 
-```sh
-.venv/bin/python -m pytest -q tests/quatops/experimental/engines/test_engine_basis_oracle.py
-.venv/bin/python -m pytest -q
+```shell
+python -m scripts.verify --repository-root . engines
+python -m scripts.verify --repository-root .
 ```
 
 For the repository's current test commands and dependency setup, see the

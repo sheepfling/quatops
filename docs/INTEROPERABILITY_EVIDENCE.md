@@ -93,10 +93,7 @@ and inspect the compact review bundle.
 Run the converter acceptance set with:
 
 ```shell
-uv run --extra dev python -m pytest -q \
-  tests/quatops/experimental \
-  tests/experiments/engines \
-  tests/experiments/converters
+python -m scripts.verify --repository-root . interoperability
 ```
 
 ## Converter-boundary evidence and remaining scope

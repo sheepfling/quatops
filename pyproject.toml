@@ -107,6 +107,7 @@ include = [
     "scripts/render_converter_registry.py",
     "scripts/validate_converter_evidence.py",
     "scripts/validate_evidence_json.py",
+    "scripts/verify.py",
     "scripts/retain_engine_witnesses.py",
     "experiments/oracles/sophus/1.24.6/verify_scipy.py",
     "experiments/oracles/openxr/1.1.65/verify_test_runtime.py",
@@ -114,6 +115,7 @@ include = [
     "experiments/converters/eigen/5.0.1/capture_native.py",
     "experiments/converters/gltf/2.0.0/create_asset.py",
     "experiments/converters/mujoco/3.17.0/capture_native.py",
+    "experiments/converters/ros2/0.36.23/run_capture.py",
     "experiments/converters/spiceypy/8.3.0/capture_native.py",
 ]
 # Package exports are assembled from runtime adapter tables and compatibility
