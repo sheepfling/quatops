@@ -10,6 +10,10 @@ import tempfile
 from dataclasses import dataclass
 from pathlib import Path
 
+from experiments.converters.cesium.distribution import (
+    CesiumDistribution,
+    install_distribution,
+)
 from scripts.evidence_json import read_evidence_document
 from scripts.evidence_schema.converter_captures import (
     CesiumCapture,
@@ -25,7 +29,7 @@ from scripts.platform_probe import is_windows
 
 @dataclass(frozen=True)
 class CapturePlan:
-    node_project: Path
+    node_project: Path | None
     input_generator: Path
     native_capture: Path
     target_dir: Path
@@ -33,7 +37,7 @@ class CapturePlan:
 
 PLANS = {
     "cesium": CapturePlan(
-        node_project=Path("experiments/converters/cesium/1.124.0"),
+        node_project=None,
         input_generator=Path("experiments/converters/cesium/1.124.0/create_inputs.py"),
         native_capture=Path("experiments/converters/cesium/1.124.0/capture_native.mjs"),
         target_dir=Path("experiments/converters/cesium/1.124.0"),
@@ -80,38 +84,51 @@ def main() -> None:
     plan = PLANS[target]
     python_command = [sys.executable]
 
-    if is_windows():
-        npm_ci = "npm.cmd ci"
-        npm_command = ["cmd.exe", "/d", "/s", "/c", npm_ci]
-    else:
-        npm_command = ["npm", "ci"]
-    run(
-        npm_command,
-        repository_root=repository_root,
-        env=env,
-        cwd=repository_root / plan.node_project,
-    )
-    run(
-        [
-            *python_command,
-            str(repository_root / plan.input_generator),
-            "--repository-root",
-            str(repository_root),
-        ],
-        repository_root=repository_root,
-        env=env,
-    )
-    capture_dir = (
-        options.output.resolve()
-        if options.output
-        else Path(tempfile.mkdtemp(prefix=f"quatops-{target}-capture-"))
-    )
-    run(
-        ["node", str(repository_root / plan.native_capture), str(capture_dir)],
-        repository_root=repository_root,
-        env=env,
-    )
-    validate_capture(target, repository_root / plan.target_dir, capture_dir)
+    with tempfile.TemporaryDirectory(prefix=f"quatops-{target}-runtime-") as runtime:
+        native_args = []
+        if plan.node_project is None:
+            install_distribution(
+                repository_root / plan.target_dir / "distribution.json", Path(runtime)
+            )
+            native_args.append(runtime)
+        else:
+            npm_command = (
+                ["cmd.exe", "/d", "/s", "/c", "npm.cmd ci"]
+                if is_windows()
+                else ["npm", "ci"]
+            )
+            run(
+                npm_command,
+                repository_root=repository_root,
+                env=env,
+                cwd=repository_root / plan.node_project,
+            )
+        run(
+            [
+                *python_command,
+                str(repository_root / plan.input_generator),
+                "--repository-root",
+                str(repository_root),
+            ],
+            repository_root=repository_root,
+            env=env,
+        )
+        capture_dir = (
+            options.output.resolve()
+            if options.output
+            else Path(tempfile.mkdtemp(prefix=f"quatops-{target}-capture-"))
+        )
+        run(
+            [
+                "node",
+                str(repository_root / plan.native_capture),
+                str(capture_dir),
+                *native_args,
+            ],
+            repository_root=repository_root,
+            env=env,
+        )
+        validate_capture(target, repository_root / plan.target_dir, capture_dir)
     print(f"Validated native witnesses and provenance in {capture_dir}")
 
 
@@ -126,7 +143,22 @@ def validate_capture(target: str, source: Path, capture: Path) -> None:
     inputs = read_evidence_document(input_path)
     if target == "cesium":
         result = CesiumCapture.model_validate(document, strict=True)
-        CesiumContract.model_validate(contract, strict=True)
+        cesium_contract = CesiumContract.model_validate(contract, strict=True)
+        dependency_path = source / "distribution.json"
+        dependency_field = "distribution_sha256"
+        pin = CesiumDistribution.model_validate(
+            read_evidence_document(dependency_path), strict=True
+        )
+        if cesium_contract.target != f"CesiumJS {pin.version}":
+            raise ValueError("Cesium distribution version differs from the contract")
+        if manifest["target"]["distribution_integrity"] != pin.integrity:
+            raise ValueError(
+                "Cesium capture distribution integrity differs from its pin"
+            )
+        if manifest["distribution_installer_sha256"] != sha256_file(
+            source.parent / "distribution.py"
+        ):
+            raise ValueError("Cesium capture distribution installer digest differs")
         recipe = CesiumInputs.model_validate(inputs, strict=True)
         ids = [row.case_id for row in result.observations]
         expected = [row.case_id for row in recipe.cases]
@@ -144,12 +176,17 @@ def validate_capture(target: str, source: Path, capture: Path) -> None:
                 or len(outputs.point_roundtrip_local_xyz_m.values) != 1
             ):
                 raise ValueError("Cesium capture is missing selected native actions")
-        expected_name, expected_version = "CesiumJS", "1.124.0"
+        expected_name, expected_version = "CesiumJS", pin.version
         input_digest = manifest["inputs"]["sha256"]
     else:
         result = ThreeGltfCapture.model_validate(document, strict=True)
         ThreeGltfContract.model_validate(contract, strict=True)
         ThreeGltfInputs.model_validate(inputs, strict=True)
+        dependency_path = (
+            source.parents[2]
+            / "transports/gltf/2.0.0/threejs/0.187.0/package-lock.json"
+        )
+        dependency_field = "package_lock_sha256"
         if result.native_entry_points != [
             "GLTFLoader.parse",
             "Object3D.updateMatrixWorld",
@@ -184,12 +221,6 @@ def validate_capture(target: str, source: Path, capture: Path) -> None:
         or manifest["target"]["package_version"] != expected_version
     ):
         raise ValueError("native target differs from the pinned contract")
-    lockfile = (
-        source / "package-lock.json"
-        if target == "cesium"
-        else source.parents[2]
-        / "transports/gltf/2.0.0/threejs/0.187.0/package-lock.json"
-    )
     if (
         manifest["semantic_contract"]["sha256"] != sha256_file(contract_path)
         or input_digest != sha256_file(input_path)
@@ -202,7 +233,7 @@ def validate_capture(target: str, source: Path, capture: Path) -> None:
         )
         or manifest["numeric_helper_sha256"]
         != sha256_file(source.parents[1] / "shared/numeric_evidence.mjs")
-        or manifest["package_lock_sha256"] != sha256_file(lockfile)
+        or manifest[dependency_field] != sha256_file(dependency_path)
     ):
         raise ValueError("native capture provenance digest differs from its artifact")
 

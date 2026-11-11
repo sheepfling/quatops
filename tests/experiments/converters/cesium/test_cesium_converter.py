@@ -111,8 +111,10 @@ def test_cesium_capture_provenance_and_explicit_frame_contract():
         "input_builder_sha256": ROOT / "experiments/converters/cesium/inputs.py",
         "capture_script_sha256": ROOT
         / "experiments/converters/cesium/1.124.0/capture_native.mjs",
-        "package_lock_sha256": ROOT
-        / "experiments/converters/cesium/1.124.0/package-lock.json",
+        "distribution_sha256": ROOT
+        / "experiments/converters/cesium/1.124.0/distribution.json",
+        "distribution_installer_sha256": ROOT
+        / "experiments/converters/cesium/distribution.py",
         "numeric_helper_sha256": ROOT
         / "experiments/converters/shared/numeric_evidence.mjs",
         "retention_formatter_sha256": ROOT / "scripts/evidence_format.py",
@@ -120,15 +122,24 @@ def test_cesium_capture_provenance_and_explicit_frame_contract():
     for field, path in reproduction_paths.items():
         assert hashlib.sha256(path.read_bytes()).hexdigest() == reproduction[field]
     assert (
-        MANIFEST["direct_reproduction"]["native_script_sha256"]
+        MANIFEST["bundled_reproduction"]["native_script_sha256"]
         == reproduction["capture_script_sha256"]
     )
     assert (
-        MANIFEST["direct_reproduction"]["reproduction_runner_sha256"]
+        MANIFEST["bundled_reproduction"]["reproduction_runner_sha256"]
         == hashlib.sha256(
             (ROOT / "experiments/run_converter_capture.py").read_bytes()
         ).hexdigest()
     )
+    for item in ("lock", "manifest"):
+        assert (
+            hashlib.sha256(
+                read_provenance_source(
+                    ROOT, provenance[f"native_package_{item}_archive"]
+                )
+            ).hexdigest()
+            == provenance[f"native_package_{item}_sha256"]
+        )
     assert (
         hashlib.sha256(
             read_provenance_source(ROOT, reproduction["input_generator_archive"])

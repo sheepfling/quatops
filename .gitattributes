@@ -24,3 +24,4 @@ scripts/evidence_schema/primitives.py text eol=crlf
 scripts/direct_quaternion_capture.py text eol=lf
 scripts/evidence_format.py text eol=lf
 scripts/evidence_schema/utilities.py text eol=lf
+experiments/run_converter_capture.py text eol=lf

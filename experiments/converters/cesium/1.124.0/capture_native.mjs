@@ -7,13 +7,13 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 import { numeric, stringifyEvidence } from '../../shared/numeric_evidence.mjs';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
-const packageRoot = here;
 const repositoryRoot = path.resolve(here, '../../../..');
 const semanticContractPath = path.join(here, 'semantic_contract.json');
-const C = await import(pathToFileURL(path.join(packageRoot, 'node_modules/cesium/Source/Cesium.js')));
 const inputPath = path.join(here, 'converter_inputs.json');
-const outputPath = process.argv[2];
-if (!outputPath) throw new Error('Usage: node capture_native.mjs OUTPUT_DIRECTORY');
+const [outputPath, packageRoot] = process.argv.slice(2);
+if (!outputPath || !packageRoot) throw new Error('Usage: node capture_native.mjs OUTPUT_DIRECTORY CESIUM_DISTRIBUTION');
+const bundlePath = path.join(packageRoot, 'index.cjs');
+const C = await import(pathToFileURL(bundlePath));
 if (fs.existsSync(outputPath) && fs.readdirSync(outputPath).length) throw new Error('Refusing to overwrite output directory');
 fs.mkdirSync(outputPath, { recursive: true });
 const input = JSON.parse(fs.readFileSync(inputPath, 'utf8'));
@@ -60,19 +60,22 @@ for (const item of input.cases) {
 
 const rowsPath = path.join(outputPath, 'witnesses.json');
 fs.writeFileSync(rowsPath, stringifyEvidence({schema_version: '1.0', evidence_kind: 'native_cesium_quatops_converter_capture', observations}));
-const lockPath = path.join(packageRoot, 'package-lock.json');
-const packageJsonPath = path.join(packageRoot, 'node_modules/cesium/package.json');
-const packageVersion = JSON.parse(fs.readFileSync(packageJsonPath, 'utf8')).version;
-if (packageVersion !== '1.124.0') throw new Error('Expected CesiumJS 1.124.0');
+const pinPath = path.join(here, 'distribution.json');
+const pin = JSON.parse(fs.readFileSync(pinPath, 'utf8'));
+const packageInfo = JSON.parse(fs.readFileSync(path.join(packageRoot, 'package.json'), 'utf8'));
+if (packageInfo.name !== pin.name || packageInfo.version !== pin.version || C.VERSION !== '1.124') {
+  throw new Error('Cesium distribution differs from the pinned release');
+}
 const exporterPath = fileURLToPath(import.meta.url);
 const manifest = {
   schema_version: '1.0', evidence_kind: 'native_cesium_quatops_converter_capture',
   semantic_contract: { file: path.relative(repositoryRoot, semanticContractPath).split(path.sep).join('/'), sha256: sha(semanticContractPath) },
-  target: { name: 'CesiumJS', package_version: packageVersion, api_version: C.VERSION, package_entry_sha256: sha(path.join(packageRoot, 'node_modules/cesium/Build/Cesium/Cesium.js')) },
+  target: { name: 'CesiumJS', package_version: packageInfo.version, api_version: C.VERSION, package_entry_sha256: sha(bundlePath), distribution_integrity: pin.integrity },
   execution: { was_run: true, utc: new Date().toISOString(), node: process.version, v8: process.versions.v8, platform: os.platform(), architecture: os.arch() },
   inputs: { path: path.relative(here, inputPath), sha256: sha(inputPath), kind: 'QuatOps-generated explicit-frame converter inputs' },
   exporter: { path: path.relative(here, exporterPath), sha256: sha(exporterPath) },
-  package_lock_sha256: sha(lockPath),
+  distribution_sha256: sha(pinPath),
+  distribution_installer_sha256: sha(path.join(here, '../distribution.py')),
   numeric_helper_sha256: sha(path.resolve(here, '../../shared/numeric_evidence.mjs')),
   observations: { path: 'witnesses.json', sha256: sha(rowsPath), count: observations.length },
   output: path.resolve(outputPath),
