@@ -34,33 +34,11 @@
     "loaded_cspice_binary_sha256": "7fd2dcc58d73ed5293847e67109897caba34240b8f9c38ad739c0b2ec6ce7715",
     "exact_invocation": "uv run --locked --project experiments/converters/spiceypy/8.3.0 --python 3.10.11 python experiments/converters/spiceypy/8.3.0/capture_native.py --repository-root <repository>",
     "capture_script_archive": "experiments/provenance/reproduction-v1.zip#spiceypy-8.3.0-capture_native.py",
-    "reproduction_lockfile_sha256": "4377022efa364fac013b8adf6a232bfbd6dc860847418061ef7f6c66e0f2d142",
-    "previous_reproduction_lockfile_sha256": "4d00653d2ac0617602271456b801d0c38f1aaf472d73833dec13dcacad887031",
-    "previous_reproduction_lockfile_revision": "d24969cefca8c5393f37165b34208ebc20bcc7a6",
-    "pre_shared_lockfile_sha256": "18939d21727075d05851f0561d4b5775d6a1c6a8785e87096dc8e7c56af4dea3",
-    "pre_shared_lockfile_revision": "2618dc4757feb94669d35a57661ff1acdf731ea0",
-    "previous_reproduction_capture_script_sha256": "11cf014273b61010ddfe52cc0207ee93c11a6715087701c808a98ba45d1da596",
-    "pre_unified_lockfile_sha256": "175d58e93537385b27d97d51bbfecd5d3eca43ef73faa588c4629482a8378e95",
-    "pre_unified_lockfile_revision": "abf2a2f27ceb601398da126423901484eb6ae46b",
-    "pre_unified_capture_source_sha256": "f828dd838bbe37e478979bcde5145c88d6c7631e66858be0a41f32c7caf8a0de"
+    "reproduction_lockfile_sha256": "4377022efa364fac013b8adf6a232bfbd6dc860847418061ef7f6c66e0f2d142"
   },
   "semantic_contract": {
     "file": "experiments/converters/spiceypy/8.3.0/semantic_contract.json",
     "sha256": "3897449f31edcb43c0f81234a95e539d84f702b0ce9c0f61adac410679c05bc9"
-  },
-  "compact_lock_replay": {
-    "utc": "2026-11-10T17:54:32.520584+00:00",
-    "python": "3.10.11 (tags/v3.10.11:7d4cc5a, Apr  5 2023, 00:38:17) [MSC v.1929 64 bit (AMD64)]",
-    "lockfile_sha256": "18939d21727075d05851f0561d4b5775d6a1c6a8785e87096dc8e7c56af4dea3",
-    "native_binary_sha256": "7fd2dcc58d73ed5293847e67109897caba34240b8f9c38ad739c0b2ec6ce7715",
-    "witnesses_sha256": "ea498c1a3b326bb76531aa94004ecaf66bc15098111ff2b6669a479f0d9dbe60"
-  },
-  "shared_lock_replay": {
-    "utc": "2026-11-10T18:37:35.951318+00:00",
-    "python": "3.10.11 (tags/v3.10.11:7d4cc5a, Apr  5 2023, 00:38:17) [MSC v.1929 64 bit (AMD64)]",
-    "lockfile_sha256": "175d58e93537385b27d97d51bbfecd5d3eca43ef73faa588c4629482a8378e95",
-    "native_binary_sha256": "7fd2dcc58d73ed5293847e67109897caba34240b8f9c38ad739c0b2ec6ce7715",
-    "witnesses_sha256": "ea498c1a3b326bb76531aa94004ecaf66bc15098111ff2b6669a479f0d9dbe60"
   },
   "unified_lock_replay": {
     "utc": "2026-11-10T19:07:46.243909+00:00",

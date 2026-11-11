@@ -90,17 +90,6 @@ def test_eigen_contract_source_pin_and_native_build_provenance():
     }
     for field, path in paths.items():
         assert hashlib.sha256(path.read_bytes()).hexdigest() == provenance[field], field
-    replay = MANIFEST["compact_lock_replay"]
-    assert replay["lockfile_sha256"] == provenance["pre_shared_lockfile_sha256"]
-    assert replay["witnesses_sha256"] == provenance["witnesses_sha256"]
-    assert (
-        MANIFEST["shared_lock_replay"]["lockfile_sha256"]
-        == provenance["pre_unified_lockfile_sha256"]
-    )
-    assert (
-        MANIFEST["shared_lock_replay"]["witnesses_sha256"]
-        == provenance["witnesses_sha256"]
-    )
     assert (
         MANIFEST["unified_lock_replay"]["lockfile_sha256"]
         == provenance["reproduction_lockfile_sha256"]
@@ -116,7 +105,6 @@ def test_eigen_contract_source_pin_and_native_build_provenance():
         hashlib.sha256(archived_source).hexdigest()
         == provenance["native_cpp_source_sha256"]
     )
-    assert provenance["reproduction_witness_sha256"] == provenance["witnesses_sha256"]
     assert provenance["eigen_source_archive_sha256"] == SOURCE["archive_sha256"]
     assert provenance["eigen_version_header_sha256"] == SOURCE["version_header_sha256"]
     archive_url = urlsplit(SOURCE["official_archive_url"])

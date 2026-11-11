@@ -89,36 +89,10 @@
     "dockerfile_sha256": "e2214f02b11168ad25ab6e88a86b428d67e940a0555574dae328391aed91ee52",
     "build_recipe_sha256": "65e75f02b743ef65eab8f0041ba8f286c767a60e3e02a64921e1a822af00e835",
     "selected_witnesses_sha256": "a6e2569b79295b44c3598decc70efba233f1ddd20e420c22c0673ee3aee64920",
-    "reproduction": {
-      "exporter_source_sha256": "1b19277bdc1888126fc0a9398aae6a09ea51fa046595eab9f1ccf62eda8f5870",
-      "runner_sha256": "6177ca151ac91efce01b00b3db1df1a59266cba3539ed5e8c5f81b75e850c906",
-      "previous_checkout_runner_sha256": "be4047a273917756c9f0f9154a0990b8318797048744be360457a391e80c8d7b",
-      "retention_script_sha256": "8fb2fc09dd05ddfc165be468d241169cfe8819e9e270852fde840467a4e9b2d4",
-      "retention_script_identity_note": "The current selector reads the frame-chain recipe; the stored witness values remain from the historical capture.",
-      "direct_json_replay": {
-        "utc": "2026-11-10T08:34:16.808333+00:00",
-        "tf2_version": "0.36.23",
-        "native_stdout_sha256": "23bde6d5273163efd6489d08f675dd340316792f1c8880cd036c26ca4c8861a0",
-        "selected_values": "match the historical fixture, including signed-zero spelling; JSON key order and full-capture count differ"
-      },
-      "retention_formatter_sha256": "56961d6be101a2bdfb1b21372c823ec86dfd636547d851901b7284f2ae20e0b3",
-      "dockerfile_sha256": "70cd2720db531d2debdb37ea6d41ac12095b2f3912baa0e3b22bc522dd941e25",
-      "build_recipe_sha256": "65e75f02b743ef65eab8f0041ba8f286c767a60e3e02a64921e1a822af00e835",
-      "corpus_sha256": "e5dd788cdbed73ca0dbd5d4a619b5526282c0656737abdfdf9593bd732a01746",
-      "input_serialization_note": "The frame-chain recipe is the reproduction input; the historical capture has its own input digest.",
-      "runner_identity_note": "The current reproduction runner validates the frame-chain recipe; capture_runner_sha256 preserves the historical runner used for the recorded capture.",
-      "previous_checkout_capture_helper_sha256": "ecdf0245b9d0318d67189c471f26b3ec58e2ef871611b6a2c5c79cbbc16963da",
-      "capture_helper_archive": "experiments/provenance/reproduction-v1.zip#capture_io.py",
-      "previous_checkout_exporter_source_sha256": "3d8374d3e3dede9d14e06ae5fb5667504cc41787ca7451eb989c914a68e2f41d",
-      "exporter_source_archive": "experiments/provenance/reproduction-v1.zip#ros2-0.36.23/capture_ros.cpp",
-      "exporter_source_identity_note": "The current reproduction exporter captures only the frame chain; the archived source is the historical producer. A separate native rerun reproduced the retained values.",
-      "previous_corpus_sha256": "4af272e762f402cb4b3a60ff063bcc2ef1b79aa82e6890207abfa1bf16890db7",
-      "capture_schema_sha256": "f3b9cb097cdeee39b0f632adebe4169c7add5769de6976e544b90e0ccee6edc6",
-      "pre_direct_source_archive": "experiments/provenance/reproduction-v1.zip#ros2-0.36.23/pre-direct/",
-      "identity_note": "Pre-direct capture tools are archived at pre_direct_source_archive. The prior helper digest is retained, while the current direct capture no longer uses that helper.",
-      "previous_reproduction_helper_sha256": "c0eb259e3aaccd6e76c1023db0104b887350777fa777d1b54995b7100566cf38",
-      "previous_retention_digest_helper_sha256": "293ac5c75393f99f783ba412be80983ec21dce39d89bc570623fb428194ea785",
-      "previous_retention_helper_sha256": "3eea651a4485c4dd3e5a85bf0085edeff14d775badeaf7c07288de74d6519ed3"
+    "historical_sources": {
+      "exporter": "experiments/provenance/reproduction-v1.zip#ros2-0.36.23/capture_ros.cpp",
+      "runner": "experiments/provenance/reproduction-v1.zip#ros2-0.36.23/capture_native.py",
+      "helper": "experiments/provenance/reproduction-v1.zip#capture_io.py"
     }
   },
   "selection": {

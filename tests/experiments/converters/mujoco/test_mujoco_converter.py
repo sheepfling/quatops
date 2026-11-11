@@ -84,15 +84,10 @@ def test_mujoco_boundary_contract_and_capture_provenance_are_explicit():
             hashlib.sha256(path.read_bytes()).hexdigest()
             == MANIFEST["provenance"][field]
         ), field
-    replay = MANIFEST["shared_lock_replay"]
     assert (
-        replay["lockfile_sha256"]
-        == MANIFEST["provenance"]["pre_unified_lockfile_sha256"]
+        MANIFEST["unified_lock_replay"]["native_binary_sha256"]
+        == MANIFEST["native_binary_files"][0]["sha256"]
     )
-    assert (
-        replay["native_binary_sha256"] == MANIFEST["native_binary_files"][0]["sha256"]
-    )
-    assert replay["witnesses_sha256"] == MANIFEST["provenance"]["witnesses_sha256"]
     assert (
         MANIFEST["unified_lock_replay"]["lockfile_sha256"]
         == MANIFEST["provenance"]["reproduction_lockfile_sha256"]

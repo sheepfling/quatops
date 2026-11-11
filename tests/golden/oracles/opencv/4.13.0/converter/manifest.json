@@ -51,24 +51,11 @@
     "previous_checkout_capture_script_sha256": "ce6df5cbbbb0983633e7ee64df2b39219b7c8e1a69731a480b152f780fda499b",
     "preparation_script_sha256": "b46f9bbb0f7422d7b940cab33682443be84225335d270be5ac323a7396e3368d",
     "lockfile_sha256": "4377022efa364fac013b8adf6a232bfbd6dc860847418061ef7f6c66e0f2d142",
-    "capture_script_identity_note": "The reproduction script now uses equivalent list extension; provenance.capture_script_sha256 preserves the historical producer used for the retained capture.",
-    "pre_shared_lockfile_sha256": "433156bce46415d69095141dd148117ddd3e4c2eeab2174aae3d9225b6cd1248",
-    "previous_reproduction_capture_script_sha256": "e99e3805b990a92085b8d8b43bed0821bafee77fb3c475fa421e1df923de4e6c",
-    "pre_shared_lockfile_revision": "e13ab95fbc3b2c8b83ced66d2d792f8fb7667e04",
-    "pre_unified_lockfile_sha256": "952089f06b272dd74d0819f838d02c68265d674bb7cac88dee080fbe8ea53fc3",
-    "pre_unified_lockfile_revision": "abf2a2f27ceb601398da126423901484eb6ae46b",
-    "pre_unified_capture_source_sha256": "70eafa697ffc8676d57890926804579b505f43316af311205f610eb229969e19"
+    "capture_script_identity_note": "The reproduction script now uses equivalent list extension; provenance.capture_script_sha256 preserves the historical producer used for the retained capture."
   },
   "semantic_contract": {
     "file": "experiments/converters/opencv/4.13.0/semantic_contract.json",
     "sha256": "e79649ea9c6fdecc4111ea311c74b66419fb0fc2796727cafa31405788456af2"
-  },
-  "shared_lock_replay": {
-    "utc": "2026-11-10T18:58:53.451294+00:00",
-    "python": "3.13.14 (main, Jun 23 2026, 15:19:27) [MSC v.1944 64 bit (AMD64)]",
-    "lockfile_sha256": "952089f06b272dd74d0819f838d02c68265d674bb7cac88dee080fbe8ea53fc3",
-    "native_binary_sha256": "90034927004e4a4ebf29360480d609c8a8d2ca07c93f8b89dff86399e8534b2a",
-    "witnesses_sha256": "821e7a22515c724672dd12f453a1388b3ac09ef32c59548b2c79ee69275242d4"
   },
   "unified_lock_replay": {
     "utc": "2026-11-10T19:07:46.363628+00:00",

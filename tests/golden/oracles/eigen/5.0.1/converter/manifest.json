@@ -43,62 +43,16 @@
     "prepared_inputs_sha256": "9a3ad531d3bc644d0a831c5f30f9410736b4a043cc92eb0e82ccaf514c3edc1a",
     "native_input_stream_sha256": "43c76320258bcef5fc7ce5d2438f8f95bee0e1c6ef0bcbacf5ec3e19eea30318",
     "witnesses_sha256": "291e42a582c358f3fa4e87afc1dfbed144f5c422ef42ef87fa97d7a2a3f89840",
-    "before_storage_compaction_witnesses_sha256": "42197e181c727fb845f07553465aa72c40855a1eee1a93367077c5cb9c409fa2",
-    "before_storage_compaction_runner_sha256": "9526dea618ab79eb5fd6bdfcfebf1aec6700edd67e2fa7b747c607449fbe7c66",
-    "before_storage_compaction_cpp_sha256": "c79bc9f7b878a84b06dfc6b210da156973b02094f02a25377ac31ff9b124d825",
-    "storage_compaction_replay": "Eigen 5.0.1; GCC 15.2.0; CPython 3.10.11; native output matches the preceding witness after removing only redundant coeffs() views.",
-    "storage_compaction_native_executable_sha256": "b58561cba8e7cf22df8a29e9e5ecbd48e9b81d64b94361e60760ea1acf516c74",
     "witness_selection_note": "Quarter-turn rows were removed from the retained subset; original native capture identity and selected values are unchanged.",
     "eigen_source_archive_sha256": "e9c326dc8c05cd1e044c71f30f1b2e34a6161a3b6ecf445d56b53ff1669e3dec",
     "eigen_source_metadata_sha256": "3e65f2be6206692af7bcfcdf65501d34aeda9762cca895738f19f59a350bff48",
     "eigen_version_header_sha256": "3bb04dc80ede841309fc975fd3ff522a58bbdf2d591e06e49d2456676a89e759",
-    "compile_command": [
-      "C:\\Users\\peanu\\scoop\\apps\\gcc\\15.2.0\\bin\\g++.exe",
-      "-std=c++17",
-      "-O2",
-      "-DNDEBUG",
-      "-I",
-      "C:\\Users\\peanu\\AppData\\Local\\Temp\\quatops-eigen-5.0.1\\eigen-5.0.1",
-      "C:\\Users\\peanu\\GIT\\sheepfling\\quatops\\experiments\\converters\\eigen\\5.0.1\\capture_native.cpp",
-      "-o",
-      "C:\\Users\\peanu\\AppData\\Local\\Temp\\quatops-eigen-5.0.1-capture-4hvv3rke\\capture_eigen.exe"
-    ],
-    "native_run_command": [
-      "C:\\Users\\peanu\\AppData\\Local\\Temp\\quatops-eigen-5.0.1-capture-4hvv3rke\\capture_eigen.exe",
-      "C:\\Users\\peanu\\AppData\\Local\\Temp\\quatops-eigen-5.0.1-capture-4hvv3rke\\native-input.tsv"
-    ],
-    "exact_invocation": "C:\\Users\\peanu\\GIT\\sheepfling\\quatops\\experiments\\converters\\eigen\\5.0.1\\.venv\\Scripts\\python.exe C:\\Users\\peanu\\GIT\\sheepfling\\quatops\\experiments\\converters\\eigen\\5.0.1\\capture_native.py --eigen-root C:\\Users\\peanu\\AppData\\Local\\Temp\\quatops-eigen-5.0.1\\eigen-5.0.1 --eigen-archive C:\\Users\\peanu\\AppData\\Local\\Temp\\eigen-5.0.1.tar.gz --compiler g++ --repository-root C:\\Users\\peanu\\GIT\\sheepfling\\quatops",
     "native_cpp_source_archive": "experiments/provenance/reproduction-v1.zip#eigen-5.0.1-capture_native.cpp",
-    "reproduction_prepared_inputs_sha256": "83a747d9fb4613c8af96b06881e9f071c8d926e58d89b5f70d00abfad2e454d1",
-    "reproduction_native_input_stream_sha256": "a4d707a7014e18f1a3c8c92ceb603e36650719e69dfb329b660f3f4cd8f2e7a3",
-    "reproduction_witness_sha256": "291e42a582c358f3fa4e87afc1dfbed144f5c422ef42ef87fa97d7a2a3f89840",
-    "reproduction_lockfile_sha256": "4377022efa364fac013b8adf6a232bfbd6dc860847418061ef7f6c66e0f2d142",
-    "previous_reproduction_lockfile_sha256": "bf81c34e574e4353861b0fe746ee0826e1b9d4a521d287223b819ba046b5bb51",
-    "previous_reproduction_lockfile_revision": "d24969cefca8c5393f37165b34208ebc20bcc7a6",
-    "pre_shared_lockfile_sha256": "20bb58212abf4a90e56a3d099b76505994a6b22f5c3b507cdd9acb208a1d876b",
-    "previous_reproduction_capture_runner_sha256": "aa7699dcd4933cda1a8f1a2e9ab93eceea714224102bb2a64a15ec7386f9b5fd",
-    "pre_shared_lockfile_revision": "e13ab95fbc3b2c8b83ced66d2d792f8fb7667e04",
-    "pre_unified_lockfile_sha256": "952089f06b272dd74d0819f838d02c68265d674bb7cac88dee080fbe8ea53fc3",
-    "pre_unified_lockfile_revision": "abf2a2f27ceb601398da126423901484eb6ae46b",
-    "pre_unified_capture_source_sha256": "7054cedc49e7d7d3808db61d4cdd4e877f10269c9aaace17e97a7198ad824496"
+    "reproduction_lockfile_sha256": "4377022efa364fac013b8adf6a232bfbd6dc860847418061ef7f6c66e0f2d142"
   },
   "semantic_contract": {
     "file": "experiments/converters/eigen/5.0.1/semantic_contract.json",
     "sha256": "80d24bf67748f0f315a99261d1b32f25f45548cb1e1bb3ce67ee3c812dfc845a"
-  },
-  "compact_lock_replay": {
-    "utc": "2026-11-10T17:55:29.810015+00:00",
-    "python": "3.11.15 (main, Jun 23 2026, 15:20:37) [MSC v.1944 64 bit (AMD64)]",
-    "lockfile_sha256": "20bb58212abf4a90e56a3d099b76505994a6b22f5c3b507cdd9acb208a1d876b",
-    "native_executable_sha256": "5b51f074c0e1cfe399b35ad2d87403c21ce493566802249eaec110f9fe036300",
-    "witnesses_sha256": "291e42a582c358f3fa4e87afc1dfbed144f5c422ef42ef87fa97d7a2a3f89840"
-  },
-  "shared_lock_replay": {
-    "utc": "2026-11-10T18:58:50.536683+00:00",
-    "python": "3.13.14 (main, Jun 23 2026, 15:19:27) [MSC v.1944 64 bit (AMD64)]",
-    "lockfile_sha256": "952089f06b272dd74d0819f838d02c68265d674bb7cac88dee080fbe8ea53fc3",
-    "native_binary_sha256": "c350075ed98d73f07ce0c34e3b738da4abaaeff27e7432954c8802b5b106464b",
-    "witnesses_sha256": "291e42a582c358f3fa4e87afc1dfbed144f5c422ef42ef87fa97d7a2a3f89840"
   },
   "unified_lock_replay": {
     "utc": "2026-11-10T19:07:47.604271+00:00",

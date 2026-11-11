@@ -9,8 +9,8 @@ The current exporter emits only the two selected lookups, shared edge inputs,
 and the forward message, round trip, and point action. The wrapper validates
 and tags finite binary64 values without changing them, including signed zero.
 It omits the old temporary matrix and direct-composition observations. The
-original fixture and its historical provenance remain unchanged; the previous
-reproduction tools are archived in `experiments/provenance/reproduction-v1.zip`.
+original fixture and its historical provenance remain unchanged; its native
+producer sources are archived in `experiments/provenance/reproduction-v1.zip`.
 The message-to-transform check accepts either quaternion sign and float64
 rounding within `2e-12`; the stored native values are never normalized or
 rewritten by that comparison.

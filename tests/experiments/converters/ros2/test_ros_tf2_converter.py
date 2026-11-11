@@ -89,75 +89,42 @@ def test_ros_capture_is_native_pinned_and_selected_values_are_lossless():
         provenance["selected_witnesses_sha256"]
         == hashlib.sha256((FIXTURE / "witnesses.json").read_bytes()).hexdigest()
     )
-    reproduction = provenance["reproduction"]
     assert len(provenance["full_observation_sha256"]) == 64
-    assert "historical capture" in reproduction["input_serialization_note"]
-    file_hashes = {
-        "retention_formatter_sha256": ROOT / "scripts/evidence_format.py",
-        "dockerfile_sha256": ROOT / "experiments/converters/ros2/0.36.23/Dockerfile",
-        "build_recipe_sha256": ROOT
-        / "experiments/converters/ros2/0.36.23/native/CMakeLists.txt",
-        "corpus_sha256": ROOT / "experiments/converters/ros2/0.36.23/chain_inputs.json",
-    }
-    for field, path in file_hashes.items():
-        assert hashlib.sha256(path.read_bytes()).hexdigest() == reproduction[field]
-
-    for field, name in {
-        "exporter_source_sha256": "capture_ros.cpp",
-        "runner_sha256": "capture_native.py",
-        "capture_schema_sha256": "ros_capture.py",
-        "retention_script_sha256": "retain_ros_tf2_witnesses.py",
-    }.items():
-        source = read_provenance_source(
-            ROOT, reproduction["pre_direct_source_archive"] + name
+    historical = provenance["historical_sources"]
+    for name, field in (
+        ("exporter", "exporter_source_sha256"),
+        ("runner", "capture_runner_sha256"),
+        ("helper", "capture_helper_sha256"),
+    ):
+        assert (
+            hashlib.sha256(read_provenance_source(ROOT, historical[name])).hexdigest()
+            == provenance[field]
         )
-        assert hashlib.sha256(source).hexdigest() == reproduction[field]
 
     direct = MANIFEST["direct_capture"]
     assert direct["packages"]["tf2"]["version"] == "0.36.23"
     assert "bit-for-bit" in direct["comparison"]
     for field, path in {
+        "input": ROOT / "experiments/converters/ros2/0.36.23/chain_inputs.json",
+        "contract": CONTRACT_PATH,
         "native_source": ROOT
         / "experiments/converters/ros2/0.36.23/native/src/capture_ros.cpp",
         "runner": ROOT / "experiments/converters/ros2/0.36.23/capture_native.py",
         "schema": ROOT / "scripts/evidence_schema/ros_capture.py",
+        "dockerfile": ROOT / "experiments/converters/ros2/0.36.23/Dockerfile",
+        "build_recipe": ROOT
+        / "experiments/converters/ros2/0.36.23/native/CMakeLists.txt",
     }.items():
         assert hashlib.sha256(path.read_bytes()).hexdigest() == direct["sha256"][field]
-
-    corpus = json.loads(file_hashes["corpus_sha256"].read_text(encoding="utf-8"))
+    assert (
+        direct["comparison_witness_sha256"] == provenance["selected_witnesses_sha256"]
+    )
+    corpus = json.loads(
+        (ROOT / "experiments/converters/ros2/0.36.23/chain_inputs.json").read_text(
+            encoding="utf-8"
+        )
+    )
     RosChainInputs.model_validate(corpus, strict=True)
-
-    archived_exporter = read_provenance_source(
-        ROOT, reproduction["exporter_source_archive"]
-    )
-    assert (
-        hashlib.sha256(archived_exporter).hexdigest()
-        == reproduction["previous_checkout_exporter_source_sha256"]
-        == provenance["exporter_source_sha256"]
-    )
-    assert "historical producer" in reproduction["exporter_source_identity_note"]
-
-    archived_capture_helper = read_provenance_source(
-        ROOT, reproduction["capture_helper_archive"]
-    )
-    assert (
-        hashlib.sha256(archived_capture_helper).hexdigest()
-        == reproduction["previous_checkout_capture_helper_sha256"]
-        == provenance["capture_helper_sha256"]
-    )
-
-    archived_runner = read_provenance_source(
-        ROOT,
-        "experiments/provenance/reproduction-v1.zip#ros2-0.36.23/capture_native.py",
-    )
-    assert (
-        hashlib.sha256(archived_runner).hexdigest()
-        == (reproduction["previous_checkout_runner_sha256"])
-    )
-    assert (
-        reproduction["previous_checkout_runner_sha256"]
-        == (MANIFEST["capture_provenance"]["capture_runner_sha256"])
-    )
 
 
 def _canonical_chain():
