@@ -17,7 +17,7 @@
     "native_scalar_profiles": ["float32", "float64"]
   },
   "selection": {
-    "orientation_cases_per_precision": 5,
+    "orientation_cases_per_precision": 4,
     "native_created_orientations_per_precision": 1,
     "noncommuting_product_orders_per_precision": 2,
     "native_basis_images_per_orientation": 3,
@@ -40,14 +40,15 @@
     "preparation_script_sha256": "d48c5017e46355a72fdf4ce96b1a66c8c78779ecbd15edb4b3a430de46c6ac92",
     "preparation_spec_sha256": "9f17f3eafd3186d3460488eff91e0f50771f2ee7c5e6d42409b1e93df5fc084e",
     "shared_canonical_inputs_sha256": "a6f0630806b69d3b3b29a036aa10f63bfe214668329c661598951f84f8f41eec",
-    "witnesses_sha256": "821e7a22515c724672dd12f453a1388b3ac09ef32c59548b2c79ee69275242d4",
-    "witness_selection_note": "Quarter-turn rows were removed from the retained subset; original native capture identity and selected values are unchanged.",
+    "witnesses_sha256": "9a42d672f7a5b4fecf26c308659ed04a7118076ccaa6e72dd250f0a78abc6df7",
+    "witness_selection_note": "Quarter-turn rows and redundant antipodal rows were removed from the retained subset; the unified-lock replay records the preceding selection. All retained native values are unchanged.",
     "lockfile_sha256": "8288ebf7e36753cc45b10f2fa0594bd5b55aee6b6405055ee8f8a972ce6ac9bf",
     "cv2_extension_directory": "site-packages/cv2",
-    "invocation_template": "python experiments/converters/opencv/4.13.0/prepare_inputs.py --output <temporary inputs.json>; then run capture_native.py --inputs <temporary inputs.json>"
+    "invocation_template": "python experiments/converters/opencv/4.13.0/prepare_inputs.py --output <temporary inputs.json>; then run capture_native.py --inputs <temporary inputs.json>",
+    "witness_selection_source_commit": "6a8dfdde33821a0a4e7911eb3641ea8fa978c4f9"
   },
   "reproduction": {
-    "capture_script_sha256": "93f665866a8f5e133b6cb9dff9696ac7e0f66b917a2dc7a989472ceb24347cdd",
+    "capture_script_sha256": "cf1b9783145fd3576f68fee0f9b666c19d31049676923362bf839e62a7694bd3",
     "previous_checkout_capture_script_sha256": "ce6df5cbbbb0983633e7ee64df2b39219b7c8e1a69731a480b152f780fda499b",
     "preparation_script_sha256": "7801be0df2c32902a3ab133cd1b89654a6a20aac2a8e32591e28f6918a842f8c",
     "lockfile_sha256": "4377022efa364fac013b8adf6a232bfbd6dc860847418061ef7f6c66e0f2d142",
@@ -66,5 +67,11 @@
     "witnesses_sha256": "821e7a22515c724672dd12f453a1388b3ac09ef32c59548b2c79ee69275242d4",
     "capture_script_sha256": "6c6eab3f17c60023a778552a2332972f156918d183854d8cd94bdce3d24d575f",
     "digest_helper_sha256": "0ef54f8fed931269ac8f104d376ac889a6be4dff449a23e4a5005bbf063ff7bb"
+  },
+  "selected_reproduction": {
+    "utc": "2026-11-11T23:25:57.436650+00:00",
+    "environment": "execution, target, native_binaries",
+    "inputs": "provenance.prepared_inputs_sha256",
+    "producer": "reproduction"
   }
 }

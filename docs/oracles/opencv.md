@@ -9,12 +9,15 @@ converts native matrices back to rotation vectors and then to QuatOps
 quaternions.
 
 The Windows x64 capture used CPython `3.13.14`, NumPy `2.3.5`, and
-`opencv-python-headless==4.13.0.92` (OpenCV `4.13.0`). It retains five
+`opencv-python-headless==4.13.0.92` (OpenCV `4.13.0`). It retains four distinct
 canonical orientation witnesses, a native-created axis-angle case, and both
 orders of a noncommuting product, for float32 and float64. The native capture
 uses `cv2.Rodrigues` and `cv2.gemm` and does not import QuatOps.
 
-The selected native matrices, basis/probe images, and build identity are in
+The mixed quaternion and its antipode are checked to produce bit-identical
+Rodrigues inputs for each precision, so one native observation covers both.
+The capture fails if that equality changes. The selected native rotation vectors,
+basis/probe images, and build identity are in
 the [versioned converter fixture](../../tests/golden/oracles/opencv/4.13.0/converter/manifest.json).
 The [capture project](../../experiments/converters/opencv/4.13.0/README.md)
 contains the pinned requirements and input preparation/native capture tools.

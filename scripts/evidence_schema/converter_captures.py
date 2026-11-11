@@ -390,6 +390,13 @@ class MuJoCoCapture(NativeLibraryCapture):
     observations: MuJoCoObservations
 
 
+# The antipodal quaternion has the same OpenCV input as mixed_a. The capture
+# verifies that equality before retaining one native observation for both.
+OPENCV_NATIVE_CASE_IDS = tuple(
+    case for case in NATIVE_RETAINED_CASE_IDS if case != "antipode_mixed_a"
+)
+
+
 class OpenCVOrientation(NativeCaptureModel):
     case_id: str
     dtype: Literal["float32", "float64"]

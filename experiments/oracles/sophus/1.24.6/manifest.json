@@ -88,23 +88,7 @@
     },
     "historical_input_sha256": "713fece6dbad561b864c3f625c740190f92210318af4fa09f4467930a04a3048",
     "current_source_sha256": "3d4f10fa0331cf5dfa94577bff57d5cc9609aacc4fc85dc12837c8b41784ac94",
-    "previous_retained_schema_sha256": "aeb357ff68f63a90192d7ee045ce2cb4357612ff0c39e0e4c69064becdfd8ce0",
-    "previous_repair_replay_sources_sha256": {
-      "retain_witnesses.py": "447105da9cb0e44883444f094d98b31027dff1cf148f996dc38f66fd3735fe4d",
-      "verify_scipy.py": "1866df20f16ac74d591c5557a677f35505ab78060526776cac22a076ae6f7940"
-    },
     "previous_witness_revision": "60802309fe3d933c6d4c7e07ed5110048620b83d",
-    "historical_direct_capture": {
-      "capture_source_sha256": "8be75eabba0aaea0599f220c49e9ee7bb5756b9ec6d95332f9471c5c81c10ae5",
-      "native_executable_sha256": "eda839c68facf70fde3bb06f1e4d2a95bac01709c083c9316ba9c59a6741e752",
-      "compiler": "g++ (GCC) 15.2.0",
-      "raw_capture_sha256": {
-        "float32": "2935c089fe81dca26f70d71fba7ba04bf07828ae7f43c4531baca3203d9ca899",
-        "float64": "a59cc25ae952e9ede89499d7cfdb6c9f223abc5815106082b9a39287e7e1ba1a"
-      },
-      "selected_values": "All selected values match the historical fixtures exactly, including signed zero.",
-      "scope_note": "Direct capture omits the previously temporary matrices and duplicate coefficient views."
-    },
     "linux_replay": {
       "platform": "Linux x86-64 Docker",
       "compiler": "g++ (Debian 14.2.0-19) 14.2.0",

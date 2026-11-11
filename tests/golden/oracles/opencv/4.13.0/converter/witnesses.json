@@ -39,17 +39,6 @@
         "native_matrix_to_rotation_vector_xyz_radians": [-0.6682686805725098, 0.44551244378089905, 1.3731615543365479]
       },
       {
-        "case_id": "antipode_mixed_a",
-        "dtype": "float32",
-        "native_input_rotation_vector_xyz_radians": [0.42900073528289795, -0.8580014705657959, 0.8580014705657959],
-        "native_gemm_basis_actions_xyz": [
-          [0.36000001430511475, 0.47999998927116394, 0.800000011920929],
-          [-0.800000011920929, 0.6000000238418579, 3.9126248907450645e-09],
-          [-0.47999998927116394, -0.6399999856948853, 0.6000000238418579]
-        ],
-        "native_matrix_to_rotation_vector_xyz_radians": [0.42900073528289795, -0.8580014705657959, 0.8580014705657959]
-      },
-      {
         "case_id": "nonprincipal_halfturn",
         "dtype": "float32",
         "native_input_rotation_vector_xyz_radians": [1.8137993812561035, 1.8137993812561035, 1.8137993812561035],
@@ -89,17 +78,6 @@
           [-0.08986484017813845, 0.6665765601187589, 0.74]
         ],
         "native_matrix_to_rotation_vector_xyz_radians": [-0.6682686844596197, 0.4455124563064132, 1.3731616120761791]
-      },
-      {
-        "case_id": "antipode_mixed_a",
-        "dtype": "float64",
-        "native_input_rotation_vector_xyz_radians": [0.4290007391955229, -0.8580014783910458, 0.8580014783910458],
-        "native_gemm_basis_actions_xyz": [
-          [0.36, 0.4799999999999999, 0.7999999999999998],
-          [-0.7999999999999998, 0.6, 0.0],
-          [-0.4799999999999999, -0.6399999999999999, 0.6]
-        ],
-        "native_matrix_to_rotation_vector_xyz_radians": [0.42900073919552284, -0.8580014783910457, 0.8580014783910457]
       },
       {
         "case_id": "nonprincipal_halfturn",

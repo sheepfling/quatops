@@ -91,10 +91,6 @@
     "input_sha256": "619099b732593c6c45f4f7eb64714e4c7d79b2c96dcd070777522e3736e4f085",
     "previous_checkout_capture_helper_sha256": "ecdf0245b9d0318d67189c471f26b3ec58e2ef871611b6a2c5c79cbbc16963da",
     "capture_helper_archive": "experiments/provenance/reproduction-v1.zip#capture_io.py",
-    "previous_reproduction_exporter_sha256": "e53f1b08cd8003e7b211552ac56703a03af2c1c649eb029672bb65edbc665836",
-    "previous_reproduction_helper_sha256": "c0eb259e3aaccd6e76c1023db0104b887350777fa777d1b54995b7100566cf38",
-    "pre_unified_exporter_sha256": "7567785060d92eea201c2861d87a75a576666ca0bd31a683c7452c2bf8913b77",
-    "previous_requirements_sha256": "2ebfab05fa84c1997fce51031415ed2da1209595112badc09faecbeadfa3aa6a",
     "lockfile_sha256": "4377022efa364fac013b8adf6a232bfbd6dc860847418061ef7f6c66e0f2d142",
     "digest_helper_sha256": "0ef54f8fed931269ac8f104d376ac889a6be4dff449a23e4a5005bbf063ff7bb",
     "previous_envelope_exporter_sha256": "98329f54b4195f242aee7d86486c4e312b8bd9d46494680843d9239baf2a5679"

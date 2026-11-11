@@ -417,7 +417,7 @@ def test_historical_capture_sources_are_archived_and_current_sources_are_separat
     )
     assert artifacts["historical_input_sha256"] != artifacts["input_sha256"]
     assert (
-        artifacts["historical_direct_capture"]["capture_source_sha256"]
+        historical["capture_native.cpp"]
         != (artifacts["direct_capture"]["capture_source_sha256"])
     )
     assert (

@@ -8,7 +8,7 @@ import json
 import numpy as np
 
 from quatops.python import hamilton
-from scripts.evidence_schema.primitives import NATIVE_RETAINED_CASE_IDS
+from scripts.evidence_schema.converter_captures import OPENCV_NATIVE_CASE_IDS
 from tests.support.evidence_oracles import matrix_from_wxyz as matrix
 from tests.support.paths import REPOSITORY_ROOT
 from tests.support.provenance_archives import read_provenance_source
@@ -51,7 +51,7 @@ def test_opencv_contract_and_pinned_capture_provenance():
     assert MANIFEST["target"]["distribution_version"] == "4.13.0.92"
     assert MANIFEST["target"]["native_scalar_profiles"] == ["float32", "float64"]
     assert MANIFEST["selection"] == {
-        "orientation_cases_per_precision": 5,
+        "orientation_cases_per_precision": 4,
         "native_created_orientations_per_precision": 1,
         "noncommuting_product_orders_per_precision": 2,
         "native_basis_images_per_orientation": 3,
@@ -88,10 +88,10 @@ def test_opencv_contract_and_pinned_capture_provenance():
         MANIFEST["unified_lock_replay"]["lockfile_sha256"]
         == reproduction["lockfile_sha256"]
     )
-    assert (
-        MANIFEST["unified_lock_replay"]["witnesses_sha256"]
-        == provenance["witnesses_sha256"]
-    )
+    selected_replay = MANIFEST["selected_reproduction"]
+    assert selected_replay["environment"] == "execution, target, native_binaries"
+    assert selected_replay["inputs"] == "provenance.prepared_inputs_sha256"
+    assert selected_replay["producer"] == "reproduction"
     archived_capture = read_provenance_source(
         ROOT, provenance["capture_script_archive"]
     )
@@ -116,7 +116,7 @@ def test_opencv_contract_and_pinned_capture_provenance():
 
 def test_opencv_rodrigues_forward_reverse_and_vector_actions_match_quatops():
     profile_rows = WITNESSES["observations"]["canonical_to_native"]
-    input_case_ids = NATIVE_RETAINED_CASE_IDS
+    input_case_ids = OPENCV_NATIVE_CASE_IDS
     for dtype in INPUTS["precision_profiles"]:
         rows = {
             item["case_id"]: item for item in profile_rows if item["dtype"] == dtype
@@ -162,11 +162,24 @@ def test_opencv_rodrigues_forward_reverse_and_vector_actions_match_quatops():
                 f"OpenCV native-to-canonical route {case_id}/{dtype}",
             )
 
+        positive = np.asarray(
+            hamilton.to_rotation_vector(CANONICAL["mixed_a"]), dtype=dtype
+        )
+        antipode = np.asarray(
+            hamilton.to_rotation_vector(CANONICAL["antipode_mixed_a"]), dtype=dtype
+        )
+        assert positive.tobytes() == antipode.tobytes()
         check(
-            rows["antipode_mixed_a"]["native_gemm_basis_actions_xyz"],
-            rows["mixed_a"]["native_gemm_basis_actions_xyz"],
+            rows["mixed_a"]["native_input_rotation_vector_xyz_radians"],
+            antipode,
             dtype,
-            f"OpenCV q versus -q/{dtype}",
+            f"OpenCV antipodal input/{dtype}",
+        )
+        check(
+            rows["mixed_a"]["native_gemm_basis_actions_xyz"],
+            [hamilton.rotate(CANONICAL["antipode_mixed_a"], p) for p in BASIS],
+            dtype,
+            f"OpenCV antipodal native action/{dtype}",
         )
 
 

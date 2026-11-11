@@ -17,13 +17,13 @@ from prepare_inputs import PreparedOpenCVInputs
 
 from scripts.evidence_json import dump_evidence_json
 from scripts.evidence_schema.converter_captures import (
+    OPENCV_NATIVE_CASE_IDS,
     OpenCVCapture,
     OpenCVComposition,
     OpenCVObservations,
     OpenCVOrientation,
     TargetIdentity,
 )
-from scripts.evidence_schema.primitives import NATIVE_RETAINED_CASE_IDS
 from scripts.evidence_schema.utilities import sha256_file
 
 PROFILE_DTYPES = {"float32": np.float32, "float64": np.float64}
@@ -86,6 +86,14 @@ def main() -> None:
     composition: list[OpenCVComposition] = []
     for dtype_label in inputs.precision_profiles:
         dtype = PROFILE_DTYPES[dtype_label]
+        mixed = np.asarray(
+            by_id["mixed_a"].quatops_rotation_vector_xyz_radians, dtype=dtype
+        )
+        antipode = np.asarray(
+            by_id["antipode_mixed_a"].quatops_rotation_vector_xyz_radians, dtype=dtype
+        )
+        if mixed.tobytes() != antipode.tobytes():
+            raise ValueError(f"OpenCV antipodal inputs differ for {dtype_label}")
         canonical_to_native.extend(
             capture_matrix(
                 row.case_id,
@@ -94,7 +102,7 @@ def main() -> None:
                 probe,
             )
             for row in inputs.orientations
-            if row.case_id in NATIVE_RETAINED_CASE_IDS
+            if row.case_id in OPENCV_NATIVE_CASE_IDS
         )
 
         native_axis = inputs.native_constructed_orientation
@@ -208,7 +216,7 @@ def main() -> None:
             "native_scalar_profiles": ["float32", "float64"],
         },
         "selection": {
-            "orientation_cases_per_precision": len(NATIVE_RETAINED_CASE_IDS),
+            "orientation_cases_per_precision": len(OPENCV_NATIVE_CASE_IDS),
             "native_created_orientations_per_precision": 1,
             "noncommuting_product_orders_per_precision": 2,
             "native_basis_images_per_orientation": 3,

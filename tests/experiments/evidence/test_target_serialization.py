@@ -54,7 +54,7 @@ EXPECTED_WITNESS_COUNTS = MappingProxyType(
         ("Blender", "5.1.2"): 7,
         ("Eigen", "5.0.1"): 16,
         ("MuJoCo", "3.17.0"): 8,
-        ("OpenCV", "4.13.0"): 16,
+        ("OpenCV", "4.13.0"): 14,
         ("ROS 2 tf2", "0.36.23"): 1,
         ("SpiceyPy / CSPICE", "8.3.0"): 8,
         ("CesiumJS", "1.124.0"): 5,

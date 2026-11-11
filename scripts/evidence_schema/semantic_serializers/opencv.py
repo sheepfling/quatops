@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from scripts.converter_evidence import ConverterEvidencePackage
 from scripts.evidence_schema.converter_captures import (
+    OPENCV_NATIVE_CASE_IDS,
     OpenCVCapture,
     OpenCVContract,
     OpenCVInputs,
@@ -92,16 +93,16 @@ def serialize_opencv_witnesses(
     capture: OpenCVCapture, inputs: OpenCVInputs
 ) -> list[RotationVectorBoundaryWitness]:
     observations = capture.observations
-    retained_case_ids = canonical_orientation_selection(
-        inputs.retained_case_ids, context="OpenCV"
-    )
+    canonical_orientation_selection(inputs.retained_case_ids, context="OpenCV")
     witnesses: list[RotationVectorBoundaryWitness] = []
     for profile in inputs.precision_profiles:
         profile_rows = [
             row for row in observations.canonical_to_native if row.dtype == profile
         ]
+        if len(profile_rows) != len(OPENCV_NATIVE_CASE_IDS):
+            raise ValueError(f"Unexpected OpenCV {profile} witness count")
         retained_rows = select_retained_rows(
-            profile_rows, retained_case_ids, context=f"OpenCV {profile}"
+            profile_rows, OPENCV_NATIVE_CASE_IDS, context=f"OpenCV {profile}"
         )
         witnesses.extend(
             RotationVectorWitness(
