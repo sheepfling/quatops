@@ -24,16 +24,16 @@ Separate compact fixtures preserve the native side of these auxiliary proofs:
 - [OpenUSD 26.11](transports/openusd/26.11/converter/manifest.json): a
   QuatOps-generated stage reopened and evaluated by native OpenUSD.
 - [SpiceyPy 8.3.0 / CSPICE_N0067](oracles/spiceypy/8.3.0/converter/manifest.json):
-  selected direct-quaternion matrix/vector actions, matrix round trip, the
-  native `axisar` matrix/`m2q` route, and noncommuting products.
+  selected direct-quaternion matrix/vector actions, the native `axisar`
+  matrix/`m2q` route, and noncommuting products.
 - [MuJoCo 3.17.0](oracles/mujoco/3.17.0/converter/manifest.json): selected
-  direct-quaternion matrix/vector actions, matrix round trip, native axis-angle
-  construction, and noncommuting products.
+  direct-quaternion vector actions, native axis-angle construction, and
+  noncommuting products.
 - [OpenCV 4.13.0](oracles/opencv/4.13.0/converter/manifest.json): native
   Rodrigues vector/matrix conversion, matrix actions, and composition in two
   scalar precisions.
 - [Eigen 5.0.1](oracles/eigen/5.0.1/converter/manifest.json): native C++
-  quaternion storage, vector action, matrix conversion, and composition.
+  quaternion storage, vector action, and composition.
 
 The converter replay tests are linked from the
 [interoperability atlas](../../docs/INTEROPERABILITY_EVIDENCE.md). These
@@ -47,8 +47,8 @@ target-specific Pydantic models before semantic serialization. Where an input
 or serialized asset is already maintained
 beside its experiment, the package references that source by path and digest
 instead of retaining a second byte-identical copy. Unknown fields and malformed
-vector, quaternion, or matrix shapes fail validation. Native observations are
-never rewritten.
+vector, quaternion, or matrix shapes fail validation. Native numeric values are
+retained losslessly when evidence is regrouped or reformatted.
 Run `python -m scripts.validate_evidence_json --repository-root .` for syntax
 and JSON-value validation, then run
 `python -m scripts.validate_converter_evidence --repository-root .` to validate

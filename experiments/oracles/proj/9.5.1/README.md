@@ -12,8 +12,22 @@ reorganized for this versioned package after the selected observations were
 captured; source hashes for the historical native run and current reproducer
 are recorded separately in the fixture. The retained fixture keeps every
 selected binary64 value, only the origin/basis/probe outputs needed per case,
-and omits verified duplicate hexadecimal sidecars. The other former readbacks
-were checked against their source points before removal.
+and omits verified duplicate hexadecimal sidecars. The shared operation,
+frame contract, and dtype are declared once for all 11 observations. A pinned
+Linux recapture reproduced the compact native values and signs exactly. The
+other former readbacks were checked against their source points before removal.
+The version manifest references a hash-named shared witness file; another PROJ
+version may reference it only after its own native capture and manifest verify
+the same values. Pass `--compare-witness <shared-file>` to a future capture;
+it reports both hashes and fails unless the newly captured file matches exactly.
+For a different native version, provide both `--proj-version` and
+`--pyproj-version` explicitly in that version's own pinned environment. The
+exporter checks the loaded versions against the request and records the actual
+versions; it does not infer compatibility from an earlier run. Its run record
+reports completed capture operations. A version manifest must additionally
+record the process exit status observed by the caller.
+The recorded binary hash identifies pyproj's `_transformer` extension; it does
+not hash every dynamically linked PROJ library.
 
 From the repository root in PowerShell, create an isolated environment and
 write a fresh capture outside the repository:

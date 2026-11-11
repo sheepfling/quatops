@@ -17,11 +17,6 @@ struct QuaternionInput {
   double w, x, y, z;
 };
 
-struct TangentInput {
-  std::string id;
-  double x, y, z;
-};
-
 template <typename Scalar>
 using Vector3 = Eigen::Matrix<Scalar, 3, 1>;
 template <typename Scalar>
@@ -65,8 +60,7 @@ void write_rotation_row(std::ostream& out, const char* id,
 
 template <typename Scalar>
 void read_inputs(const char* path, Vector3<Scalar>& probe,
-                 std::vector<QuaternionInput>& quaternions,
-                 std::vector<TangentInput>& tangents) {
+                 std::vector<QuaternionInput>& quaternions) {
   std::ifstream input(path);
   if (!input) throw std::runtime_error("cannot open input TSV");
 
@@ -80,10 +74,6 @@ void read_inputs(const char* path, Vector3<Scalar>& probe,
       QuaternionInput item;
       input >> item.id >> item.w >> item.x >> item.y >> item.z;
       quaternions.push_back(item);
-    } else if (kind == "tangent") {
-      TangentInput item;
-      input >> item.id >> item.x >> item.y >> item.z;
-      tangents.push_back(item);
     } else if (!kind.empty() && kind[0] == '#') {
       std::string ignored;
       std::getline(input, ignored);
@@ -92,8 +82,8 @@ void read_inputs(const char* path, Vector3<Scalar>& probe,
     }
     if (!input) throw std::runtime_error("malformed input TSV row");
   }
-  if (!found_probe || quaternions.empty() || tangents.empty()) {
-    throw std::runtime_error("input TSV must define probe, quaternion, tangent");
+  if (!found_probe || quaternions.empty()) {
+    throw std::runtime_error("input TSV must define probe and quaternions");
   }
 }
 
@@ -102,14 +92,12 @@ int capture(const char* input_path) {
   std::cout << std::setprecision(std::numeric_limits<Scalar>::max_digits10);
   Vector3<Scalar> probe;
   std::vector<QuaternionInput> quaternion_inputs;
-  std::vector<TangentInput> tangent_inputs;
-  read_inputs(input_path, probe, quaternion_inputs, tangent_inputs);
+  read_inputs(input_path, probe, quaternion_inputs);
 
   std::map<std::string, Rotation<Scalar>> rotations;
-  std::map<std::string, Vector3<Scalar>> tangents;
   const char* target =
       std::is_same_v<Scalar, float> ? "Sophus SO3f" : "Sophus SO3d";
-  std::cout << "{\"capture_schema\":\"quatops-sophus-direct-v1\","
+  std::cout << "{\"capture_schema\":\"quatops-sophus-direct-v2\","
             << "\"target\":\"" << target << "\",\"probe_xyz\":";
   write_vec3(std::cout, probe);
   std::cout << ",\"quaternion_construction\":[";
@@ -128,46 +116,16 @@ int capture(const char* input_path) {
     write_vec3(std::cout, rotation * Vector3<Scalar>::UnitX()); std::cout << ',';
     write_vec3(std::cout, rotation * Vector3<Scalar>::UnitY()); std::cout << ',';
     write_vec3(std::cout, rotation * Vector3<Scalar>::UnitZ()); std::cout << "],";
-    write_vec3(std::cout, rotation.log()); std::cout << ',';
     if (item.id == "mixed_unequal") write_vec3(std::cout, rotation * probe);
     else std::cout << "null";
     std::cout << ']';
   }
-  std::cout << "],\"exp_log\":[";
-  bool first = true;
-  for (const auto& item : tangent_inputs) {
-    const Vector3<Scalar> tangent(static_cast<Scalar>(item.x),
-        static_cast<Scalar>(item.y), static_cast<Scalar>(item.z));
-    const Rotation<Scalar> rotation = Rotation<Scalar>::exp(tangent);
-    tangents.emplace(item.id, tangent);
-    rotations.emplace("exp_" + item.id, rotation);
-    if (item.id == "perturbation") continue;
-    if (!first) std::cout << ',';
-    first = false;
-    std::cout << "[\"" << item.id << "\",";
-    write_vec3(std::cout, tangent); std::cout << ',';
-    write_params(std::cout, rotation); std::cout << ",[";
-    write_vec3(std::cout, rotation * Vector3<Scalar>::UnitX()); std::cout << ',';
-    write_vec3(std::cout, rotation * Vector3<Scalar>::UnitY()); std::cout << ',';
-    write_vec3(std::cout, rotation * Vector3<Scalar>::UnitZ()); std::cout << "],";
-    write_vec3(std::cout, rotation.log()); std::cout << ',';
-    if (item.id == "mixed_a") write_vec3(std::cout, rotation * probe);
-    else std::cout << "null";
-    std::cout << ']';
-  }
-  const Rotation<Scalar>& a = rotations.at("exp_mixed_a");
-  const Rotation<Scalar>& b = rotations.at("exp_mixed_b");
-  const Rotation<Scalar> delta = Rotation<Scalar>::exp(tangents.at("perturbation"));
+  const Rotation<Scalar>& a = rotations.at("mixed_unequal");
+  const Rotation<Scalar>& b = rotations.at("nonunit");
   std::cout << "],\"composition\":[";
-  write_rotation_row(std::cout, "mixed_a_times_mixed_b", a * b, probe, true);
+  write_rotation_row(std::cout, "mixed_unequal_times_nonunit", a * b, probe, true);
   std::cout << ',';
-  write_rotation_row(std::cout, "mixed_b_times_mixed_a", b * a, probe, true);
-  std::cout << "],\"inverse\":";
-  write_rotation_row(std::cout, "inverse_mixed_a", a.inverse(), probe, false);
-  std::cout << ",\"perturbation_side\":[";
-  write_rotation_row(std::cout, "delta_times_mixed_a", delta * a, probe, false);
-  std::cout << ',';
-  write_rotation_row(std::cout, "mixed_a_times_delta", a * delta, probe, false);
+  write_rotation_row(std::cout, "nonunit_times_mixed_unequal", b * a, probe, true);
   std::cout << "]}\n";
   return 0;
 }

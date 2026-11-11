@@ -32,7 +32,13 @@ stores the native ECEF origin, three ENU axis endpoints, one transformed mixed
 point, and that point's local inverse readback. Location inputs resolve by
 case ID from the shared geographic corpus. Redundant inputs and readbacks were
 removed after checking their values; retained decimal values round-trip to the
-original binary64 patterns, so duplicate per-value hex arrays are omitted.
+original binary64 patterns, so duplicate per-value hex arrays are omitted. The
+operation, frame contract, and scalar type are declared once for the capture;
+a pinned Linux recapture reproduced the compact native values exactly. The
+version-specific manifest identifies the hash-named shared witness; other
+versions require their own native capture and verified manifest before reusing
+it. The recorded binary hash identifies the pyproj `_transformer` extension,
+not every dynamically linked PROJ library.
 PROJ's topocentric
 operation is described in the
 [PROJ topocentric conversion reference](https://proj.org/en/stable/operations/conversions/topocentric.html).

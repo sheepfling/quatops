@@ -15,6 +15,7 @@ from quatops.experimental.semantics import (
     bind_cesium_enu_frame,
 )
 from quatops.python import hamilton
+from tests.support.evidence_oracles import ecef_origin
 from tests.support.evidence_oracles import matrix_from_wxyz as rotation_matrix
 from tests.support.evidence_oracles import native_values as values
 from tests.support.paths import REPOSITORY_ROOT
@@ -43,24 +44,6 @@ def enu_to_ecef(origin_xyz):
     east /= np.linalg.norm(east)
     north = np.cross(up, east)
     return np.column_stack((east, north, up))
-
-
-def ecef_origin(longitude_degrees, latitude_degrees, height_m):
-    longitude, latitude = np.deg2rad([longitude_degrees, latitude_degrees])
-    semi_major = 6_378_137.0
-    flattening = 1.0 / 298.257223563
-    eccentricity_squared = flattening * (2.0 - flattening)
-    prime_vertical = semi_major / np.sqrt(
-        1.0 - eccentricity_squared * np.sin(latitude) ** 2
-    )
-    return np.array(
-        [
-            (prime_vertical + height_m) * np.cos(latitude) * np.cos(longitude),
-            (prime_vertical + height_m) * np.cos(latitude) * np.sin(longitude),
-            (prime_vertical * (1.0 - eccentricity_squared) + height_m)
-            * np.sin(latitude),
-        ]
-    )
 
 
 def check(actual, expected, message, *, atol=ATOL):

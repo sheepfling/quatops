@@ -9,8 +9,8 @@
   "native_baseline": {
     "manifest": "manifest.json",
     "audit_time_manifest_sha256": "281ea752613bf2238a3e15008033124067f8fa390c0ee47a8edfe102ef0adc51",
-    "observations": "observations.jsonl",
-    "observations_sha256": "44d6c6ed0c27339ad0f718436dbacc89ac22778209790428919883f6e74c1ab8",
+    "observations": "../shared/observations-ab631993f29c2307725d8720e19a3aa0d42fdcb4536b32d3734ca0bc2c75fe33.jsonl",
+    "observations_sha256": "ab631993f29c2307725d8720e19a3aa0d42fdcb4536b32d3734ca0bc2c75fe33",
     "input_corpus": "experiments/oracles/shared/geographic_inputs_v1.json",
     "audit_time_input_corpus_sha256": "ca5c70314444c14cead0cc196f319e5d189657bb818eb59751c07e55ec23ff85",
     "observation_count": 11,
@@ -19,8 +19,10 @@
     "historical_native_exporter_sha256": "8211253a2d97a9453890b8a695af02f0c79069419deca9ce7e7dc0b4211a48b1",
     "reproduction_exporter_path": "experiments/oracles/proj/9.5.1/capture_proj.py",
     "source_observations_sha256": "67adb8fcedc1cd9b6aca1b203a6109b8b57f2d8fe3f381951cbcb0dcd56e5f5a",
-    "retention": "Selected native origin, basis endpoints, and probe/inverse values retained for 11 locations; duplicate inputs, redundant readbacks, and per-value hex sidecars omitted.",
-    "original_full_capture_sha256": "d908e22625445f11e0167b136587cfe511161885f22f35fddea53b5e6069e20d"
+    "retention": "All eleven location outputs retained with shared contract and binary64 dtype declared once; per-value hex sidecars remain omitted.",
+    "original_full_capture_sha256": "d908e22625445f11e0167b136587cfe511161885f22f35fddea53b5e6069e20d",
+    "previous_selected_observations_sha256": "44d6c6ed0c27339ad0f718436dbacc89ac22778209790428919883f6e74c1ab8",
+    "previous_selected_observations_revision": "60802309fe3d933c6d4c7e07ed5110048620b83d"
   },
   "independent_native_reexecution": {
     "was_run": true,

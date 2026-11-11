@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import struct
 from collections.abc import Sequence
@@ -10,50 +11,55 @@ from pathlib import Path
 
 import numpy as np
 import scipy
-from retain_witnesses import _PINNED_INPUT_SHA256, load_semantic_config, reduce_capture
+from retain_witnesses import (
+    DEFAULT_PACKAGE,
+    load_recipe_manifest,
+    load_semantic_config,
+    load_shared_witness,
+    parse_witness,
+    reduce_capture,
+)
 from scipy.spatial.transform import Rotation
 
 from scripts.evidence_schema.primitives import finite_max_abs
 from scripts.evidence_schema.sophus import SophusDiscoveryWitnessSet
-from scripts.evidence_schema.utilities import sha256_file
 
 
-def verify(witnesses: SophusDiscoveryWitnessSet, tolerance: float) -> float:
+def verify(
+    witnesses: SophusDiscoveryWitnessSet,
+    tolerance: float,
+    package: Path = DEFAULT_PACKAGE,
+) -> float:
     """Check retained native coefficient, basis-action and SO(3) observations."""
     maximum = 0.0
-    input_path = Path(__file__).with_name("capture_inputs.tsv")
-    if sha256_file(input_path) != _PINNED_INPUT_SHA256:
+    load_semantic_config(package)
+    input_path = package / "capture_inputs.tsv"
+    input_bytes = input_path.read_bytes()
+    if (
+        hashlib.sha256(input_bytes).hexdigest()
+        != load_recipe_manifest(package).artifacts.input_sha256
+    ):
         raise ValueError(
             "pinned Sophus input TSV hash differs from the recorded corpus"
         )
     input_rows = [
         line.split()
-        for line in input_path.read_text(encoding="utf-8").splitlines()
+        for line in input_bytes.decode("utf-8").splitlines()
         if line and not line.startswith("#")
     ]
 
-    def precision(values: Sequence[str | float]) -> tuple[float, ...]:
+    def precision(values: Sequence[str | float]) -> bytes:
         numbers = tuple(float(value) for value in values)
-        if "SO3f" in witnesses.target:
-            return tuple(
-                struct.unpack("=f", struct.pack("=f", value))[0] for value in numbers
-            )
-        return numbers
+        code = "f" if witnesses.scalar_profile == "float32" else "d"
+        return struct.pack(f"={len(numbers)}{code}", *numbers)
 
     corpus = {
         (row[0], row[1]): precision(row[2:]) for row in input_rows if row[0] != "probe"
     }
     probe = next(precision(row[1:]) for row in input_rows if row[0] == "probe")
-    if (
-        precision(witnesses.probe_xyz) != probe
-        or any(
-            precision(row[1]) != corpus[("quaternion", row[0])]
-            for row in witnesses.quaternion_construction
-        )
-        or any(
-            precision(row[1]) != corpus[("tangent", row[0])]
-            for row in witnesses.exp_log
-        )
+    if precision(witnesses.probe_xyz) != probe or any(
+        precision(row[1]) != corpus[("quaternion", row[0])]
+        for row in witnesses.quaternion_construction
     ):
         raise ValueError("selected witness inputs differ from the pinned Sophus corpus")
 
@@ -82,18 +88,11 @@ def verify(witnesses: SophusDiscoveryWitnessSet, tolerance: float) -> float:
             compare(probe, expected.apply(witnesses.probe_xyz), f"{case_id} probe")
 
     constructors = {row[0]: row for row in witnesses.quaternion_construction}
-    for case_id, wxyz, norm, xyzw, basis, log, probe in constructors.values():
+    for case_id, wxyz, norm, xyzw, basis, probe in constructors.values():
         values = np.asarray(wxyz, dtype=float)
         compare([norm], [np.linalg.norm(values)], f"{case_id} input norm")
         expected = Rotation.from_quat(values[[1, 2, 3, 0]])
         rotation((case_id, xyzw, basis, probe), expected)
-        compare(
-            Rotation.from_rotvec(log).as_matrix(),
-            expected.as_matrix(),
-            f"{case_id} log action",
-        )
-        if case_id != "half_turn_axis":
-            compare(log, expected.as_rotvec(), f"{case_id} log")
     if (
         np.dot(
             constructors["mixed_unequal"][3], constructors["mixed_unequal_antipode"][3]
@@ -102,43 +101,22 @@ def verify(witnesses: SophusDiscoveryWitnessSet, tolerance: float) -> float:
     ):
         raise AssertionError("native antipodes must retain opposite coefficient signs")
 
-    tangents: dict[str, Rotation] = {}
-    for case_id, tangent, xyzw, basis, log, probe in witnesses.exp_log:
-        expected = Rotation.from_rotvec(tangent)
-        rotation((case_id, xyzw, basis, probe), expected)
-        compare(log, expected.as_rotvec(), f"{case_id} log")
-        tangents[case_id] = expected
-
-    a, b = tangents["mixed_a"], tangents["mixed_b"]
+    a = Rotation.from_quat(constructors["mixed_unequal"][3])
+    b = Rotation.from_quat(constructors["nonunit"][3])
     expected_products = (
-        ("mixed_a_times_mixed_b", a * b),
-        ("mixed_b_times_mixed_a", b * a),
+        ("mixed_unequal_times_nonunit", a * b),
+        ("nonunit_times_mixed_unequal", b * a),
     )
     for row, (case_id, expected) in zip(witnesses.composition, expected_products):
         if row[0] != case_id:
             raise ValueError("native composition order differs from the input contract")
-        rotation(row, expected)
-    if witnesses.inverse[0] != "inverse_mixed_a":
-        raise ValueError("native inverse case differs from the input contract")
-    rotation(witnesses.inverse, a.inv())
-
-    # The perturbation input is in the pinned corpus; it is not an extra golden.
-    delta = Rotation.from_rotvec(corpus[("tangent", "perturbation")])
-    expected_deltas = (
-        ("delta_times_mixed_a", delta * a),
-        ("mixed_a_times_delta", a * delta),
-    )
-    for row, (case_id, expected) in zip(witnesses.perturbation_side, expected_deltas):
-        if row[0] != case_id:
-            raise ValueError(
-                "native perturbation order differs from the input contract"
-            )
         rotation(row, expected)
     return maximum
 
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--package-dir", type=Path, default=DEFAULT_PACKAGE)
     group = parser.add_mutually_exclusive_group(required=True)
     group.add_argument(
         "--capture", type=Path, help="full native capture to reduce and verify"
@@ -148,24 +126,29 @@ def main() -> None:
     )
     parser.add_argument("--output", type=Path, help="optional comparison report")
     args = parser.parse_args()
-    config = load_semantic_config()
-    witnesses = (
-        reduce_capture(args.capture.read_bytes(), config)
-        if args.capture is not None
-        else SophusDiscoveryWitnessSet.model_validate_json(
-            args.witnesses.read_bytes(), strict=True
-        )
-    )
+    package = args.package_dir.resolve(strict=True)
+    config = load_semantic_config(package)
+    if args.capture is not None:
+        witnesses = reduce_capture(args.capture.read_bytes(), config, package)
+    else:
+        requested = parse_witness(args.witnesses.read_bytes())
+        witnesses = load_shared_witness(requested.scalar_profile, package)
+        if json.dumps(requested.model_dump(mode="json"), sort_keys=True) != json.dumps(
+            witnesses.model_dump(mode="json"), sort_keys=True
+        ):
+            raise ValueError(
+                "requested witness differs from the recorded shared payload"
+            )
     profile = next(
         item
         for item in config.scalar_profiles
-        if item.witness_target == witnesses.target
+        if item.precision == witnesses.scalar_profile
     )
-    maximum = verify(witnesses, profile.scipy_tolerance)
+    maximum = verify(witnesses, profile.scipy_tolerance, package)
     report = json.dumps(
         {
             "result": "pass",
-            "native_target": witnesses.target,
+            "native_target": profile.witness_target,
             "reference": f"SciPy {scipy.__version__}",
             "quatops_executed": False,
             "absolute_tolerance": profile.scipy_tolerance,

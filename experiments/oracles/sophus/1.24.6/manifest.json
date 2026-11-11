@@ -36,11 +36,11 @@
       "verify_scipy.py": "548bb54929ef570477c2b6a8d17756610af610ceb41979bba369d27485d35124"
     },
     "repair_replay_sources_sha256": {
-      "retain_witnesses.py": "447105da9cb0e44883444f094d98b31027dff1cf148f996dc38f66fd3735fe4d",
-      "verify_scipy.py": "1866df20f16ac74d591c5557a677f35505ab78060526776cac22a076ae6f7940"
+      "retain_witnesses.py": "6804997ba88d5ca0be1c83d71bf1885de770b52c61061b307d5ea1492d626dda",
+      "verify_scipy.py": "7fb6b559d51684004c7c64452647cf0829a08ac0f4862cc4fc92f3cf87f15fc4"
     },
     "input_file": "capture_inputs.tsv",
-    "input_sha256": "713fece6dbad561b864c3f625c740190f92210318af4fa09f4467930a04a3048",
+    "input_sha256": "4790e818b9c29d2c7222d7da40e2545e1bdad4ed8f4d9e6c942bd2152253e3a4",
     "native_executable_sha256": "fd164cf8c34f1b731c8eafd6ea4bd336eb59b8941004e866edcfc3fc07016767",
     "pinned_dependency_headers_sha256": {
       "Sophus/sophus/so3.hpp": "6fe2514122e4d1b11d73b1d4a97d1d731973da9539663b56cab8d4fc94c6ba53",
@@ -49,21 +49,52 @@
     },
     "scalar_profiles": {
       "float32": {
-        "raw_capture_sha256": "e0b3cea54fbe2770376143a3ce9c82ddfc3c6c275397b43c4eb71c0d7856710a",
+        "raw_capture_sha256": "5f9c0a4cecc98f86358f5e96651ebbd88d7ab789ba8d5b2c8fd19dabb68259ba",
         "raw_capture_retained": false,
-        "selected_witness_file": "witnesses/float32.json",
-        "selected_witness_sha256": "ef2b4118b180c0a9d7d69bf6714367c74fe4e450a533b843d1482a4fd5bee687"
+        "selected_witness_file": "experiments/oracles/sophus/shared/witnesses/float32-3f8207676dcc008b493e8addfd11684f5aa6a9b7d2d4db764e847dd103647b1c.json",
+        "selected_witness_sha256": "3f8207676dcc008b493e8addfd11684f5aa6a9b7d2d4db764e847dd103647b1c",
+        "historical_raw_capture_sha256": "e0b3cea54fbe2770376143a3ce9c82ddfc3c6c275397b43c4eb71c0d7856710a",
+        "previous_selected_witness_sha256": "ef2b4118b180c0a9d7d69bf6714367c74fe4e450a533b843d1482a4fd5bee687",
+        "comparison": "verified_exact"
       },
       "float64": {
-        "raw_capture_sha256": "f2a9caf8dd60c37e4f344f852ccf74afc4714702ff81980d7445600d9749378f",
+        "raw_capture_sha256": "bd57009194cd9095669c1b7bdf6da803abdc39259eac09993a20b941f6ada3a5",
         "raw_capture_retained": false,
-        "selected_witness_file": "witnesses/float64.json",
-        "selected_witness_sha256": "25124f291a5ab5f21d61e17c27cb3ab58f8ebc2f608870e210b6bee04648f3ef"
+        "selected_witness_file": "experiments/oracles/sophus/shared/witnesses/float64-4463a219e16e552439e248955590afbde819c517f4e42f48f331d792bf25c75b.json",
+        "selected_witness_sha256": "4463a219e16e552439e248955590afbde819c517f4e42f48f331d792bf25c75b",
+        "historical_raw_capture_sha256": "f2a9caf8dd60c37e4f344f852ccf74afc4714702ff81980d7445600d9749378f",
+        "previous_selected_witness_sha256": "25124f291a5ab5f21d61e17c27cb3ab58f8ebc2f608870e210b6bee04648f3ef",
+        "comparison": "verified_exact"
       }
     },
-    "retained_schema_sha256": "aeb357ff68f63a90192d7ee045ce2cb4357612ff0c39e0e4c69064becdfd8ce0",
+    "retained_schema_sha256": "67d6713954fa7b1674c0b15fceea2bef993fb8b0a6fd2c2cba3a05d3436701fe",
     "historical_capture_source_archive": "experiments/provenance/reproduction-v1.zip#sophus-1.24.6-capture_native.cpp",
     "direct_capture": {
+      "product_version": "1.24.6",
+      "dependency": "Eigen 5.0.1",
+      "capture_source_sha256": "0d846b647556324b2724a70d0ce703d84f73d1a8eeb42842fcc109a0b6691987",
+      "native_executable_sha256": "f30e3ecbf6669b281702626f2e08cff2f24b12f48b79d806ace189dbde9dccc4",
+      "input_sha256": "4790e818b9c29d2c7222d7da40e2545e1bdad4ed8f4d9e6c942bd2152253e3a4",
+      "compiler": "g++ (GCC) 15.2.0",
+      "utc": "2026-11-11T22:32:43.872223+00:00",
+      "exit_code": 0,
+      "raw_capture_sha256": {
+        "float32": "5f9c0a4cecc98f86358f5e96651ebbd88d7ab789ba8d5b2c8fd19dabb68259ba",
+        "float64": "bd57009194cd9095669c1b7bdf6da803abdc39259eac09993a20b941f6ada3a5"
+      },
+      "selected_values": "Constructor observations match the historical fixtures exactly, including signed zero. Product observations were newly captured using two retained constructors.",
+      "scope_note": "Quaternion construction, native actions and noncommuting products only.",
+      "capture_source_file": "experiments/oracles/sophus/1.24.6/capture_native.cpp"
+    },
+    "historical_input_sha256": "713fece6dbad561b864c3f625c740190f92210318af4fa09f4467930a04a3048",
+    "current_source_sha256": "3d4f10fa0331cf5dfa94577bff57d5cc9609aacc4fc85dc12837c8b41784ac94",
+    "previous_retained_schema_sha256": "aeb357ff68f63a90192d7ee045ce2cb4357612ff0c39e0e4c69064becdfd8ce0",
+    "previous_repair_replay_sources_sha256": {
+      "retain_witnesses.py": "447105da9cb0e44883444f094d98b31027dff1cf148f996dc38f66fd3735fe4d",
+      "verify_scipy.py": "1866df20f16ac74d591c5557a677f35505ab78060526776cac22a076ae6f7940"
+    },
+    "previous_witness_revision": "60802309fe3d933c6d4c7e07ed5110048620b83d",
+    "historical_direct_capture": {
       "capture_source_sha256": "8be75eabba0aaea0599f220c49e9ee7bb5756b9ec6d95332f9471c5c81c10ae5",
       "native_executable_sha256": "eda839c68facf70fde3bb06f1e4d2a95bac01709c083c9316ba9c59a6741e752",
       "compiler": "g++ (GCC) 15.2.0",
@@ -73,7 +104,20 @@
       },
       "selected_values": "All selected values match the historical fixtures exactly, including signed zero.",
       "scope_note": "Direct capture omits the previously temporary matrices and duplicate coefficient views."
-    }
+    },
+    "linux_replay": {
+      "platform": "Linux x86-64 Docker",
+      "compiler": "g++ (Debian 14.2.0-19) 14.2.0",
+      "capture_source_sha256": "0d846b647556324b2724a70d0ce703d84f73d1a8eeb42842fcc109a0b6691987",
+      "native_executable_sha256": "f28d672d2f5e0b3c79d33e8df8d4a92afcbc54120b9118c656fb4d85780d4479",
+      "input_sha256": "4790e818b9c29d2c7222d7da40e2545e1bdad4ed8f4d9e6c942bd2152253e3a4",
+      "raw_capture_sha256": {
+        "float32": "a2662649c02c61fc904417e060664166181fd7ce3c858dd168d9e170468b642b",
+        "float64": "d7bbe3d2d297f3792bf00c973ac8dabd227244a717f55aa03bdc8ede5986d5b4"
+      },
+      "comparison": "All retained values match the Windows run exactly, including signed zeros."
+    },
+    "capture_hash_note": "Each raw_capture_sha256 identifies that profile's exact direct native run. Earlier full-capture hashes and witness revision are recorded separately."
   },
   "review": {
     "state": "selected_native_discovery_witnesses_reviewed",
