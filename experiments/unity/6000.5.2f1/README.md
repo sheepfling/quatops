@@ -35,5 +35,5 @@ outside this converter's retained evidence.
 Run the replay and generated frame-map checks with:
 
 ```shell
-python -m scripts.verify --repository-root . engines
+python -m scripts.verify engines
 ```

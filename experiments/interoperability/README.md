@@ -26,7 +26,7 @@ Validate and normalize the typed source packages after changing a capture,
 contract, or retention rule:
 
 ```shell
-python -m scripts.verify --repository-root . evidence
+python -m scripts.verify evidence
 ```
 
 The validator checks the target-specific contracts and native witnesses and

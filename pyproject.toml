@@ -103,6 +103,7 @@ include = [
     "tests/typing_tests/numpy_consumer.py",
     "scripts/evidence_json.py",
     "scripts/evidence_format.py",
+    "scripts/repository.py",
     "scripts/converter_evidence.py",
     "scripts/render_converter_registry.py",
     "scripts/validate_converter_evidence.py",

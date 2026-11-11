@@ -93,7 +93,7 @@ and inspect the compact review bundle.
 Run the converter acceptance set with:
 
 ```shell
-python -m scripts.verify --repository-root . interoperability
+python -m scripts.verify interoperability
 ```
 
 ## Converter-boundary evidence and remaining scope

@@ -9,9 +9,45 @@ import shlex
 import subprocess
 import sys
 import tempfile
+from collections.abc import Callable, Mapping
 from pathlib import Path
 
 PYTHON = sys.executable
+
+CI_COMMANDS: Mapping[str, tuple[tuple[str, ...], ...]] = {
+    "mypy": (
+        (
+            "tests/typing_tests/foundational_consumer.py",
+            "tests/typing_tests/consumer.py",
+            "tests/typing_tests/float32_consumer.py",
+        ),
+    ),
+    "ruff": (
+        ("check", "src", "tests", "examples", "experiments"),
+        (
+            "check",
+            "--select",
+            "B,C4,E4,PERF,RUF,SIM,UP",
+            "experiments/oracles",
+            "experiments/converters",
+            "scripts",
+        ),
+        ("format", "--check", "examples", "experiments", "scripts"),
+    ),
+}
+
+TEST_TARGETS: Mapping[str, tuple[str, ...]] = {
+    "engines": (
+        "tests/quatops/experimental/engines/test_canonical_interoperability.py",
+        "tests/quatops/experimental/engines/test_engine_basis_oracle.py",
+        "tests/experiments/engines/shared/test_engine_proof_profiles.py",
+    ),
+    "interoperability": (
+        "tests/quatops/experimental",
+        "tests/experiments/engines",
+        "tests/experiments/converters",
+    ),
+}
 
 
 def run(*command: str, cwd: Path, env: dict[str, str] | None = None) -> None:
@@ -67,27 +103,9 @@ def ci(root: Path, env: dict[str, str]) -> None:
     """Run the checks shared with the CI Python-version matrix."""
     evidence(root, env)
     pytest(root, env=env)
-    module(
-        root,
-        env,
-        "mypy",
-        "tests/typing_tests/foundational_consumer.py",
-        "tests/typing_tests/consumer.py",
-        "tests/typing_tests/float32_consumer.py",
-    )
-    module(root, env, "ruff", "check", "src", "tests", "examples", "experiments")
-    module(
-        root,
-        env,
-        "ruff",
-        "check",
-        "--select",
-        "B,C4,E4,PERF,RUF,SIM,UP",
-        "experiments/oracles",
-        "experiments/converters",
-        "scripts",
-    )
-    module(root, env, "ruff", "format", "--check", "examples", "experiments", "scripts")
+    for name, commands in CI_COMMANDS.items():
+        for command in commands:
+            module(root, env, name, *command)
 
 
 def typecheck(root: Path, env: dict[str, str]) -> None:
@@ -105,27 +123,6 @@ def all_checks(root: Path, env: dict[str, str]) -> None:
     typecheck(root, env)
     lock(root, env)
     module(root, env, "build", "--quiet")
-
-
-def engine_checks(root: Path, env: dict[str, str]) -> None:
-    """Replay native engine witnesses and independently generated basis maps."""
-    pytest(
-        root,
-        "tests/quatops/experimental/engines/test_canonical_interoperability.py",
-        "tests/quatops/experimental/engines/test_engine_basis_oracle.py",
-        "tests/experiments/engines/shared/test_engine_proof_profiles.py",
-        env=env,
-    )
-
-
-def interoperability_checks(root: Path, env: dict[str, str]) -> None:
-    pytest(
-        root,
-        "tests/quatops/experimental",
-        "tests/experiments/engines",
-        "tests/experiments/converters",
-        env=env,
-    )
 
 
 def benchmark_checks(
@@ -181,8 +178,6 @@ def linux_checks(root: Path) -> None:
             "python:3.12-slim",
             "python",
             "/tmp/verify.py",
-            "--repository-root",
-            "/tmp",
             "--bootstrap",
             cwd=root,
         )
@@ -218,28 +213,28 @@ def bootstrap_linux() -> None:
         "uv==0.11.28",
         cwd=root,
     )
-    run(python, "-m", "scripts.verify", "--repository-root", str(root), "all", cwd=root)
+    run(python, "-m", "scripts.verify", "all", cwd=root)
+
+
+CHECKS: Mapping[str, Callable[[Path, dict[str, str]], None]] = {
+    "all": all_checks,
+    "ci": ci,
+    "evidence": evidence,
+    "benchmarks": benchmark_checks,
+    "converter-benchmark": converter_benchmarks,
+    "typecheck": typecheck,
+    "lock": lock,
+}
 
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--repository-root", type=Path, required=True)
+    parser.add_argument("--repository-root", type=Path)
     parser.add_argument(
         "scope",
         nargs="?",
         default="all",
-        choices=(
-            "all",
-            "ci",
-            "evidence",
-            "engines",
-            "interoperability",
-            "benchmarks",
-            "converter-benchmark",
-            "typecheck",
-            "lock",
-            "linux",
-        ),
+        choices=(*CHECKS, *TEST_TARGETS, "linux"),
         help="Select checks to run (default: all). The linux scope runs them in Docker.",
     )
     parser.add_argument("--bootstrap", action="store_true", help=argparse.SUPPRESS)
@@ -249,24 +244,20 @@ def main() -> int:
         if options.bootstrap:
             bootstrap_linux()
         else:
-            root = options.repository_root.resolve(strict=True)
-            if not (root / "pyproject.toml").is_file():
-                raise ValueError(f"Not a repository root: {root}")
+            from scripts.repository import find_repository_root
+
+            start = options.repository_root or Path(__file__)
+            root = find_repository_root(start)
+            if options.repository_root and options.repository_root.resolve() != root:
+                raise ValueError(f"Not a repository root: {options.repository_root}")
             if scope == "linux":
                 linux_checks(root)
             else:
-                checks = {
-                    "all": all_checks,
-                    "ci": ci,
-                    "evidence": evidence,
-                    "engines": engine_checks,
-                    "interoperability": interoperability_checks,
-                    "benchmarks": benchmark_checks,
-                    "converter-benchmark": converter_benchmarks,
-                    "typecheck": typecheck,
-                    "lock": lock,
-                }
-                checks[scope](root, check_environment())
+                env = check_environment()
+                if scope in TEST_TARGETS:
+                    pytest(root, *TEST_TARGETS[scope], env=env)
+                else:
+                    CHECKS[scope](root, env)
     except (OSError, subprocess.CalledProcessError, ValueError) as error:
         print(f"Verification failed: {error}", file=sys.stderr)
         return 1

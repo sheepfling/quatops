@@ -33,11 +33,9 @@ exclude = []
 
 [checks.path_discovery]
 extensions = [".py"]
-# The experiment launcher intentionally installs its configured source paths;
-# test support locates checked-in fixture roots for replay tests.
+# The experiment launcher intentionally installs its configured source paths.
 exclude = [
   "experiments/run.py",
-  "tests/support/paths.py",
 ]
 inspection_exclude = []
 

@@ -62,8 +62,8 @@ choice explicit.
 Run the focused and complete suites when changing implementation code:
 
 ```shell
-python -m scripts.verify --repository-root . engines
-python -m scripts.verify --repository-root .
+python -m scripts.verify engines
+python -m scripts.verify
 ```
 
 For the repository's current test commands and dependency setup, see the

@@ -21,12 +21,14 @@ Run the full local checks, including the CI suite, type checking, the capture
 lock, and package build:
 
 ```shell
-python -m scripts.verify --repository-root .
+python -m scripts.verify
 ```
 
 Use `python -m scripts.verify --help` for the individual evidence, engine,
 interoperability, benchmark, CI, type-check, and lock scopes. The CI matrix
-runs the same `ci` scope; its package and Pyright jobs run separately.
+runs the same `ci` scope; its package and Pyright jobs run separately. The
+runner discovers its repository automatically; `--repository-root` can select
+an explicit checkout.
 
 Pytest's default configuration skips opt-in performance cases. The routine
 suite covers API behavior, conventions, numerical edge cases, scalar and NumPy
@@ -45,7 +47,7 @@ workflow.
 Before pushing, run the checks in a Linux Docker container as well:
 
 ```shell
-python -m scripts.verify --repository-root . linux
+python -m scripts.verify linux
 ```
 
 The command requires a clean committed checkout, bundles `HEAD`, and clones it
@@ -63,14 +65,14 @@ contents are expected to exclude local Numba cache files.
 Install the declared development dependencies, then run the benchmark suite:
 
 ```shell
-python -m scripts.verify --repository-root . benchmarks
+python -m scripts.verify benchmarks
 ```
 
 To measure reusable versus one-shot scalar and 10k-item orientation conversion
 calls specifically, run:
 
 ```shell
-python -m scripts.verify --repository-root . converter-benchmark
+python -m scripts.verify converter-benchmark
 ```
 
 The benchmark cases check correctness before timing and warm optional Numba

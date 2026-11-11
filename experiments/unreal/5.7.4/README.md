@@ -29,5 +29,5 @@ capture hashes are recorded with the retained contract.
 Replay the formula and frozen native-witness checks with:
 
 ```shell
-python -m scripts.verify --repository-root . engines
+python -m scripts.verify engines
 ```

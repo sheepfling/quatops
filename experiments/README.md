@@ -63,7 +63,7 @@ Pass `--json` with a destination path to save the run's results.
 For grouped NumPy and engine comparisons:
 
 ```shell
-python -m scripts.verify --repository-root . benchmarks
+python -m scripts.verify benchmarks
 ```
 
 Benchmark groups verify outputs before timing. Optional Numba kernels are
