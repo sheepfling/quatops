@@ -1,6 +1,7 @@
 """Type surface for the SpiceyPy 8.3.0 APIs used by rotation captures."""
 
 from collections.abc import Sequence
+from ctypes import CDLL
 from typing import Any
 
 from numpy.typing import NDArray
@@ -11,6 +12,7 @@ _FloatSequence: TypeAlias = Sequence[float] | _FloatArray
 
 __file__: str
 __version__: str
+libspice: CDLL
 
 def axisar(axis: _FloatSequence, angle: float) -> _FloatArray: ...
 def eul2m(

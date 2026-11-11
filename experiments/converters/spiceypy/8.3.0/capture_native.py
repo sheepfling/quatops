@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-from importlib import resources
 from pathlib import Path
 
 import numpy as np
@@ -113,7 +112,7 @@ def capture(
         ),
     )
     validate_spiceypy_capture_matches_inputs(witnesses, spec, shared)
-    library = Path(str(resources.files("spiceypy"))) / "utils" / "cspice.dll"
+    library = Path(spice.libspice._name)
     return DirectCaptureResult(witnesses, library)
 
 

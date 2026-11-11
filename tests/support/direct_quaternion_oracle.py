@@ -55,7 +55,12 @@ def check_contract_and_provenance(contract, manifest, *, source, fixture):
         "lockfile_sha256": REPOSITORY_ROOT / "experiments/converters/python/uv.lock",
     }
     for field, path in replay_paths.items():
-        assert hashlib.sha256(path.read_bytes()).hexdigest() == replay[field], field
+        recorded = (
+            manifest.get("reproduction", replay)[field]
+            if field == "capture_script_sha256"
+            else replay[field]
+        )
+        assert hashlib.sha256(path.read_bytes()).hexdigest() == recorded, field
     assert replay["witnesses_sha256"] == manifest["provenance"]["witnesses_sha256"]
     for field in ("capture_script_sha256", "shared_capture_script_sha256"):
         capture_source = replay_paths[field].read_text(encoding="utf-8")

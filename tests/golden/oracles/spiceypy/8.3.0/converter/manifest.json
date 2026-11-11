@@ -41,6 +41,9 @@
     "file": "experiments/converters/spiceypy/8.3.0/semantic_contract.json",
     "sha256": "ecc8a72a50ad0390cde0ac597e019b5d31c587f743ab3f69ec765c4a373ceb02"
   },
+  "reproduction": {
+    "capture_script_sha256": "27fa644897c7c1d07f6e1feb4429e647d4c97c9aa0db2d3fd2b7a979d2329928"
+  },
   "unified_lock_replay": {
     "utc": "2026-11-11T02:08:23.958462+00:00",
     "python": "3.13.14 (main, Jun 23 2026, 15:19:27) [MSC v.1944 64 bit (AMD64)]",

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import sys
 from importlib import resources
 from importlib.metadata import version
 from pathlib import Path
@@ -105,7 +106,11 @@ def capture(
             ],
         ),
     )
-    library = Path(str(resources.files("mujoco"))) / "mujoco.dll"
+    name = {
+        "win32": "mujoco.dll",
+        "darwin": f"libmujoco.{mujoco.mj_versionString()}.dylib",
+    }.get(sys.platform, f"libmujoco.so.{mujoco.mj_versionString()}")
+    library = Path(str(resources.files("mujoco"))) / name
     return DirectCaptureResult(witnesses, library)
 
 

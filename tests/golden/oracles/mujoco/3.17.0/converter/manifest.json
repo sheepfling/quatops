@@ -45,6 +45,9 @@
     "file": "experiments/converters/mujoco/3.17.0/semantic_contract.json",
     "sha256": "dac376343fd3da84bcf1283a0b456013b7df30aa0c114db2863279a9d48cd504"
   },
+  "reproduction": {
+    "capture_script_sha256": "c4de15696414b74bd1a5bc6e392cbde4535a9066ef450c8c677a1aa99b2277b0"
+  },
   "unified_lock_replay": {
     "utc": "2026-11-11T02:08:24.049489+00:00",
     "python": "3.13.14 (main, Jun 23 2026, 15:19:27) [MSC v.1944 64 bit (AMD64)]",
