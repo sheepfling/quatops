@@ -50,6 +50,35 @@ not preserve old pass counts or environment snapshots.
 The pinned Alphus quality review runs on pushes and pull requests as a separate
 workflow.
 
+Before pushing, run the relevant checks in a Linux container as well. This
+example bundles the current commit and checks it out inside the container, so
+Git applies Linux file modes and the recorded line-ending rules:
+
+```powershell
+$bundle = Join-Path $env:TEMP 'quatops-linux-check.bundle'
+git bundle create $bundle HEAD
+$checks = @(
+  'apt-get update -qq'
+  'apt-get install -y -qq --no-install-recommends git'
+  'git clone /source.bundle /tmp/quatops'
+  'cd /tmp/quatops'
+  'python -m venv /tmp/quatops-venv'
+  '. /tmp/quatops-venv/bin/activate'
+  'pip install -e ".[dev]" uv==0.11.28'
+  'uv lock --check --project experiments/converters/python'
+  'python -m scripts.validate_evidence_json --repository-root .'
+  'python -m scripts.validate_converter_evidence --repository-root .'
+  'python -m pytest -q'
+  'ruff check src tests examples experiments'
+  'ruff format --check experiments scripts'
+) -join ' && '
+docker run --rm -v "${bundle}:/source.bundle:ro" python:3.12-slim sh -c $checks
+```
+
+Commit local changes before creating the bundle, and add any change-specific
+checks. This does not replace the CI Python-version matrix or native captures
+in their pinned target runtimes.
+
 The package job also builds both distribution formats, installs the wheel into
 an isolated target directory, checks scalar conversion without optional
 dependencies, then installs NumPy and checks a float32 batch round trip. Wheel
