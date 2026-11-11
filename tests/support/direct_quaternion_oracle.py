@@ -1,14 +1,66 @@
 """Replay direct Hamilton WXYZ native witnesses against QuatOps and SciPy."""
 
+import hashlib
+
 import numpy as np
 from scipy.spatial.transform import Rotation
 
 from quatops.python import hamilton
 from scripts.evidence_schema.primitives import NATIVE_RETAINED_CASE_IDS
 from tests.support.evidence_oracles import matrix_from_wxyz
+from tests.support.paths import REPOSITORY_ROOT
 
 _BASIS = np.eye(3)
 _ATOL = 3e-12
+
+
+def check_contract_and_provenance(contract, manifest, *, source, fixture):
+    """Check the shared direct-quaternion contract and pinned capture inputs."""
+    assert contract["canonical"]["frame"] == {
+        "positive_x": "right",
+        "positive_y": "forward",
+        "positive_z": "up",
+    }
+    boundary = contract["target_boundary"]
+    assert boundary["source_to_target_coordinate_map"] == ["x", "y", "z"]
+    assert boundary["probe_frame_assignment"]["meaning"].startswith(
+        "explicit test frame assignment"
+    )
+    assert boundary["canonical_to_native"].startswith("identity on WXYZ")
+    assert manifest["execution"]["was_run"] is True
+    assert manifest["selection"] == {
+        "retained_orientation_cases": 5,
+        "native_created_orientations": 1,
+        "noncommuting_product_orders": 2,
+        "native_basis_images_per_orientation": 3,
+        "native_mixed_probe_case_id": "mixed_a",
+    }
+    paths = {
+        "contract_sha256": source / "semantic_contract.json",
+        "converter_input_spec_sha256": source / "converter_inputs.json",
+        "selected_inputs_sha256": REPOSITORY_ROOT
+        / "experiments/interoperability/v1/canonical_inputs.json",
+        "witnesses_sha256": fixture / "witnesses.json",
+    }
+    for field, path in paths.items():
+        assert (
+            hashlib.sha256(path.read_bytes()).hexdigest()
+            == manifest["provenance"][field]
+        ), field
+    replay = manifest["unified_lock_replay"]
+    replay_paths = {
+        "capture_script_sha256": source / "capture_native.py",
+        "shared_capture_script_sha256": REPOSITORY_ROOT
+        / "scripts/direct_quaternion_capture.py",
+        "lockfile_sha256": REPOSITORY_ROOT / "experiments/converters/python/uv.lock",
+    }
+    for field, path in replay_paths.items():
+        assert hashlib.sha256(path.read_bytes()).hexdigest() == replay[field], field
+    assert replay["witnesses_sha256"] == manifest["provenance"]["witnesses_sha256"]
+    for field in ("capture_script_sha256", "shared_capture_script_sha256"):
+        capture_source = replay_paths[field].read_text(encoding="utf-8")
+        assert "import quatops" not in capture_source
+        assert "from quatops" not in capture_source
 
 
 def canonical_cases_and_probe(shared):

@@ -8,6 +8,7 @@ import json
 from tests.support.direct_quaternion_oracle import (
     canonical_cases_and_probe,
     check_composition,
+    check_contract_and_provenance,
     check_native_constructor,
     check_orientations,
 )
@@ -36,55 +37,14 @@ def test_spiceypy_boundary_contract_and_capture_provenance_are_explicit():
         CONTRACT["contract_id"]
         == "quatops-spiceypy-8.3.0-direct-quaternion-boundary-v1"
     )
-    assert CONTRACT["canonical"]["frame"] == {
-        "positive_x": "right",
-        "positive_y": "forward",
-        "positive_z": "up",
-    }
-    assert CONTRACT["target_boundary"]["source_to_target_coordinate_map"] == [
-        "x",
-        "y",
-        "z",
-    ]
-    assert CONTRACT["target_boundary"]["probe_frame_assignment"]["meaning"].startswith(
-        "explicit test frame assignment"
-    )
-    assert CONTRACT["target_boundary"]["canonical_to_native"].startswith(
-        "identity on WXYZ"
+    check_contract_and_provenance(
+        CONTRACT, MANIFEST, source=CONTRACT_PATH.parent, fixture=FIXTURE
     )
     assert CONTRACT["target"]["entry_points"] == ["q2m", "mxv", "m2q", "qxq", "axisar"]
     assert "eul2m" in CONTRACT["excludes"][0]
-    assert MANIFEST["execution"]["was_run"] is True
     assert MANIFEST["target"]["wrapper_version"] == "8.3.0"
     assert MANIFEST["target"]["toolkit_version"] == "CSPICE_N0067"
-    assert MANIFEST["selection"] == {
-        "retained_orientation_cases": 5,
-        "native_created_orientations": 1,
-        "noncommuting_product_orders": 2,
-        "native_basis_images_per_orientation": 3,
-        "native_mixed_probe_case_id": "mixed_a",
-    }
-    paths = {
-        "contract_sha256": CONTRACT_PATH,
-        "converter_input_spec_sha256": ROOT
-        / "experiments/converters/spiceypy/8.3.0/converter_inputs.json",
-        "selected_inputs_sha256": SHARED_PATH,
-        "witnesses_sha256": FIXTURE / "witnesses.json",
-    }
-    for field, path in paths.items():
-        assert (
-            hashlib.sha256(path.read_bytes()).hexdigest()
-            == MANIFEST["provenance"][field]
-        ), field
     replay = MANIFEST["unified_lock_replay"]
-    replay_paths = {
-        "capture_script_sha256": ROOT
-        / "experiments/converters/spiceypy/8.3.0/capture_native.py",
-        "shared_capture_script_sha256": ROOT / "scripts/direct_quaternion_capture.py",
-        "lockfile_sha256": ROOT / "experiments/converters/python/uv.lock",
-    }
-    for field, path in replay_paths.items():
-        assert hashlib.sha256(path.read_bytes()).hexdigest() == replay[field], field
     assert (
         replay["native_binary_sha256"]
         == MANIFEST["provenance"]["loaded_cspice_binary_sha256"]
@@ -97,11 +57,6 @@ def test_spiceypy_boundary_contract_and_capture_provenance_are_explicit():
         ).hexdigest()
         == MANIFEST["provenance"]["capture_script_sha256"]
     )
-    assert replay["witnesses_sha256"] == MANIFEST["provenance"]["witnesses_sha256"]
-    for field in ("capture_script_sha256", "shared_capture_script_sha256"):
-        capture_source = replay_paths[field].read_text(encoding="utf-8")
-        assert "import quatops" not in capture_source
-        assert "from quatops" not in capture_source
     assert len(MANIFEST["provenance"]["loaded_cspice_binary_sha256"]) == 64
     assert (
         MANIFEST["provenance"]["loaded_cspice_binary_path"]
