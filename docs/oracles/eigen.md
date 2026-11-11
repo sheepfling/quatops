@@ -4,7 +4,8 @@ The retained native capture was compiled against the official Eigen 5.0.1
 source archive with GCC 15.2.0 on Windows x86-64 using C++17. The source
 archive URL, SHA-256, and the hash of `Eigen/Version` are in
 [`source.json`](../../experiments/oracles/eigen/5.0.1/source.json). The native
-C++ harness and its selected output manifest live under
+[C++ harness](../../experiments/converters/eigen/5.0.1/capture_native.cpp) produces
+the selected witnesses under
 [`tests/golden/oracles/eigen/5.0.1/converter`](../../tests/golden/oracles/eigen/5.0.1/converter/manifest.json).
 
 ## Measured behavior

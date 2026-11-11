@@ -21,8 +21,8 @@ linked from the [engine proof matrix](../engines/proof-matrix.md).
 - [OpenCV 4.13.0](opencv.md): Rodrigues vector/matrix converter boundary in float32 and float64.
 - [Eigen 5.0.1](eigen.md): native Quaternionf/Quaterniond storage, action, and composition boundary.
 - [PROJ 9.5.1](proj.md): supporting WGS84 geodetic/ECEF and topocentric probes.
-- [CSPICE via SpiceyPy 8.3.0](spiceypy.md): direct quaternion/matrix converter boundary.
-- [MuJoCo 3.17.0](mujoco.md): direct quaternion/matrix converter boundary.
+- [CSPICE via SpiceyPy 8.3.0](spiceypy.md): direct quaternion boundary with native matrix-based vector action.
+- [MuJoCo 3.17.0](mujoco.md): direct quaternion boundary and native vector action.
 - [ROS 2 Jazzy / tf2 0.36.23](ros2-tf2.md): native named-frame chain,
   forward and reverse lookup, message fields, and QuatOps replay.
 

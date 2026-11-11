@@ -30,17 +30,20 @@
   ],
   "provenance": {
     "capture_script_sha256": "ab00e29d284624426f46e88e65a7f2faa964d8e21fdbac08cb7f80a0be3af60e",
-    "contract_sha256": "6a2de9e8a58581109663850419dc39c01b7ae2674e60b969bdebe1fbeacefe8a",
+    "contract_sha256": "dac376343fd3da84bcf1283a0b456013b7df30aa0c114db2863279a9d48cd504",
     "converter_input_spec_sha256": "cfc5dbbc1729c6d22b9f0c2e8f7d3f335ff0b32a65a968f2f48f65a4aaa0eb82",
     "selected_inputs_sha256": "a6f0630806b69d3b3b29a036aa10f63bfe214668329c661598951f84f8f41eec",
     "witnesses_sha256": "0c5eb585275c19930d6b0ee2a1ebe92cfd65dff0b66776f52b9f85bfda0e3485",
     "witness_selection_note": "Quarter-turn rows were removed from the retained subset; original native capture identity and selected values are unchanged.",
     "pinned_lockfile_sha256": "9043b65cd8be3132dc0302638cc5d80886951cbee64fbc0612c3437acd0070a8",
-    "exact_invocation": "uv run --locked --project experiments/converters/mujoco/3.17.0 --python 3.10.11 python experiments/converters/mujoco/3.17.0/capture_native.py --repository-root <repository>"
+    "exact_invocation": "uv run --locked --project experiments/converters/mujoco/3.17.0 --python 3.10.11 python experiments/converters/mujoco/3.17.0/capture_native.py --repository-root <repository>",
+    "historical_contract_sha256": "6a2de9e8a58581109663850419dc39c01b7ae2674e60b969bdebe1fbeacefe8a",
+    "historical_contract_revision": "e523c687de06bb600a2cc3e404c193a650ec0319",
+    "contract_scope_note": "Current contract removes unsupported matrix-roundtrip claims; original capture, witnesses and recorded execution are unchanged."
   },
   "semantic_contract": {
     "file": "experiments/converters/mujoco/3.17.0/semantic_contract.json",
-    "sha256": "6a2de9e8a58581109663850419dc39c01b7ae2674e60b969bdebe1fbeacefe8a"
+    "sha256": "dac376343fd3da84bcf1283a0b456013b7df30aa0c114db2863279a9d48cd504"
   },
   "unified_lock_replay": {
     "utc": "2026-11-11T02:08:24.049489+00:00",

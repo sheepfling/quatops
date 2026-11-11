@@ -42,6 +42,7 @@ def test_spiceypy_boundary_contract_and_capture_provenance_are_explicit():
     )
     assert CONTRACT["target"]["entry_points"] == ["q2m", "mxv", "m2q", "qxq", "axisar"]
     assert "eul2m" in CONTRACT["excludes"][0]
+    assert "round trips" in CONTRACT["excludes"][-1]
     assert MANIFEST["target"]["wrapper_version"] == "8.3.0"
     assert MANIFEST["target"]["toolkit_version"] == "CSPICE_N0067"
     replay = MANIFEST["unified_lock_replay"]

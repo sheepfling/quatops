@@ -45,7 +45,7 @@ def serialize_direct_quaternion_contract(
         native_action = boundary.vector_action
     elif isinstance(boundary, MuJoCoBoundaryContract):
         native_storage = None
-        native_action = boundary.observed_quat2mat_vector_action
+        native_action = boundary.observed_rotvecquat_vector_action
     else:
         native_storage = None
         native_action = boundary.observed_q2m_vector_action

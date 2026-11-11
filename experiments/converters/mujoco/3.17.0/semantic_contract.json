@@ -5,7 +5,7 @@
     "name": "MuJoCo",
     "version": "3.17.0",
     "native_scalar_dtype": "float64",
-    "entry_points": ["mju_quat2Mat", "mju_rotVecQuat", "mju_mat2Quat", "mju_mulQuat", "mju_axisAngle2Quat"]
+    "entry_points": ["mju_rotVecQuat", "mju_mulQuat", "mju_axisAngle2Quat"]
   },
   "canonical": {
     "algebra": "Hamilton",
@@ -22,7 +22,6 @@
   },
   "target_boundary": {
     "coefficient_order": "WXYZ",
-    "observed_quat2mat_vector_action": "active; mju_rotVecQuat(q, vector)",
     "observed_product": "mju_mulQuat(lhs, rhs) matches Hamilton lhs * rhs; rhs acts first",
     "source_to_target_coordinate_map": ["x", "y", "z"],
     "probe_frame_assignment": {
@@ -31,14 +30,12 @@
       "positive_z": "up",
       "meaning": "explicit test frame assignment for these numeric APIs; not a model or simulator frame claim"
     },
-    "native_matrix_layout": "flat row-major 9 coefficients returned by mju_quat2Mat, reshaped to 3x3",
     "canonical_to_native": "identity on WXYZ coefficients for the declared shared probe frame",
     "native_to_canonical": "identity on WXYZ coefficients for the declared shared probe frame",
-    "reverse_matrix_route": "mju_mat2Quat(mju_quat2Mat(q)) is rotation-equivalent to q"
+    "observed_rotvecquat_vector_action": "active; mujoco.mju_rotVecQuat(output, vector, q)"
   },
   "scope": [
-    "direct unit-quaternion mju_quat2Mat and mju_rotVecQuat action",
-    "direct quaternion-to-matrix-to-quaternion round trip",
+    "direct unit-quaternion mju_rotVecQuat action",
     "native mju_axisAngle2Quat constructor route",
     "native noncommuting mju_mulQuat products in both operand orders",
     "native action on three basis vectors and one asymmetric probe"
@@ -47,6 +44,7 @@
     "Euler argument-sequence behavior",
     "simulation model, body, joint, camera, and robot link frame assignments",
     "viewer, rendering, physics stepping, and integration behavior",
-    "single-precision MuJoCo builds or non-unit quaternion policy"
+    "single-precision MuJoCo builds or non-unit quaternion policy",
+    "quaternion-to-matrix layout and matrix-to-quaternion round trips"
   ]
 }

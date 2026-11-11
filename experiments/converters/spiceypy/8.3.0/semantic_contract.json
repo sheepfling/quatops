@@ -31,14 +31,11 @@
       "positive_z": "up",
       "meaning": "explicit test frame assignment for these numeric APIs; not a SPICE named-frame claim"
     },
-    "native_matrix_layout": "3x3 matrix returned by q2m",
     "canonical_to_native": "identity on WXYZ coefficients for the declared shared probe frame",
-    "native_to_canonical": "identity on WXYZ coefficients for the declared shared probe frame",
-    "reverse_matrix_route": "m2q(q2m(q)) is rotation-equivalent to q"
+    "native_to_canonical": "identity on WXYZ coefficients for the declared shared probe frame"
   },
   "scope": [
     "direct unit-quaternion q2m and mxv action",
-    "direct quaternion-to-matrix-to-quaternion round trip",
     "native axisar matrix and m2q quaternion route",
     "native noncommuting qxq products in both operand orders",
     "native action on three basis vectors and one asymmetric probe"
@@ -47,6 +44,7 @@
     "eul2m and m2eul frame-direction or Euler conventions",
     "SPICE named reference frames, kernels, spacecraft attitude models, and mission data",
     "any universal aerospace or body/world frame mapping",
-    "non-unit quaternion policy outside these rotation APIs"
+    "non-unit quaternion policy outside these rotation APIs",
+    "standalone quaternion-to-matrix-to-quaternion round trips"
   ]
 }

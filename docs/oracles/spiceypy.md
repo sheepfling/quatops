@@ -17,8 +17,9 @@ it does not launch CSPICE.
 
 The capture and pinned dependencies are under
 [`experiments/converters/spiceypy/8.3.0`](../../experiments/converters/spiceypy/8.3.0/README.md).
-Euler/frame direction, derivatives, mission kernels, and named reference
-frames are outside this converter claim. See NAIF's references for
+A standalone quaternion-to-matrix-to-quaternion round trip, Euler/frame
+direction, derivatives, mission kernels, and named reference frames are outside
+this converter claim. See NAIF's references for
 [`q2m_c`](https://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/q2m_c.html),
 [`qxq_c`](https://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/qxq_c.html),
 and [`axisar_c`](https://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/axisar_c.html).

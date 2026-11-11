@@ -38,13 +38,16 @@ def test_mujoco_boundary_contract_and_capture_provenance_are_explicit():
         CONTRACT, MANIFEST, source=CONTRACT_PATH.parent, fixture=FIXTURE
     )
     assert CONTRACT["target"]["entry_points"] == [
-        "mju_quat2Mat",
         "mju_rotVecQuat",
-        "mju_mat2Quat",
         "mju_mulQuat",
         "mju_axisAngle2Quat",
     ]
+    assert (
+        CONTRACT["target_boundary"]["observed_rotvecquat_vector_action"]
+        == "active; mujoco.mju_rotVecQuat(output, vector, q)"
+    )
     assert "robot link" in CONTRACT["excludes"][1]
+    assert "matrix-to-quaternion" in CONTRACT["excludes"][-1]
     assert MANIFEST["target"]["package_version"] == "3.17.0"
     assert MANIFEST["target"]["engine_version"] == "3.17.0"
     assert MANIFEST["target"]["native_scalar_dtype"] == "float64"

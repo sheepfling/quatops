@@ -108,13 +108,11 @@ class DirectQuaternionBoundaryContract(BoundaryContractBase):
     source_to_target_coordinate_map: Annotated[
         list[str], Field(min_length=3, max_length=3)
     ]
-    native_matrix_layout: str
     canonical_to_native: str
-    reverse_matrix_route: str
 
 
 class MuJoCoBoundaryContract(DirectQuaternionBoundaryContract):
-    observed_quat2mat_vector_action: str
+    observed_rotvecquat_vector_action: str
 
 
 class OpenCVBoundaryContract(BoundaryContractBase):

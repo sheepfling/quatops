@@ -23,7 +23,7 @@
   },
   "provenance": {
     "capture_script_sha256": "9f086a289cc3a3ffa4e7c1503575b74e4291b53a0bcd72b687bf93d680b0f4b6",
-    "contract_sha256": "3897449f31edcb43c0f81234a95e539d84f702b0ce9c0f61adac410679c05bc9",
+    "contract_sha256": "ecc8a72a50ad0390cde0ac597e019b5d31c587f743ab3f69ec765c4a373ceb02",
     "converter_input_spec_sha256": "aa7756f7c655246f53fbd4e34b1a48d72942c2bcb41fc181f8021fd666bfa058",
     "selected_inputs_sha256": "a6f0630806b69d3b3b29a036aa10f63bfe214668329c661598951f84f8f41eec",
     "witnesses_sha256": "ea498c1a3b326bb76531aa94004ecaf66bc15098111ff2b6669a479f0d9dbe60",
@@ -32,11 +32,14 @@
     "loaded_cspice_binary_path": "C:\\Users\\peanu\\GIT\\sheepfling\\quatops\\experiments\\converters\\spiceypy\\8.3.0\\.venv\\lib\\site-packages\\spiceypy\\utils\\cspice.dll",
     "loaded_cspice_binary_sha256": "7fd2dcc58d73ed5293847e67109897caba34240b8f9c38ad739c0b2ec6ce7715",
     "exact_invocation": "uv run --locked --project experiments/converters/spiceypy/8.3.0 --python 3.10.11 python experiments/converters/spiceypy/8.3.0/capture_native.py --repository-root <repository>",
-    "capture_script_archive": "experiments/provenance/reproduction-v1.zip#spiceypy-8.3.0-capture_native.py"
+    "capture_script_archive": "experiments/provenance/reproduction-v1.zip#spiceypy-8.3.0-capture_native.py",
+    "historical_contract_sha256": "3897449f31edcb43c0f81234a95e539d84f702b0ce9c0f61adac410679c05bc9",
+    "historical_contract_revision": "e523c687de06bb600a2cc3e404c193a650ec0319",
+    "contract_scope_note": "Current contract removes unsupported matrix-roundtrip claims; original capture, witnesses and recorded execution are unchanged."
   },
   "semantic_contract": {
     "file": "experiments/converters/spiceypy/8.3.0/semantic_contract.json",
-    "sha256": "3897449f31edcb43c0f81234a95e539d84f702b0ce9c0f61adac410679c05bc9"
+    "sha256": "ecc8a72a50ad0390cde0ac597e019b5d31c587f743ab3f69ec765c4a373ceb02"
   },
   "unified_lock_replay": {
     "utc": "2026-11-11T02:08:23.958462+00:00",
