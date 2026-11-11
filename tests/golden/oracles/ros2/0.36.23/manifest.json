@@ -107,7 +107,7 @@
   },
   "direct_capture": {
     "kind": "direct_native_ros2_tf2_capture",
-    "utc": "2026-11-10T14:39:23.898669+00:00",
+    "utc": "2026-11-11T16:50:09.825280+00:00",
     "runtime_image": "ros:jazzy-ros-base@sha256:8eed0a4669bbf43ee331878a4c39bd8ebddea8e3312a58b4fae8edb14526b617",
     "ros_distro": "jazzy",
     "packages": {
@@ -136,8 +136,9 @@
       "input": "e5dd788cdbed73ca0dbd5d4a619b5526282c0656737abdfdf9593bd732a01746",
       "contract": "4fef1703f0d2a982c2087d058b0703272f3e1cc5608673ea9890f0655c42ce48",
       "native_source": "3f792807563b75bff742ad8b1aaeb15a83743325f8d4e8eb5f82c70be9b78fd6",
-      "runner": "b6f4f42e41a658c89f717c4c74c2070870767e2cda2535f2db2cd93f37c57da3",
+      "runner": "9238f1592ecd5f23b6e434f9a8442f1cd04f15c766e6952c5a3a5647f5d8af31",
       "schema": "718141efc5546a7625c24dda6e9d2fd867c04e8e43d4de76d8844aa3441ecc4a",
+      "digest_helper": "0ef54f8fed931269ac8f104d376ac889a6be4dff449a23e4a5005bbf063ff7bb",
       "dockerfile": "70cd2720db531d2debdb37ea6d41ac12095b2f3912baa0e3b22bc522dd941e25",
       "build_recipe": "65e75f02b743ef65eab8f0041ba8f286c767a60e3e02a64921e1a822af00e835",
       "native_binary": "2ee2a64e333771b008e67d0b1ca9a3217c0cd7030e058c0c882d84776b7c1a18",

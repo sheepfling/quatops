@@ -53,6 +53,7 @@ class GltfAssetBuilderTests(unittest.TestCase):
             "asset_builder_source",
             "schema",
             "schema_primitives",
+            "digest_helper",
             "requirements",
         ):
             self.assertEqual(

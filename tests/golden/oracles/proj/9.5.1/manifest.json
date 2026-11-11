@@ -85,7 +85,7 @@
   },
   "reproduction": {
     "exporter_path": "experiments/oracles/proj/9.5.1/capture_proj.py",
-    "exporter_sha256": "6f4a9cfaacc6be5540bf6f9e74d2d2335f47eedf6e465237616d1d90e5d59a39",
+    "exporter_sha256": "98329f54b4195f242aee7d86486c4e312b8bd9d46494680843d9239baf2a5679",
     "previous_checkout_exporter_sha256": "b1924e77c6a449b3c86af70f8fb870cb06fa2eecd160f8a1d6937b3bbe4254a6",
     "input_path": "experiments/oracles/shared/geographic_inputs_v1.json",
     "input_sha256": "619099b732593c6c45f4f7eb64714e4c7d79b2c96dcd070777522e3736e4f085",
@@ -95,7 +95,8 @@
     "previous_reproduction_helper_sha256": "c0eb259e3aaccd6e76c1023db0104b887350777fa777d1b54995b7100566cf38",
     "pre_unified_exporter_sha256": "7567785060d92eea201c2861d87a75a576666ca0bd31a683c7452c2bf8913b77",
     "previous_requirements_sha256": "2ebfab05fa84c1997fce51031415ed2da1209595112badc09faecbeadfa3aa6a",
-    "lockfile_sha256": "4377022efa364fac013b8adf6a232bfbd6dc860847418061ef7f6c66e0f2d142"
+    "lockfile_sha256": "4377022efa364fac013b8adf6a232bfbd6dc860847418061ef7f6c66e0f2d142",
+    "digest_helper_sha256": "0ef54f8fed931269ac8f104d376ac889a6be4dff449a23e4a5005bbf063ff7bb"
   },
   "retention": {
     "source_observations_sha256": "67adb8fcedc1cd9b6aca1b203a6109b8b57f2d8fe3f381951cbcb0dcd56e5f5a",
@@ -116,14 +117,16 @@
     "observations_sha256": "d30b93e91e68d562f3a4d6187a648191e748e400cf45876135ed6a8958aa35ba",
     "observation_count": 11,
     "comparison": "All 11 native records reproduced on Windows; maximum absolute difference from historical Linux values was 9.313225746154785e-10 m, with no signed-zero differences.",
-    "reproduction_exporter_sha256": "6f4a9cfaacc6be5540bf6f9e74d2d2335f47eedf6e465237616d1d90e5d59a39"
+    "reproduction_exporter_sha256": "98329f54b4195f242aee7d86486c4e312b8bd9d46494680843d9239baf2a5679"
   },
   "unified_lock_replay": {
-    "utc": "2026-11-10T19:09:42.167547+00:00",
+    "utc": "2026-11-11T16:53:49.987735+00:00",
     "python": "3.13.14 (main, Jun 23 2026, 15:19:27) [MSC v.1944 64 bit (AMD64)]",
     "lockfile_sha256": "4377022efa364fac013b8adf6a232bfbd6dc860847418061ef7f6c66e0f2d142",
     "native_binary_sha256": "bc220c1e28b5a5aa694eabe713c8c7b35f39aa38d6d6412046f9d1dfc96f138c",
     "observations_sha256": "d30b93e91e68d562f3a4d6187a648191e748e400cf45876135ed6a8958aa35ba",
-    "observation_count": 11
+    "observation_count": 11,
+    "exporter_sha256": "98329f54b4195f242aee7d86486c4e312b8bd9d46494680843d9239baf2a5679",
+    "digest_helper_sha256": "0ef54f8fed931269ac8f104d376ac889a6be4dff449a23e4a5005bbf063ff7bb"
   }
 }

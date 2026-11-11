@@ -47,21 +47,24 @@
     "invocation_template": "python experiments/converters/opencv/4.13.0/prepare_inputs.py --output <temporary inputs.json>; then run capture_native.py --inputs <temporary inputs.json>"
   },
   "reproduction": {
-    "capture_script_sha256": "fd8acfab4f8c64daca3e146ce23f3bb12fe5220a8a0f64b75457d10d9e6d6482",
+    "capture_script_sha256": "6c6eab3f17c60023a778552a2332972f156918d183854d8cd94bdce3d24d575f",
     "previous_checkout_capture_script_sha256": "ce6df5cbbbb0983633e7ee64df2b39219b7c8e1a69731a480b152f780fda499b",
-    "preparation_script_sha256": "b46f9bbb0f7422d7b940cab33682443be84225335d270be5ac323a7396e3368d",
+    "preparation_script_sha256": "7801be0df2c32902a3ab133cd1b89654a6a20aac2a8e32591e28f6918a842f8c",
     "lockfile_sha256": "4377022efa364fac013b8adf6a232bfbd6dc860847418061ef7f6c66e0f2d142",
-    "capture_script_identity_note": "The reproduction script now uses equivalent list extension; provenance.capture_script_sha256 preserves the historical producer used for the retained capture."
+    "capture_script_identity_note": "The current reproducer shares the file-digest helper; provenance.capture_script_sha256 preserves the historical producer used for the retained capture.",
+    "digest_helper_sha256": "0ef54f8fed931269ac8f104d376ac889a6be4dff449a23e4a5005bbf063ff7bb"
   },
   "semantic_contract": {
     "file": "experiments/converters/opencv/4.13.0/semantic_contract.json",
     "sha256": "e79649ea9c6fdecc4111ea311c74b66419fb0fc2796727cafa31405788456af2"
   },
   "unified_lock_replay": {
-    "utc": "2026-11-10T19:07:46.363628+00:00",
+    "utc": "2026-11-11T16:50:02.930206+00:00",
     "python": "3.13.14 (main, Jun 23 2026, 15:19:27) [MSC v.1944 64 bit (AMD64)]",
     "lockfile_sha256": "4377022efa364fac013b8adf6a232bfbd6dc860847418061ef7f6c66e0f2d142",
     "native_binary_sha256": "90034927004e4a4ebf29360480d609c8a8d2ca07c93f8b89dff86399e8534b2a",
-    "witnesses_sha256": "821e7a22515c724672dd12f453a1388b3ac09ef32c59548b2c79ee69275242d4"
+    "witnesses_sha256": "821e7a22515c724672dd12f453a1388b3ac09ef32c59548b2c79ee69275242d4",
+    "capture_script_sha256": "6c6eab3f17c60023a778552a2332972f156918d183854d8cd94bdce3d24d575f",
+    "digest_helper_sha256": "0ef54f8fed931269ac8f104d376ac889a6be4dff449a23e4a5005bbf063ff7bb"
   }
 }

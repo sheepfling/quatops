@@ -73,6 +73,7 @@ def test_opencv_contract_and_pinned_capture_provenance():
         / "experiments/converters/opencv/4.13.0/capture_native.py",
         "preparation_script_sha256": ROOT
         / "experiments/converters/opencv/4.13.0/prepare_inputs.py",
+        "digest_helper_sha256": ROOT / "scripts/evidence_schema/utilities.py",
         "lockfile_sha256": ROOT / "experiments/converters/python/uv.lock",
     }
     for field, path in reproduction_paths.items():

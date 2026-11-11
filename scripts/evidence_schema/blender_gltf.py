@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import Annotated, Literal
+from typing import Annotated, Literal, Optional
 
 from pydantic import Field, FiniteFloat, StrictInt
 
@@ -52,6 +52,7 @@ class BlenderGltfProvenance(NativeCaptureModel):
     gltf_sha256: SHA256
     binary_sha256: SHA256
     exporter_sha256: SHA256
+    digest_helper_sha256: Optional[SHA256] = None  # noqa: UP045 -- Python 3.9
     exact_invocation: str
     operator_arguments: BlenderGltfOperatorArguments
     other_operator_properties: str

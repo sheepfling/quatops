@@ -7,5 +7,9 @@ from pathlib import Path
 
 
 def sha256_file(path: Path) -> str:
-    """Return the SHA-256 digest of a file's exact bytes."""
-    return hashlib.sha256(path.read_bytes()).hexdigest()
+    """Return the SHA-256 digest of a file's exact bytes, without loading it all."""
+    digest = hashlib.sha256()
+    with path.open("rb") as stream:
+        for block in iter(lambda: stream.read(1024 * 1024), b""):
+            digest.update(block)
+    return digest.hexdigest()

@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import argparse
-import hashlib
 import json
 import platform
 import sys
@@ -24,6 +23,7 @@ from scripts.evidence_schema.proj_capture import (
     ProjObservation,
 )
 from scripts.evidence_schema.shared_inputs import GeographicInputCorpus
+from scripts.evidence_schema.utilities import sha256_file
 
 
 def main() -> None:
@@ -121,9 +121,6 @@ def main() -> None:
         newline="\n",
     )
 
-    def digest(path: Path) -> str:
-        return hashlib.sha256(path.read_bytes()).hexdigest()
-
     manifest = {
         "evidence_kind": "native_proj_geographic_capture",
         "utc": datetime.now(timezone.utc).isoformat(),
@@ -132,13 +129,16 @@ def main() -> None:
         "python": sys.version,
         "platform": platform.platform(),
         "native_binary": str(native_binary),
-        "native_binary_sha256": digest(native_binary),
-        "input_sha256": digest(args.geographic),
-        "exporter_sha256": digest(Path(__file__)),
-        "lockfile_sha256": digest(
+        "native_binary_sha256": sha256_file(native_binary),
+        "input_sha256": sha256_file(args.geographic),
+        "exporter_sha256": sha256_file(Path(__file__)),
+        "digest_helper_sha256": sha256_file(
+            args.repository_root / "scripts/evidence_schema/utilities.py"
+        ),
+        "lockfile_sha256": sha256_file(
             args.repository_root / "experiments/converters/python/uv.lock"
         ),
-        "observations_sha256": digest(rows),
+        "observations_sha256": sha256_file(rows),
         "observation_count": len(observations),
         "scope": "WGS84 ENU/ECEF point transforms; network disabled; not Cesium or quaternion execution",
     }

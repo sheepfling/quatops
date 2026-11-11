@@ -105,6 +105,7 @@ def test_openusd_converter_stage_provenance_and_frame_declarations():
     for field, path in {
         "capture_script_sha256": ROOT
         / "experiments/converters/openusd/26.11/capture_native.py",
+        "digest_helper_sha256": ROOT / "scripts/evidence_schema/utilities.py",
         "retention_formatter_sha256": ROOT / "scripts/evidence_format.py",
     }.items():
         assert hashlib.sha256(path.read_bytes()).hexdigest() == reproduction[field]

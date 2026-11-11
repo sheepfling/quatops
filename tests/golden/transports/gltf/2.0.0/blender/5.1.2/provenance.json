@@ -12,21 +12,26 @@
   },
   "reproduction": {
     "capture_source": "experiments/transports/gltf/2.0.0/blender/5.1.2/capture_gltf.py",
-    "capture_source_sha256": "505d6c6b3706e6a0a1a7d13a0f56070180a680862c0d6588f10b60678b1f0855",
+    "capture_source_sha256": "c9aeb69ae28a2c687212cc39e1c965191e6a19e35d4a2d653864759bc9536a7e",
     "asset_builder_source": "experiments/transports/gltf/2.0.0/assets/build_asset.py",
     "asset_builder_source_sha256": "67df2b51c62ad3f9d9bc99a21e23effaf53703e99d482fe6c5a2d0f7fa2f2dc0",
     "identity_note": "Shared Pydantic models validate this reproduction; the historical native exporter remains archived.",
     "schema": "scripts/evidence_schema/blender_gltf.py",
-    "schema_sha256": "2a8d19fc6adec16af09f4f20b65c73f06077f3c9012c05ee3f1c5e812f26f4d4",
+    "schema_sha256": "91ae00fec8c2d9dc4b4e346857d37e938d6505989b61d276f94497c4afdddcdd",
     "schema_primitives": "scripts/evidence_schema/primitives.py",
     "schema_primitives_sha256": "71469be6ed0591edc9f742c0310a48ef5b7a05ba1819b8b053714cef918c1d5d",
     "requirements": "experiments/transports/gltf/2.0.0/blender/5.1.2/requirements-capture.txt",
-    "requirements_sha256": "44612bb88640ae1ae1c0e10867bcb3019c9c4c77b3d2cd7dd51bf05e30e39de7"
+    "requirements_sha256": "44612bb88640ae1ae1c0e10867bcb3019c9c4c77b3d2cd7dd51bf05e30e39de7",
+    "digest_helper": "scripts/evidence_schema/utilities.py",
+    "digest_helper_sha256": "0ef54f8fed931269ac8f104d376ac889a6be4dff449a23e4a5005bbf063ff7bb"
   },
   "pydantic_native_rerun": {
     "blender_version": "5.1.2",
     "build_hash": "ec6e62d40fa9",
     "observations_sha256": "8f8d5c0d0012529bc646dbb6861a20a282728bbaf0ddb2939943a19bb4c3a175",
-    "comparison": "Native observations and scene values match the historical fixture, including signed zero."
+    "comparison": "Native observations and scene values match the historical fixture, including signed zero.",
+    "utc": "2026-11-11T16:55:24.814817+00:00",
+    "capture_source_sha256": "c9aeb69ae28a2c687212cc39e1c965191e6a19e35d4a2d653864759bc9536a7e",
+    "digest_helper_sha256": "0ef54f8fed931269ac8f104d376ac889a6be4dff449a23e4a5005bbf063ff7bb"
   }
 }

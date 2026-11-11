@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import argparse
-import hashlib
 import platform
 import sys
 from collections.abc import Iterable
@@ -21,10 +20,7 @@ from scripts.evidence_schema.converter_captures import (
     OpenUsdNodeObservation,
     OpenUsdOutputs,
 )
-
-
-def sha(path: Path) -> str:
-    return hashlib.sha256(path.read_bytes()).hexdigest()
+from scripts.evidence_schema.utilities import sha256_file
 
 
 def vec(value: Iterable[float]) -> list[float]:
@@ -115,7 +111,7 @@ def main() -> None:
         "UsdGeom/_usdGeom.pyd",
     ):
         binary = package_dir / relative
-        binaries[relative] = sha(binary)
+        binaries[relative] = sha256_file(binary)
     output_path = args.output.resolve()
     output_path.mkdir(parents=True, exist_ok=True)
     semantic_contract_path = target_dir / "semantic_contract.json"
@@ -133,7 +129,7 @@ def main() -> None:
             "file": (target_dir / "semantic_contract.json")
             .relative_to(repository_root)
             .as_posix(),
-            "sha256": sha(target_dir / "semantic_contract.json"),
+            "sha256": sha256_file(target_dir / "semantic_contract.json"),
         },
         "target": {
             "name": "OpenUSD",
@@ -155,18 +151,24 @@ def main() -> None:
         },
         "native_binaries_sha256": binaries,
         "inputs": {
-            "stage_sha256": sha(stage_path),
-            "converter_input_sha256": sha(inputs_path),
+            "stage_sha256": sha256_file(stage_path),
+            "converter_input_sha256": sha256_file(inputs_path),
         },
-        "exporter": {"path": str(Path(__file__).name), "sha256": sha(Path(__file__))},
-        "generator_sha256": sha(target_dir / "create_stage.py"),
-        "lockfile_sha256": sha(
+        "exporter": {
+            "path": str(Path(__file__).name),
+            "sha256": sha256_file(Path(__file__)),
+        },
+        "digest_helper_sha256": sha256_file(
+            repository_root / "scripts/evidence_schema/utilities.py"
+        ),
+        "generator_sha256": sha256_file(target_dir / "create_stage.py"),
+        "lockfile_sha256": sha256_file(
             repository_root / "experiments/converters/python/uv.lock"
         ),
         "canonical_inputs_sha256": inputs.canonical_input_sha256,
         "observations": {
             "path": "witnesses.json",
-            "sha256": sha(observations_path),
+            "sha256": sha256_file(observations_path),
             "count": len(observations),
         },
     }

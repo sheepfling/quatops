@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-import hashlib
+import inspect
 import json
 import math
 import sys
@@ -14,6 +14,7 @@ from typing import Any
 import bpy
 
 from scripts.evidence_schema import blender_gltf as schema
+from scripts.evidence_schema.utilities import sha256_file
 
 
 @dataclass(frozen=True, slots=True)
@@ -35,14 +36,6 @@ class CurveRow:
 class CapturedActionCurves:
     summary: schema.BlenderGltfFcurveSummary
     key_frames: list[float]
-
-
-def sha256_file(path: Path) -> str:
-    digest = hashlib.sha256()
-    with Path(path).open("rb") as stream:
-        for block in iter(lambda: stream.read(1024 * 1024), b""):
-            digest.update(block)
-    return digest.hexdigest()
 
 
 def text_value(value: str | bytes) -> str:
@@ -232,9 +225,10 @@ def main() -> None:
             )
         t0, t1, t2 = time_values
         epsilon = min(1e-6, (t1 - t0) / 1000.0, (t2 - t1) / 1000.0)
-        boundary_samples = []
-        for offset in dict.fromkeys((1e-5, epsilon)):
-            boundary_samples.append((f"before-key-1-{offset:.0e}", t1 - offset))
+        boundary_samples = [
+            (f"before-key-1-{offset:.0e}", t1 - offset)
+            for offset in dict.fromkeys((1e-5, epsilon))
+        ]
         if interpolation == "STEP":
             samples = [
                 ("key-0", t0),
@@ -322,6 +316,7 @@ def main() -> None:
             gltf_sha256=sha256_file(asset_path),
             binary_sha256=sha256_file(asset_binary),
             exporter_sha256=sha256_file(Path(__file__)),
+            digest_helper_sha256=sha256_file(Path(inspect.getfile(sha256_file))),
             exact_invocation=(
                 "blender --background --factory-startup --python-use-system-env --python-exit-code 1 "
                 "--python capture_gltf.py -- --asset <rotation_transport.gltf> "

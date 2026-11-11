@@ -111,6 +111,7 @@ def test_ros_capture_is_native_pinned_and_selected_values_are_lossless():
         / "experiments/converters/ros2/0.36.23/native/src/capture_ros.cpp",
         "runner": ROOT / "experiments/converters/ros2/0.36.23/capture_native.py",
         "schema": ROOT / "scripts/evidence_schema/ros_capture.py",
+        "digest_helper": ROOT / "scripts/evidence_schema/utilities.py",
         "dockerfile": ROOT / "experiments/converters/ros2/0.36.23/Dockerfile",
         "build_recipe": ROOT
         / "experiments/converters/ros2/0.36.23/native/CMakeLists.txt",

@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import argparse
-import hashlib
 import json
 from pathlib import Path
 from typing import Literal
@@ -20,6 +19,7 @@ from scripts.evidence_schema.shared_inputs import (
     SharedCanonicalInputCapture,
     SharedFrameInput,
 )
+from scripts.evidence_schema.utilities import sha256_file
 
 
 class PreparedOrientation(BaseModel):
@@ -57,10 +57,6 @@ class PreparedOpenCVInputs(BaseModel):
     orientations: list[PreparedOrientation]
     native_constructed_orientation: NativeConstructedInput
     composition: PreparedComposition
-
-
-def sha256_file(path: Path) -> str:
-    return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
 def main() -> None:

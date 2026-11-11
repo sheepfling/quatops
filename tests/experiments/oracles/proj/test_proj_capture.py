@@ -67,6 +67,12 @@ def test_proj_reproduction_hashes_preserve_prior_and_current_source_identity() -
         == reproduction["exporter_sha256"]
     )
     assert (
+        hashlib.sha256(
+            (root / "scripts/evidence_schema/utilities.py").read_bytes()
+        ).hexdigest()
+        == reproduction["digest_helper_sha256"]
+    )
+    assert (
         hashlib.sha256(lock.read_bytes()).hexdigest() == reproduction["lockfile_sha256"]
     )
     archived_helper = read_provenance_source(

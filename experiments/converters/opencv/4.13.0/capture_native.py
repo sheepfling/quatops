@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import argparse
-import hashlib
 import json
 import platform
 import sys
@@ -25,12 +24,9 @@ from scripts.evidence_schema.converter_captures import (
     TargetIdentity,
 )
 from scripts.evidence_schema.primitives import NATIVE_RETAINED_CASE_IDS
+from scripts.evidence_schema.utilities import sha256_file
 
 PROFILE_DTYPES = {"float32": np.float32, "float64": np.float64}
-
-
-def sha256_file(path: Path) -> str:
-    return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
 def native_action(matrix: np.ndarray, vector: np.ndarray) -> list[float]:
@@ -236,6 +232,9 @@ def main() -> None:
         "reproduction": {
             "capture_script_sha256": sha256_file(Path(__file__)),
             "preparation_script_sha256": sha256_file(target_dir / "prepare_inputs.py"),
+            "digest_helper_sha256": sha256_file(
+                repository_root / "scripts/evidence_schema/utilities.py"
+            ),
             "lockfile_sha256": sha256_file(shared_lock),
         },
     }

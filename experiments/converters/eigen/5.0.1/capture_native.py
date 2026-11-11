@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import argparse
-import hashlib
 import json
 import platform
 import shutil
@@ -29,6 +28,7 @@ from scripts.evidence_schema.shared_inputs import (
     SharedCanonicalInputCapture,
     resolve_orientation_selection,
 )
+from scripts.evidence_schema.utilities import sha256_file
 from scripts.platform_probe import executable_suffix
 
 
@@ -40,14 +40,6 @@ class NativeEigenCapture(BaseModel):
     eigen_version: str
     version_macros: list[int]
     profiles: list[EigenPrecisionProfile]
-
-
-def sha256_file(path: Path) -> str:
-    digest = hashlib.sha256()
-    with path.open("rb") as stream:
-        for block in iter(lambda: stream.read(1024 * 1024), b""):
-            digest.update(block)
-    return digest.hexdigest()
 
 
 def write_json(path: Path, value: BaseModel) -> None:
@@ -309,6 +301,9 @@ def main() -> None:
         "provenance": {
             "capture_runner_sha256": capture_runner_sha256,
             "reproduction_capture_runner_sha256": capture_runner_sha256,
+            "reproduction_digest_helper_sha256": sha256_file(
+                repository_root / "scripts/evidence_schema/utilities.py"
+            ),
             "native_cpp_source_sha256": sha256_file(cpp_source),
             "reproduction_native_cpp_source_sha256": sha256_file(cpp_source),
             "contract_sha256": sha256_file(target_dir / "semantic_contract.json"),

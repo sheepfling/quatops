@@ -78,6 +78,8 @@ def test_eigen_contract_source_pin_and_native_build_provenance():
     paths = {
         "reproduction_capture_runner_sha256": ROOT
         / "experiments/converters/eigen/5.0.1/capture_native.py",
+        "reproduction_digest_helper_sha256": ROOT
+        / "scripts/evidence_schema/utilities.py",
         "reproduction_native_cpp_source_sha256": ROOT
         / "experiments/converters/eigen/5.0.1/capture_native.cpp",
         "contract_sha256": CONTRACT_PATH,

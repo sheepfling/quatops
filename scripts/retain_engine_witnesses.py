@@ -26,6 +26,7 @@ from scripts.evidence_schema.engine_captures import (
 )
 from scripts.evidence_schema.primitives import Quaternion4, validate_signed_axis_map
 from scripts.evidence_schema.shared_inputs import SharedCanonicalInputCapture
+from scripts.evidence_schema.utilities import sha256_file
 
 JsonRecord = dict[str, JsonValue]
 QUATERNION = TypeAdapter(Quaternion4)
@@ -197,10 +198,6 @@ def _retain_profile(
     )
 
 
-def sha256(path: Path) -> str:
-    return hashlib.sha256(path.read_bytes()).hexdigest()
-
-
 def retain(
     engine: str,
     version: str,
@@ -342,14 +339,17 @@ def retain(
         "capture_method": captured.get("capture_method"),
         "native_capture_sha256": hashlib.sha256(original_bytes).hexdigest(),
         "capture_source": capture_source_name,
-        "capture_source_sha256": sha256(repository_root / capture_source_name),
-        "selector_sha256": sha256(Path(__file__)),
-        "canonical_input_sha256": sha256(canonical_inputs),
+        "capture_source_sha256": sha256_file(repository_root / capture_source_name),
+        "selector_sha256": sha256_file(Path(__file__)),
+        "digest_helper_sha256": sha256_file(
+            repository_root / "scripts/evidence_schema/utilities.py"
+        ),
+        "canonical_input_sha256": sha256_file(canonical_inputs),
         "semantic_contract": semantic_config_path.relative_to(
             repository_root
         ).as_posix(),
-        "semantic_contract_sha256": sha256(semantic_config_path),
-        "witness_sha256": sha256(output_path),
+        "semantic_contract_sha256": sha256_file(semantic_config_path),
+        "witness_sha256": sha256_file(output_path),
     }
     (output_dir / "manifest.json").write_text(
         dump_evidence_json(manifest), encoding="utf-8", newline="\n"

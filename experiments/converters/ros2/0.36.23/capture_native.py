@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import argparse
-import hashlib
 import json
 import os
 import platform
@@ -11,24 +10,28 @@ import subprocess
 import xml.etree.ElementTree as ET
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any
+from typing import Any, NamedTuple
 
 from scripts.evidence_json import dump_evidence_json, read_evidence_document
 from scripts.evidence_schema.converter_captures import Ros2Contract
 from scripts.evidence_schema.ros_capture import RosChainInputs, RosDirectCapture
+from scripts.evidence_schema.utilities import sha256_file
 
 
-def sha256(path: Path) -> str:
-    return hashlib.sha256(path.read_bytes()).hexdigest()
+class PackageIdentity(NamedTuple):
+    """A sourced ROS package version and the digest of its package.xml."""
+
+    version: str
+    package_xml_sha256: str
 
 
-def version_for(package: str) -> tuple[str, str]:
+def version_for(package: str) -> PackageIdentity:
     for prefix in os.environ.get("AMENT_PREFIX_PATH", "").split(os.pathsep):
         path = Path(prefix) / "share" / package / "package.xml"
         if path.is_file():
             version = ET.parse(path).getroot().findtext("version")
             if version:
-                return version, sha256(path)
+                return PackageIdentity(version, sha256_file(path))
     raise RuntimeError(f"Cannot resolve {package} package identity. Source ROS first.")
 
 
@@ -64,7 +67,7 @@ def main() -> None:
         name: version_for(name)
         for name in ("tf2", "tf2_geometry_msgs", "geometry_msgs")
     }
-    if packages["tf2"][0] != contract.target.tf2_version:
+    if packages["tf2"].version != contract.target.tf2_version:
         raise ValueError("ROS semantic contract and native runtime versions differ")
 
     args.output.mkdir(parents=True, exist_ok=True)
@@ -127,6 +130,7 @@ def main() -> None:
         "native_source": package / "native/src/capture_ros.cpp",
         "runner": Path(__file__),
         "schema": root / "scripts/evidence_schema/ros_capture.py",
+        "digest_helper": root / "scripts/evidence_schema/utilities.py",
         "dockerfile": package / "Dockerfile",
         "build_recipe": package / "native/CMakeLists.txt",
         "native_binary": args.executable,
@@ -138,19 +142,16 @@ def main() -> None:
         "utc": datetime.now(timezone.utc).isoformat(),
         "runtime_image": args.runtime_image,
         "ros_distro": os.environ.get("ROS_DISTRO"),
-        "packages": {
-            name: {"version": version, "package_xml_sha256": digest}
-            for name, (version, digest) in packages.items()
-        },
+        "packages": {name: identity._asdict() for name, identity in packages.items()},
         "platform": platform.platform(),
         "python": platform.python_version(),
         "native_build": {
             key: getattr(capture, key)
             for key in ("native_scalar_bytes", "compiler", "cpp_standard", "flags")
         },
-        "sha256": {name: sha256(path) for name, path in files.items()},
+        "sha256": {name: sha256_file(path) for name, path in files.items()},
         "scope": "static same-time BufferCore chain; no DDS, interpolation or hardware transport",
-        "comparison_witness_sha256": sha256(args.compare_witnesses)
+        "comparison_witness_sha256": sha256_file(args.compare_witnesses)
         if args.compare_witnesses
         else None,
     }
