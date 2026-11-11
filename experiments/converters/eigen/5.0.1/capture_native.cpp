@@ -1,4 +1,4 @@
-// Native Eigen quaternion and matrix boundary capture. No QuatOps code is used.
+// Native Eigen quaternion boundary capture. No QuatOps code is used.
 #include <Eigen/Geometry>
 
 #include <array>
@@ -28,9 +28,6 @@ template <typename T>
 using Vector3 = Eigen::Matrix<T, 3, 1>;
 
 template <typename T>
-using Matrix3 = Eigen::Matrix<T, 3, 3>;
-
-template <typename T>
 void write_vec3(std::ostream& out, const Vector3<T>& value) {
   out << '[' << value[0] << ',' << value[1] << ',' << value[2] << ']';
 }
@@ -45,21 +42,6 @@ void write_quaternion(std::ostream& out, const Quaternion<T>& q,
         << coeffs[2] << ',' << coeffs[3] << ']';
   }
   out << '}';
-}
-
-template <typename T>
-void write_matrix(std::ostream& out, const Matrix3<T>& matrix) {
-  out << "{\"rows\":[";
-  for (int row = 0; row < 3; ++row) {
-    if (row) out << ',';
-    out << '[' << matrix(row, 0) << ',' << matrix(row, 1) << ',' << matrix(row, 2) << ']';
-  }
-  out << "],\"column_major_storage\":[";
-  for (int i = 0; i < 9; ++i) {
-    if (i) out << ',';
-    out << matrix.data()[i];
-  }
-  out << "]}";
 }
 
 template <typename T>
@@ -86,19 +68,11 @@ void write_orientation(std::ostream& out, const InputCase& item, const Vector3<d
                         static_cast<T>(item.y), static_cast<T>(item.z));
   out << "{\"case_id\":\"" << item.id << "\",\"quaternion\":";
   write_quaternion(out, q, item.id == "mixed_a");
-  if (item.id == "mixed_a") {
-    out << ",\"rotation_matrix\":";
-    write_matrix(out, q.toRotationMatrix());
-  }
   out << ",\"native_quaternion_basis_actions_xyz\":";
   write_basis_actions(out, q);
   if (item.id == "mixed_a") {
     out << ",\"native_quaternion_probe_action_xyz\":";
     write_probe_action(out, q, probe);
-  }
-  if (item.id == "mixed_a" || item.id == "nonprincipal_halfturn") {
-    out << ",\"matrix_to_quaternion\":";
-    write_quaternion(out, Quaternion<T>(q.toRotationMatrix()), false);
   }
   out << '}';
 }
@@ -140,15 +114,11 @@ void write_profile(std::ostream& out, const std::string& dtype,
                         static_cast<T>(axis_angle.z));
   const Eigen::AngleAxis<T> angle_axis(static_cast<T>(axis_angle.angle), axis.normalized());
   const Quaternion<T> native_q(angle_axis);
-  const Matrix3<T> native_matrix = native_q.toRotationMatrix();
-  const Quaternion<T> native_recovered(native_matrix);
   out << "{\"case_id\":\"" << axis_angle.id
       << "\",\"constructor\":\"Eigen::Quaternion(Eigen::AngleAxis)\",\"quaternion\":";
   write_quaternion(out, native_q, false);
   out << ",\"native_quaternion_basis_actions_xyz\":";
   write_basis_actions(out, native_q);
-  out << ",\"matrix_to_quaternion\":";
-  write_quaternion(out, native_recovered, false);
   out << "}]";
 
   std::size_t a_index = cases.size(), b_index = cases.size();

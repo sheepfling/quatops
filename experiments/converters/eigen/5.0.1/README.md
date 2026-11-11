@@ -3,7 +3,7 @@
 This auxiliary proof compiles a small C++ capture program against the official
 Eigen 5.0.1 source archive. The program uses `Eigen::Quaternionf` and
 `Eigen::Quaterniond` constructors, `coeffs()`, quaternion/vector products,
-`toRotationMatrix()`, matrix-to-quaternion construction, and `AngleAxis`.
+and `AngleAxis`.
 It imports and calls no QuatOps code.
 
 The release archive URL and SHA-256 are pinned in

@@ -23,7 +23,7 @@
   "target_boundary": {
     "constructor_order": "Eigen::Quaternion(w, x, y, z)",
     "coeffs_access_order": "XYZW",
-    "matrix_action": "Eigen quaternion and matrix multiply column vectors",
+    "vector_action": "Eigen quaternion multiplication rotates column vectors",
     "observed_product": "lhs * rhs matches Hamilton lhs * rhs; rhs acts first",
     "source_to_target_coordinate_map": ["x", "y", "z"],
     "probe_frame_assignment": {
@@ -32,20 +32,19 @@
       "positive_z": "up",
       "meaning": "explicit numeric test frame assignment; Eigen has no selected application/world frame here"
     },
-    "native_matrix_storage": "Eigen default column-major; logical values are also retained as rows",
     "canonical_to_native": "WXYZ constructor arguments; coeffs() exposes XYZW",
-    "native_to_canonical": "Quaternion constructed from Eigen rotation matrix; read w/x/y/z accessors as canonical WXYZ"
+    "native_to_canonical": "Read w/x/y/z accessors as canonical WXYZ; reorder coeffs() from XYZW"
   },
   "scope": [
     "Eigen::Quaternionf and Eigen::Quaterniond constructors and coeffs layout",
-    "native quaternion-vector and matrix-vector actions",
-    "native matrix-to-quaternion construction round trip",
+    "native quaternion-vector action",
     "native noncommuting quaternion products in both operand orders",
     "Eigen::AngleAxis to Quaternion construction"
   ],
   "excludes": [
     "application-specific world, body, camera, or asset frames",
     "Sophus group/tangent semantics",
+    "matrix conversion and storage",
     "non-unit quaternion behavior",
     "serialization and interpolation"
   ]

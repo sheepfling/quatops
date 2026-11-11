@@ -210,16 +210,6 @@ def main() -> None:
                 raise ValueError(
                     f"native Eigen {row.case_id} has unexpected coefficient storage"
                 )
-            if (row.rotation_matrix is not None) != (row.case_id == "mixed_a"):
-                raise ValueError(
-                    f"native Eigen {row.case_id} has unexpected matrix evidence"
-                )
-            if (row.matrix_to_quaternion is not None) != (
-                row.case_id in {"mixed_a", "nonprincipal_halfturn"}
-            ):
-                raise ValueError(
-                    f"native Eigen {row.case_id} has unexpected matrix readback"
-                )
             if (row.native_quaternion_probe_action_xyz is not None) != (
                 row.case_id == "mixed_a"
             ):
@@ -230,7 +220,6 @@ def main() -> None:
         if (
             constructor.case_id
             != (spec.native_constructed_orientation.case_id or "native_axis_angle")
-            or constructor.matrix_to_quaternion is None
             or constructor.constructor != "Eigen::Quaternion(Eigen::AngleAxis)"
         ):
             raise ValueError(
@@ -295,8 +284,6 @@ def main() -> None:
             "noncommuting_product_orders_per_scalar_profile": 2,
             "native_basis_images_per_orientation": 3,
             "native_mixed_probe_case_id": "mixed_a",
-            "matrix_to_quaternion_case_ids": ["mixed_a", "nonprincipal_halfturn"],
-            "matrix_layout_case_id": "mixed_a",
         },
         "provenance": {
             "capture_runner_sha256": capture_runner_sha256,

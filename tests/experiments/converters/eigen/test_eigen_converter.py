@@ -1,4 +1,4 @@
-"""Replay native Eigen quaternion, storage, and matrix-construction witnesses."""
+"""Replay native Eigen quaternion construction, storage, and action witnesses."""
 
 from __future__ import annotations
 
@@ -71,8 +71,6 @@ def test_eigen_contract_source_pin_and_native_build_provenance():
         "noncommuting_product_orders_per_scalar_profile": 2,
         "native_basis_images_per_orientation": 3,
         "native_mixed_probe_case_id": "mixed_a",
-        "matrix_to_quaternion_case_ids": ["mixed_a", "nonprincipal_halfturn"],
-        "matrix_layout_case_id": "mixed_a",
     }
     provenance = MANIFEST["provenance"]
     paths = {
@@ -131,7 +129,6 @@ def test_eigen_wxyz_constructor_xyzw_storage_and_native_actions():
         assert set(rows) == set(NATIVE_RETAINED_CASE_IDS)
         for case_id, row in rows.items():
             canonical = CANONICAL[case_id]
-            expected_matrix = matrix(canonical)
             check(
                 row["quaternion"]["wxyz"],
                 canonical,
@@ -153,26 +150,6 @@ def test_eigen_wxyz_constructor_xyzw_storage_and_native_actions():
                 dtype,
                 f"Eigen quaternion vector action {case_id}/{dtype}",
             )
-            if case_id == "mixed_a":
-                check(
-                    row["rotation_matrix"]["rows"],
-                    expected_matrix,
-                    dtype,
-                    f"Eigen selected matrix rows/{dtype}",
-                )
-                check(
-                    row["rotation_matrix"]["column_major_storage"],
-                    expected_matrix.flatten(order="F"),
-                    dtype,
-                    f"Eigen selected matrix storage/{dtype}",
-                )
-            if case_id in {"mixed_a", "nonprincipal_halfturn"}:
-                check(
-                    matrix(row["matrix_to_quaternion"]["wxyz"]),
-                    expected_matrix,
-                    dtype,
-                    f"Eigen matrix-to-quaternion {case_id}/{dtype}",
-                )
 
         check(
             rows["antipode_mixed_a"]["native_quaternion_basis_actions_xyz"],
@@ -182,7 +159,7 @@ def test_eigen_wxyz_constructor_xyzw_storage_and_native_actions():
         )
 
 
-def test_eigen_angleaxis_reverse_conversion_and_noncommuting_products():
+def test_eigen_angleaxis_native_action_and_noncommuting_products():
     ctor = INPUTS["native_constructed_orientation"]
     expected_q = np.asarray(
         hamilton.from_rotation_vector(
@@ -204,12 +181,6 @@ def test_eigen_angleaxis_reverse_conversion_and_noncommuting_products():
             (expected_matrix @ BASIS.T).T,
             dtype,
             f"Eigen AngleAxis action/{dtype}",
-        )
-        check(
-            matrix(native["matrix_to_quaternion"]["wxyz"]),
-            expected_matrix,
-            dtype,
-            f"Eigen AngleAxis matrix reverse/{dtype}",
         )
 
         products = {item["case_id"]: item for item in profile["composition"]}

@@ -12,7 +12,6 @@ from pydantic import ConfigDict, Field, FiniteFloat, model_validator
 from scripts.evidence_schema.primitives import (
     NATIVE_RETAINED_CASE_IDS,
     SHA256,
-    Matrix3,
     NativeCaptureModel,
     Quaternion4,
     Scalar,
@@ -20,7 +19,6 @@ from scripts.evidence_schema.primitives import (
 )
 
 BasisActions = Annotated[list[Vector3], Field(min_length=3, max_length=3)]
-NumberList9 = Annotated[list[Scalar], Field(min_length=9, max_length=9)]
 
 
 class TargetIdentity(NativeCaptureModel):
@@ -96,13 +94,12 @@ class LibraryContractBase(NativeCaptureModel):
 class EigenBoundaryContract(BoundaryContractBase):
     constructor_order: str
     coeffs_access_order: str
-    matrix_action: str
+    vector_action: str
     observed_product: str
     source_to_target_coordinate_map: Annotated[
         list[str], Field(min_length=3, max_length=3)
     ]
     canonical_to_native: str
-    native_matrix_storage: str
 
 
 class DirectQuaternionBoundaryContract(BoundaryContractBase):
@@ -330,18 +327,11 @@ class QuaternionValues(NativeCaptureModel):
     coeffs_xyzw: Optional[Quaternion4] = None
 
 
-class EigenMatrix(NativeCaptureModel):
-    rows: Matrix3
-    column_major_storage: NumberList9
-
-
 class EigenOrientation(NativeCaptureModel):
     case_id: str
     quaternion: QuaternionValues
-    rotation_matrix: Optional[EigenMatrix] = None
     native_quaternion_basis_actions_xyz: BasisActions
     native_quaternion_probe_action_xyz: Optional[Vector3] = None
-    matrix_to_quaternion: Optional[QuaternionValues] = None
 
 
 class EigenConstructedOrientation(EigenOrientation):

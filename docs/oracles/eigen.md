@@ -12,10 +12,7 @@ C++ harness and its selected output manifest live under
 For unit Hamilton WXYZ inputs in the explicitly assigned probe frame, the
 native `Eigen::Quaternion(w, x, y, z)` accessors preserve WXYZ and
 `coeffs()` exposes XYZW. `Quaternion * Vector3` matched the active Hamilton
-action for three basis vectors and an asymmetric probe. `toRotationMatrix()`
-matched the same action; its native column-major coefficient storage is retained
-separately from the logical row display. Constructing a quaternion from that
-matrix reproduced the orientation. `lhs * rhs` matched Hamilton product order,
+action for three basis vectors and an asymmetric probe. `lhs * rhs` matched Hamilton product order,
 with the right operand acting first. A native `AngleAxis` constructor path was
 also captured. Both `Quaternionf` and `Quaterniond` are covered.
 
@@ -23,7 +20,8 @@ The native C++ capture does not import QuatOps. Replay tests compare its frozen
 outputs with QuatOps and a separate SciPy matrix calculation in
 [`tests/experiments/converters/eigen/test_eigen_converter.py`](../../tests/experiments/converters/eigen/test_eigen_converter.py).
 Eigen is a mathematical library here; the assigned axes do not claim any
-application-specific world, body, camera, or asset frame.
+application-specific world, body, camera, or asset frame. Matrix conversion and
+matrix storage are outside this retained quaternion-boundary evidence.
 
 The official [Eigen quaternion API reference](https://eigen.tuxfamily.org/dox/classEigen_1_1Quaternion.html)
 documents the WXYZ constructor parameter order and XYZW `coeffs()` storage.

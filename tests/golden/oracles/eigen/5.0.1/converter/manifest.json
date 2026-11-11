@@ -27,35 +27,49 @@
     "native_created_orientations_per_scalar_profile": 1,
     "noncommuting_product_orders_per_scalar_profile": 2,
     "native_basis_images_per_orientation": 3,
-    "native_mixed_probe_case_id": "mixed_a",
-    "matrix_to_quaternion_case_ids": ["mixed_a", "nonprincipal_halfturn"],
-    "matrix_layout_case_id": "mixed_a"
+    "native_mixed_probe_case_id": "mixed_a"
   },
   "provenance": {
     "capture_runner_sha256": "87352500fe2a8fdd18443648d7194d846accd10824114dc5ccde2df6e6bc1510",
-    "reproduction_capture_runner_sha256": "531a58948fd0f4f54ea4dfe3a91d54c4f1f3dd87a5bcc0c31a8234a222df286d",
-    "reproduction_contract_note": "The native harness emits the selected witness shape directly; one mixed-axis coeffs() observation per precision establishes storage order. Original producer identity and retained native values remain unchanged.",
+    "reproduction_capture_runner_sha256": "f49deee8fae42bd91c1ef2def4f411d972ad2b03380d7a379a2a3309d0499ed2",
+    "reproduction_contract_note": "The current reproducer captures quaternion constructor, coeffs, native vector action, AngleAxis and products; auxiliary matrix observations from the earlier scope are no longer retained.",
     "native_cpp_source_sha256": "766952b362ed5a48fd6d826e90c23db4e6e6cfb86c2f6fbff2c748918368eb9b",
-    "reproduction_native_cpp_source_sha256": "3847835205536a0748127536e2102852b47e6c93dc88b8f020a55dd860c1244e",
-    "contract_sha256": "80d24bf67748f0f315a99261d1b32f25f45548cb1e1bb3ce67ee3c812dfc845a",
+    "reproduction_native_cpp_source_sha256": "32bed77ef431df54b0c088125b492d5ab7ae241a8936ec90ec08639a26cd6ef3",
+    "contract_sha256": "a6332d04f6c84bee1902b5b875ef0cc9afdb6a5d3b425fa910d7fb6c08117e8f",
     "converter_input_spec_sha256": "cdcecfa512477580a1b04d0f7aed32eca4512e585de8c41711fa9e84301a50b9",
     "selected_inputs_sha256": "a6f0630806b69d3b3b29a036aa10f63bfe214668329c661598951f84f8f41eec",
     "prepared_inputs_sha256": "9a3ad531d3bc644d0a831c5f30f9410736b4a043cc92eb0e82ccaf514c3edc1a",
     "native_input_stream_sha256": "43c76320258bcef5fc7ce5d2438f8f95bee0e1c6ef0bcbacf5ec3e19eea30318",
-    "witnesses_sha256": "291e42a582c358f3fa4e87afc1dfbed144f5c422ef42ef87fa97d7a2a3f89840",
+    "witnesses_sha256": "5a2a1a59364b8a78e8b463e4d6295296dd0435565d81be59ff16d78f4d75d974",
     "witness_selection_note": "Quarter-turn rows were removed from the retained subset; original native capture identity and selected values are unchanged.",
     "eigen_source_archive_sha256": "e9c326dc8c05cd1e044c71f30f1b2e34a6161a3b6ecf445d56b53ff1669e3dec",
     "eigen_source_metadata_sha256": "3e65f2be6206692af7bcfcdf65501d34aeda9762cca895738f19f59a350bff48",
     "eigen_version_header_sha256": "3bb04dc80ede841309fc975fd3ff522a58bbdf2d591e06e49d2456676a89e759",
     "native_cpp_source_archive": "experiments/provenance/reproduction-v1.zip#eigen-5.0.1-capture_native.cpp",
     "reproduction_lockfile_sha256": "4377022efa364fac013b8adf6a232bfbd6dc860847418061ef7f6c66e0f2d142",
-    "reproduction_digest_helper_sha256": "0ef54f8fed931269ac8f104d376ac889a6be4dff449a23e4a5005bbf063ff7bb"
+    "reproduction_digest_helper_sha256": "0ef54f8fed931269ac8f104d376ac889a6be4dff449a23e4a5005bbf063ff7bb",
+    "previous_contract_sha256": "80d24bf67748f0f315a99261d1b32f25f45548cb1e1bb3ce67ee3c812dfc845a",
+    "previous_witnesses_sha256": "291e42a582c358f3fa4e87afc1dfbed144f5c422ef42ef87fa97d7a2a3f89840",
+    "previous_reproduction_native_cpp_source_sha256": "3847835205536a0748127536e2102852b47e6c93dc88b8f020a55dd860c1244e",
+    "previous_contract_and_witness_revision": "43b5406d7cb8ea0632cc5801f9b796d78fce08d2"
   },
   "semantic_contract": {
     "file": "experiments/converters/eigen/5.0.1/semantic_contract.json",
-    "sha256": "80d24bf67748f0f315a99261d1b32f25f45548cb1e1bb3ce67ee3c812dfc845a"
+    "sha256": "a6332d04f6c84bee1902b5b875ef0cc9afdb6a5d3b425fa910d7fb6c08117e8f"
   },
   "unified_lock_replay": {
+    "utc": "2026-11-11T21:53:35.331623+00:00",
+    "python": "3.13.14 (main, Jun 23 2026, 15:19:27) [MSC v.1944 64 bit (AMD64)]",
+    "compiler": "g++.exe (GCC) 15.2.0",
+    "lockfile_sha256": "4377022efa364fac013b8adf6a232bfbd6dc860847418061ef7f6c66e0f2d142",
+    "native_binary_sha256": "397a49800b1897a8738875635b1697f75f43dcc6a9a19561f9ac801e06c28715",
+    "native_input_stream_sha256": "a4d707a7014e18f1a3c8c92ceb603e36650719e69dfb329b660f3f4cd8f2e7a3",
+    "witnesses_sha256": "5a2a1a59364b8a78e8b463e4d6295296dd0435565d81be59ff16d78f4d75d974",
+    "capture_runner_sha256": "f49deee8fae42bd91c1ef2def4f411d972ad2b03380d7a379a2a3309d0499ed2",
+    "native_cpp_source_sha256": "32bed77ef431df54b0c088125b492d5ab7ae241a8936ec90ec08639a26cd6ef3",
+    "digest_helper_sha256": "0ef54f8fed931269ac8f104d376ac889a6be4dff449a23e4a5005bbf063ff7bb"
+  },
+  "historical_unified_lock_replay": {
     "utc": "2026-11-11T16:50:04.926192+00:00",
     "python": "3.13.14 (main, Jun 23 2026, 15:19:27) [MSC v.1944 64 bit (AMD64)]",
     "compiler": "g++.exe (GCC) 15.2.0",

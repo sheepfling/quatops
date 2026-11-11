@@ -19,7 +19,7 @@ linked from the [engine proof matrix](../engines/proof-matrix.md).
 
 - [CesiumJS 1.124.0](cesium.md): local-ENU quaternion conversion and native WGS84 ENU/ECEF placement.
 - [OpenCV 4.13.0](opencv.md): Rodrigues vector/matrix converter boundary in float32 and float64.
-- [Eigen 5.0.1](eigen.md): native Quaternionf/Quaterniond storage, action, matrix, and composition boundary.
+- [Eigen 5.0.1](eigen.md): native Quaternionf/Quaterniond storage, action, and composition boundary.
 - [PROJ 9.5.1](proj.md): supporting WGS84 geodetic/ECEF and topocentric probes.
 - [CSPICE via SpiceyPy 8.3.0](spiceypy.md): direct quaternion/matrix converter boundary.
 - [MuJoCo 3.17.0](mujoco.md): direct quaternion/matrix converter boundary.
