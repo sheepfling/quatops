@@ -5,16 +5,14 @@
 
 from __future__ import annotations
 
-import math
 from typing import Annotated, Literal, Optional, Union
 
-from pydantic import ConfigDict, Field, model_validator
+from pydantic import ConfigDict, Field, FiniteFloat, model_validator
 
 from scripts.evidence_schema.primitives import (
     NATIVE_RETAINED_CASE_IDS,
     SHA256,
     Matrix3,
-    Matrix4,
     NativeCaptureModel,
     Quaternion4,
     Scalar,
@@ -307,24 +305,23 @@ class OpenCVInputs(DirectLibraryInputBase):
     precision_profiles: list[Literal["float32", "float64"]]
 
 
+class SpiceyPyConstructedInput(NativeConstructedInput):
+    """The fixed native constructor and finite values in the SpiceyPy recipe."""
+
+    case_id: Literal["native_axis_angle_mixed"]
+    axis_xyz: Annotated[list[FiniteFloat], Field(min_length=3, max_length=3)]
+    angle_radians: FiniteFloat
+
+
 class SpiceyPyInputs(DirectLibraryInputBase):
+    native_constructed_orientation: SpiceyPyConstructedInput
+
     @model_validator(mode="after")
-    def validate_native_constructor(self) -> SpiceyPyInputs:
-        constructor = self.native_constructed_orientation
-        if constructor.case_id != SPICEYPY_CONSTRUCTOR_CASE_ID:
-            raise ValueError(
-                f"SpiceyPy constructor case_id must be {SPICEYPY_CONSTRUCTOR_CASE_ID!r}"
-            )
+    def validate_case_selection(self) -> SpiceyPyInputs:
         if tuple(self.retained_case_ids) != SPICEYPY_CAPTURE_INPUT_CASE_IDS:
             raise ValueError(
                 "SpiceyPy inputs must retain the complete ordered recipe selection"
             )
-        if not all(math.isfinite(value) for value in constructor.axis_xyz):
-            raise ValueError(
-                "SpiceyPy constructor axis must contain only finite values"
-            )
-        if not math.isfinite(constructor.angle_radians):
-            raise ValueError("SpiceyPy constructor angle must be finite")
         return self
 
 
@@ -453,9 +450,7 @@ SPICEYPY_COMPOSITION_CASE_IDS = (
 
 
 class SpiceyPyOrientation(NativeCaptureModel):
-    model_config = ConfigDict(
-        extra="forbid", frozen=True, strict=True, allow_inf_nan=False
-    )
+    model_config = ConfigDict(allow_inf_nan=False)
 
     case_id: str
     native_input_wxyz: Quaternion4
@@ -467,11 +462,9 @@ class SpiceyPyOrientation(NativeCaptureModel):
 
 
 class SpiceyPyConstructedOrientation(NativeCaptureModel):
-    model_config = ConfigDict(
-        extra="forbid", frozen=True, strict=True, allow_inf_nan=False
-    )
+    model_config = ConfigDict(allow_inf_nan=False)
 
-    case_id: str
+    case_id: Literal["native_axis_angle_mixed"]
     native_constructor: str
     native_m2q_wxyz: Quaternion4
     native_mxv_basis_xyz: BasisActions
@@ -479,7 +472,9 @@ class SpiceyPyConstructedOrientation(NativeCaptureModel):
 
 class SpiceyPyObservations(NativeCaptureModel):
     canonical_to_native: list[SpiceyPyOrientation]
-    native_created: list[SpiceyPyConstructedOrientation]
+    native_created: Annotated[
+        list[SpiceyPyConstructedOrientation], Field(min_length=1, max_length=1)
+    ]
     composition: list[SpiceyPyOrientation]
 
     @model_validator(mode="after")
@@ -488,11 +483,6 @@ class SpiceyPyObservations(NativeCaptureModel):
         if canonical_ids != SPICEYPY_RETAINED_CASE_IDS:
             raise ValueError(
                 "SpiceyPy capture must contain the complete ordered canonical selection"
-            )
-        constructed_ids = tuple(row.case_id for row in self.native_created)
-        if constructed_ids != (SPICEYPY_CONSTRUCTOR_CASE_ID,):
-            raise ValueError(
-                "SpiceyPy capture must contain its one selected constructed orientation"
             )
         composition_ids = tuple(row.case_id for row in self.composition)
         if composition_ids != SPICEYPY_COMPOSITION_CASE_IDS:
@@ -522,16 +512,6 @@ class TaggedVector3(NativeCaptureModel):
 
 class TaggedQuaternion(NativeCaptureModel):
     values: Quaternion4
-    dtype: Literal["binary64", "float32", "float64"]
-
-
-class TaggedMatrix4(NativeCaptureModel):
-    values: Matrix4
-    dtype: Literal["binary64", "float32", "float64"]
-
-
-class TaggedVectors3(NativeCaptureModel):
-    values: list[Vector3]
     dtype: Literal["binary64", "float32", "float64"]
 
 

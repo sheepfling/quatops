@@ -290,90 +290,33 @@ def test_eigen_rejects_missing_or_incorrect_native_storage(precision, coefficien
         serialize_eigen_witnesses(capture, package.inputs)
 
 
-def test_target_serializers_reject_malformed_native_vectors():
-    with pytest.raises(ValidationError):
-        EigenOrientation.model_validate(
-            {
-                "case_id": "identity",
-                "quaternion": {
-                    "wxyz": [1.0, 0.0, 0.0, 0.0],
-                    "coeffs_xyzw": [0.0, 0.0, 0.0, 1.0],
-                },
-                "rotation_matrix": {
-                    "rows": [
-                        [1.0, 0.0, 0.0],
-                        [0.0, 1.0, 0.0],
-                        [0.0, 0.0, 1.0],
-                    ],
-                    "column_major_storage": [
-                        1.0,
-                        0.0,
-                        0.0,
-                        0.0,
-                        1.0,
-                        0.0,
-                        0.0,
-                        0.0,
-                        1.0,
-                    ],
-                },
-                "native_quaternion_basis_actions_xyz": [
-                    [1.0, 0.0, 0.0],
-                    [0.0, 1.0, 0.0],
-                ],
-                "matrix_to_quaternion": {"wxyz": [1.0, 0.0, 0.0, 0.0]},
-            },
-            strict=True,
-        )
+@pytest.mark.parametrize(
+    ("field", "value"),
+    [
+        pytest.param(
+            "native_quaternion_basis_actions_xyz",
+            [[1.0, 0.0, 0.0], [0.0, 1.0, 0.0]],
+            id="missing-basis-vector",
+        ),
+        pytest.param("unmodeled_native_field", True, id="unknown-native-field"),
+    ],
+)
+def test_eigen_orientation_rejects_invalid_native_fields(field, value):
+    directory = ROOT / "tests/golden/oracles/eigen/5.0.1/converter"
+    document = read_evidence_document(directory / "witnesses.json")
+    valid = document["observations"]["profiles"][0]["orientations"][0]
+    data = {**valid, field: value}
+    with pytest.raises(ValidationError) as error:
+        EigenOrientation.model_validate(data, strict=True)
+    assert error.value.errors()[0]["loc"][0] == field
 
 
-def test_target_input_schema_requires_eigen_specific_fields():
-    with pytest.raises(ValidationError):
+@pytest.mark.parametrize("field", ["scalar_profiles", "composition"])
+def test_target_input_schema_requires_eigen_specific_fields(field):
+    path = ROOT / "experiments/converters/eigen/5.0.1/converter_inputs.json"
+    data = read_evidence_document(path)
+    with pytest.raises(ValidationError) as error:
         EigenInputs.model_validate(
-            {
-                "schema_version": "1.0",
-                "contract_id": "fixture-contract",
-                "native_constructed_orientation": {
-                    "axis_xyz": [1.0, 0.0, 0.0],
-                    "angle_radians": 1.0,
-                },
-            },
-            strict=True,
+            {key: value for key, value in data.items() if key != field}, strict=True
         )
-
-
-def test_target_serializers_reject_unknown_native_fields():
-    identity_matrix = {
-        "rows": [
-            [1.0, 0.0, 0.0],
-            [0.0, 1.0, 0.0],
-            [0.0, 0.0, 1.0],
-        ],
-        "column_major_storage": [
-            1.0,
-            0.0,
-            0.0,
-            0.0,
-            1.0,
-            0.0,
-            0.0,
-            0.0,
-            1.0,
-        ],
-    }
-    valid_identity = {
-        "case_id": "identity",
-        "quaternion": {"wxyz": [1.0, 0.0, 0.0, 0.0]},
-        "rotation_matrix": identity_matrix,
-        "native_quaternion_basis_actions_xyz": [
-            [1.0, 0.0, 0.0],
-            [0.0, 1.0, 0.0],
-            [0.0, 0.0, 1.0],
-        ],
-        "matrix_to_quaternion": {"wxyz": [1.0, 0.0, 0.0, 0.0]},
-    }
-    with pytest.raises(ValidationError):
-        EigenOrientation.model_validate(
-            {**valid_identity, "unmodeled_native_field": True},
-            strict=True,
-        )
+    assert error.value.errors()[0]["loc"] == (field,)

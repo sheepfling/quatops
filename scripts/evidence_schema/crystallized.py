@@ -60,10 +60,16 @@ class PrecisionTolerance(StrictEvidenceModel):
     relative: float
 
 
-class QuaternionBoundaryContract(StrictEvidenceModel):
-    """Quaternion coefficient and shared-basis conversion contract."""
+class _EvidenceContract(StrictEvidenceModel):
+    """Scope and exclusions common to every normalized evidence contract."""
 
-    kind: Literal["quaternion_boundary"]
+    scope: list[str]
+    excludes: list[str]
+
+
+class _RotationBoundaryContract(_EvidenceContract):
+    """Frame and conversion fields shared by rotation boundary contracts."""
+
     canonical_algebra: Literal["Hamilton", "JPL"]
     canonical_order: Literal["wxyz", "xyzw"]
     rotation_action: Literal["active", "passive"]
@@ -74,40 +80,29 @@ class QuaternionBoundaryContract(StrictEvidenceModel):
     destination_axes_from_source: Annotated[
         list[str], Field(min_length=3, max_length=3)
     ]
+    conversion_rule: str
+    inverse_rule: str
+    tolerances: list[PrecisionTolerance]
+
+
+class QuaternionBoundaryContract(_RotationBoundaryContract):
+    """Quaternion coefficient and shared-basis conversion contract."""
+
+    kind: Literal["quaternion_boundary"]
     native_algebra: Literal["Hamilton", "JPL"]
     native_order: Literal["wxyz", "xyzw"]
     native_storage_order: Optional[Literal["wxyz", "xyzw"]] = None  # noqa: UP045
     native_vector_action: str
-    conversion_rule: str
-    inverse_rule: str
     input_domain: str
-    tolerances: list[PrecisionTolerance]
-    scope: list[str]
-    excludes: list[str]
 
 
-class RotationVectorBoundaryContract(StrictEvidenceModel):
+class RotationVectorBoundaryContract(_RotationBoundaryContract):
     """Conversion contract for a native axis-angle/rotation-vector boundary."""
 
     kind: Literal["rotation_vector_boundary"]
-    canonical_algebra: Literal["Hamilton", "JPL"]
-    canonical_order: Literal["wxyz", "xyzw"]
-    rotation_action: Literal["active", "passive"]
-    source_frame: CoordinateFrame
-    source_frame_semantics: FrameSemantics
-    destination_frame: CoordinateFrame
-    destination_frame_semantics: FrameSemantics
-    destination_axes_from_source: Annotated[
-        list[str], Field(min_length=3, max_length=3)
-    ]
     angle_units: Literal["radians"]
     native_representation: str
     native_matrix_action: str
-    conversion_rule: str
-    inverse_rule: str
-    tolerances: list[PrecisionTolerance]
-    scope: list[str]
-    excludes: list[str]
 
 
 class FrameAxisMapping(StrictEvidenceModel):
@@ -118,26 +113,27 @@ class FrameAxisMapping(StrictEvidenceModel):
     semantics: FrameSemantics
 
 
-class FrameChainContract(StrictEvidenceModel):
+class _CanonicalFrameContract(_EvidenceContract):
+    """A contract anchored to the explicitly assigned canonical frame."""
+
+    canonical_frame: CoordinateFrame
+    canonical_frame_semantics: FrameSemantics
+
+
+class FrameChainContract(_CanonicalFrameContract):
     """Named-frame direction contract for robotics and transform graphs."""
 
     kind: Literal["frame_chain"]
-    canonical_frame: CoordinateFrame
-    canonical_frame_semantics: FrameSemantics
     quaternion_order: Literal["wxyz", "xyzw"]
     vector_action: str
     lookup_direction: str
     frame_mappings: list[FrameAxisMapping]
-    scope: list[str]
-    excludes: list[str]
 
 
-class GeographicContract(StrictEvidenceModel):
+class GeographicContract(_CanonicalFrameContract):
     """Local geographic frame and global reference-frame contract."""
 
     kind: Literal["geographic"]
-    canonical_frame: CoordinateFrame
-    canonical_frame_semantics: FrameSemantics
     local_frame: CoordinateFrame
     local_frame_semantics: FrameSemantics
     local_axes_from_canonical: Annotated[list[str], Field(min_length=3, max_length=3)]
@@ -152,11 +148,9 @@ class GeographicContract(StrictEvidenceModel):
     forward_expression: str
     inverse_expression: str
     quaternion_order: Literal["wxyz", "xyzw"]
-    scope: list[str]
-    excludes: list[str]
 
 
-class SceneTransportContract(StrictEvidenceModel):
+class SceneTransportContract(_CanonicalFrameContract):
     """Serialized scene rotation and hierarchy contract."""
 
     kind: Literal["scene_transport"]
@@ -164,8 +158,6 @@ class SceneTransportContract(StrictEvidenceModel):
     format_version: str
     loader_name: str
     loader_version: str
-    canonical_frame: CoordinateFrame
-    canonical_frame_semantics: FrameSemantics
     target_frame: CoordinateFrame
     target_frame_semantics: FrameSemantics
     target_frame_role: Literal["caller_assigned_probe", "declared_stage"]
@@ -175,8 +167,6 @@ class SceneTransportContract(StrictEvidenceModel):
     quaternion_order: Literal["wxyz", "xyzw"]
     matrix_action: str
     hierarchy_semantics: str
-    scope: list[str]
-    excludes: list[str]
 
 
 EvidenceContract = Annotated[
@@ -191,58 +181,61 @@ EvidenceContract = Annotated[
 ]
 
 
-class OrientationWitness(StrictEvidenceModel):
+class _PrecisionWitness(StrictEvidenceModel):
+    """A named observation with a native precision and basis action."""
+
+    case_id: str
+    precision: str
+    basis_images_xyz: BasisImages
+
+
+class _QuaternionWitness(_PrecisionWitness):
+    """A quaternion-valued native observation."""
+
+    coefficient_order: Literal["wxyz", "xyzw"]
+    coefficients: Quaternion4
+
+
+class OrientationWitness(_QuaternionWitness):
     """Native quaternion coefficients and the native action on a basis."""
 
     kind: Literal["orientation"]
-    case_id: str
-    precision: str
-    coefficient_order: Literal["wxyz", "xyzw"]
-    coefficients: Quaternion4
     storage_coefficients_xyzw: Optional[Quaternion4] = None  # noqa: UP045
-    basis_images_xyz: BasisImages
     probe_image_xyz: Optional[Vector3] = None  # noqa: UP045
     constructor_axis_xyz: Optional[Vector3] = None  # noqa: UP045
     constructor_angle_radians: Optional[float] = None  # noqa: UP045
 
 
-class CompositionWitness(StrictEvidenceModel):
+class CompositionWitness(_QuaternionWitness):
     """Native result for a named, ordered product of two rotations."""
 
     kind: Literal["composition"]
-    case_id: str
     left_case_id: str
     right_case_id: str
     product_order: str
-    precision: str
-    coefficient_order: Literal["wxyz", "xyzw"]
-    coefficients: Quaternion4
-    basis_images_xyz: BasisImages
 
 
-class RotationVectorWitness(StrictEvidenceModel):
+class _RotationVectorWitness(_PrecisionWitness):
+    """A native observation returning an axis-angle rotation vector."""
+
+    output_rotation_vector_xyz: Vector3
+
+
+class RotationVectorWitness(_RotationVectorWitness):
     """Native Rodrigues route from or to an axis-angle rotation vector."""
 
     kind: Literal["rotation_vector"]
-    case_id: str
-    precision: str
     input_rotation_vector_xyz: Vector3
-    output_rotation_vector_xyz: Vector3
-    basis_images_xyz: BasisImages
     probe_image_xyz: Optional[Vector3] = None  # noqa: UP045
 
 
-class RotationVectorCompositionWitness(StrictEvidenceModel):
+class RotationVectorCompositionWitness(_RotationVectorWitness):
     """Native matrix product and its returned rotation-vector representation."""
 
     kind: Literal["rotation_vector_composition"]
-    case_id: str
     left_case_id: str
     right_case_id: str
     product_order: str
-    precision: str
-    output_rotation_vector_xyz: Vector3
-    basis_images_xyz: BasisImages
 
 
 class FrameTransform(StrictEvidenceModel):
@@ -255,16 +248,11 @@ class FrameTransform(StrictEvidenceModel):
     translation_xyz: Vector3
 
 
-class FrameMessageWitness(StrictEvidenceModel):
+class FrameMessageWitness(FrameTransform):
     """Serialized transform-message fields and their named frame direction."""
 
-    parent_frame: str
-    child_frame: str
     stamp_sec: int
     stamp_nanosec: int
-    quaternion: Quaternion4
-    coefficient_order: Literal["wxyz", "xyzw"]
-    translation_xyz: Vector3
 
 
 class PointAction(StrictEvidenceModel):

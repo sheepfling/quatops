@@ -3,7 +3,9 @@
 from __future__ import annotations
 
 from scripts.evidence_schema.converter_captures import (
+    EigenBoundaryContract,
     EigenContract,
+    MuJoCoBoundaryContract,
     MuJoCoContract,
     SpiceyPyContract,
 )
@@ -29,16 +31,24 @@ def serialize_direct_quaternion_contract(
     """Serialize the shared direct-quaternion boundary declared by one library."""
     boundary = contract.target_boundary
     canonical_coefficient_order = canonical_order(contract)
-    frame_map = getattr(boundary, "source_to_target_coordinate_map", None)
-    if frame_map is None:
-        frame_map = boundary.coordinate_map
-    if frame_map is None:
-        raise ValueError("direct quaternion contract has no declared coordinate map")
     native_coefficient_order = native_order(boundary)
     conversion = boundary.canonical_to_native
     inverse = boundary.native_to_canonical
     if not conversion or not inverse:
         raise ValueError("direct quaternion contract must declare both directions")
+    if isinstance(boundary, EigenBoundaryContract):
+        native_storage = (
+            coefficient_order(boundary.coeffs_access_order)
+            if boundary.coeffs_access_order
+            else None
+        )
+        native_action = boundary.matrix_action
+    elif isinstance(boundary, MuJoCoBoundaryContract):
+        native_storage = None
+        native_action = boundary.observed_quat2mat_vector_action
+    else:
+        native_storage = None
+        native_action = boundary.observed_q2m_vector_action
     return QuaternionBoundaryContract(
         kind="quaternion_boundary",
         canonical_algebra="Hamilton",
@@ -50,18 +60,14 @@ def serialize_direct_quaternion_contract(
         destination_frame_semantics=numeric_probe_semantics(
             boundary.probe_frame_assignment.meaning
         ),
-        destination_axes_from_source=signed_axis_map(frame_map),
+        destination_axes_from_source=signed_axis_map(
+            boundary.source_to_target_coordinate_map
+        ),
         native_algebra="Hamilton",
         native_order=native_coefficient_order,
-        native_storage_order=(
-            coefficient_order(boundary.coeffs_access_order)
-            if getattr(boundary, "coeffs_access_order", None)
-            else None
-        ),
+        native_storage_order=native_storage,
         native_vector_action=(
-            getattr(boundary, "matrix_action", None)
-            or getattr(boundary, "observed_quat2mat_vector_action", None)
-            or getattr(boundary, "observed_q2m_vector_action", None)
+            native_action
             or "native quaternion action captured on the declared coordinate basis"
         ),
         conversion_rule=conversion,

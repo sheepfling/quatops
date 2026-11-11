@@ -109,15 +109,13 @@ def canonical_order(
 
 
 def native_order(boundary: _NativeQuaternionBoundary) -> Literal["wxyz", "xyzw"]:
-    declared_order = getattr(boundary, "coefficient_order", None)
-    if isinstance(declared_order, str):
-        return coefficient_order(declared_order)
-
-    constructor = getattr(boundary, "constructor_order", None)
-    if isinstance(constructor, str):
-        components = "".join(re.findall(r"\b([wxyz])\b", constructor, re.IGNORECASE))
-        if components:
-            return coefficient_order(components)
+    if not isinstance(boundary, EigenBoundaryContract):
+        return coefficient_order(boundary.coefficient_order)
+    components = "".join(
+        re.findall(r"\b([wxyz])\b", boundary.constructor_order, re.IGNORECASE)
+    )
+    if components:
+        return coefficient_order(components)
     raise ValueError(
         "target contract does not explicitly declare native coefficient order"
     )

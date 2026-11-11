@@ -163,6 +163,23 @@ def test_spice_capture_inputs_and_product_operands_link_to_selected_corpus():
         validate_spiceypy_capture_matches_inputs(changed, inputs, shared)
 
 
+@pytest.mark.parametrize(
+    ("group", "message"),
+    [
+        ("canonical_to_native", "captured orientations"),
+        ("native_created", "constructed output"),
+        ("composition", "composition outputs"),
+    ],
+)
+def test_standalone_validation_rejects_mutated_capture_lists(group, message):
+    capture = _load_valid_spice_capture()
+    getattr(capture.observations, group).pop()
+    with pytest.raises(ValueError, match=message):
+        validate_spiceypy_capture_matches_inputs(
+            capture, _load_spice_inputs(), _load_canonical_inputs()
+        )
+
+
 @pytest.mark.parametrize("invalid_ids", [[], ["identity"] * 8, ["identity"]])
 def test_spice_input_requires_the_complete_unique_fixed_selection(invalid_ids):
     spec = read_evidence_document(

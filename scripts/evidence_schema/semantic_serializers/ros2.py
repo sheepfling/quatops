@@ -3,7 +3,11 @@
 from __future__ import annotations
 
 from scripts.converter_evidence import ConverterEvidencePackage
-from scripts.evidence_schema.converter_captures import Ros2Capture, Ros2Contract
+from scripts.evidence_schema.converter_captures import (
+    Ros2Capture,
+    Ros2Contract,
+    RosTransform,
+)
 from scripts.evidence_schema.crystallized import (
     FrameAxisMapping,
     FrameChainContract,
@@ -119,79 +123,67 @@ def serialize_ros2_witnesses(capture: Ros2Capture) -> list[FrameChainWitness]:
     reverse = by_operation["lookup-sensor-from-world"]
     inputs = capture.native_inputs
 
-    def input_transform(name: str, parent: str, child: str) -> FrameTransform:
-        transform = getattr(inputs, name)
+    def frame_transform(
+        transform: RosTransform, parent: str, child: str
+    ) -> FrameTransform:
         return FrameTransform(
             parent_frame=parent,
             child_frame=child,
             quaternion=transform.quaternion_xyzw.values,
             coefficient_order="xyzw",
             translation_xyz=transform.translation_xyz.values,
-        )
-
-    def lookup_transform(row) -> FrameTransform:
-        transform = row.native_outputs.lookup
-        parent, child = (
-            (inputs.target_frame, inputs.source_frame)
-            if row.operation_id == "lookup-world-from-sensor"
-            else (inputs.source_frame, inputs.target_frame)
-        )
-        return FrameTransform(
-            parent_frame=parent,
-            child_frame=child,
-            quaternion=transform.quaternion_xyzw.values,
-            coefficient_order="xyzw",
-            translation_xyz=transform.translation_xyz.values,
-        )
-
-    def message_roundtrip(row) -> FrameTransform:
-        transform = row.native_outputs.message_roundtrip
-        if transform is None:
-            raise ValueError("forward ROS lookup lacks its message round trip")
-        return FrameTransform(
-            parent_frame=inputs.target_frame,
-            child_frame=inputs.source_frame,
-            quaternion=transform.quaternion_xyzw.values,
-            coefficient_order="xyzw",
-            translation_xyz=transform.translation_xyz.values,
-        )
-
-    def message_fields(row) -> FrameMessageWitness:
-        message = row.native_outputs.lookup_message
-        if message is None:
-            raise ValueError("forward ROS lookup lacks TransformStamped fields")
-        return FrameMessageWitness(
-            parent_frame=message.parent_frame,
-            child_frame=message.child_frame,
-            stamp_sec=message.stamp_sec,
-            stamp_nanosec=message.stamp_nanosec,
-            quaternion=message.rotation_xyzw.values,
-            coefficient_order="xyzw",
-            translation_xyz=message.translation_xyz.values,
         )
 
     probe_output = forward.native_outputs.probe_in_target_xyz
     if probe_output is None:
         raise ValueError("forward ROS lookup lacks its transformed point")
-    point_actions = [
-        PointAction(
-            source_frame=inputs.source_frame,
-            target_frame=inputs.target_frame,
-            input_xyz=inputs.probe_in_source_xyz.values,
-            output_xyz=probe_output.values,
-        )
-    ]
+    message = forward.native_outputs.lookup_message
+    if message is None:
+        raise ValueError("forward ROS lookup lacks TransformStamped fields")
+    roundtrip = forward.native_outputs.message_roundtrip
+    if roundtrip is None:
+        raise ValueError("forward ROS lookup lacks its message round trip")
     return [
         FrameChainWitness(
             kind="frame_chain",
             case_id="world-base-sensor",
             intermediate_transforms=[
-                input_transform("world_from_base", inputs.target_frame, "base"),
-                input_transform("base_from_sensor", "base", inputs.source_frame),
+                frame_transform(inputs.world_from_base, inputs.target_frame, "base"),
+                frame_transform(inputs.base_from_sensor, "base", inputs.source_frame),
             ],
-            lookups=[lookup_transform(forward), lookup_transform(reverse)],
-            messages=[message_fields(forward)],
-            point_actions=point_actions,
-            message_roundtrips=[message_roundtrip(forward)],
+            lookups=[
+                frame_transform(
+                    forward.native_outputs.lookup,
+                    inputs.target_frame,
+                    inputs.source_frame,
+                ),
+                frame_transform(
+                    reverse.native_outputs.lookup,
+                    inputs.source_frame,
+                    inputs.target_frame,
+                ),
+            ],
+            messages=[
+                FrameMessageWitness(
+                    parent_frame=message.parent_frame,
+                    child_frame=message.child_frame,
+                    stamp_sec=message.stamp_sec,
+                    stamp_nanosec=message.stamp_nanosec,
+                    quaternion=message.rotation_xyzw.values,
+                    coefficient_order="xyzw",
+                    translation_xyz=message.translation_xyz.values,
+                )
+            ],
+            point_actions=[
+                PointAction(
+                    source_frame=inputs.source_frame,
+                    target_frame=inputs.target_frame,
+                    input_xyz=inputs.probe_in_source_xyz.values,
+                    output_xyz=probe_output.values,
+                )
+            ],
+            message_roundtrips=[
+                frame_transform(roundtrip, inputs.target_frame, inputs.source_frame)
+            ],
         )
     ]
