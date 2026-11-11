@@ -42,7 +42,7 @@
     "retention_formatter_sha256": "56961d6be101a2bdfb1b21372c823ec86dfd636547d851901b7284f2ae20e0b3",
     "generator_sha256": "82685da1114506b7a693cea04bfd46d34b23019ded118c3d30306f6f9b24bc5e",
     "generator_archive": "experiments/provenance/reproduction-v1.zip#openusd-26.11-create_stage.py",
-    "capture_script_sha256": "00986de969827a592d5ed768bccb571af644d8a34cc9362f6aa0ffd2104a73cb",
+    "capture_script_sha256": "8d07e5ae18c7967b8c4ef3819d16c8a2b100c2e88f9c0b1f982f40aecce705ec",
     "capture_script_identity_note": "The current direct capture reproduces the retained native values; provenance.native_capture_script_sha256 identifies the historical producer.",
     "lockfile_sha256": "4377022efa364fac013b8adf6a232bfbd6dc860847418061ef7f6c66e0f2d142",
     "previous_reproduction_capture_script_sha256": "bd3cda3a7eff771dcc98f891c854b223dd004c363de9608272799f8c8370de7a",
@@ -68,10 +68,10 @@
     "capture_script_sha256": "f4412b38627acc111f676b94fa503ae542c172e516fbcf229fb00370659eb997",
     "witnesses_sha256": "1ccf08a682e1283c7f86894accadd1eba0a46e12a63bf280282305407c80125e",
     "note": "Pinned OpenUSD rerun reproduced every selected witness byte-for-byte using the same native binary hashes.",
-    "reproduction_capture_script_sha256": "00986de969827a592d5ed768bccb571af644d8a34cc9362f6aa0ffd2104a73cb"
+    "reproduction_capture_script_sha256": "8d07e5ae18c7967b8c4ef3819d16c8a2b100c2e88f9c0b1f982f40aecce705ec"
   },
   "unified_lock_replay": {
-    "utc": "2026-11-10T19:07:46.354079+00:00",
+    "utc": "2026-11-11T15:53:35.432317+00:00",
     "python": "3.13.14 (main, Jun 23 2026, 15:19:27) [MSC v.1944 64 bit (AMD64)]",
     "lockfile_sha256": "4377022efa364fac013b8adf6a232bfbd6dc860847418061ef7f6c66e0f2d142",
     "witnesses_sha256": "1ccf08a682e1283c7f86894accadd1eba0a46e12a63bf280282305407c80125e",
@@ -80,6 +80,7 @@
       "Gf/_gf.pyd": "b32894f21ad51c0e0345d3937e88e391122a6bbefe9b647ee5e2829d826ac3bf",
       "Usd/_usd.pyd": "dc622117c31ae71adb7fd4519919810299d4933860167dc052173bc5a0f0ac93",
       "UsdGeom/_usdGeom.pyd": "06a99e8763cc19e59f8b71f2249f55f48fad39907c03e9dc1fc65cfa5a6e0781"
-    }
+    },
+    "capture_script_sha256": "8d07e5ae18c7967b8c4ef3819d16c8a2b100c2e88f9c0b1f982f40aecce705ec"
   }
 }

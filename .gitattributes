@@ -16,3 +16,10 @@ scripts/evidence_json.py -text
 scripts/evidence_schema/sophus.py -text
 scripts/compact_oracle_witnesses.py -text
 scripts/retain_*_witnesses.py -text
+# These schemas were hashed with CRLF in the Blender capture. Keep those
+# exact bytes in every checkout while storing normalized text in Git.
+scripts/evidence_schema/blender_gltf.py text eol=crlf
+scripts/evidence_schema/primitives.py text eol=crlf
+# These shared capture helpers were hashed with LF.
+scripts/direct_quaternion_capture.py text eol=lf
+scripts/evidence_format.py text eol=lf

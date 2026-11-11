@@ -160,7 +160,9 @@ def main() -> None:
         },
         "exporter": {"path": str(Path(__file__).name), "sha256": sha(Path(__file__))},
         "generator_sha256": sha(target_dir / "create_stage.py"),
-        "lockfile_sha256": sha(repository_root / "experiments/converters/python/uv.lock"),
+        "lockfile_sha256": sha(
+            repository_root / "experiments/converters/python/uv.lock"
+        ),
         "canonical_inputs_sha256": inputs.canonical_input_sha256,
         "observations": {
             "path": "witnesses.json",
