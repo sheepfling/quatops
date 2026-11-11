@@ -175,11 +175,14 @@ def main() -> None:
     cv2_path = Path(str(resources.files("cv2")))
     native_binaries = [
         {"path": path.relative_to(cv2_path).as_posix(), "sha256": sha256_file(path)}
-        for pattern in ("*.pyd", "*.dll")
+        for pattern in ("*.pyd", "*.dll", "*.so", "*.so.*", "*.dylib")
         for path in sorted(cv2_path.rglob(pattern))
+        if path.is_file()
     ]
     if not native_binaries:
-        raise RuntimeError(f"No OpenCV native extension or DLL found under {cv2_path}")
+        raise RuntimeError(
+            f"No OpenCV native extension or library found under {cv2_path}"
+        )
     manifest = {
         "schema_version": "1.0",
         "semantic_contract": {

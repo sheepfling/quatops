@@ -47,7 +47,7 @@
     "invocation_template": "python experiments/converters/opencv/4.13.0/prepare_inputs.py --output <temporary inputs.json>; then run capture_native.py --inputs <temporary inputs.json>"
   },
   "reproduction": {
-    "capture_script_sha256": "6c6eab3f17c60023a778552a2332972f156918d183854d8cd94bdce3d24d575f",
+    "capture_script_sha256": "93f665866a8f5e133b6cb9dff9696ac7e0f66b917a2dc7a989472ceb24347cdd",
     "previous_checkout_capture_script_sha256": "ce6df5cbbbb0983633e7ee64df2b39219b7c8e1a69731a480b152f780fda499b",
     "preparation_script_sha256": "7801be0df2c32902a3ab133cd1b89654a6a20aac2a8e32591e28f6918a842f8c",
     "lockfile_sha256": "4377022efa364fac013b8adf6a232bfbd6dc860847418061ef7f6c66e0f2d142",
