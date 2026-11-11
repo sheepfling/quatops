@@ -65,22 +65,28 @@ def test_spiceypy_boundary_contract_and_capture_provenance_are_explicit():
         "native_mixed_probe_case_id": "mixed_a",
     }
     paths = {
-        "reproduction_capture_script_sha256": ROOT
-        / "experiments/converters/spiceypy/8.3.0/capture_native.py",
         "contract_sha256": CONTRACT_PATH,
         "converter_input_spec_sha256": ROOT
         / "experiments/converters/spiceypy/8.3.0/converter_inputs.json",
         "selected_inputs_sha256": SHARED_PATH,
         "witnesses_sha256": FIXTURE / "witnesses.json",
-        "reproduction_lockfile_sha256": ROOT / "experiments/converters/python/uv.lock",
     }
     for field, path in paths.items():
         assert (
             hashlib.sha256(path.read_bytes()).hexdigest()
             == MANIFEST["provenance"][field]
         ), field
+    replay = MANIFEST["unified_lock_replay"]
+    replay_paths = {
+        "capture_script_sha256": ROOT
+        / "experiments/converters/spiceypy/8.3.0/capture_native.py",
+        "shared_capture_script_sha256": ROOT / "scripts/direct_quaternion_capture.py",
+        "lockfile_sha256": ROOT / "experiments/converters/python/uv.lock",
+    }
+    for field, path in replay_paths.items():
+        assert hashlib.sha256(path.read_bytes()).hexdigest() == replay[field], field
     assert (
-        MANIFEST["unified_lock_replay"]["native_binary_sha256"]
+        replay["native_binary_sha256"]
         == MANIFEST["provenance"]["loaded_cspice_binary_sha256"]
     )
     assert (
@@ -91,20 +97,11 @@ def test_spiceypy_boundary_contract_and_capture_provenance_are_explicit():
         ).hexdigest()
         == MANIFEST["provenance"]["capture_script_sha256"]
     )
-    assert (
-        MANIFEST["unified_lock_replay"]["lockfile_sha256"]
-        == MANIFEST["provenance"]["reproduction_lockfile_sha256"]
-    )
-    assert (
-        MANIFEST["unified_lock_replay"]["witnesses_sha256"]
-        == MANIFEST["provenance"]["witnesses_sha256"]
-    )
-    capture_source = paths["reproduction_capture_script_sha256"].read_text(
-        encoding="utf-8"
-    )
-    assert (
-        "import quatops" not in capture_source and "from quatops" not in capture_source
-    )
+    assert replay["witnesses_sha256"] == MANIFEST["provenance"]["witnesses_sha256"]
+    for field in ("capture_script_sha256", "shared_capture_script_sha256"):
+        capture_source = replay_paths[field].read_text(encoding="utf-8")
+        assert "import quatops" not in capture_source
+        assert "from quatops" not in capture_source
     assert len(MANIFEST["provenance"]["loaded_cspice_binary_sha256"]) == 64
     assert (
         MANIFEST["provenance"]["loaded_cspice_binary_path"]

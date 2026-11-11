@@ -20,7 +20,10 @@ does not need this native capture dependency. The lock covers Python 3.13,
 the interpreter used for this capture; other Python versions require a
 separately resolved environment.
 
-The script writes only the retained converter witnesses and run provenance to
+The script writes selected witnesses and provenance to a new temporary
+directory, or to `--output-dir` when specified. It shares input selection and
+provenance recording with the MuJoCo capture; the rotation operations remain
+CSPICE calls. The reviewed witnesses and original capture provenance are in
 [`tests/golden/oracles/spiceypy/8.3.0/converter`](../../../../tests/golden/oracles/spiceypy/8.3.0/converter/manifest.json).
 Replay those frozen native values with
 [`test_spiceypy_converter.py`](../../../../tests/experiments/converters/spiceypy/test_spiceypy_converter.py).

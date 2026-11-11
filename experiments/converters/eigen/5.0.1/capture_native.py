@@ -12,25 +12,22 @@ import sys
 import tempfile
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Literal
 
 from pydantic import BaseModel, ConfigDict
 
 from scripts.evidence_format import dump_evidence_json
 from scripts.evidence_json import parse_evidence_document, read_evidence_document
 from scripts.evidence_schema.converter_captures import (
-    CompositionInput,
     EigenCapture,
     EigenInputs,
     EigenObservations,
     EigenPrecisionProfile,
-    NativeConstructedInput,
     TargetIdentity,
 )
-from scripts.evidence_schema.primitives import NATIVE_RETAINED_CASE_IDS, Vector3
+from scripts.evidence_schema.primitives import NATIVE_RETAINED_CASE_IDS
 from scripts.evidence_schema.shared_inputs import (
     SharedCanonicalInputCapture,
-    SharedFrameInput,
+    resolve_orientation_selection,
 )
 from scripts.platform_probe import executable_suffix
 
@@ -43,32 +40,6 @@ class NativeEigenCapture(BaseModel):
     eigen_version: str
     version_macros: list[int]
     profiles: list[EigenPrecisionProfile]
-
-
-class PreparedEigenOrientation(BaseModel):
-    """One canonical quaternion sent to the native stdin protocol."""
-
-    model_config = ConfigDict(extra="forbid", strict=True)
-
-    case_id: str
-    canonical_wxyz: list[float]
-
-
-class PreparedEigenInputs(BaseModel):
-    """Typed inputs and source provenance for the native Eigen harness."""
-
-    model_config = ConfigDict(extra="forbid", strict=True)
-
-    schema_version: Literal["1.0"]
-    contract_id: str
-    canonical_input_sha256: str
-    preparation_spec_sha256: str
-    source_frame: SharedFrameInput
-    probe_vector_xyz: Vector3
-    scalar_profiles: list[Literal["float32", "float64"]]
-    orientations: list[PreparedEigenOrientation]
-    native_constructed_orientation: NativeConstructedInput
-    composition: CompositionInput
 
 
 def sha256_file(path: Path) -> str:
@@ -130,40 +101,27 @@ def main() -> None:
     spec_path = target_dir / "converter_inputs.json"
     spec = EigenInputs.model_validate(read_evidence_document(spec_path), strict=True)
     shared_path = repository_root / spec.shared_canonical_inputs
-    shared_bytes = shared_path.read_bytes()
-    shared = SharedCanonicalInputCapture.model_validate_json(shared_bytes, strict=True)
-    shared_by_id = {row.case_id: row for row in shared.orientations}
-    inputs = PreparedEigenInputs(
-        schema_version="1.0",
-        contract_id=spec.contract_id,
-        canonical_input_sha256=hashlib.sha256(shared_bytes).hexdigest(),
-        preparation_spec_sha256=sha256_file(spec_path),
-        source_frame=shared.source_frame,
-        probe_vector_xyz=shared.probe_vector_xyz,
-        scalar_profiles=spec.scalar_profiles,
-        orientations=[
-            PreparedEigenOrientation(
-                case_id=case_id,
-                canonical_wxyz=shared_by_id[case_id].canonical_wxyz,
-            )
-            for case_id in spec.retained_case_ids
-            if case_id in NATIVE_RETAINED_CASE_IDS
-        ],
-        native_constructed_orientation=spec.native_constructed_orientation,
-        composition=spec.composition,
+    shared = SharedCanonicalInputCapture.model_validate(
+        read_evidence_document(shared_path), strict=True
     )
-    prepared_inputs_bytes = (
-        json.dumps(
-            inputs.model_dump(mode="json", exclude_none=True),
-            indent=2,
-            allow_nan=False,
+    selected = [
+        row
+        for row in resolve_orientation_selection(
+            shared,
+            spec.retained_case_ids,
+            required_case_ids={
+                spec.composition.left_case_id,
+                spec.composition.right_case_id,
+            },
         )
-        + "\n"
-    ).encode("utf-8")
-    prepared_inputs_sha256 = hashlib.sha256(prepared_inputs_bytes).hexdigest()
+        if row.case_id in NATIVE_RETAINED_CASE_IDS
+    ]
+    if tuple(row.case_id for row in selected) != NATIVE_RETAINED_CASE_IDS:
+        raise ValueError(
+            "native Eigen orientation selection differs from the retained recipe"
+        )
     output_dir = (
-        options.output_dir
-        or repository_root / "tests/golden/oracles/eigen/5.0.1/converter"
+        options.output_dir or Path(tempfile.mkdtemp(prefix="quatops-eigen-capture-"))
     ).resolve()
     output_dir.mkdir(parents=True, exist_ok=True)
 
@@ -183,16 +141,16 @@ def main() -> None:
         input_text_path = temp / "native-input.tsv"
         executable = temp / f"capture_eigen{executable_suffix()}"
         lines = [
-            str(len(inputs.orientations)),
-            " ".join(format(float(value), ".17g") for value in inputs.probe_vector_xyz),
+            str(len(selected)),
+            " ".join(format(float(value), ".17g") for value in shared.probe_vector_xyz),
         ]
         lines.extend(
             row.case_id
             + " "
             + " ".join(format(float(value), ".17g") for value in row.canonical_wxyz)
-            for row in inputs.orientations
+            for row in selected
         )
-        native_axis = inputs.native_constructed_orientation
+        native_axis = spec.native_constructed_orientation
         lines.append(
             (native_axis.case_id or "native_axis_angle")
             + " "
@@ -355,8 +313,7 @@ def main() -> None:
             "reproduction_native_cpp_source_sha256": sha256_file(cpp_source),
             "contract_sha256": sha256_file(target_dir / "semantic_contract.json"),
             "converter_input_spec_sha256": sha256_file(spec_path),
-            "selected_inputs_sha256": inputs.canonical_input_sha256,
-            "prepared_inputs_sha256": prepared_inputs_sha256,
+            "selected_inputs_sha256": sha256_file(shared_path),
             "native_input_stream_sha256": native_input_sha256,
             "witnesses_sha256": sha256_file(witnesses_path),
             "reproduction_lockfile_sha256": sha256_file(shared_lock),

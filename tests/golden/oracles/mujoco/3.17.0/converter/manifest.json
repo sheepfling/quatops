@@ -30,25 +30,26 @@
   ],
   "provenance": {
     "capture_script_sha256": "ab00e29d284624426f46e88e65a7f2faa964d8e21fdbac08cb7f80a0be3af60e",
-    "reproduction_capture_script_sha256": "59c9352dbdf1d1ccdcd974af3c95e655bd1e0b135a5ee4516e8d8aab7610cc80",
     "contract_sha256": "6a2de9e8a58581109663850419dc39c01b7ae2674e60b969bdebe1fbeacefe8a",
     "converter_input_spec_sha256": "cfc5dbbc1729c6d22b9f0c2e8f7d3f335ff0b32a65a968f2f48f65a4aaa0eb82",
     "selected_inputs_sha256": "a6f0630806b69d3b3b29a036aa10f63bfe214668329c661598951f84f8f41eec",
     "witnesses_sha256": "0c5eb585275c19930d6b0ee2a1ebe92cfd65dff0b66776f52b9f85bfda0e3485",
     "witness_selection_note": "Quarter-turn rows were removed from the retained subset; original native capture identity and selected values are unchanged.",
     "pinned_lockfile_sha256": "9043b65cd8be3132dc0302638cc5d80886951cbee64fbc0612c3437acd0070a8",
-    "exact_invocation": "uv run --locked --project experiments/converters/mujoco/3.17.0 --python 3.10.11 python experiments/converters/mujoco/3.17.0/capture_native.py --repository-root <repository>",
-    "reproduction_lockfile_sha256": "4377022efa364fac013b8adf6a232bfbd6dc860847418061ef7f6c66e0f2d142"
+    "exact_invocation": "uv run --locked --project experiments/converters/mujoco/3.17.0 --python 3.10.11 python experiments/converters/mujoco/3.17.0/capture_native.py --repository-root <repository>"
   },
   "semantic_contract": {
     "file": "experiments/converters/mujoco/3.17.0/semantic_contract.json",
     "sha256": "6a2de9e8a58581109663850419dc39c01b7ae2674e60b969bdebe1fbeacefe8a"
   },
   "unified_lock_replay": {
-    "utc": "2026-11-10T19:07:46.381749+00:00",
+    "utc": "2026-11-11T02:08:24.049489+00:00",
     "python": "3.13.14 (main, Jun 23 2026, 15:19:27) [MSC v.1944 64 bit (AMD64)]",
     "lockfile_sha256": "4377022efa364fac013b8adf6a232bfbd6dc860847418061ef7f6c66e0f2d142",
     "native_binary_sha256": "c395db1b3f5110a730c4b0c31b7a4f29881af459c8a74a03e14b7683f022d57f",
-    "witnesses_sha256": "0c5eb585275c19930d6b0ee2a1ebe92cfd65dff0b66776f52b9f85bfda0e3485"
+    "capture_script_sha256": "061a4e078b6e04891cd931e839f6ad9ccfc804b24081d4c035af271885390eb5",
+    "shared_capture_script_sha256": "0b7f0374acedf0ba38a17701a9a2aba2e0b79033ff89d5f49878ea20e166917b",
+    "witnesses_sha256": "0c5eb585275c19930d6b0ee2a1ebe92cfd65dff0b66776f52b9f85bfda0e3485",
+    "invocation": "uv run --locked --project experiments/converters/python --all-extras --python 3.13.14 python experiments/converters/mujoco/3.17.0/capture_native.py --repository-root . --output-dir <temporary>"
   }
 }

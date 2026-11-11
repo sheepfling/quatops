@@ -17,9 +17,9 @@ inventory, accepted evidence, and remaining scope are maintained in the
   share a serializer while retaining their target-specific capture models;
   `normalizer.py` validates the resulting shared evidence contract.
 - `experiments/pyproject.toml` packages shared evidence helpers and Pydantic
-  schemas and declares optional target dependency sets. Each pinned Python
-  capture project selects its target extra and keeps a version-specific
-  `uv.lock` beside the runner.
+  schemas and declares optional target dependency sets. The
+  [`python/`](python/README.md) project locks the standalone Python captures
+  together, with a separate extra for each target.
 
 The optional groups use portable PEP 621 metadata. The `[tool.uv]` settings in
 that file only express resolver-specific constraints between incompatible
@@ -39,13 +39,9 @@ observations to the experiment's semantic serializer. Native capture programs
 do not import the common normalizer; the repository-side pipeline imports the
 target adapter after the native runtime has exited. Capture exporters use
 shared input files and typed evidence models where the target runtime permits
-them. Version-specific locks keep native environments reproducible without
-putting their dependencies in QuatOps' regular install. CI checks that each
-lock matches current package metadata. The retained historical capture locks
-predate the `alphus-trial` to `dev-experimental` extra rename; replacing the
-new name with the old name in those lockfiles recovers their exact recorded
-bytes. Native package versions and artifact hashes did not change in that
-metadata repair.
+them. The shared lock makes the standalone Python captures reproducible without
+adding their native dependencies to a regular QuatOps install. Engines, ROS,
+and JavaScript captures have their own runtime requirements.
 `python -m scripts.validate_converter_evidence --repository-root .` checks the
 normalized evidence in memory without generating a second data product.
 

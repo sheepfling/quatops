@@ -33,7 +33,7 @@
   },
   "provenance": {
     "capture_runner_sha256": "87352500fe2a8fdd18443648d7194d846accd10824114dc5ccde2df6e6bc1510",
-    "reproduction_capture_runner_sha256": "530c71c75f3c832cc66cc95be06f9da5795b7930ef6e2836ece9d9009e32dc20",
+    "reproduction_capture_runner_sha256": "4e99b7286cba6f9fda679e1327d2efe50677d09c1b85fb594349eed8a0817944",
     "reproduction_contract_note": "The native harness emits the selected witness shape directly; one mixed-axis coeffs() observation per precision establishes storage order. Original producer identity and retained native values remain unchanged.",
     "native_cpp_source_sha256": "766952b362ed5a48fd6d826e90c23db4e6e6cfb86c2f6fbff2c748918368eb9b",
     "reproduction_native_cpp_source_sha256": "3847835205536a0748127536e2102852b47e6c93dc88b8f020a55dd860c1244e",
@@ -55,10 +55,12 @@
     "sha256": "80d24bf67748f0f315a99261d1b32f25f45548cb1e1bb3ce67ee3c812dfc845a"
   },
   "unified_lock_replay": {
-    "utc": "2026-11-10T19:07:47.604271+00:00",
+    "utc": "2026-11-11T02:03:05.953842+00:00",
     "python": "3.13.14 (main, Jun 23 2026, 15:19:27) [MSC v.1944 64 bit (AMD64)]",
+    "compiler": "g++.exe (GCC) 15.2.0",
     "lockfile_sha256": "4377022efa364fac013b8adf6a232bfbd6dc860847418061ef7f6c66e0f2d142",
-    "native_binary_sha256": "08c3ecca32138b0b0a3bac2170aa8d0ff6926f45d346150c50422bbf486e810e",
+    "native_binary_sha256": "0669fb603732dc60205f665d4321490bf18dfd05eaf46935242a1d7e3d047867",
+    "native_input_stream_sha256": "a4d707a7014e18f1a3c8c92ceb603e36650719e69dfb329b660f3f4cd8f2e7a3",
     "witnesses_sha256": "291e42a582c358f3fa4e87afc1dfbed144f5c422ef42ef87fa97d7a2a3f89840"
   }
 }

@@ -23,7 +23,6 @@
   },
   "provenance": {
     "capture_script_sha256": "9f086a289cc3a3ffa4e7c1503575b74e4291b53a0bcd72b687bf93d680b0f4b6",
-    "reproduction_capture_script_sha256": "385efbddb85e545511616dc1e32924fe5101068ef45be0c6c1f118900500fbfa",
     "contract_sha256": "3897449f31edcb43c0f81234a95e539d84f702b0ce9c0f61adac410679c05bc9",
     "converter_input_spec_sha256": "aa7756f7c655246f53fbd4e34b1a48d72942c2bcb41fc181f8021fd666bfa058",
     "selected_inputs_sha256": "a6f0630806b69d3b3b29a036aa10f63bfe214668329c661598951f84f8f41eec",
@@ -33,18 +32,20 @@
     "loaded_cspice_binary_path": "C:\\Users\\peanu\\GIT\\sheepfling\\quatops\\experiments\\converters\\spiceypy\\8.3.0\\.venv\\lib\\site-packages\\spiceypy\\utils\\cspice.dll",
     "loaded_cspice_binary_sha256": "7fd2dcc58d73ed5293847e67109897caba34240b8f9c38ad739c0b2ec6ce7715",
     "exact_invocation": "uv run --locked --project experiments/converters/spiceypy/8.3.0 --python 3.10.11 python experiments/converters/spiceypy/8.3.0/capture_native.py --repository-root <repository>",
-    "capture_script_archive": "experiments/provenance/reproduction-v1.zip#spiceypy-8.3.0-capture_native.py",
-    "reproduction_lockfile_sha256": "4377022efa364fac013b8adf6a232bfbd6dc860847418061ef7f6c66e0f2d142"
+    "capture_script_archive": "experiments/provenance/reproduction-v1.zip#spiceypy-8.3.0-capture_native.py"
   },
   "semantic_contract": {
     "file": "experiments/converters/spiceypy/8.3.0/semantic_contract.json",
     "sha256": "3897449f31edcb43c0f81234a95e539d84f702b0ce9c0f61adac410679c05bc9"
   },
   "unified_lock_replay": {
-    "utc": "2026-11-10T19:07:46.243909+00:00",
+    "utc": "2026-11-11T02:08:23.958462+00:00",
     "python": "3.13.14 (main, Jun 23 2026, 15:19:27) [MSC v.1944 64 bit (AMD64)]",
     "lockfile_sha256": "4377022efa364fac013b8adf6a232bfbd6dc860847418061ef7f6c66e0f2d142",
     "native_binary_sha256": "7fd2dcc58d73ed5293847e67109897caba34240b8f9c38ad739c0b2ec6ce7715",
-    "witnesses_sha256": "ea498c1a3b326bb76531aa94004ecaf66bc15098111ff2b6669a479f0d9dbe60"
+    "capture_script_sha256": "7a7b5c154cf72ef4713aefed5862c8b8159f78a7e160d311603048f433e4bb35",
+    "shared_capture_script_sha256": "0b7f0374acedf0ba38a17701a9a2aba2e0b79033ff89d5f49878ea20e166917b",
+    "witnesses_sha256": "ea498c1a3b326bb76531aa94004ecaf66bc15098111ff2b6669a479f0d9dbe60",
+    "invocation": "uv run --locked --project experiments/converters/python --all-extras --python 3.13.14 python experiments/converters/spiceypy/8.3.0/capture_native.py --repository-root . --output-dir <temporary>"
   }
 }

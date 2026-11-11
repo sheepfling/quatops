@@ -27,16 +27,17 @@ uv run --locked --project experiments/converters/python --extra eigen --python 3
 
 The capture verifies the archive digest before compiling with `g++` in C++17
 mode. Its Python 3.13 lock is shared across captures through separate extras;
-other Python versions require a separately resolved environment. It keeps the
-small selected witnesses and build provenance under
+other Python versions require a separately resolved environment. The script
+writes a new temporary capture directory by default; pass `--output-dir` to
+choose another location. The reviewed witnesses and original build provenance
+are under
 [`tests/golden/oracles/eigen/5.0.1/converter`](../../../../tests/golden/oracles/eigen/5.0.1/converter/manifest.json).
 The compiler path/version and native executable digest are recorded in the
 manifest. The harness retains one native `coeffs()` storage-order observation
 per precision, alongside WXYZ coefficients and native actions for each selected
 orientation. It emits the selected typed rows directly; the
 historical producer source remains available by digest in the provenance
-archive. Prepared JSON inputs
-are generated in memory; the native input stream and shared canonical source
-remain reproducible without a duplicate fixture file. Replay the frozen
+archive. The native input stream is built directly from typed shared inputs
+and its digest is recorded without a duplicate prepared JSON document. Replay the frozen
 native outputs with
 [`test_eigen_converter.py`](../../../../tests/experiments/converters/eigen/test_eigen_converter.py).
