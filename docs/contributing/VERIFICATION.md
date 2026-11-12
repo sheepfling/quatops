@@ -54,7 +54,8 @@ Install its optional tools in a separate Python 3.15 environment, then run from
 the repository root:
 
 ```shell
-python -m pip install "alphus @ https://github.com/sheepfling/alphus/archive/77b191b8bdf1fc4cfb50c6f3e4518be297f3d3ee.zip" -r requirements-dev-experimental.txt
+python -m pip install https://github.com/sheepfling/alphus/archive/77b191b8bdf1fc4cfb50c6f3e4518be297f3d3ee.zip
+python -m pip install -r requirements-dev-experimental.txt
 python -m alphus --root . --config quality-gates.toml --run --profile review --output plain
 ```
 
