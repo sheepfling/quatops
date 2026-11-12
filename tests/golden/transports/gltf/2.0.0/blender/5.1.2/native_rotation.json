@@ -27,13 +27,15 @@
   "provenance": {
     "gltf_sha256": "fdfb41df6dba25b0af3452b85310887e7e4f0060b017fad025c930a9de7c0bb3",
     "binary_sha256": "335c8c8ca1d09faae363ddab206ec1abd04c94c044889f92c501edbf772f2ed7",
-    "exporter_sha256": "81fec5fb7fff574714086bf7958aabae62dc4d9c88758cfe374b9b613f3b0cac",
-    "exact_invocation": "blender --background --factory-startup --python-exit-code 1 --python capture_gltf.py -- --asset <rotation_transport.gltf> --output <native_blender_gltf.json>",
+    "exporter_sha256": "cee2112867c9b484dbc4213e9b6c2d161ae56b3cb21e25e94f596437f7ec17e3",
+    "digest_helper_sha256": "0ef54f8fed931269ac8f104d376ac889a6be4dff449a23e4a5005bbf063ff7bb",
+    "formatter_sha256": "56961d6be101a2bdfb1b21372c823ec86dfd636547d851901b7284f2ae20e0b3",
+    "exact_invocation": "blender --background --factory-startup --python-use-system-env --python-exit-code 1 --python capture_gltf.py -- --asset <rotation_transport.gltf> --output <native_blender_gltf.json>",
     "operator_arguments": {
       "filepath": "rotation_transport.gltf"
     },
     "other_operator_properties": "Blender 5.1.2 importer defaults",
-    "captured_at_utc": "2026-11-03T21:28:49.937970+00:00"
+    "captured_at_utc": "2026-11-12T00:05:21.087320+00:00"
   },
   "scene": {
     "fps": 30,
@@ -93,7 +95,6 @@
     },
     "animations": [
       {
-        "interpolation": "STEP",
         "action_name": "rotation_step",
         "target_object": "animated_step",
         "key_times_seconds_from_imported_fcurves": [0.0, 0.7, 1.9],
@@ -109,11 +110,6 @@
         },
         "samples": [
           {
-            "sample": "key-0",
-            "time_seconds": 0.0,
-            "quaternion_wxyz": [0.9847265481948853, 0.1741081327199936, 0.0, 0.0]
-          },
-          {
             "sample": "before-key-1-1e-05",
             "time_seconds": 0.69999,
             "quaternion_wxyz": [0.9847265481948853, 0.1741081327199936, 0.0, 0.0]
@@ -122,26 +118,11 @@
             "sample": "before-key-1-1e-06",
             "time_seconds": 0.6999989999999999,
             "quaternion_wxyz": [0.8253356218338013, 0.0, 0.0, 0.5646424889564514]
-          },
-          {
-            "sample": "key-1",
-            "time_seconds": 0.7,
-            "quaternion_wxyz": [0.8253356218338013, 0.0, 0.0, 0.5646424889564514]
-          },
-          {
-            "sample": "after-key-1",
-            "time_seconds": 0.700001,
-            "quaternion_wxyz": [0.8253356218338013, 0.0, 0.0, 0.5646424889564514]
-          },
-          {
-            "sample": "key-2",
-            "time_seconds": 1.9,
-            "quaternion_wxyz": [0.4535961151123047, 0.0, -0.8912073373794556, 0.0]
           }
-        ]
+        ],
+        "interpolation": "STEP"
       },
       {
-        "interpolation": "LINEAR",
         "action_name": "rotation_linear",
         "target_object": "animated_linear",
         "key_times_seconds_from_imported_fcurves": [0.0, 0.7, 1.9],
@@ -157,29 +138,14 @@
         },
         "samples": [
           {
-            "sample": "key-0",
-            "time_seconds": 0.0,
-            "quaternion_wxyz": [0.9847265481948853, 0.1741081327199936, 0.0, 0.0]
-          },
-          {
             "sample": "midpoint-0-1",
             "time_seconds": 0.35,
             "quaternion_wxyz": [0.9050310850143433, 0.0870540663599968, 0.0, 0.2823212444782257]
-          },
-          {
-            "sample": "key-1",
-            "time_seconds": 0.7,
-            "quaternion_wxyz": [0.8253356218338013, 0.0, 0.0, 0.5646424889564514]
-          },
-          {
-            "sample": "key-2",
-            "time_seconds": 1.9,
-            "quaternion_wxyz": [0.4535961151123047, 0.0, -0.8912073373794556, 0.0]
           }
-        ]
+        ],
+        "interpolation": "LINEAR"
       },
       {
-        "interpolation": "CUBICSPLINE",
         "action_name": "rotation_cubic",
         "target_object": "animated_cubic",
         "key_times_seconds_from_imported_fcurves": [0.0, 0.7, 1.9],
@@ -197,26 +163,12 @@
         },
         "samples": [
           {
-            "sample": "key-0",
-            "time_seconds": 0.0,
-            "quaternion_wxyz": [0.9847265481948853, 0.1741081327199936, 0.0, 0.0]
-          },
-          {
             "sample": "midpoint-0-1",
             "time_seconds": 0.35,
             "quaternion_wxyz": [0.9388859868049622, 0.10767213255167007, 0.03591213375329971, 0.2382085621356964]
-          },
-          {
-            "sample": "key-1",
-            "time_seconds": 0.7,
-            "quaternion_wxyz": [0.8253356218338013, 0.0, 0.0, 0.5646424889564514]
-          },
-          {
-            "sample": "key-2",
-            "time_seconds": 1.9,
-            "quaternion_wxyz": [0.4535961151123047, 0.0, -0.8912073373794556, 0.0]
           }
-        ]
+        ],
+        "interpolation": "CUBICSPLINE"
       }
     ]
   }

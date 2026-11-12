@@ -22,8 +22,10 @@ The Blender importer maps the tested glTF axes to Blender as `+X -> +X`,
 `LINEAR` quaternion curves use component-linear F-curves, and `CUBICSPLINE`
 inputs are represented by automatic Bezier curves; selected native midpoint
 values differ from the glTF reference interpolation. Two step-key samples
-retain a narrow subframe boundary behavior. These are Blender `5.1.2` observations and do not
-change the format contract or Three.js results. Details and native values are
+retain a narrow subframe boundary behavior. The Blender fixture keeps those two
+samples and one discriminating midpoint for each other interpolation mode.
+These are Blender `5.1.2` observations and do not change the format contract or
+Three.js results. Details and native values are
 in the [Blender capture notes](../../experiments/transports/gltf/2.0.0/blender/5.1.2/README.md)
 and [frozen output](../../tests/golden/transports/gltf/2.0.0/blender/5.1.2/native_rotation.json).
 

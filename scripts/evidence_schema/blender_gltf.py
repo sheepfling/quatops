@@ -53,6 +53,7 @@ class BlenderGltfProvenance(NativeCaptureModel):
     binary_sha256: SHA256
     exporter_sha256: SHA256
     digest_helper_sha256: Optional[SHA256] = None  # noqa: UP045 -- Python 3.9
+    formatter_sha256: SHA256
     exact_invocation: str
     operator_arguments: BlenderGltfOperatorArguments
     other_operator_properties: str
@@ -114,7 +115,7 @@ class BlenderGltfAnimationFields(NativeCaptureModel):
         list[FiniteFloat], Field(min_length=3, max_length=3)
     ]
     fcurves: BlenderGltfFcurveSummary
-    samples: Annotated[list[BlenderGltfAnimationSample], Field(min_length=4)]
+    samples: Annotated[list[BlenderGltfAnimationSample], Field(min_length=1)]
 
 
 class BlenderGltfStepAnimation(BlenderGltfAnimationFields):

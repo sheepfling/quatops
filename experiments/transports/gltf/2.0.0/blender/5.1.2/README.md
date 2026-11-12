@@ -54,8 +54,10 @@ release.
 
 Subframe sampling also exposed a tiny boundary quirk: the sample 1e-5 seconds
 before the second key keeps the previous `STEP` value, while the sample 1e-6
-seconds before it evaluates to the next key. The capture retains those two
-native quaternion outputs and key values. This is a pinned Blender sampler
+seconds before it evaluates to the next key. The retained animation values are
+limited to those two boundary outputs and the first-interval midpoint for each
+of the other interpolation modes. Authored key values and imported F-curve key
+times remain in the source asset and capture. This is a pinned Blender sampler
 observation, not a change to the source asset's key time.
 
 The format contract is described by the

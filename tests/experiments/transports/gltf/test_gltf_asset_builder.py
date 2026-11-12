@@ -37,8 +37,13 @@ class GltfAssetBuilderTests(unittest.TestCase):
             ).read_text()
         )
         gltf_history = gltf["historical_capture"]
+        reproduction = gltf["reproduction"]
+        native_provenance = native["provenance"]
         self.assertEqual(
-            native["provenance"]["exporter_sha256"], gltf_history["exporter_sha256"]
+            native_provenance["exporter_sha256"], reproduction["capture_source_sha256"]
+        )
+        self.assertEqual(
+            native_provenance["formatter_sha256"], reproduction["formatter_sha256"]
         )
         self.assertEqual(
             hashlib.sha256(
@@ -54,13 +59,14 @@ class GltfAssetBuilderTests(unittest.TestCase):
             "schema",
             "schema_primitives",
             "digest_helper",
+            "formatter",
             "requirements",
         ):
             self.assertEqual(
                 hashlib.sha256(
-                    read_provenance_source(REPOSITORY_ROOT, gltf["reproduction"][field])
+                    read_provenance_source(REPOSITORY_ROOT, reproduction[field])
                 ).hexdigest(),
-                gltf["reproduction"][f"{field}_sha256"],
+                reproduction[f"{field}_sha256"],
             )
         canonical_observations = json.dumps(
             native["observations"],

@@ -317,6 +317,12 @@ def test_blender_importer_axis_mapping_and_quaternion_animation_profiles_are_fro
     target_keys = target_keys_xyzw[:, (3, 0, 1, 2)]
     rows = {row.interpolation: row for row in BLENDER.observations.animations}
     assert set(rows) == {"STEP", "LINEAR", "CUBICSPLINE"}
+    assert {sample.sample for sample in rows["STEP"].samples} == {
+        "before-key-1-1e-05",
+        "before-key-1-1e-06",
+    }
+    assert [sample.sample for sample in rows["LINEAR"].samples] == ["midpoint-0-1"]
+    assert [sample.sample for sample in rows["CUBICSPLINE"].samples] == ["midpoint-0-1"]
     assert (
         np.max(
             np.abs(

@@ -13,6 +13,7 @@ from typing import Any
 
 import bpy
 
+from scripts.evidence_json import dump_evidence_json
 from scripts.evidence_schema import blender_gltf as schema
 from scripts.evidence_schema.utilities import sha256_file
 
@@ -230,20 +231,9 @@ def main() -> None:
             for offset in dict.fromkeys((1e-5, epsilon))
         ]
         if interpolation == "STEP":
-            samples = [
-                ("key-0", t0),
-                *boundary_samples,
-                ("key-1", t1),
-                ("after-key-1", t1 + epsilon),
-                ("key-2", t2),
-            ]
+            samples = boundary_samples
         else:
-            samples = [
-                ("key-0", t0),
-                ("midpoint-0-1", (t0 + t1) / 2.0),
-                ("key-1", t1),
-                ("key-2", t2),
-            ]
+            samples = [("midpoint-0-1", (t0 + t1) / 2.0)]
         sample_rows: list[schema.BlenderGltfAnimationSample] = []
         for sample_name, sample_time in samples:
             set_scene_time(scene, sample_time)
@@ -317,6 +307,7 @@ def main() -> None:
             binary_sha256=sha256_file(asset_binary),
             exporter_sha256=sha256_file(Path(__file__)),
             digest_helper_sha256=sha256_file(Path(inspect.getfile(sha256_file))),
+            formatter_sha256=sha256_file(Path(inspect.getfile(dump_evidence_json))),
             exact_invocation=(
                 "blender --background --factory-startup --python-use-system-env --python-exit-code 1 "
                 "--python capture_gltf.py -- --asset <rotation_transport.gltf> "
@@ -346,7 +337,7 @@ def main() -> None:
         ),
     )
     output_path.write_text(
-        json.dumps(result.model_dump(mode="json"), indent=2, allow_nan=False) + "\n",
+        dump_evidence_json(result.model_dump(mode="json")),
         encoding="utf-8",
         newline="\n",
     )
