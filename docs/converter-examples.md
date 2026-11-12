@@ -58,7 +58,7 @@ result under a different scene frame and checks the reverse gateway's error.
 
 ```shell
 npm ci --prefix experiments/transports/gltf/2.0.0/threejs/0.187.0
-python examples/converters/threejs_consumer.py
+python examples/converters/threejs_consumer.py --repository-root .
 ```
 
 Use the development environment for this example's typed probe messages.

@@ -206,11 +206,12 @@ def validate_oriented_mesh(root: Path, witness_path: Path) -> tuple[str, set[str
     ):
         raise ValueError("oriented mesh buffer declaration differs")
     uri = buffers[0].get("uri")
-    if not isinstance(uri, str) or not uri.startswith(
-        "data:application/octet-stream;base64,"
-    ):
+    if not isinstance(uri, str):
         raise ValueError("oriented mesh embedded buffer is missing")
-    binary = base64.b64decode(uri.split(",", 1)[1], validate=True)
+    media_type, separator, encoded = uri.partition(",")
+    if media_type != "data:application/octet-stream;base64" or not separator:
+        raise ValueError("oriented mesh embedded buffer is missing")
+    binary = base64.b64decode(encoded, validate=True)
     if len(binary) != 72:
         raise ValueError("oriented mesh binary length differs")
     expected_vertices = np.asarray([[0, 0, 0], [0, 0, 2], [-3, 0, 0], [0, 5, 0]])

@@ -87,7 +87,8 @@ _EVIDENCE_ITEMS = (
         True,
         "role_specific_action",
         False,
-        "Native Camera3D local/global action and viewport-center ray in an assigned scene; no physical calibration or adapter conformance claim.",
+        "Native Camera3D local/global action and viewport-center ray in an assigned scene; "
+        "no physical calibration or adapter conformance claim.",
     ),
     SemanticEvidenceArtifact(
         "godot.camera3d.4.8-dev1",
@@ -98,7 +99,8 @@ _EVIDENCE_ITEMS = (
         True,
         "role_specific_action",
         False,
-        "Native Camera3D local/global action and viewport-center ray in an assigned scene; no physical calibration or adapter conformance claim.",
+        "Native Camera3D local/global action and viewport-center ray in an assigned scene; "
+        "no physical calibration or adapter conformance claim.",
     ),
     SemanticEvidenceArtifact(
         "ros2.tf2.0.36.23",

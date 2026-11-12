@@ -33,7 +33,7 @@ Primary API references:
 
 ## Verification scope
 
-Run `python examples/converters/threejs_consumer.py` after installing the
+Run `python examples/converters/threejs_consumer.py --repository-root .` after installing the
 documented development and pinned npm dependencies. It checks an actual native
 object action, explicit float32 assignment, and a deliberately incorrect scene
 frame rejected by the reverse gateway. It requires Node.js and runs without a

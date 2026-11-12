@@ -1,12 +1,13 @@
 """Check a public QuatOps boundary by observing a pinned Three.js object.
 
-Run after installing development dependencies and the pinned Three.js fixture:
+Run from the repository root after installing development dependencies and the pinned Three.js fixture:
     npm ci --prefix experiments/transports/gltf/2.0.0/threejs/0.187.0
-    python examples/converters/threejs_consumer.py
+    python examples/converters/threejs_consumer.py --repository-root .
 """
 
 from __future__ import annotations
 
+import argparse
 import shutil
 import subprocess
 from dataclasses import replace
@@ -52,7 +53,9 @@ class NativeObservation(BaseModel):
 
 
 def main() -> None:
-    root = Path(__file__).resolve().parents[2]
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--repository-root", type=Path, required=True)
+    root = parser.parse_args().repository_root.resolve(strict=True)
     native_module = (
         root
         / "experiments/transports/gltf/2.0.0/threejs/0.187.0/node_modules/three/build/three.module.js"

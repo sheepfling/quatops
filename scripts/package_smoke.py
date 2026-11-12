@@ -3,9 +3,8 @@
 from __future__ import annotations
 
 import argparse
-import os
-import sys
 import tempfile
+import venv
 from pathlib import Path
 from zipfile import ZipFile
 
@@ -30,9 +29,10 @@ def check_installed_wheel(wheel: Path) -> None:
     consumer = Path(__file__).with_name("wheel_consumer.py")
     with tempfile.TemporaryDirectory(prefix="quatops-installed-wheel-") as directory:
         working = Path(directory)
-        venv = working / "venv"
-        run(sys.executable, "-m", "venv", str(venv), cwd=working)
-        python = venv / ("Scripts/python.exe" if os.name == "nt" else "bin/python")
+        environment = working / "venv"
+        builder = venv.EnvBuilder(with_pip=True)
+        builder.create(str(environment))
+        python = Path(builder.ensure_directories(str(environment)).env_exe)
         run(
             str(python),
             "-m",
