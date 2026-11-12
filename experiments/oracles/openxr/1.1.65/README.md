@@ -105,3 +105,30 @@ retained. Primary references are the OpenXR 1.1.65
 and [`XrReferenceSpaceType`](https://registry.khronos.org/OpenXR/specs/1.1/man/html/XrReferenceSpaceType.html)
 pages, plus the pinned
 [`Khronos test-runtime source`](https://github.com/KhronosGroup/OpenXR-SDK-Source/tree/release-1.1.65/src/tests/test_runtimes).
+
+## VIEW and LOCAL_FLOOR static-offset witnesses
+
+The 2026-11-12 follow-up directly executes the same pinned Khronos runtime for
+`VIEW` and `LOCAL_FLOOR`. The capture program takes an optional final argument
+`LOCAL`, `VIEW`, or `LOCAL_FLOOR`; omitted means `LOCAL`, preserving its earlier
+interface. Use the same build commands above, then run the executable once for
+each desired type. The original LOCAL witness is unchanged and was reproduced
+exactly as a parsed JSON value during this capture.
+
+[reference_spaces_manifest.json](reference_spaces_manifest.json) identifies the
+new producer, pinned SDK/runtime commits, runtime-source and binary hashes,
+and exact native stdout files. Its producer identity supersedes neither the
+historical producer nor the historical LOCAL manifest. Replay these additions
+with `python -m pytest tests/experiments/oracles/openxr/test_reference_space_witnesses.py`.
+
+These observations establish **same-type static offset chains only**. All three
+spaces A/B/C in a run have the selected reference type. The pinned mock runtime
+computes the relative supplied offsets; it does not simulate head motion or a
+measured floor height. Identical numbers across these types are therefore
+expected, not evidence that their physical semantics are interchangeable.
+The capture uses synthetic time 1 and no hardware, vendor runtime, or QuatOps
+adapter. VIEW tracking and LOCAL_FLOOR floor alignment remain unqualified.
+Cross-type relations and dynamic-time behavior are not covered by this fixture.
+The existing LOCAL semantic contract remains LOCAL-only; new assurance links
+must explicitly name these added static-offset witnesses rather than widening
+the legacy witness's scope.

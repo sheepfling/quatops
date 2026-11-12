@@ -18,7 +18,7 @@ Use the activated environment for the commands below.
 ## Run routine checks
 
 Run the full local checks, including the CI suite, type checking, the capture
-lock, and package build:
+lock, distribution builds, and isolated installed-wheel consumers:
 
 ```shell
 python -m scripts.verify
@@ -29,6 +29,14 @@ interoperability, benchmark, CI, type-check, and lock scopes. The CI matrix
 runs the same `ci` scope; its package and Pyright jobs run separately. The
 runner discovers its repository automatically; `--repository-root` can select
 an explicit checkout.
+
+Run only the shared packaging checks with `python -m scripts.verify package`.
+Local verification and the hosted package job use that same command. It builds
+the wheel and source distribution in a temporary directory, checks the wheel
+for runtime caches, and installs that exact wheel into a fresh virtual
+environment. The isolated interpreter runs outside the checkout. It checks
+scalar conversion and semantic context copying before NumPy is installed,
+then checks a float32 component-first batch after installing NumPy.
 
 Pytest's default configuration skips opt-in performance cases. The routine
 suite covers API behavior, conventions, numerical edge cases, scalar and NumPy
@@ -55,10 +63,12 @@ inside the container so Git applies Linux file modes and line-ending rules.
 It does not replace the CI Python-version matrix or native captures in their
 pinned target runtimes. Run additional change-specific checks as needed.
 
-The package job also builds both distribution formats, installs the wheel into
-an isolated target directory, checks scalar conversion without optional
-dependencies, then installs NumPy and checks a float32 batch round trip. Wheel
-contents are expected to exclude local Numba cache files.
+The installed scalar consumer also checks a forward-vector action, distinct
+calibration cache keys, and rejection of an old value under a new binding.
+The optional live [Three.js object example](../engines/threejs.md) observes
+native forward/up markers and an explicit float32 assignment separately from
+the standard Python checks. Evidence-bundle replay remains a separate hosted
+job.
 
 ## Run opt-in benchmarks
 

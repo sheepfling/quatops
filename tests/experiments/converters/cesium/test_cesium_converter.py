@@ -111,7 +111,9 @@ def test_cesium_capture_provenance_and_explicit_frame_contract():
     assert (
         MANIFEST["bundled_reproduction"]["reproduction_runner_sha256"]
         == hashlib.sha256(
-            (ROOT / "experiments/run_converter_capture.py").read_bytes()
+            read_provenance_source(
+                ROOT, MANIFEST["bundled_reproduction"]["reproduction_runner_source"]
+            )
         ).hexdigest()
     )
     for item in ("lock", "manifest"):

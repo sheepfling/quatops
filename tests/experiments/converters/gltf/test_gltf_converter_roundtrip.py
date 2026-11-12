@@ -12,6 +12,7 @@ from quatops.experimental.engines import QuaternionFrameMap, SignedAxisMap
 from tests.support.evidence_oracles import matrix_from_wxyz as rotation
 from tests.support.evidence_oracles import native_values as values
 from tests.support.paths import REPOSITORY_ROOT
+from tests.support.provenance_archives import read_provenance_source
 
 ROOT = REPOSITORY_ROOT
 FIXTURE = ROOT / "tests/golden/transports/gltf/2.0.0/threejs/0.187.0/converter"
@@ -51,7 +52,13 @@ def test_gltf_converter_artifact_loader_and_provenance_are_pinned():
     assert CONTRACT["probe_frame"]["forward"] == "-Z"
     assert "asset_frame" not in CONTRACT
     assert "camera-like" in CONTRACT["frame_role_note"]
-    assert CONTRACT["target"] == "glTF 2.0 loaded by Three.js GLTFLoader 0.187.0"
+    assert CONTRACT["target"] == {
+        "name": "Three.js GLTFLoader",
+        "version": "0.187.0",
+        "revision": "187",
+    }
+    assert CONTRACT["format_name"] == "glTF"
+    assert CONTRACT["format_version"] == "2.0"
     assert MANIFEST["target"]["package_version"] == "0.187.0"
     assert MANIFEST["execution"]["was_run"] is True
     assert MANIFEST["selection"]["retained_observations"] == 2
@@ -111,7 +118,9 @@ def test_gltf_converter_artifact_loader_and_provenance_are_pinned():
     assert (
         MANIFEST["direct_reproduction"]["reproduction_runner_sha256"]
         == hashlib.sha256(
-            (ROOT / "experiments/run_converter_capture.py").read_bytes()
+            read_provenance_source(
+                ROOT, MANIFEST["direct_reproduction"]["reproduction_runner_source"]
+            )
         ).hexdigest()
     )
 
@@ -185,3 +194,24 @@ def test_loader_local_actions_hierarchy_composition_and_inverse_preserve_physica
     # The parent and child turns are noncommuting; reversing the hierarchy product is exposed.
     wrong = expected_local["QuatOpsChild"] @ expected_local["QuatOpsParent"]
     assert np.max(np.abs(wrong[:3, :3] - world_child[:3, :3])) > 0.1
+
+
+def test_retained_and_direct_capture_entry_points_remain_distinct_valid_boundaries():
+    from scripts.evidence_schema.converter_captures import ThreeGltfCapture
+    from scripts.evidence_schema.semantic_serializers.gltf import _validate_observations
+
+    retained = ThreeGltfCapture.model_validate(CAPTURE, strict=True)
+    _validate_observations(retained)
+    direct = retained.model_copy(deep=True)
+    direct.native_entry_points[2] = "Vector3.applyMatrix4"
+    _validate_observations(direct)
+    assert retained.native_entry_points[2] == "Object3D.localToWorld"
+
+    import pytest
+
+    with pytest.raises(ValueError, match="entry points"):
+        _validate_observations(
+            direct.model_copy(
+                update={"native_entry_points": direct.native_entry_points[:2]}
+            )
+        )

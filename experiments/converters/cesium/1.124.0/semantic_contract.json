@@ -1,8 +1,14 @@
 {
   "contract_id": "quatops-cesium-local-enu-ecef-v1",
-  "target": "CesiumJS 1.124.0",
-  "algebra": "Hamilton active quaternion",
-  "storage": "QuatOps WXYZ; Cesium XYZW",
+  "target": {
+    "name": "CesiumJS",
+    "version": "1.124.0",
+    "api_version": "1.124"
+  },
+  "algebra": "Hamilton",
+  "rotation_action": "active",
+  "canonical_storage_order": "WXYZ",
+  "native_storage_order": "XYZW",
   "local_frame": {
     "handedness": "right",
     "positive_x": "east",
@@ -20,7 +26,9 @@
   ],
   "forward": "R_ECEF_from_model = R_ECEF_from_ENU * R_ENU_from_model; t_ECEF = t_ECEF_from_ENU + R_ECEF_from_ENU * t_ENU_from_model",
   "inverse": "R_ENU_from_model = transpose(R_ECEF_from_ENU) * R_ECEF_from_model; t_ENU = transpose(R_ECEF_from_ENU) * (t_ECEF - t_ECEF_from_ENU)",
-  "geodesy": "WGS84; lon/lat input in degrees, height and translations in metres",
+  "geodetic_datum": "WGS84",
+  "angular_units": "degrees",
+  "linear_units": "metres",
   "normalization": "unit input quaternion; no hidden sign canonicalization in QuatOps input mapping",
   "scope": [
     "QuatOps-produced local quaternion to Cesium ECEF transform",

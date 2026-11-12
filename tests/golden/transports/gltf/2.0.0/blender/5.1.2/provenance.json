@@ -18,7 +18,7 @@
     "identity_note": "Blender 5.1.2 re-captured the selected static and minimal animation witnesses; the historical exporter remains archived.",
     "schema": "scripts/evidence_schema/blender_gltf.py",
     "schema_sha256": "8c97cd8af80bf71312d8889a7b898a13e33c170ba8328745fd60a6a70d62403f",
-    "schema_primitives": "scripts/evidence_schema/primitives.py",
+    "schema_primitives": "experiments/provenance/reproduction-v1.zip#blender-5.1.2-primitives-71469be6.py",
     "schema_primitives_sha256": "71469be6ed0591edc9f742c0310a48ef5b7a05ba1819b8b053714cef918c1d5d",
     "requirements": "experiments/transports/gltf/2.0.0/blender/5.1.2/requirements-capture.txt",
     "requirements_sha256": "44612bb88640ae1ae1c0e10867bcb3019c9c4c77b3d2cd7dd51bf05e30e39de7",

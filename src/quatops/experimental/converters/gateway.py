@@ -74,10 +74,10 @@ def _resolve_target_frame(
 class OrientationConverter:
     """Reusable target conversion with explicit source and target frame pairs.
 
-    Construct one instance per application frame mapping, then reuse it for
-    scalar and batch values. It resolves the target profile and compiles the
-    parent/child coordinate maps once. No axes are inferred from the converter
-    ID.
+    Reuse an instance while its frame mapping and binding context apply. New
+    coefficients do not refresh a captured runtime relation. Constructor frame
+    bindings are retained so copying and hashing include semantic context.
+    No axes are inferred from the converter ID.
     """
 
     converter: Converter
@@ -105,8 +105,6 @@ class OrientationConverter:
             target_parent,
             target_child,
         )
-        object.__setattr__(self, "target_parent", target_parent)
-        object.__setattr__(self, "target_child", target_child)
         object.__setattr__(self, "_profile", profile)
         object.__setattr__(self, "_mapping", mapping)
         object.__setattr__(
@@ -122,6 +120,16 @@ class OrientationConverter:
     def evidence_status(self) -> EvidenceStatus:
         """Return the selected profile's acceptance state without upgrading it."""
         return self._profile.evidence_status
+
+    @property
+    def target_parent_frame(self) -> CoordinateFrame:
+        """Return the resolved target parent frame without stripping its binding."""
+        return self._mapping.world.destination
+
+    @property
+    def target_child_frame(self) -> CoordinateFrame:
+        """Return the resolved target child frame without stripping its binding."""
+        return self._mapping.body.destination
 
     @property
     def target_semantic_bindings(

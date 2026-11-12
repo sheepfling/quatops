@@ -10,7 +10,11 @@ from quatops.experimental.semantics import (
     semantic_assurance_rows,
     validate_semantic_assurance,
 )
-from quatops.experimental.semantics.assurance import SEMANTIC_EVIDENCE
+from quatops.experimental.semantics.assurance import (
+    SEMANTIC_EVIDENCE,
+    SEMANTIC_EVIDENCE_CLAIMS,
+)
+from scripts.semantic_claims import validate_evidence_claims
 from tests.support.paths import REPOSITORY_ROOT
 
 
@@ -136,8 +140,25 @@ def test_assurance_matrix_does_not_promote_openxr_test_runtime_to_adapter_accept
     rows = {row["contract"].contract_id: row for row in semantic_assurance_rows()}
     for role_id in ("openxr.reference-space", "openxr.view-space"):
         assert rows[role_id]["representation"] == "R specification/test-runtime only"
-        assert "runtime_space_relation" in rows[role_id]["native"]
-        assert "adapter conformance not demonstrated" in rows[role_id]["native"]
+    assert "runtime_space_relation [LOCAL]" in rows["openxr.reference-space"]["native"]
+    assert (
+        "adapter conformance not demonstrated"
+        in rows["openxr.reference-space"]["native"]
+    )
+    assert "runtime_space_relation [VIEW]" in rows["openxr.view-space"]["native"]
+    assert (
+        "runtime_space_relation [LOCAL_FLOOR]"
+        in rows["openxr.reference-space"]["native"]
+    )
+    for space in ("view", "local_floor"):
+        artifact = SEMANTIC_EVIDENCE[f"openxr.test-runtime.{space}.1.1.65"]
+        assert not artifact.adapter_conformance_checked
+        assert "static pose-offset" in artifact.claim
+        assert "no tracking" in artifact.claim
+    assert (
+        "asset_front_observation [oriented_mesh]" in rows["gltf.asset-front"]["native"]
+    )
+    assert "adapter conformance not demonstrated" in rows["gltf.asset-front"]["native"]
     openxr = SEMANTIC_EVIDENCE["openxr.test-runtime.1.1.65"]
     assert openxr.proof_scope == "runtime_space_relation"
     assert openxr.adapter_conformance_checked is False
@@ -153,3 +174,66 @@ def test_native_proof_scope_does_not_overstate_role_specific_coverage():
 
 def test_evidence_ids_resolve_to_existing_artifacts_and_replay_tests():
     validate_semantic_assurance(str(REPOSITORY_ROOT))
+
+
+@pytest.mark.parametrize(
+    ("evidence_id", "operation", "scope"),
+    [
+        ("openxr.test-runtime.1.1.65", "runtime_space_relation", "LOCAL_FLOOR"),
+        ("godot.native.4.7", "camera_node_action", "camera_node"),
+        ("gltf.threejs.loader.0.187.0", "asset_front_observation", "oriented_mesh"),
+    ],
+)
+def test_same_target_artifact_cannot_satisfy_an_uncaptured_operation(
+    evidence_id, operation, scope
+):
+    claims = list(SEMANTIC_EVIDENCE_CLAIMS)
+    index = next(
+        i for i, claim in enumerate(claims) if claim.evidence_id == evidence_id
+    )
+    claims[index] = replace(claims[index], operation=operation, scope=scope)
+    with pytest.raises(ValueError, match="capture does not support"):
+        validate_evidence_claims(
+            REPOSITORY_ROOT, claims, SEMANTIC_EVIDENCE, SEMANTIC_CONTRACTS
+        )
+
+
+def test_local_capture_cannot_be_credited_to_the_view_role():
+    claims = list(SEMANTIC_EVIDENCE_CLAIMS)
+    index = next(
+        i
+        for i, claim in enumerate(claims)
+        if claim.evidence_id == "openxr.test-runtime.1.1.65"
+    )
+    claims[index] = replace(
+        claims[index], contract_id="openxr.view-space", scope="VIEW"
+    )
+    contracts = dict(SEMANTIC_CONTRACTS)
+    contracts["openxr.reference-space"] = replace(
+        contracts["openxr.reference-space"], execution_evidence_ids=()
+    )
+    contracts["openxr.view-space"] = replace(
+        contracts["openxr.view-space"],
+        execution_evidence_ids=(claims[index].evidence_id,),
+    )
+    with pytest.raises(ValueError, match="capture does not support.*VIEW"):
+        validate_evidence_claims(REPOSITORY_ROOT, claims, SEMANTIC_EVIDENCE, contracts)
+
+
+@pytest.mark.parametrize(
+    "changes, message",
+    [
+        ({"witness_ids": ("imaginary-observation",)}, "witness IDs"),
+        ({"version": "999.0"}, "version or artifact differs"),
+        ({"converter_id": "godot.quaternion"}, "profile does not match"),
+    ],
+)
+def test_evidence_claim_identity_must_resolve_to_its_actual_capture(changes, message):
+    claims = (
+        replace(SEMANTIC_EVIDENCE_CLAIMS[0], **changes),
+        *SEMANTIC_EVIDENCE_CLAIMS[1:],
+    )
+    with pytest.raises(ValueError, match=message):
+        validate_evidence_claims(
+            REPOSITORY_ROOT, claims, SEMANTIC_EVIDENCE, SEMANTIC_CONTRACTS
+        )

@@ -122,7 +122,20 @@ def all_checks(root: Path, env: dict[str, str]) -> None:
     ci(root, env)
     typecheck(root, env)
     lock(root, env)
-    module(root, env, "build", "--quiet")
+    package(root, env)
+
+
+def package(root: Path, env: dict[str, str]) -> None:
+    """Build both distributions and exercise the wheel outside the checkout."""
+    with tempfile.TemporaryDirectory(prefix="quatops-distributions-") as directory:
+        output = Path(directory)
+        module(root, env, "build", "--quiet", "--outdir", str(output))
+        wheels = tuple(output.glob("*.whl"))
+        if len(wheels) != 1 or len(tuple(output.glob("*.tar.gz"))) != 1:
+            raise ValueError(
+                "Package build must produce one wheel and one source distribution"
+            )
+        module(root, env, "scripts.package_smoke", "--wheel", str(wheels[0]))
 
 
 def benchmark_checks(
@@ -220,6 +233,7 @@ CHECKS: Mapping[str, Callable[[Path, dict[str, str]], None]] = {
     "all": all_checks,
     "ci": ci,
     "evidence": evidence,
+    "package": package,
     "benchmarks": benchmark_checks,
     "converter-benchmark": converter_benchmarks,
     "typecheck": typecheck,

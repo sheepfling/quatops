@@ -1,0 +1,107 @@
+{
+  "schema_version": "1.0",
+  "evidence_kind": "native_threejs_authored_mesh_capture",
+  "node": "OrientedMesh",
+  "parent": "FixtureParent",
+  "geometry_type": "BufferGeometry",
+  "indices": [
+    0,
+    2,
+    1,
+    0,
+    1,
+    3,
+    0,
+    3,
+    2,
+    1,
+    2,
+    3
+  ],
+  "local_quaternion_xyzw": [
+    0,
+    0.6,
+    0,
+    0.8
+  ],
+  "parent_quaternion_xyzw": [
+    0.3333333333333333,
+    0.6666666666666666,
+    0.6666666666666666,
+    0
+  ],
+  "vertices": [
+    {
+      "index": 0,
+      "local_xyz": [
+        0,
+        0,
+        0
+      ],
+      "parent_xyz": [
+        -1,
+        3,
+        2
+      ],
+      "world_xyz": [
+        7,
+        -1.0000000000000002,
+        9
+      ]
+    },
+    {
+      "index": 1,
+      "local_xyz": [
+        0,
+        0,
+        2
+      ],
+      "parent_xyz": [
+        0.9199999999999999,
+        3,
+        2.56
+      ],
+      "world_xyz": [
+        5.7555555555555555,
+        0.35111111111111093,
+        9.79111111111111
+      ]
+    },
+    {
+      "index": 2,
+      "local_xyz": [
+        -3,
+        0,
+        0
+      ],
+      "parent_xyz": [
+        -1.84,
+        3,
+        4.88
+      ],
+      "world_xyz": [
+        8.933333333333334,
+        1.1866666666666663,
+        8.306666666666667
+      ]
+    },
+    {
+      "index": 3,
+      "local_xyz": [
+        0,
+        5,
+        0
+      ],
+      "parent_xyz": [
+        -1,
+        8,
+        2
+      ],
+      "world_xyz": [
+        9.222222222222221,
+        -1.555555555555556,
+        13.444444444444445
+      ]
+    }
+  ]
+}

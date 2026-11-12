@@ -35,7 +35,7 @@
     "generator_sha256": "13ac39b7846ebfddde2326f8eed11eb859cc24354dee916cf1478305b46abd76",
     "native_capture_script_sha256": "1e9e0c258837a66dba56d9eb3ecbabb0cbd04353763778758329ef3b2c50e0c4",
     "lockfile_sha256": "5bef7ea8cec65c6054abc37722b1a2a11021719902408230281cb4f4e926e44a",
-    "contract_sha256": "0340bf759e3687c4432902446ef64ce10e46554749f86dabdf7e5303ac56820a"
+    "contract_sha256": "1386b60889ddc2480e1f9c43a61c036f47b04121a3bc8fd7f203b4614af6077d"
   },
   "reproduction": {
     "input_builder_sha256": "967540c58422b8b863022bac55e96b5c961f4063cf890b8e77c409c2dad9bee2",
@@ -61,7 +61,7 @@
   },
   "semantic_contract": {
     "file": "experiments/converters/openusd/26.11/semantic_contract.json",
-    "sha256": "0340bf759e3687c4432902446ef64ce10e46554749f86dabdf7e5303ac56820a"
+    "sha256": "1386b60889ddc2480e1f9c43a61c036f47b04121a3bc8fd7f203b4614af6077d"
   },
   "direct_reproduction": {
     "utc": "2026-11-10T14:57:45.021408+00:00",

@@ -4,6 +4,7 @@
   "target": {
     "name": "MuJoCo",
     "version": "3.17.0",
+    "engine_version": "3.17.0",
     "native_scalar_dtype": "float64",
     "entry_points": ["mju_rotVecQuat", "mju_mulQuat", "mju_axisAngle2Quat"]
   },

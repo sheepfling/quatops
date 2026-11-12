@@ -7,9 +7,18 @@ from typing import Annotated, Literal, Optional, Union
 from pydantic import Field
 
 from scripts.evidence_schema.primitives import (
+    AxisMeaning,
     BasisImages,
     Matrix4,
+    NativeScalarProfile,
+    NativeQuaternionVectorAction,
+    NonNegativeFiniteFloat,
+    ObservedProductOrder,
+    PositiveFiniteFloat,
+    PrecisionProfile,
     Quaternion4,
+    SceneTransformSemantics,
+    SignedAxis,
     StrictEvidenceModel,
     Vector3,
 )
@@ -20,9 +29,9 @@ class CoordinateFrame(StrictEvidenceModel):
 
     name: str
     handedness: Literal["right-handed", "left-handed"]
-    positive_x: str
-    positive_y: str
-    positive_z: str
+    positive_x: AxisMeaning
+    positive_y: AxisMeaning
+    positive_z: AxisMeaning
 
 
 class FrameSemantics(StrictEvidenceModel):
@@ -55,9 +64,9 @@ def canonical_source_frame_semantics() -> FrameSemantics:
 class PrecisionTolerance(StrictEvidenceModel):
     """Comparison rule for one native scalar profile."""
 
-    profile: str
-    absolute: float
-    relative: float
+    profile: PrecisionProfile
+    absolute: NonNegativeFiniteFloat
+    relative: NonNegativeFiniteFloat
 
 
 class _EvidenceContract(StrictEvidenceModel):
@@ -78,7 +87,7 @@ class _RotationBoundaryContract(_EvidenceContract):
     destination_frame: CoordinateFrame
     destination_frame_semantics: FrameSemantics
     destination_axes_from_source: Annotated[
-        list[str], Field(min_length=3, max_length=3)
+        list[SignedAxis], Field(min_length=3, max_length=3)
     ]
     conversion_rule: str
     inverse_rule: str
@@ -92,7 +101,7 @@ class QuaternionBoundaryContract(_RotationBoundaryContract):
     native_algebra: Literal["Hamilton", "JPL"]
     native_order: Literal["wxyz", "xyzw"]
     native_storage_order: Optional[Literal["wxyz", "xyzw"]] = None  # noqa: UP045
-    native_vector_action: str
+    native_vector_action: NativeQuaternionVectorAction
     input_domain: str
 
 
@@ -102,14 +111,14 @@ class RotationVectorBoundaryContract(_RotationBoundaryContract):
     kind: Literal["rotation_vector_boundary"]
     angle_units: Literal["radians"]
     native_representation: str
-    native_matrix_action: str
+    native_matrix_action: Literal["cv2.gemm(R, vector_column, alpha=1, beta=0)"]
 
 
 class FrameAxisMapping(StrictEvidenceModel):
     """Declared signed-axis mapping for one named transform frame."""
 
     frame: str
-    axes_from_canonical: Annotated[list[str], Field(min_length=3, max_length=3)]
+    axes_from_canonical: Annotated[list[SignedAxis], Field(min_length=3, max_length=3)]
     semantics: FrameSemantics
 
 
@@ -125,8 +134,12 @@ class FrameChainContract(_CanonicalFrameContract):
 
     kind: Literal["frame_chain"]
     quaternion_order: Literal["wxyz", "xyzw"]
-    vector_action: str
-    lookup_direction: str
+    vector_action: Literal["active source-point to target-point transform"]
+    lookup_direction: Literal[
+        "lookupTransform(target, source) returns target_from_source; "
+        "its rotation and translation map source point coordinates "
+        "into target coordinates"
+    ]
     frame_mappings: list[FrameAxisMapping]
 
 
@@ -136,7 +149,9 @@ class GeographicContract(_CanonicalFrameContract):
     kind: Literal["geographic"]
     local_frame: CoordinateFrame
     local_frame_semantics: FrameSemantics
-    local_axes_from_canonical: Annotated[list[str], Field(min_length=3, max_length=3)]
+    local_axes_from_canonical: Annotated[
+        list[SignedAxis], Field(min_length=3, max_length=3)
+    ]
     local_alignment_authority: Literal[
         "target_documented",
         "application_declared",
@@ -144,7 +159,9 @@ class GeographicContract(_CanonicalFrameContract):
         "unspecified",
     ]
     global_frame_name: str
-    geodetic_datum: str
+    geodetic_datum: Literal["WGS84"]
+    angular_units: Literal["degrees"]
+    linear_units: Literal["metres"]
     forward_expression: str
     inverse_expression: str
     quaternion_order: Literal["wxyz", "xyzw"]
@@ -158,15 +175,17 @@ class SceneTransportContract(_CanonicalFrameContract):
     format_version: str
     loader_name: str
     loader_version: str
+    orientation_field: Literal["node.rotation", "xformOp:orient"]
+    meters_per_unit: Optional[PositiveFiniteFloat] = None  # noqa: UP045
     target_frame: CoordinateFrame
     target_frame_semantics: FrameSemantics
     target_frame_role: Literal["caller_assigned_probe", "declared_stage"]
     destination_axes_from_source: Annotated[
-        list[str], Field(min_length=3, max_length=3)
+        list[SignedAxis], Field(min_length=3, max_length=3)
     ]
     quaternion_order: Literal["wxyz", "xyzw"]
-    matrix_action: str
-    hierarchy_semantics: str
+    matrix_action: SceneTransformSemantics
+    hierarchy_semantics: SceneTransformSemantics
 
 
 EvidenceContract = Annotated[
@@ -185,7 +204,7 @@ class _PrecisionWitness(StrictEvidenceModel):
     """A named observation with a native precision and basis action."""
 
     case_id: str
-    precision: str
+    precision: NativeScalarProfile
     basis_images_xyz: BasisImages
 
 
@@ -212,7 +231,7 @@ class CompositionWitness(_QuaternionWitness):
     kind: Literal["composition"]
     left_case_id: str
     right_case_id: str
-    product_order: str
+    product_order: ObservedProductOrder
 
 
 class _RotationVectorWitness(_PrecisionWitness):
@@ -235,7 +254,7 @@ class RotationVectorCompositionWitness(_RotationVectorWitness):
     kind: Literal["rotation_vector_composition"]
     left_case_id: str
     right_case_id: str
-    product_order: str
+    product_order: ObservedProductOrder
 
 
 class FrameTransform(StrictEvidenceModel):
@@ -398,12 +417,12 @@ class CanonicalOrientationInput(StrictEvidenceModel):
 
 
 class CanonicalInputContract(StrictEvidenceModel):
-    algebra: Literal["Hamilton", "JPL"]
-    coefficient_order: Literal["wxyz", "xyzw"]
-    rotation_action: Literal["active", "passive"]
-    vector_action: str
-    matrix_action: str
-    coordinate_system: Literal["right-handed", "left-handed"]
+    algebra: Literal["Hamilton"]
+    coefficient_order: Literal["wxyz"]
+    rotation_action: Literal["active"]
+    vector_action: Literal["q * (0, v) * conjugate(q)"]
+    matrix_action: Literal["column vectors"]
+    coordinate_system: Literal["right-handed"]
     construction_angle_units: Literal["radians"]
     normalization: str
     frame_mapping: str
@@ -421,4 +440,4 @@ class CanonicalInputs(StrictEvidenceModel):
     probe_vector_xyz: Vector3
     composition_left_case_id: str
     composition_right_case_id: str
-    product_order: str
+    product_order: Literal["lhs * rhs; rhs acts first"]

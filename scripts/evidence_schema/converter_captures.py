@@ -10,15 +10,61 @@ from typing import Annotated, Literal, Optional, Union
 from pydantic import ConfigDict, Field, FiniteFloat, model_validator
 
 from scripts.evidence_schema.primitives import (
+    AxisLetter,
+    AxisMeaning,
+    MatrixProductOrder,
     NATIVE_RETAINED_CASE_IDS,
+    PositiveFiniteFloat,
+    QuaternionProductOrder,
     SHA256,
     NativeCaptureModel,
     Quaternion4,
     Scalar,
+    SignedAxis,
+    SignedAxisDirection,
     Vector3,
 )
 
+PositiveFiniteMetersPerUnit = PositiveFiniteFloat
+
 BasisActions = Annotated[list[Vector3], Field(min_length=3, max_length=3)]
+ThreeInputNodeName = Literal["parent", "child"]
+ThreeCaptureNodeName = Literal["QuatOpsParent", "QuatOpsChild"]
+OpenUsdNodeName = Literal["parent", "child", "reset_child"]
+OpenUsdPrimPath = Literal[
+    "/Scene/Parent", "/Scene/Parent/Child", "/Scene/Parent/ResetChild"
+]
+OpenUsdXformOp = Literal["xformOp:translate", "xformOp:orient", "!resetXformStack!"]
+CesiumNativeApi = Literal[
+    "Cartesian3.fromDegrees",
+    "Transforms.eastNorthUpToFixedFrame",
+    "Matrix3.fromQuaternion",
+    "Matrix4.fromRotationTranslation",
+    "Matrix4.multiply",
+    "Matrix4.inverseTransformation",
+]
+Ros2NativeApi = Literal[
+    "tf2::BufferCore::setTransform",
+    "tf2::BufferCore::lookupTransform",
+    "tf2::Transform",
+    "geometry_msgs/msg/TransformStamped",
+    "tf2::fromMsg",
+]
+ThreeNativeEntryPoint = Literal[
+    "GLTFLoader.parse",
+    "Object3D.updateMatrixWorld",
+    "Object3D.localToWorld",
+    "Vector3.applyMatrix4",
+    "Matrix4.invert",
+]
+OpenUsdNativeEntryPoint = Literal[
+    "Usd.Stage.Open",
+    "UsdGeom.Xformable.GetOrderedXformOps",
+    "GetLocalTransformation",
+    "UsdGeom.XformCache.GetLocalToWorldTransform",
+    "Gf.Matrix4d.Transform",
+    "Gf.Matrix4d.TransformDir",
+]
 
 
 class TargetIdentity(NativeCaptureModel):
@@ -40,8 +86,11 @@ class TargetIdentity(NativeCaptureModel):
 class ContractTargetIdentity(NativeCaptureModel):
     name: str
     version: Optional[str] = None
+    engine_version: Optional[str] = None
     distro: Optional[str] = None
     tf2_version: Optional[str] = None
+    wrapper_version: Optional[str] = None
+    toolkit_version: Optional[str] = None
     native_scalar_dtype: Optional[str] = None
     native_scalar_bytes: Optional[int] = None
     scalar_profiles: Optional[list[str]] = None
@@ -50,25 +99,66 @@ class ContractTargetIdentity(NativeCaptureModel):
     header: Optional[str] = None
     api_version: Optional[str] = None
     distribution: Optional[str] = None
+    distribution_version: Optional[str] = None
     openusd_version_tuple: Optional[list[int]] = None
 
 
+class EigenTargetIdentity(ContractTargetIdentity):
+    name: Literal["Eigen"]
+    version: Literal["5.0.1"]
+    header: Literal["Eigen/Geometry"]
+    scalar_profiles: list[Literal["float32", "float64"]]
+
+
+class MuJoCoTargetIdentity(ContractTargetIdentity):
+    name: Literal["MuJoCo"]
+    version: Literal["3.17.0"]
+    engine_version: Literal["3.17.0"]
+    native_scalar_dtype: Literal["float64"]
+    entry_points: list[Literal["mju_rotVecQuat", "mju_mulQuat", "mju_axisAngle2Quat"]]
+
+
+class OpenCVTargetIdentity(ContractTargetIdentity):
+    name: Literal["OpenCV"]
+    version: Literal["4.13.0"]
+    interface: Literal["cv2.Rodrigues and cv2.gemm"]
+    distribution: Literal["opencv-python-headless"]
+    distribution_version: Literal["4.13.0.92"]
+    scalar_profiles: list[Literal["float32", "float64"]]
+
+
+class SpiceyPyTargetIdentity(ContractTargetIdentity):
+    name: Literal["SpiceyPy / CSPICE"]
+    wrapper_version: Literal["8.3.0"]
+    toolkit_version: Literal["CSPICE_N0067"]
+    native_scalar_dtype: Literal["float64"]
+    entry_points: list[Literal["q2m", "mxv", "m2q", "qxq", "axisar"]]
+
+
+class Ros2TargetIdentity(ContractTargetIdentity):
+    name: Literal["ROS 2 tf2"]
+    distro: Literal["jazzy"]
+    tf2_version: Literal["0.36.23"]
+    native_scalar_dtype: Literal["float64"]
+    native_scalar_bytes: Literal[8]
+
+
 class CanonicalAxesContract(NativeCaptureModel):
-    positive_x: str
-    positive_y: str
-    positive_z: str
+    positive_x: AxisMeaning
+    positive_y: AxisMeaning
+    positive_z: AxisMeaning
 
 
 class ContractFrame(CanonicalAxesContract):
-    handedness: str
+    handedness: Literal["right"]
 
 
 class CanonicalRotationContract(NativeCaptureModel):
-    algebra: str
-    coefficient_order: str
-    rotation_action: str
-    matrix_action: str
-    handedness: str
+    algebra: Literal["Hamilton"]
+    coefficient_order: Literal["WXYZ"]
+    rotation_action: Literal["active: q * (0, v) * conjugate(q)"]
+    matrix_action: Literal["column vectors"]
+    handedness: Literal["right-handed"]
     normalization: str
     frame: CanonicalAxesContract
 
@@ -92,86 +182,96 @@ class LibraryContractBase(NativeCaptureModel):
 
 
 class EigenBoundaryContract(BoundaryContractBase):
-    constructor_order: str
-    coeffs_access_order: str
-    vector_action: str
+    constructor_order: Literal["Eigen::Quaternion(w, x, y, z)"]
+    coeffs_access_order: Literal["XYZW"]
+    vector_action: Literal["Eigen quaternion multiplication rotates column vectors"]
     observed_product: str
     source_to_target_coordinate_map: Annotated[
-        list[str], Field(min_length=3, max_length=3)
+        list[SignedAxis], Field(min_length=3, max_length=3)
     ]
     canonical_to_native: str
 
 
 class DirectQuaternionBoundaryContract(BoundaryContractBase):
-    coefficient_order: str
+    coefficient_order: Literal["WXYZ"]
     observed_product: str
     source_to_target_coordinate_map: Annotated[
-        list[str], Field(min_length=3, max_length=3)
+        list[SignedAxis], Field(min_length=3, max_length=3)
     ]
     canonical_to_native: str
 
 
 class MuJoCoBoundaryContract(DirectQuaternionBoundaryContract):
-    observed_rotvecquat_vector_action: str
+    observed_rotvecquat_vector_action: Literal[
+        "active; mujoco.mju_rotVecQuat(output, vector, q)"
+    ]
 
 
 class OpenCVBoundaryContract(BoundaryContractBase):
     representation: str
     rotation_vector_from_canonical: str
-    native_matrix_action: str
-    coordinate_map: Annotated[list[str], Field(min_length=3, max_length=3)]
+    native_matrix_action: Literal["cv2.gemm(R, vector_column, alpha=1, beta=0)"]
+    coordinate_map: Annotated[list[SignedAxis], Field(min_length=3, max_length=3)]
     matrix_layout: str
 
 
 class SpiceyPyBoundaryContract(DirectQuaternionBoundaryContract):
-    observed_q2m_vector_action: str
+    observed_q2m_vector_action: Literal["active; q2m(q) * column_vector"]
 
 
 class EigenContract(LibraryContractBase):
+    target: EigenTargetIdentity
     target_boundary: EigenBoundaryContract
 
 
 class MuJoCoContract(LibraryContractBase):
+    target: MuJoCoTargetIdentity
     target_boundary: MuJoCoBoundaryContract
 
 
 class OpenCVContract(LibraryContractBase):
+    target: OpenCVTargetIdentity
     target_boundary: OpenCVBoundaryContract
 
 
 class SpiceyPyContract(LibraryContractBase):
+    target: SpiceyPyTargetIdentity
     target_boundary: SpiceyPyBoundaryContract
 
 
 class RosFramesContract(NativeCaptureModel):
     canonical_axes: ContractFrame
     ros_world_from_canonical_world: Annotated[
-        list[str], Field(min_length=3, max_length=3)
+        list[SignedAxis], Field(min_length=3, max_length=3)
     ]
     ros_base_from_canonical_base: Annotated[
-        list[str], Field(min_length=3, max_length=3)
+        list[SignedAxis], Field(min_length=3, max_length=3)
     ]
     ros_sensor_optical_from_canonical_sensor: Annotated[
-        list[str], Field(min_length=3, max_length=3)
+        list[SignedAxis], Field(min_length=3, max_length=3)
     ]
     interpretation: str
 
 
 class RosRotationContract(NativeCaptureModel):
-    algebra: str
-    native_order: str
-    action: str
-    units: str
+    algebra: Literal["Hamilton"]
+    native_order: Literal["xyzw"]
+    action: Literal["active source-point to target-point transform"]
+    units: Literal["radians"]
 
 
 class Ros2Contract(NativeCaptureModel):
     schema_version: Optional[Literal["1.0"]] = None
     contract_id: str
-    target: ContractTargetIdentity
-    native_api: list[str]
+    target: Ros2TargetIdentity
+    native_api: list[Ros2NativeApi]
     rotation: RosRotationContract
     frames: RosFramesContract
-    frame_direction: str
+    frame_direction: Literal[
+        "lookupTransform(target, source) returns target_from_source; "
+        "its rotation and translation map source point coordinates "
+        "into target coordinates"
+    ]
     conversion: str
     inverse_conversion: str
     input_domain: str
@@ -184,73 +284,107 @@ class GeographicFrameContract(ContractFrame):
     pass
 
 
+class CesiumTargetIdentity(NativeCaptureModel):
+    name: Literal["CesiumJS"]
+    version: Literal["1.124.0"]
+    api_version: Literal["1.124"]
+
+
 class CesiumContract(NativeCaptureModel):
     schema_version: Optional[Literal["1.0"]] = None
     contract_id: str
-    target: str
-    algebra: str
-    storage: str
+    target: CesiumTargetIdentity
+    algebra: Literal["Hamilton"]
+    rotation_action: Literal["active"]
+    canonical_storage_order: Literal["WXYZ"]
+    native_storage_order: Literal["XYZW"]
     local_frame: GeographicFrameContract
-    source_map: Annotated[list[str], Field(min_length=3, max_length=3)]
-    native_api: list[str]
+    source_map: Annotated[list[SignedAxis], Field(min_length=3, max_length=3)]
+    native_api: list[CesiumNativeApi]
     forward: str
     inverse: str
-    geodesy: str
+    geodetic_datum: Literal["WGS84"]
+    angular_units: Literal["degrees"]
+    linear_units: Literal["metres"]
     normalization: str
     scope: list[str]
     excludes: list[str]
 
 
 class SceneFrameContract(ContractFrame):
-    forward: Optional[str] = None
+    forward: Optional[SignedAxisDirection] = None
+
+
+class ThreeGltfTargetIdentity(NativeCaptureModel):
+    name: Literal["Three.js GLTFLoader"]
+    version: Literal["0.187.0"]
+    revision: Literal["187"]
 
 
 class ThreeGltfContract(NativeCaptureModel):
     schema_version: Optional[Literal["1.0"]] = None
     contract_id: str
-    target: str
-    algebra: str
-    source_storage: str
-    serialized_storage: str
+    target: ThreeGltfTargetIdentity
+    format_name: Literal["glTF"]
+    format_version: Literal["2.0"]
+    algebra: Literal["Hamilton"]
+    rotation_action: Literal["active"]
+    source_storage_order: Literal["WXYZ"]
+    serialized_storage_order: Literal["XYZW"]
+    meters_per_unit: Literal[1.0]
     canonical_frame: SceneFrameContract
     probe_frame: SceneFrameContract
     frame_role_note: str
     destination_axes_from_source: Annotated[
-        list[str], Field(min_length=3, max_length=3)
+        list[SignedAxis], Field(min_length=3, max_length=3)
     ]
-    transform_semantics: str
+    transform_semantics: Literal[
+        "node local to parent; world = parent world * child local; column-vector action"
+    ]
     scope: list[str]
     excludes: list[str]
 
 
 class OpenUsdSourceContract(NativeCaptureModel):
-    algebra: str
-    storage: str
-    frame: str
+    algebra: Literal["Hamilton"]
+    rotation_action: Literal["active"]
+    storage: Literal["WXYZ"]
+    frame: ContractFrame
+
+
+class OpenUsdTargetIdentity(NativeCaptureModel):
+    name: Literal["OpenUSD"]
+    version: Literal["26.11"]
+    distribution: Literal["usd-core"]
 
 
 class OpenUsdStageContract(NativeCaptureModel):
-    handedness: str
-    upAxis: str
-    positive_x: str
-    positive_y: str
-    positive_z: str
-    forward: str
-    metersPerUnit: float
+    handedness: Literal["right"]
+    upAxis: AxisLetter
+    positive_x: Literal["right"]
+    positive_y: Literal["up"]
+    positive_z: Literal["backward"]
+    forward: SignedAxisDirection
+    metersPerUnit: PositiveFiniteMetersPerUnit
 
 
 class OpenUsdContract(NativeCaptureModel):
     schema_version: Optional[Literal["1.0"]] = None
     contract_id: str
-    target: str
+    target: OpenUsdTargetIdentity
+    serialization_format: Literal["USDA"]
+    reopen_api: Literal["Usd.Stage.Open"]
     source: OpenUsdSourceContract
     stage: OpenUsdStageContract
     destination_axes_from_source: Annotated[
-        list[str], Field(min_length=3, max_length=3)
+        list[SignedAxis], Field(min_length=3, max_length=3)
     ]
-    serialized_orientation: str
-    matrix_action: str
-    native_numeric_type: str
+    orientation_op: Literal["xformOp:orient"]
+    matrix_action: Literal[
+        "OpenUSD Gf row vectors; child world row matrix = child local row matrix "
+        "* parent world row matrix"
+    ]
+    native_numeric_type: Literal["binary64 Gf.Quatd and Gf.Matrix4d"]
     scope: list[str]
     excludes: list[str]
 
@@ -276,7 +410,7 @@ class NativeConstructedInput(NativeCaptureModel):
 class CompositionInput(NativeCaptureModel):
     left_case_id: str
     right_case_id: str
-    product_order: Optional[str] = None
+    product_order: Optional[QuaternionProductOrder] = None
 
 
 class DirectLibraryInputBase(NativeCaptureModel):
@@ -333,14 +467,14 @@ class EigenOrientation(NativeCaptureModel):
 
 
 class EigenConstructedOrientation(EigenOrientation):
-    constructor: str
+    constructor: Literal["Eigen::Quaternion(Eigen::AngleAxis)"]
 
 
 class EigenComposition(NativeCaptureModel):
     case_id: str
     lhs_case_id: str
     rhs_case_id: str
-    product_order: str
+    product_order: QuaternionProductOrder
     quaternion: QuaternionValues
     native_quaternion_basis_actions_xyz: BasisActions
 
@@ -374,10 +508,10 @@ class MuJoCoOrientation(NativeCaptureModel):
     native_input_wxyz: Quaternion4
     native_mju_rotVecQuat_basis_xyz: BasisActions
     native_mju_rotVecQuat_probe_xyz: Optional[Vector3] = None
-    native_constructor: Optional[str] = None
+    native_constructor: Optional[Literal["mju_axisAngle2Quat(axis, angle)"]] = None
     native_lhs_wxyz: Optional[Quaternion4] = None
     native_rhs_wxyz: Optional[Quaternion4] = None
-    product_order: Optional[str] = None
+    product_order: Optional[QuaternionProductOrder] = None
 
 
 class MuJoCoObservations(NativeCaptureModel):
@@ -417,7 +551,7 @@ class OpenCVComposition(NativeCaptureModel):
     dtype: Literal["float32", "float64"]
     native_lhs_case_id: str
     native_rhs_case_id: str
-    product_order: str
+    product_order: MatrixProductOrder
     native_gemm_basis_actions_xyz: BasisActions
     native_matrix_to_rotation_vector_xyz_radians: Vector3
 
@@ -453,14 +587,14 @@ class SpiceyPyOrientation(NativeCaptureModel):
     native_mxv_probe_xyz: Optional[Vector3] = None
     native_lhs_wxyz: Optional[Quaternion4] = None
     native_rhs_wxyz: Optional[Quaternion4] = None
-    product_order: Optional[str] = None
+    product_order: Optional[QuaternionProductOrder] = None
 
 
 class SpiceyPyConstructedOrientation(NativeCaptureModel):
     model_config = ConfigDict(allow_inf_nan=False)
 
     case_id: Literal["native_axis_angle_mixed"]
-    native_constructor: str
+    native_constructor: Literal["axisar(axis, angle) -> m2q(matrix)"]
     native_m2q_wxyz: Quaternion4
     native_mxv_basis_xyz: BasisActions
 
@@ -541,7 +675,7 @@ class RosOutputs(NativeCaptureModel):
 
 
 class RosObservation(NativeCaptureModel):
-    operation_id: str
+    operation_id: Literal["lookup-world-from-sensor", "lookup-sensor-from-world"]
     native_outputs: RosOutputs
 
 
@@ -603,19 +737,25 @@ class CesiumInputCase(NativeCaptureModel):
 
 class CesiumInputFrame(NativeCaptureModel):
     handedness: Literal["right"]
-    positive_x: str
-    positive_y: str
-    positive_z: str
-    forward: Optional[str] = None
-    upAxis: Optional[str] = None
+    positive_x: AxisMeaning
+    positive_y: AxisMeaning
+    positive_z: AxisMeaning
+    forward: Optional[SignedAxisDirection] = None
+    upAxis: Optional[AxisLetter] = None
 
 
 class CesiumInputFrameContract(NativeCaptureModel):
     canonical_local: CesiumInputFrame
     cesium_local: CesiumInputFrame
-    map_canonical_to_cesium_enu: Annotated[list[str], Field(min_length=3, max_length=3)]
-    destination_local_api: str
-    world_placement: str
+    map_canonical_to_cesium_enu: Annotated[
+        list[SignedAxis], Field(min_length=3, max_length=3)
+    ]
+    destination_local_api: Literal[
+        "Cesium Quaternion XYZW; active; Matrix3 column-vector action"
+    ]
+    world_placement: Literal[
+        "WGS84 ENU-to-ECEF from Cesium Transforms.eastNorthUpToFixedFrame"
+    ]
 
 
 class CesiumInputs(NativeCaptureModel):
@@ -642,21 +782,21 @@ class ThreeOutputs(NativeCaptureModel):
 
 
 class ThreeNodeObservation(NativeCaptureModel):
-    node: str
+    node: ThreeCaptureNodeName
     outputs: ThreeOutputs
 
 
 class ThreeGltfCapture(NativeCaptureModel):
     schema_version: Literal["1.0"]
     evidence_kind: Literal["native_threejs_gltf_converter_capture"]
-    native_entry_points: list[str]
+    native_entry_points: list[ThreeNativeEntryPoint]
     observations: Annotated[
         list[ThreeNodeObservation], Field(min_length=2, max_length=2)
     ]
 
 
 class ThreeInputNode(NativeCaptureModel):
-    node: str
+    node: ThreeInputNodeName
     canonical_wxyz: Quaternion4
     gltf_xyzw: Quaternion4
     canonical_translation_xyz: Vector3
@@ -677,10 +817,10 @@ class ThreeGltfInputFrameContract(NativeCaptureModel):
     canonical: CesiumInputFrame
     gltf_probe_frame: CesiumInputFrame
     destination_axes_from_canonical: Annotated[
-        list[str], Field(min_length=3, max_length=3)
+        list[SignedAxis], Field(min_length=3, max_length=3)
     ]
-    quaternion: str
-    translation: str
+    quaternion: Literal["Hamilton active; glTF rotation property stores XYZW"]
+    translation: Literal["gltf_translation = B * canonical_translation"]
     scope: str
 
 
@@ -693,23 +833,25 @@ class OpenUsdOutputs(NativeCaptureModel):
 
 
 class OpenUsdNodeObservation(NativeCaptureModel):
-    node: str
-    prim_path: str
+    node: OpenUsdNodeName
+    prim_path: OpenUsdPrimPath
     outputs: OpenUsdOutputs
 
 
 class OpenUsdCapture(NativeCaptureModel):
     schema_version: Literal["1.0"]
     evidence_kind: Literal["native_openusd_quatops_converter_capture"]
-    native_entry_points: list[str]
-    ordered_xform_ops: list[str]
+    native_entry_points: list[OpenUsdNativeEntryPoint]
+    ordered_xform_ops: Annotated[
+        list[OpenUsdXformOp], Field(min_length=2, max_length=2)
+    ]
     observations: Annotated[
         list[OpenUsdNodeObservation], Field(min_length=3, max_length=3)
     ]
 
 
 class OpenUsdInputNode(NativeCaptureModel):
-    node: str
+    node: OpenUsdNodeName
     canonical_case_id: str
     canonical_wxyz: Quaternion4
     usd_wxyz: Quaternion4
@@ -732,16 +874,18 @@ class OpenUsdInputFrameContract(NativeCaptureModel):
     canonical: CesiumInputFrame
     usd_stage: CesiumInputFrame
     destination_axes_from_source: Annotated[
-        list[str], Field(min_length=3, max_length=3)
+        list[SignedAxis], Field(min_length=3, max_length=3)
     ]
-    quaternion: str
-    matrix_action: str
+    quaternion: Literal["Hamilton active; USDA quatd real-first WXYZ"]
+    matrix_action: Literal[
+        "OpenUSD Gf/UsdGeom row vectors, captured and compared as row-major arrays"
+    ]
 
 
 class OpenUsdStackContract(NativeCaptureModel):
-    parent_ops: list[str]
-    child_ops: list[str]
-    reset_ops: list[str]
+    parent_ops: Annotated[list[OpenUsdXformOp], Field(min_length=2, max_length=2)]
+    child_ops: Annotated[list[OpenUsdXformOp], Field(min_length=2, max_length=2)]
+    reset_ops: Annotated[list[OpenUsdXformOp], Field(min_length=3, max_length=3)]
 
 
 TargetInputs = Union[

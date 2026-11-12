@@ -11,48 +11,65 @@ from typing import Annotated, Literal, Optional, Union
 from pydantic import Field
 
 from scripts.evidence_schema.primitives import (
+    AxisDirectionName,
+    AxisMeaning,
+    FrameHandednessLabel,
     NATIVE_RETAINED_CASE_IDS,
+    NonNegativeFiniteFloat,
+    NativeScalarProfile,
+    QuaternionProductOrder,
     SHA256,
     NativeCaptureModel,
     Quaternion4,
+    SignedAxis,
     Vector3,
 )
 
 ENGINE_RETAINED_CASE_IDS = NATIVE_RETAINED_CASE_IDS
+EngineName = Literal["Unreal Engine", "Unity Editor", "Godot Engine", "Blender"]
+EngineApi = Literal[
+    "UE::Math::TQuat<T>(X,Y,Z,W); TQuat::RotateVector",
+    "UnityEngine.Quaternion(x,y,z,w); Quaternion * Vector3",
+    "Quaternion(x,y,z,w); Quaternion * Vector3",
+    "mathutils.Quaternion((w,x,y,z)); Quaternion @ Vector",
+]
+EngineVersion = Literal["5.7.4", "6000.5.2f1", "4.7-stable", "4.8-dev1", "5.1.2"]
 
 
 class EngineIdentity(NativeCaptureModel):
-    engine: str
-    api: str
-    version: Optional[str] = None
+    engine: EngineName
+    api: EngineApi
+    version: Optional[EngineVersion] = None
     build: Optional[Union[int, str]] = None
     platform: str
-    native_scalar_profiles: list[str]
+    native_scalar_profiles: list[NativeScalarProfile]
     native_quaternion_order: Literal["wxyz", "xyzw"]
     native_algebra: Literal["Hamilton", "JPL"]
-    native_vector_action: str
+    native_vector_action: Literal[
+        "active quaternion sandwich / engine vector rotation API"
+    ]
 
 
 class EngineFrame(NativeCaptureModel):
     declaration: Optional[str] = None
     declared_probe_semantics: Optional[str] = None
-    handedness: Optional[str] = None
-    positive_x: Optional[str] = None
-    positive_y: Optional[str] = None
-    positive_z: Optional[str] = None
-    forward_direction: Optional[str] = None
+    handedness: Optional[FrameHandednessLabel] = None
+    positive_x: AxisMeaning
+    positive_y: AxisMeaning
+    positive_z: AxisMeaning
+    forward_direction: Optional[AxisDirectionName] = None
     positive_x_image: Optional[Vector3] = None
     positive_y_image: Optional[Vector3] = None
     positive_z_image: Optional[Vector3] = None
-    semantic_imported_object_forward_axis: Optional[str] = None
+    semantic_imported_object_forward_axis: Optional[Literal["not assumed"]] = None
 
 
 class EngineCanonicalFrame(NativeCaptureModel):
     declaration: Optional[str] = None
-    handedness: str
-    positive_x: str
-    positive_y: str
-    positive_z: str
+    handedness: Literal["right-handed"]
+    positive_x: AxisMeaning
+    positive_y: AxisMeaning
+    positive_z: AxisMeaning
 
 
 class EngineConversionContract(NativeCaptureModel):
@@ -63,13 +80,13 @@ class EngineConversionContract(NativeCaptureModel):
     canonical_frame: EngineCanonicalFrame
     native_frame: EngineFrame
     destination_axes_from_source: Annotated[
-        list[str], Field(min_length=3, max_length=3)
+        list[SignedAxis], Field(min_length=3, max_length=3)
     ]
     conversion_rule: str
     inverse_rule: str
     world_and_body_map: Optional[str] = None
     input_domain: str
-    native_precision_tolerance: dict[str, float]
+    native_precision_tolerance: dict[NativeScalarProfile, NonNegativeFiniteFloat]
     scope: str
     excludes: list[str]
 
@@ -132,13 +149,15 @@ class EngineContractDocument(NativeCaptureModel):
 class EngineSemanticIdentity(NativeCaptureModel):
     """Stable target identity and representation facts owned by an experiment."""
 
-    engine: str
-    api: str
-    version: Union[str, list[str]]
-    native_scalar_profiles: list[str]
+    engine: EngineName
+    api: EngineApi
+    version: Union[EngineVersion, list[EngineVersion]]
+    native_scalar_profiles: list[NativeScalarProfile]
     native_quaternion_order: Literal["wxyz", "xyzw"]
     native_algebra: Literal["Hamilton", "JPL"]
-    native_vector_action: str
+    native_vector_action: Literal[
+        "active quaternion sandwich / engine vector rotation API"
+    ]
 
     def supports_version(self, version: str) -> bool:
         """Allow only versions explicitly named by the experiment contract."""
@@ -176,7 +195,7 @@ class EngineOrientation(NativeCaptureModel):
 class EngineComposition(NativeCaptureModel):
     left_case_id: str
     right_case_id: str
-    product_order: str
+    product_order: QuaternionProductOrder
     native_product_quaternion: Quaternion4
     native_rotated_positive_basis_vectors_xyz: Annotated[
         list[Vector3], Field(min_length=3, max_length=3)
@@ -193,12 +212,14 @@ class EngineCanonicalInterop(NativeCaptureModel):
     contract_id: str
     native_quaternion_order: Literal["wxyz", "xyzw"]
     frame_map_destination_axes_from_source: Annotated[
-        list[str], Field(min_length=3, max_length=3)
+        list[SignedAxis], Field(min_length=3, max_length=3)
     ]
     orientation_cases: Optional[list[EngineOrientation]] = None
     composition: Optional[EngineComposition] = None
     reverse_composition: Optional[EngineComposition] = None
-    precision_captures: Optional[dict[str, EnginePrecisionCapture]] = None
+    precision_captures: Optional[dict[NativeScalarProfile, EnginePrecisionCapture]] = (
+        None
+    )
 
 
 class EngineCaptureDocument(NativeCaptureModel):

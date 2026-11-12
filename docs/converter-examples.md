@@ -24,6 +24,57 @@ Run it from the repository root:
 python examples/converters/game_engines.py
 ```
 
+## Receiving external quaternion values
+
+Record the external API's algebra, coefficient order, active/passive direction,
+and frame definitions before selecting a numerical module. Imports do not tag
+tuples with those facts. Convert at the boundary, then use one chosen numerical
+backend internally. For example, when an external contract explicitly supplies
+an active Hamilton XYZW child-to-parent orientation:
+
+```python
+from quatops.python import hamilton
+from quatops.experimental.semantics import PhysicalOrientation
+
+x, y, z, w = received_xyzw
+orientation = PhysicalOrientation.from_wxyz(
+    hamilton.normalize((w, x, y, z)), parent_frame, child_frame
+)
+```
+
+Normalization here is deliberate. Invert a passive transform first; a different
+algebra needs its own explicit conversion. Use the semantic gateway for frame
+and binding checks. These declarations describe the received data, rather than
+following from the target's name.
+
+## Observing a native object's forward and up directions
+
+[`threejs_consumer.py`](../examples/converters/threejs_consumer.py) passes a
+public gateway result into pinned Three.js 0.187.0, attaches asymmetric
+forward/up markers to an object, and checks their observed world directions.
+It also performs an explicit float32 storage cast and compares the native
+action within its precision tolerance. Finally, it deliberately presents the
+result under a different scene frame and checks the reverse gateway's error.
+
+```shell
+npm ci --prefix experiments/transports/gltf/2.0.0/threejs/0.187.0
+python examples/converters/threejs_consumer.py
+```
+
+Use the development environment for this example's typed probe messages.
+The [Three.js consumer page](engines/threejs.md) records its native API contract
+and precise limits. This executable integration example does not extend any
+retained evidence claim about imported mesh-front, camera mounting, or scenes
+with scale/shear.
+
+Choose comparisons for the boundary you need: quaternion-to-quaternion
+conversion retains the representative sign; native storage can round its
+coefficients; `q` and `-q` have equivalent rotation actions. Serialization may
+need a deterministic representative, while trajectories need a sign policy
+relative to adjacent samples. Neither exact coefficient equality nor
+rotation-equivalent round trips alone establish continuity. The Rodrigues
+boundary preserves rotation equivalence and loses the original sign.
+
 ## Local ENU attitude expressed in ECEF
 
 A geospatial provider supplies the local ENU basis at the chosen origin. Its
@@ -83,3 +134,8 @@ application. This field assignment covers the rotation value; it does not
 serialize a complete scene or animation. The
 [glTF/Three.js converter proof](transports/gltf.md) exercises a QuatOps-produced
 static hierarchy through the independent loader.
+
+A quaternion field assignment and a world-orientation extraction are different
+operations. The current gateway does not decompose arbitrary scene matrices.
+Scale, mirrored parents, shear, transform order, and import settings need
+separate handling before a full transform can be interpreted as a rotation.

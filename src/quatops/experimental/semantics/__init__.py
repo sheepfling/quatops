@@ -33,6 +33,7 @@ from .conventions import (
     ECEFBodyOrientation,
     FrameConvention,
 )
+from .evidence_claims import SEMANTIC_EVIDENCE_CLAIMS, SemanticEvidenceClaim
 from .frames import (
     CoordinateFrame,
     FrameCorrespondence,
@@ -59,6 +60,7 @@ __all__ = [
     "ROS_CAMERA_OPTICAL",
     "SEMANTIC_CONTRACTS",
     "SEMANTIC_EVIDENCE",
+    "SEMANTIC_EVIDENCE_CLAIMS",
     "WORLD_ENU",
     "WORLD_NED",
     "AlignmentSource",
@@ -78,6 +80,7 @@ __all__ = [
     "PhysicalOrientationBatch",
     "SemanticAuthority",
     "SemanticContract",
+    "SemanticEvidenceClaim",
     "SemanticFrameBinding",
     "SemanticQuaternionMap",
     "bind_cesium_enu_frame",

@@ -5,6 +5,8 @@
     "name": "OpenCV",
     "version": "4.13.0",
     "interface": "cv2.Rodrigues and cv2.gemm",
+    "distribution": "opencv-python-headless",
+    "distribution_version": "4.13.0.92",
     "scalar_profiles": ["float32", "float64"]
   },
   "canonical": {

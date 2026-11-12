@@ -7,6 +7,7 @@ from dataclasses import dataclass
 from types import MappingProxyType
 from typing import TYPE_CHECKING, Literal
 
+from .evidence_claims import SEMANTIC_EVIDENCE_CLAIMS
 from .roles import SEMANTIC_CONTRACTS
 
 if TYPE_CHECKING:
@@ -78,6 +79,28 @@ _EVIDENCE_ITEMS = (
         "Frozen Godot quaternion vector actions replayed for the captured probe frame; no Camera3D action claim.",
     ),
     SemanticEvidenceArtifact(
+        "godot.camera3d.4.7-stable",
+        "tests/golden/godot/camera3d/4.7-stable/witnesses.json",
+        "tests/experiments/godot/test_camera3d.py",
+        "Godot",
+        "4.7-stable",
+        True,
+        "role_specific_action",
+        False,
+        "Native Camera3D local/global action and viewport-center ray in an assigned scene; no physical calibration or adapter conformance claim.",
+    ),
+    SemanticEvidenceArtifact(
+        "godot.camera3d.4.8-dev1",
+        "tests/golden/godot/camera3d/4.8-dev1/witnesses.json",
+        "tests/experiments/godot/test_camera3d.py",
+        "Godot",
+        "4.8-dev1",
+        True,
+        "role_specific_action",
+        False,
+        "Native Camera3D local/global action and viewport-center ray in an assigned scene; no physical calibration or adapter conformance claim.",
+    ),
+    SemanticEvidenceArtifact(
         "ros2.tf2.0.36.23",
         "tests/golden/oracles/ros2/0.36.23/witnesses.json",
         "tests/experiments/converters/ros2/test_ros_tf2_converter.py",
@@ -113,6 +136,19 @@ _EVIDENCE_ITEMS = (
         "oriented mesh geometry verifies asset-front.",
     ),
     SemanticEvidenceArtifact(
+        "gltf.threejs.oriented-mesh.0.187.0",
+        "tests/golden/transports/gltf/2.0.0/threejs/0.187.0/oriented_mesh/witnesses.json",
+        "tests/experiments/converters/gltf/test_oriented_mesh_evidence.py",
+        "glTF",
+        "2.0 / Three.js 0.187.0",
+        True,
+        "role_specific_action",
+        False,
+        "Native asymmetric authored-mesh vertex action under an explicit +Z front, "
+        "-X right, +Y up declaration; not arbitrary asset alignment or native "
+        "QuatOps adapter acceptance.",
+    ),
+    SemanticEvidenceArtifact(
         "openxr.test-runtime.1.1.65",
         "experiments/oracles/openxr/1.1.65/witnesses/test_runtime_frame_chain.json",
         "tests/experiments/oracles/openxr/test_openxr_test_runtime.py",
@@ -123,6 +159,30 @@ _EVIDENCE_ITEMS = (
         False,
         "Native static-space xrLocateSpace relation from the Khronos test runtime; "
         "no vendor hardware or QuatOps adapter acceptance claimed.",
+    ),
+    SemanticEvidenceArtifact(
+        "openxr.test-runtime.view.1.1.65",
+        "experiments/oracles/openxr/1.1.65/witnesses/test_runtime_view.json",
+        "tests/experiments/oracles/openxr/test_reference_space_witnesses.py",
+        "OpenXR",
+        "1.1.65 / Khronos test runtime",
+        True,
+        "runtime_space_relation",
+        False,
+        "Native same-type VIEW static pose-offset relations in the Khronos mock runtime; "
+        "no tracking, floor-height, cross-space physical alignment or QuatOps adapter acceptance.",
+    ),
+    SemanticEvidenceArtifact(
+        "openxr.test-runtime.local_floor.1.1.65",
+        "experiments/oracles/openxr/1.1.65/witnesses/test_runtime_local_floor.json",
+        "tests/experiments/oracles/openxr/test_reference_space_witnesses.py",
+        "OpenXR",
+        "1.1.65 / Khronos test runtime",
+        True,
+        "runtime_space_relation",
+        False,
+        "Native same-type LOCAL_FLOOR static pose-offset relations in the Khronos mock runtime; "
+        "no tracking, floor-height, cross-space physical alignment or QuatOps adapter acceptance.",
     ),
 )
 
@@ -146,6 +206,11 @@ def semantic_assurance_rows() -> tuple[dict[str, object], ...]:
             SEMANTIC_EVIDENCE[evidence_id]
             for evidence_id in contract.execution_evidence_ids
             if evidence_id in SEMANTIC_EVIDENCE
+        )
+        claims = tuple(
+            claim
+            for claim in SEMANTIC_EVIDENCE_CLAIMS
+            if claim.contract_id == contract.contract_id
         )
         if contract.converter_ids and len(profiles) != len(contract.converter_ids):
             raise ValueError(f"{contract.contract_id} references an unknown converter")
@@ -173,13 +238,13 @@ def semantic_assurance_rows() -> tuple[dict[str, object], ...]:
             binding = "declared contract only; no executable semantic binder"
         native = (
             "; ".join(
-                f"{item.proof_scope}: {item.evidence_id}"
+                f"{claim.operation} [{claim.scope}] @ {claim.version}: {claim.evidence_id}"
                 + (
-                    " (adapter conformance replayed)"
-                    if item.adapter_conformance_checked
+                    " (profile replayed for this operation/scope)"
+                    if SEMANTIC_EVIDENCE[claim.evidence_id].adapter_conformance_checked
                     else " (native runtime only; adapter conformance not demonstrated)"
                 )
-                for item in evidence
+                for claim in claims
             )
             or "not demonstrated"
         )
@@ -192,6 +257,7 @@ def semantic_assurance_rows() -> tuple[dict[str, object], ...]:
                 "native": native,
                 "profiles": profiles,
                 "evidence": evidence,
+                "claims": claims,
             }
         )
     return tuple(rows)
@@ -212,7 +278,11 @@ def _representation_claim(profiles: tuple[ConverterProfile, ...]) -> str:
 
 
 def validate_semantic_assurance(repository_root: str) -> None:
-    """Fail if role claims reference absent or mismatched declarations/evidence."""
+    """Validate repository role claims, including typed capture coverage.
+
+    Requires the repository's development verification dependencies; ordinary
+    conversion and assurance introspection do not load the evidence tooling.
+    """
     from pathlib import Path
 
     from ..converters.targets import CONVERTERS
@@ -275,3 +345,8 @@ def validate_semantic_assurance(repository_root: str) -> None:
                 raise ValueError(
                     f"{evidence_id} target does not match {contract.contract_id}"
                 )
+    from scripts.semantic_claims import validate_evidence_claims
+
+    validate_evidence_claims(
+        root, SEMANTIC_EVIDENCE_CLAIMS, SEMANTIC_EVIDENCE, SEMANTIC_CONTRACTS
+    )

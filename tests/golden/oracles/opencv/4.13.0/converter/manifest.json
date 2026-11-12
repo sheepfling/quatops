@@ -57,7 +57,7 @@
   },
   "semantic_contract": {
     "file": "experiments/converters/opencv/4.13.0/semantic_contract.json",
-    "sha256": "e79649ea9c6fdecc4111ea311c74b66419fb0fc2796727cafa31405788456af2"
+    "sha256": "d198b111f44f8fecad526d73cf6507a8099e6c04aac1bba798297872136ea1f9"
   },
   "unified_lock_replay": {
     "utc": "2026-11-11T16:50:02.930206+00:00",

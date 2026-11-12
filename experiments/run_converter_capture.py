@@ -149,7 +149,10 @@ def validate_capture(target: str, source: Path, capture: Path) -> None:
         pin = CesiumDistribution.model_validate(
             read_evidence_document(dependency_path), strict=True
         )
-        if cesium_contract.target != f"CesiumJS {pin.version}":
+        if (
+            cesium_contract.target.name != "CesiumJS"
+            or cesium_contract.target.version != pin.version
+        ):
             raise ValueError("Cesium distribution version differs from the contract")
         if manifest["target"]["distribution_integrity"] != pin.integrity:
             raise ValueError(

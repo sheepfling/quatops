@@ -287,7 +287,12 @@ _ROLE_ITEMS = (
             "camera mount calibration",
         ),
         converter_ids=("godot.quaternion",),
-        execution_evidence_ids=("godot.native.4.7", "godot.native.4.8-dev1"),
+        execution_evidence_ids=(
+            "godot.native.4.7",
+            "godot.native.4.8-dev1",
+            "godot.camera3d.4.7-stable",
+            "godot.camera3d.4.8-dev1",
+        ),
     ),
     SemanticContract(
         "ros.rep103.body-flu",
@@ -391,7 +396,7 @@ _ROLE_ITEMS = (
             "animation interpolation",
         ),
         converter_ids=("gltf.rotation",),
-        execution_evidence_ids=("gltf.threejs.loader.0.187.0",),
+        execution_evidence_ids=("gltf.threejs.oriented-mesh.0.187.0",),
     ),
     SemanticContract(
         "gltf.node-local",
@@ -445,7 +450,10 @@ _ROLE_ITEMS = (
             "validity without orientation-valid flag",
         ),
         converter_ids=("openxr.xrquaternionf",),
-        execution_evidence_ids=("openxr.test-runtime.1.1.65",),
+        execution_evidence_ids=(
+            "openxr.test-runtime.1.1.65",
+            "openxr.test-runtime.local_floor.1.1.65",
+        ),
     ),
     SemanticContract(
         "openxr.view-space",
@@ -472,7 +480,7 @@ _ROLE_ITEMS = (
             "invalid orientation locations",
         ),
         converter_ids=("openxr.xrquaternionf",),
-        execution_evidence_ids=("openxr.test-runtime.1.1.65",),
+        execution_evidence_ids=("openxr.test-runtime.view.1.1.65",),
     ),
     SemanticContract(
         "quatops.parent-child-orientation",

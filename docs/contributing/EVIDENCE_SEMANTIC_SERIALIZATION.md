@@ -113,3 +113,26 @@ against a target-specific strict model before the target serializer receives
 it. The common output is a normalized view, not a replacement for native
 evidence. Native capture validation, mathematical-oracle checks, and pinned
 runtime validation remain separately reportable evidence.
+
+Fields that select interpretation use closed literals or small finite unions:
+coefficient order, handedness, signed-axis tokens, action, and composition
+order. Target identity, axis meanings, forward/up-axis labels, native entry
+points, transform fields, and unit scales are also constrained wherever the
+pinned target has a closed vocabulary. Target serializers read those validated
+fields directly instead of parsing storage or frame meaning out of descriptive
+text. They check generated frame declarations against the shared canonical
+frame and target contract, then check mapped probes, translations, and
+quaternion coefficients against the declared signed-axis map. Engine and
+direct-library serializers also check retained basis/probe actions against the
+captured quaternion coefficients; OpenCV checks its matrix actions and
+Rodrigues roundtrips against the shared rotations. Formula, conversion, and
+scope explanations remain prose because they describe the contract rather than
+select a serializer branch.
+
+The Cesium, glTF/Three.js, and OpenUSD scene transports preserve the serialized
+orientation field and linear unit scale in the normalized contract. Their input
+frame declarations and target identities must agree with the pinned contract;
+OpenUSD additionally checks its orient-op stacks, prim paths, and reset flags.
+These metadata and validation changes leave the retained native observations
+unchanged. The affected semantic-contract digests are refreshed in their
+provenance manifests.

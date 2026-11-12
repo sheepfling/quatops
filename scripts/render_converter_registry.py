@@ -14,6 +14,7 @@ from quatops.experimental.semantics.assurance import (
     semantic_assurance_rows,
     validate_semantic_assurance,
 )
+from quatops.experimental.semantics.evidence_claims import SemanticEvidenceClaim
 from quatops.experimental.semantics.roles import SemanticContract
 
 
@@ -74,12 +75,18 @@ def render_registry() -> str:
             "Adapter conformance is reported separately; these claims do not establish physical",
             "asset or sensor alignment. Primary sources are indexed in the",
             "[semantic source audit](semantic-source-audit.md).",
+            "Every native claim names an operation, context, version, and retained witness IDs.",
+            "Repository verification checks those against the validated capture contents.",
+            "Profile replay applies only to the listed operation and scope; it does not prove",
+            "the entire role. LOCAL_FLOOR and VIEW have",
+            "no native execution claim in the current fixtures.",
             "",
         ]
     )
     for row in semantic_assurance_rows():
         contract = cast(SemanticContract, row["contract"])
         evidence = cast(tuple[SemanticEvidenceArtifact, ...], row["evidence"])
+        claims = cast(tuple[SemanticEvidenceClaim, ...], row["claims"])
         source = (
             " / ".join(
                 value
@@ -100,12 +107,16 @@ def render_registry() -> str:
         binding = contract.binding_kind
         if contract.alignment_purpose:
             binding += f"; alignment={contract.alignment_purpose}"
+        replayed_ids = {
+            item.evidence_id for item in evidence if item.adapter_conformance_checked
+        }
         conformance = (
-            "demonstrated"
-            if evidence and all(item.adapter_conformance_checked for item in evidence)
-            else "partially demonstrated"
-            if any(item.adapter_conformance_checked for item in evidence)
-            else "not demonstrated"
+            "; ".join(
+                f"{claim.converter_id}: {claim.operation} [{claim.scope}] @ {claim.version}"
+                for claim in claims
+                if claim.evidence_id in replayed_ids
+            )
+            or "not demonstrated"
         )
         evidence_links = (
             "; ".join(
@@ -134,6 +145,15 @@ def render_registry() -> str:
                     f"B: {row['binding']}; N: {row['native']}",
                 ),
                 _wrapped("- Adapter conformance: ", conformance),
+                _wrapped(
+                    "- Witnesses: ",
+                    "; ".join(
+                        f"{claim.evidence_id} / {claim.operation} [{claim.scope}]: "
+                        + ", ".join(claim.witness_ids)
+                        for claim in claims
+                    )
+                    or "-",
+                ),
                 _wrapped("- Evidence: ", evidence_links),
                 "",
             ]

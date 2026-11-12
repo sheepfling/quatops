@@ -26,7 +26,7 @@
     "native_numeric_helper_sha256": "aed1da7b180e76ff0e101a477dd6a941ed0ad076509d9716bf2bf9b6896f5fa4",
     "native_package_lock_sha256": "5e331bee862cbdff2a96dec2d325e86aa996b780821833899f4053e9476002e0",
     "witnesses_sha256": "cf56f2ed41685d79fb08f3d04ef7e36818e5fb920286758aa813d85746613ed2",
-    "contract_sha256": "18b97f79b455cf197421566bec02fae6380c4060cecbc0439bdfc8aa15f5c5d9",
+    "contract_sha256": "b99e29264dea4f59f8dc958e16b09fa32773cc38cc1e4c466f6f821dc28be644",
     "input_serialization_note": "JSON formatting changed only; parsed native input values are unchanged.",
     "captured_input_generator_sha256": "53fc7b1ebaa120677a08ba1d578983de7b2694ea8b17a5321dcb2e6797d9b6a0",
     "captured_input_generator_archive": "experiments/provenance/reproduction-v1.zip#cesium-1.124.0-create_inputs-v2.py",
@@ -64,7 +64,7 @@
   },
   "semantic_contract": {
     "file": "experiments/converters/cesium/1.124.0/semantic_contract.json",
-    "sha256": "18b97f79b455cf197421566bec02fae6380c4060cecbc0439bdfc8aa15f5c5d9"
+    "sha256": "b99e29264dea4f59f8dc958e16b09fa32773cc38cc1e4c466f6f821dc28be644"
   },
   "direct_reproduction": {
     "utc": "2026-11-10T15:06:54.214Z",
@@ -84,6 +84,7 @@
     "native_script_sha256": "724dee726d19f66940dc4f2001f94d209a56b9c5954e086c442ea828820e5838",
     "native_witnesses_sha256": "7aeceed46f87013b05255d90e06f2821b0ac9b1ee45a589a9b27de8b90d4e3be",
     "reproduction_runner_sha256": "48890a5e938a38f654f5b4083c38408e6376b23ddb84b75a0e5969ecedf3c49a",
-    "comparison": "All selected native values match the historical witnesses exactly, including signed zero; JSON formatting differs."
+    "comparison": "All selected native values match the historical witnesses exactly, including signed zero; JSON formatting differs.",
+    "reproduction_runner_source": "experiments/provenance/reproduction-v1.zip#run-converter-capture-48890a5e.py"
   }
 }

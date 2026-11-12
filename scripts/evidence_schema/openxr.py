@@ -49,7 +49,7 @@ class OpenXRTestRuntimeCapture(NativeCaptureModel):
     runtime: OpenXRTestRuntimeIdentity
     api_version: Annotated[list[int], Field(min_length=3, max_length=3)]
     locate_time_xr_time: int
-    reference_space_type: Literal["LOCAL"]
+    reference_space_type: Literal["LOCAL", "VIEW", "LOCAL_FLOOR"]
     inputs_pose_in_reference_space: dict[InputKey, OpenXRPose]
     observations: dict[ObservationKey, LocatedOpenXRPose]
     quatops_executed: Literal[False]

@@ -40,8 +40,8 @@ class SharedQuaternionInput(NativeCaptureModel):
 class SharedCompositionInput(NativeCaptureModel):
     left_case_id: str
     right_case_id: str
-    product_order: str
-    reverse_product_order: str
+    product_order: Literal["lhs * rhs; rhs acts first"]
+    reverse_product_order: Literal["rhs * lhs; lhs acts first"]
 
 
 class SharedCanonicalContract(NativeCaptureModel):

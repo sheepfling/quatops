@@ -2,8 +2,11 @@
 
 from __future__ import annotations
 
+import math
 from collections.abc import Sequence
 from typing import Protocol, TypeVar
+
+from quatops.scalar import rotate as rotate_hamilton_wxyz
 
 from scripts.evidence_schema.crystallized import CanonicalInputs
 from scripts.evidence_schema.primitives import NATIVE_RETAINED_CASE_IDS
@@ -80,6 +83,88 @@ def validate_canonical_input_digest(
     """Require a target input document to cite this exact canonical corpus."""
     if actual_digest != context.canonical_input_sha256:
         raise ValueError(f"{target} canonical input digest differs")
+
+
+def validate_canonical_probe_vectors(
+    actual: Sequence[Sequence[float]],
+    context: SemanticSerializationContext,
+    *,
+    target: str,
+) -> list[list[float]]:
+    """Require the target's probes to be the shared basis and mixed probe."""
+    expected = canonical_probe_vectors(context)
+    if [list(vector) for vector in actual] != expected:
+        raise ValueError(f"{target} probe vectors differ from shared inputs")
+    return expected
+
+
+def canonical_probe_vectors(
+    context: SemanticSerializationContext,
+) -> list[list[float]]:
+    """Return the three basis vectors and shared asymmetric probe."""
+    return [
+        [1.0, 0.0, 0.0],
+        [0.0, 1.0, 0.0],
+        [0.0, 0.0, 1.0],
+        context.canonical_inputs.probe_vector_xyz,
+    ]
+
+
+def validate_quaternion_actions(
+    coefficients_wxyz: Sequence[float],
+    basis_images_xyz: Sequence[Sequence[float]],
+    *,
+    tolerance: float,
+    context: str,
+    probe_vector_xyz: Sequence[float] | None = None,
+    probe_image_xyz: Sequence[float] | None = None,
+) -> None:
+    """Bind captured vector actions to a captured active Hamilton quaternion."""
+    basis = (
+        (1.0, 0.0, 0.0),
+        (0.0, 1.0, 0.0),
+        (0.0, 0.0, 1.0),
+    )
+    if len(basis_images_xyz) != len(basis):
+        raise ValueError(f"{context} must contain three basis-vector actions")
+    expected_basis = [rotate_hamilton_wxyz(coefficients_wxyz, axis) for axis in basis]
+    _require_vectors_close(
+        basis_images_xyz,
+        expected_basis,
+        tolerance=tolerance,
+        context=f"{context} basis actions",
+    )
+    if probe_image_xyz is None:
+        if probe_vector_xyz is not None:
+            raise ValueError(f"{context} is missing its declared probe action")
+        return
+    if probe_vector_xyz is None:
+        raise ValueError(f"{context} has a probe action without its input vector")
+    expected_probe = rotate_hamilton_wxyz(coefficients_wxyz, probe_vector_xyz)
+    _require_vectors_close(
+        [probe_image_xyz],
+        [expected_probe],
+        tolerance=tolerance,
+        context=f"{context} probe action",
+    )
+
+
+def _require_vectors_close(
+    actual: Sequence[Sequence[float]],
+    expected: Sequence[Sequence[float]],
+    *,
+    tolerance: float,
+    context: str,
+) -> None:
+    if len(actual) != len(expected) or any(
+        len(actual_vector) != len(expected_vector)
+        or any(
+            not math.isclose(value, wanted, rel_tol=0.0, abs_tol=tolerance)
+            for value, wanted in zip(actual_vector, expected_vector)
+        )
+        for actual_vector, expected_vector in zip(actual, expected)
+    ):
+        raise ValueError(f"{context} differ from their declared quaternion action")
 
 
 def validate_canonical_quaternion(

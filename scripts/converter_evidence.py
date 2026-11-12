@@ -49,6 +49,9 @@ _VERSION_FIELDS = (
     "engine_version",
     "api_version",
 )
+_TARGET_DETAIL_ALIASES = {
+    "native_scalar_profiles": "scalar_profiles",
+}
 
 
 class ConverterEvidenceTarget(BaseModel):
@@ -126,6 +129,31 @@ def _target_inputs(
     if models is None or models.inputs is None:
         raise ValueError(f"{directory}: unsupported typed input target {name!r}")
     return models.inputs.model_validate(document, strict=True)
+
+
+def _validate_target_identity(
+    identity: BaseModel,
+    target: ConverterEvidenceTarget,
+    *,
+    context: str,
+) -> None:
+    """Bind a typed target identity to the manifest's versioned product."""
+    document = identity.model_dump(mode="json", exclude_none=True)
+    if document.get("name") != target.name:
+        raise ValueError(f"{context}: target names differ from manifest")
+    versions = [
+        document[field]
+        for field in _VERSION_FIELDS
+        if isinstance(document.get(field), str)
+    ]
+    if target.version not in versions:
+        raise ValueError(f"{context}: target versions differ from manifest")
+    for field, manifest_value in target.details.items():
+        contract_field = field
+        if contract_field not in document:
+            contract_field = _TARGET_DETAIL_ALIASES.get(field, field)
+        if contract_field in document and document[contract_field] != manifest_value:
+            raise ValueError(f"{context}: target field {field!r} differs from manifest")
 
 
 def _observation_group_count(capture: TargetCapture) -> int:
@@ -311,14 +339,17 @@ def load_converter_evidence(
 
     capture = _target_capture(target.name, witnesses, directory=directory)
     witness_target = getattr(capture, "target", None)
-    if witness_target is not None and witness_target.name != target.name:
-        raise ValueError(f"{directory}: witness and manifest target names differ")
+    if witness_target is not None:
+        _validate_target_identity(
+            witness_target, target, context=f"{directory}: witness"
+        )
     contract_target = getattr(contract, "target", None)
-    if contract_target is not None and getattr(contract_target, "name", None) not in (
-        None,
-        target.name,
-    ):
-        raise ValueError(f"{directory}: contract and manifest target names differ")
+    if contract_target is not None:
+        _validate_target_identity(
+            contract_target,
+            target,
+            context=f"{directory}: semantic contract",
+        )
 
     return ConverterEvidencePackage(
         fixture_directory=directory.relative_to(normalized_root).as_posix(),

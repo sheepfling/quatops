@@ -1,0 +1,74 @@
+{
+  "schema_version": "1.0",
+  "scope": "same-reference-type static offset chains; no tracking, floor-height or physical alignment evidence",
+  "runtime_kind": "Khronos test runtime; direct DLL negotiation, no system registration",
+  "hardware_runtime": false,
+  "quatops_executed": false,
+  "api_version": [
+    1,
+    1,
+    65
+  ],
+  "captured_utc": "2026-11-12T17:32:19.602434+00:00",
+  "sdk_commit": "24a1f2b92d212501a2b1b8d30ffd53abf55fcfa8",
+  "runtime_commit": "a9f14c416e383d05c142f5a2539a91fe3931b52a",
+  "capture_source": "capture_test_runtime.cpp",
+  "capture_source_sha256": "b18cb5d1787cc1f3e1bc5296d0a5b1a55432577cd68021f080f0abf8ca00dbf6",
+  "runtime_source_sha256": "1ab9f9e7ae170c7a1896ae51c6535a60f9eae5c8d2eef52bddd4ae5e369c50be",
+  "runtime_binary_sha256": "ee38901e36d775d0453b5696f20d838b31c1da883ae0a2e97746260ed696fbd3",
+  "capture_binary_sha256": "2bc5a026291b4e47cb368d71f9d86f2e8b3addce44d7a5bd3e812efab883d271",
+  "compiler": "g++ (GCC) 15.2.0",
+  "observations": {
+    "VIEW": {
+      "file": "witnesses/test_runtime_view.json",
+      "sha256": "0d5f046be09954bdcab6757007b6fbcfaf55ef073c9453569f9c2d7abfc105be"
+    },
+    "LOCAL_FLOOR": {
+      "file": "witnesses/test_runtime_local_floor.json",
+      "sha256": "81138f8650dc4824adb6401f114b340dc1eefa7753a4428fea4ad30828023901"
+    }
+  },
+  "local_legacy_output_reproduced": true,
+  "platform": "Windows-11-10.0.26300-SP0",
+  "architecture": "AMD64",
+  "build_commands": [
+    [
+      "g++",
+      "-std=c++17",
+      "-shared",
+      "-I",
+      "<pinned-sdk>/include",
+      "-I",
+      "<pinned-sdk-source>/src",
+      "-I",
+      "<pinned-sdk-source>/src/common",
+      "<pinned-sdk-source>/src/tests/test_runtimes/runtime_test.cpp",
+      "<pinned-sdk-source>/src/tests/test_runtimes/test_runtime.def",
+      "-o",
+      "<temporary>/test_runtime.dll"
+    ],
+    [
+      "g++",
+      "-std=c++17",
+      "-O2",
+      "-I",
+      "<pinned-sdk>/include",
+      "capture_test_runtime.cpp",
+      "-o",
+      "<temporary>/capture_spaces.exe"
+    ]
+  ],
+  "capture_commands": [
+    [
+      "<temporary>/capture_spaces.exe",
+      "<temporary>/test_runtime.dll",
+      "VIEW"
+    ],
+    [
+      "<temporary>/capture_spaces.exe",
+      "<temporary>/test_runtime.dll",
+      "LOCAL_FLOOR"
+    ]
+  ],
+  "synthetic_xr_time": 1
+}

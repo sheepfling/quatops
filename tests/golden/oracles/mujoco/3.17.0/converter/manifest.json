@@ -30,7 +30,7 @@
   ],
   "provenance": {
     "capture_script_sha256": "ab00e29d284624426f46e88e65a7f2faa964d8e21fdbac08cb7f80a0be3af60e",
-    "contract_sha256": "dac376343fd3da84bcf1283a0b456013b7df30aa0c114db2863279a9d48cd504",
+    "contract_sha256": "9a9e115858020bd870cd4c3b081a582e0f10a7f14e639b8747f6ab097a6d4be9",
     "converter_input_spec_sha256": "cfc5dbbc1729c6d22b9f0c2e8f7d3f335ff0b32a65a968f2f48f65a4aaa0eb82",
     "selected_inputs_sha256": "a6f0630806b69d3b3b29a036aa10f63bfe214668329c661598951f84f8f41eec",
     "witnesses_sha256": "0c5eb585275c19930d6b0ee2a1ebe92cfd65dff0b66776f52b9f85bfda0e3485",
@@ -43,10 +43,11 @@
   },
   "semantic_contract": {
     "file": "experiments/converters/mujoco/3.17.0/semantic_contract.json",
-    "sha256": "dac376343fd3da84bcf1283a0b456013b7df30aa0c114db2863279a9d48cd504"
+    "sha256": "9a9e115858020bd870cd4c3b081a582e0f10a7f14e639b8747f6ab097a6d4be9"
   },
   "reproduction": {
-    "capture_script_sha256": "c4de15696414b74bd1a5bc6e392cbde4535a9066ef450c8c677a1aa99b2277b0"
+    "capture_script_sha256": "c4de15696414b74bd1a5bc6e392cbde4535a9066ef450c8c677a1aa99b2277b0",
+    "capture_script_source": "experiments/provenance/reproduction-v1.zip#mujoco-capture-c4de1569.py"
   },
   "unified_lock_replay": {
     "utc": "2026-11-11T02:08:24.049489+00:00",

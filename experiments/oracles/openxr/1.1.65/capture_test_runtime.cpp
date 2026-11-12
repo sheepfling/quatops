@@ -53,10 +53,11 @@ void print_pose(const XrPosef& pose) {
 }
 
 XrSpace create_local_space(PFN_xrCreateReferenceSpace create_reference_space,
-                           XrSession session, const XrPosef& pose) {
+                           XrSession session, const XrPosef& pose,
+                           XrReferenceSpaceType reference_type) {
   XrReferenceSpaceCreateInfo create_info{
       XR_TYPE_REFERENCE_SPACE_CREATE_INFO};
-  create_info.referenceSpaceType = XR_REFERENCE_SPACE_TYPE_LOCAL;
+  create_info.referenceSpaceType = reference_type;
   create_info.poseInReferenceSpace = pose;
   XrSpace space = XR_NULL_HANDLE;
   check(create_reference_space(session, &create_info, &space),
@@ -80,10 +81,17 @@ XrSpaceLocation locate(PFN_xrLocateSpace locate_space, XrSpace space,
 }  // namespace
 
 int main(int argc, char** argv) {
-  if (argc != 2) {
-    std::cerr << "usage: capture_openxr_test_runtime.exe <test_runtime.dll>\n";
+  if (argc != 2 && argc != 3) {
+    std::cerr << "usage: capture_openxr_test_runtime.exe <test_runtime.dll> [LOCAL|VIEW|LOCAL_FLOOR]\n";
     return EXIT_FAILURE;
   }
+
+  const std::string reference_name = argc == 3 ? argv[2] : "LOCAL";
+  XrReferenceSpaceType reference_type;
+  if (reference_name == "LOCAL") reference_type = XR_REFERENCE_SPACE_TYPE_LOCAL;
+  else if (reference_name == "VIEW") reference_type = XR_REFERENCE_SPACE_TYPE_VIEW;
+  else if (reference_name == "LOCAL_FLOOR") reference_type = XR_REFERENCE_SPACE_TYPE_LOCAL_FLOOR;
+  else { std::cerr << "unsupported reference space\n"; return EXIT_FAILURE; }
 
   HMODULE runtime_module = LoadLibraryA(argv[1]);
   if (runtime_module == nullptr) {
@@ -205,7 +213,7 @@ int main(int argc, char** argv) {
   std::array<XrSpace, 3> spaces{};
   for (size_t index = 0; index < inputs.size(); ++index) {
     spaces[index] = create_local_space(create_reference_space, session,
-                                       inputs[index].pose);
+                                       inputs[index].pose, reference_type);
   }
 
   // xrLocateSpace(target, base, ...) returns the target pose in base.
@@ -223,7 +231,7 @@ int main(int argc, char** argv) {
             << ", " << XR_VERSION_MINOR(runtime_request.runtimeApiVersion) << ", "
             << XR_VERSION_PATCH(runtime_request.runtimeApiVersion) << "],\n"
             << "  \"locate_time_xr_time\": 1,\n"
-            << "  \"reference_space_type\": \"LOCAL\",\n"
+            << "  \"reference_space_type\": \"" << reference_name << "\",\n"
             << "  \"inputs_pose_in_reference_space\": {\n";
   for (size_t index = 0; index < inputs.size(); ++index) {
     std::cout << "    \"" << inputs[index].name << "\":";

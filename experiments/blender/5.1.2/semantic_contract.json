@@ -25,6 +25,9 @@
     },
     "native_frame": {
       "declared_probe_semantics": "+X right, +Y forward, +Z up for this fixture",
+      "positive_x": "right",
+      "positive_y": "forward",
+      "positive_z": "up",
       "positive_x_image": [
         1.0,
         0.0,

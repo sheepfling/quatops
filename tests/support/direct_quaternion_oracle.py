@@ -9,6 +9,7 @@ from quatops.python import hamilton
 from scripts.evidence_schema.primitives import NATIVE_RETAINED_CASE_IDS
 from tests.support.evidence_oracles import matrix_from_wxyz
 from tests.support.paths import REPOSITORY_ROOT
+from tests.support.provenance_archives import read_provenance_source
 
 _BASIS = np.eye(3)
 _ATOL = 3e-12
@@ -60,7 +61,13 @@ def check_contract_and_provenance(contract, manifest, *, source, fixture):
             if field == "capture_script_sha256"
             else replay[field]
         )
-        assert hashlib.sha256(path.read_bytes()).hexdigest() == recorded, field
+        reference = manifest.get("reproduction", replay).get("capture_script_source")
+        source_bytes = (
+            read_provenance_source(REPOSITORY_ROOT, reference)
+            if field == "capture_script_sha256" and reference is not None
+            else path.read_bytes()
+        )
+        assert hashlib.sha256(source_bytes).hexdigest() == recorded, field
     assert replay["witnesses_sha256"] == manifest["provenance"]["witnesses_sha256"]
     for field in ("capture_script_sha256", "shared_capture_script_sha256"):
         capture_source = replay_paths[field].read_text(encoding="utf-8")

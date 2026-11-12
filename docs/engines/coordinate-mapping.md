@@ -66,6 +66,27 @@ quaternion orientation. The scalar/frame primitive checks cover all 48 signed
 maps and all 48-by-48 world/body map pairs in
 [`test_engine_basis_oracle.py`](../../tests/quatops/experimental/engines/test_engine_basis_oracle.py).
 
+## Different parent and child maps
+
+For `R_target = B_parent R_source B_child^-1`, an identity source orientation
+becomes `B_parent B_child^-1`. When the two maps differ this can be nonidentity:
+the same aligned physical frames can use different coordinate bases. For
+example, `B_parent = diag(-1, 1, 1)` and `B_child = diag(1, -1, 1)` yield
+`diag(-1, -1, 1)`, a half turn, from a source identity. Their determinants match.
+
+Composition needs a matching intermediate frame. In a connected frame chain,
+
+```text
+R'_AB R'_BC = (B_A R_AB B_B^-1) (B_B R_BC B_C^-1)
+             = B_A (R_AB R_BC) B_C^-1
+```
+
+An arbitrary two-sided converter applied to both factors does not generally
+preserve their product, because its child and parent maps need not cancel.
+Use converters for A-from-B, B-from-C, and A-from-C with the same declared B
+frame in the first two. `PhysicalOrientation.compose()` checks that shared
+frame; gateway tests independently check the matrix action and cancellation.
+
 For semantic frame IDs, axis descriptions, and common physical conventions,
 use `quatops.experimental.semantics`. The common [`quatops.experimental.converters` gateway](../converters.md)
 derives a map from the declared parent and child bases, then converts the

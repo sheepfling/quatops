@@ -38,3 +38,19 @@ right-handed, +Y up, and camera forward along -Z. The same page distinguishes
 camera forward from the oriented-asset convention, whose front points along
 +Z. QuatOps keeps those as different roles; neither is inferred for an
 arbitrary imported object.
+
+
+## Camera3D native node evidence
+
+Separate native Camera3D captures now cover Godot 4.7 stable and 4.8-dev1:
+[fixture and reproduction](../../experiments/godot/camera3d/README.md).
+The real camera is attached to a translated, asymmetrically rotated parent.
+Identity and both noncommuting parent/child orders verify local/global axes,
+`get_camera_transform()` and perspective viewport-center ray direction.
+Camera forward is observed as -Z under the explicitly assigned scene frame.
+
+These artifacts have their own `camera_node_action` / `camera_node` claims;
+they do not broaden the older quaternion-only captures. Native camera behavior
+is checked, but actual QuatOps adapter conformance for this camera fixture is
+not claimed. Physical calibration, imported assets, XR overrides, nonuniform
+scale, nonzero offsets and animation remain outside this capture.

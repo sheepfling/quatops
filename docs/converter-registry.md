@@ -37,6 +37,11 @@ caller- or runtime-supplied physical alignment. N states the native proof scope.
 Adapter conformance is reported separately; these claims do not establish physical
 asset or sensor alignment. Primary sources are indexed in the
 [semantic source audit](semantic-source-audit.md).
+Every native claim names an operation, context, version, and retained witness IDs.
+Repository verification checks those against the validated capture contents.
+Profile replay applies only to the listed operation and scope; it does not prove
+the entire role. LOCAL_FLOOR and VIEW have
+no native execution claim in the current fixtures.
 
 ### `unreal.world-axes`
 
@@ -50,8 +55,10 @@ asset or sensor alignment. Primary sources are indexed in the
   geographic alignment
 - Assurance: R: R verified (native representation); S: pinned source and scoped claim recorded; B:
   executable binder; explicit alignment required; structure checked, physical truth supplied by
-  caller/runtime; N: numeric_action: unreal.native.5.7.4 (adapter conformance replayed)
-- Adapter conformance: demonstrated
+  caller/runtime; N: quaternion_action [numeric_probe] @ 5.7.4: unreal.native.5.7.4 (profile
+  replayed for this operation/scope)
+- Adapter conformance: unreal.fquat: quaternion_action [numeric_probe] @ 5.7.4
+- Witnesses: unreal.native.5.7.4 / quaternion_action [numeric_probe]: identity, mixed_a, mixed_b
 - Evidence: [unreal.native.5.7.4](../tests/oracles/unreal/5.7.4/witnesses.json)
 
 ### `unity.world-axes`
@@ -64,8 +71,10 @@ asset or sensor alignment. Primary sources are indexed in the
 - Exclusions: imported model local axes; project-specific scene alignment; geographic alignment
 - Assurance: R: R verified (native representation); S: pinned source and scoped claim recorded; B:
   executable binder; explicit alignment required; structure checked, physical truth supplied by
-  caller/runtime; N: numeric_action: unity.native.6000.5.2f1 (adapter conformance replayed)
-- Adapter conformance: demonstrated
+  caller/runtime; N: quaternion_action [numeric_probe] @ 6000.5.2f1: unity.native.6000.5.2f1
+  (profile replayed for this operation/scope)
+- Adapter conformance: unity.quaternion: quaternion_action [numeric_probe] @ 6000.5.2f1
+- Witnesses: unity.native.6000.5.2f1 / quaternion_action [numeric_probe]: identity, mixed_a, mixed_b
 - Evidence: [unity.native.6000.5.2f1](../tests/oracles/unity/6000.5.2f1/witnesses.json)
 
 ### `godot.camera-axes`
@@ -80,11 +89,22 @@ asset or sensor alignment. Primary sources are indexed in the
 - Exclusions: arbitrary Node3D world alignment; asset-forward conventions; camera mount calibration
 - Assurance: R: R verified (native representation); S: pinned source and scoped claim recorded; B:
   executable binder; explicit alignment required; structure checked, physical truth supplied by
-  caller/runtime; N: numeric_action: godot.native.4.7 (adapter conformance replayed);
-  numeric_action: godot.native.4.8-dev1 (adapter conformance replayed)
-- Adapter conformance: demonstrated
+  caller/runtime; N: quaternion_action [numeric_probe] @ 4.7-stable: godot.native.4.7 (profile
+  replayed for this operation/scope); quaternion_action [numeric_probe] @ 4.8-dev1:
+  godot.native.4.8-dev1 (profile replayed for this operation/scope); camera_node_action
+  [camera_node] @ 4.7-stable: godot.camera3d.4.7-stable (native runtime only; adapter conformance
+  not demonstrated); camera_node_action [camera_node] @ 4.8-dev1: godot.camera3d.4.8-dev1 (native
+  runtime only; adapter conformance not demonstrated)
+- Adapter conformance: godot.quaternion: quaternion_action [numeric_probe] @ 4.7-stable;
+  godot.quaternion: quaternion_action [numeric_probe] @ 4.8-dev1
+- Witnesses: godot.native.4.7 / quaternion_action [numeric_probe]: identity, mixed_a, mixed_b;
+  godot.native.4.8-dev1 / quaternion_action [numeric_probe]: identity, mixed_a, mixed_b;
+  godot.camera3d.4.7-stable / camera_node_action [camera_node]: 0_0, 1_2, 2_1;
+  godot.camera3d.4.8-dev1 / camera_node_action [camera_node]: 0_0, 1_2, 2_1
 - Evidence: [godot.native.4.7](../tests/oracles/godot/shared/witnesses.json);
-  [godot.native.4.8-dev1](../tests/oracles/godot/shared/witnesses.json)
+  [godot.native.4.8-dev1](../tests/oracles/godot/shared/witnesses.json);
+  [godot.camera3d.4.7-stable](../tests/golden/godot/camera3d/4.7-stable/witnesses.json);
+  [godot.camera3d.4.8-dev1](../tests/golden/godot/camera3d/4.8-dev1/witnesses.json)
 
 ### `ros.rep103.body-flu`
 
@@ -98,8 +118,11 @@ asset or sensor alignment. Primary sources are indexed in the
   frames
 - Assurance: R: R verified (native representation); S: pinned source and scoped claim recorded; B:
   executable binder; explicit alignment required; structure checked, physical truth supplied by
-  caller/runtime; N: runtime_space_relation: ros2.tf2.0.36.23 (adapter conformance replayed)
-- Adapter conformance: demonstrated
+  caller/runtime; N: named_frame_relation [named_frame_chain] @ 0.36.23: ros2.tf2.0.36.23 (profile
+  replayed for this operation/scope)
+- Adapter conformance: ros2.geometry-msgs-quaternion: named_frame_relation [named_frame_chain] @
+  0.36.23
+- Witnesses: ros2.tf2.0.36.23 / named_frame_relation [named_frame_chain]: world-base-sensor
 - Evidence: [ros2.tf2.0.36.23](../tests/golden/oracles/ros2/0.36.23/witnesses.json)
 
 ### `ros.rep103.optical`
@@ -113,8 +136,11 @@ asset or sensor alignment. Primary sources are indexed in the
   frames
 - Assurance: R: R verified (native representation); S: pinned source and scoped claim recorded; B:
   executable binder; explicit alignment required; structure checked, physical truth supplied by
-  caller/runtime; N: runtime_space_relation: ros2.tf2.0.36.23 (adapter conformance replayed)
-- Adapter conformance: demonstrated
+  caller/runtime; N: named_frame_relation [named_frame_chain] @ 0.36.23: ros2.tf2.0.36.23 (profile
+  replayed for this operation/scope)
+- Adapter conformance: ros2.geometry-msgs-quaternion: named_frame_relation [named_frame_chain] @
+  0.36.23
+- Witnesses: ros2.tf2.0.36.23 / named_frame_relation [named_frame_chain]: world-base-sensor
 - Evidence: [ros2.tf2.0.36.23](../tests/golden/oracles/ros2/0.36.23/witnesses.json)
 
 ### `cesium.enu-to-fixed`
@@ -129,8 +155,11 @@ asset or sensor alignment. Primary sources are indexed in the
   orientation; position or pose translation
 - Assurance: R: R verified (native representation); S: pinned source and scoped claim recorded; B:
   executable contextual resolver; typed origin and ellipsoid required; body alignment remains caller
-  supplied; N: role_specific_action: cesium.native.1.124.0 (adapter conformance replayed)
-- Adapter conformance: demonstrated
+  supplied; N: geographic_frame_action [enu_at_origin] @ 1.124.0: cesium.native.1.124.0 (profile
+  replayed for this operation/scope)
+- Adapter conformance: cesium.quaternion: geographic_frame_action [enu_at_origin] @ 1.124.0
+- Witnesses: cesium.native.1.124.0 / geographic_frame_action [enu_at_origin]: identity@geo-00,
+  mixed_a@geo-03
 - Evidence: [cesium.native.1.124.0](../tests/golden/transports/cesium/1.124.0/witnesses.json)
 
 ### `gltf.asset-front`
@@ -145,10 +174,13 @@ asset or sensor alignment. Primary sources are indexed in the
   alignment; animation interpolation
 - Assurance: R: R verified (native representation); S: pinned source and scoped claim recorded; B:
   executable binder; explicit alignment required; structure checked, physical truth supplied by
-  caller/runtime; N: numeric_action: gltf.threejs.loader.0.187.0 (adapter conformance replayed)
-- Adapter conformance: demonstrated
+  caller/runtime; N: asset_front_observation [oriented_mesh] @ 0.187.0:
+  gltf.threejs.oriented-mesh.0.187.0 (native runtime only; adapter conformance not demonstrated)
+- Adapter conformance: not demonstrated
+- Witnesses: gltf.threejs.oriented-mesh.0.187.0 / asset_front_observation [oriented_mesh]:
+  OrientedMesh
 - Evidence:
-  [gltf.threejs.loader.0.187.0](../tests/golden/transports/gltf/2.0.0/threejs/0.187.0/converter/witnesses.json)
+  [gltf.threejs.oriented-mesh.0.187.0](../tests/golden/transports/gltf/2.0.0/threejs/0.187.0/oriented_mesh/witnesses.json)
 
 ### `gltf.node-local`
 
@@ -162,9 +194,15 @@ asset or sensor alignment. Primary sources are indexed in the
 - Scope: Static glTF node-local rotation field and hierarchy behavior in the pinned loader fixture.
 - Exclusions: general scene-export/import semantics; animation curves; application model alignment
 - Assurance: R: R verified (native representation); S: pinned source and scoped claim recorded; B:
-  declared contract only; no executable semantic binder; N: numeric_action:
-  gltf.threejs.loader.0.187.0 (adapter conformance replayed)
-- Adapter conformance: demonstrated
+  declared contract only; no executable semantic binder; N: quaternion_field [static_node] @
+  0.187.0: gltf.threejs.loader.0.187.0 (profile replayed for this operation/scope);
+  hierarchy_composition [static_node] @ 0.187.0: gltf.threejs.loader.0.187.0 (profile replayed for
+  this operation/scope)
+- Adapter conformance: gltf.rotation: quaternion_field [static_node] @ 0.187.0; gltf.rotation:
+  hierarchy_composition [static_node] @ 0.187.0
+- Witnesses: gltf.threejs.loader.0.187.0 / quaternion_field [static_node]: QuatOpsParent,
+  QuatOpsChild; gltf.threejs.loader.0.187.0 / hierarchy_composition [static_node]: QuatOpsParent,
+  QuatOpsChild
 - Evidence:
   [gltf.threejs.loader.0.187.0](../tests/golden/transports/gltf/2.0.0/threejs/0.187.0/converter/witnesses.json)
 
@@ -183,11 +221,17 @@ asset or sensor alignment. Primary sources are indexed in the
   validity without orientation-valid flag
 - Assurance: R: R specification/test-runtime only; S: pinned source and scoped claim recorded; B:
   executable binder; explicit alignment required; structure checked, physical truth supplied by
-  caller/runtime; N: runtime_space_relation: openxr.test-runtime.1.1.65 (native runtime only;
-  adapter conformance not demonstrated)
+  caller/runtime; N: runtime_space_relation [LOCAL] @ 1.1.65: openxr.test-runtime.1.1.65 (native
+  runtime only; adapter conformance not demonstrated); runtime_space_relation [LOCAL_FLOOR] @
+  1.1.65: openxr.test-runtime.local_floor.1.1.65 (native runtime only; adapter conformance not
+  demonstrated)
 - Adapter conformance: not demonstrated
+- Witnesses: openxr.test-runtime.1.1.65 / runtime_space_relation [LOCAL]: A_from_B, B_from_C,
+  A_from_C; openxr.test-runtime.local_floor.1.1.65 / runtime_space_relation [LOCAL_FLOOR]: A_from_B,
+  B_from_C, A_from_C
 - Evidence:
-  [openxr.test-runtime.1.1.65](../experiments/oracles/openxr/1.1.65/witnesses/test_runtime_frame_chain.json)
+  [openxr.test-runtime.1.1.65](../experiments/oracles/openxr/1.1.65/witnesses/test_runtime_frame_chain.json);
+  [openxr.test-runtime.local_floor.1.1.65](../experiments/oracles/openxr/1.1.65/witnesses/test_runtime_local_floor.json)
 
 ### `openxr.view-space`
 
@@ -202,11 +246,13 @@ asset or sensor alignment. Primary sources are indexed in the
   locations
 - Assurance: R: R specification/test-runtime only; S: pinned source and scoped claim recorded; B:
   executable binder; explicit alignment required; structure checked, physical truth supplied by
-  caller/runtime; N: runtime_space_relation: openxr.test-runtime.1.1.65 (native runtime only;
-  adapter conformance not demonstrated)
+  caller/runtime; N: runtime_space_relation [VIEW] @ 1.1.65: openxr.test-runtime.view.1.1.65 (native
+  runtime only; adapter conformance not demonstrated)
 - Adapter conformance: not demonstrated
+- Witnesses: openxr.test-runtime.view.1.1.65 / runtime_space_relation [VIEW]: A_from_B, B_from_C,
+  A_from_C
 - Evidence:
-  [openxr.test-runtime.1.1.65](../experiments/oracles/openxr/1.1.65/witnesses/test_runtime_frame_chain.json)
+  [openxr.test-runtime.view.1.1.65](../experiments/oracles/openxr/1.1.65/witnesses/test_runtime_view.json)
 
 ### `quatops.parent-child-orientation`
 
@@ -222,6 +268,7 @@ asset or sensor alignment. Primary sources are indexed in the
 - Assurance: R: not applicable; S: application contract; B: declared contract only; no executable
   semantic binder; N: not demonstrated
 - Adapter conformance: not demonstrated
+- Witnesses: -
 - Evidence: —
 
 Representation-only profiles remain coefficient/action converters over

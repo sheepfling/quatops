@@ -2,10 +2,11 @@
 
 from __future__ import annotations
 
-import re
+import math
 from pathlib import Path
 from typing import Protocol
 
+from quatops.scalar import multiply as multiply_wxyz
 from scripts.evidence_schema.crystallized import (
     CanonicalInputs,
     CompositionWitness,
@@ -25,9 +26,19 @@ from scripts.evidence_schema.engine_captures import (
     EngineContractDocument,
     EngineOrientation,
 )
-from scripts.evidence_schema.primitives import mapped_handedness
+from scripts.evidence_schema.primitives import (
+    AxisMeaning,
+    NativeScalarProfile,
+    mapped_handedness,
+)
+from scripts.evidence_schema.semantic_serializers._contract_helpers import (
+    derive_signed_axis_map,
+    map_hamilton_quaternion_wxyz,
+    map_vector_components,
+)
 from scripts.evidence_schema.semantic_serializers._witness_helpers import (
     select_retained_rows,
+    validate_quaternion_actions,
 )
 
 
@@ -40,64 +51,61 @@ class EngineSemanticPackage(Protocol):
     capture: EngineCaptureDocument
 
 
-def _opposite_axis_meaning(value: str) -> str:
-    opposites = {
-        "right": "left",
-        "left": "right",
-        "east": "west",
-        "west": "east",
-        "forward": "backward",
-        "backward": "forward",
-        "north": "south",
-        "south": "north",
-        "up": "down",
-        "down": "up",
-    }
-    if value not in opposites:
-        raise ValueError(f"cannot invert declared axis meaning {value!r}")
-    return opposites[value]
-
-
-def _native_axis_labels(package: EngineSemanticPackage) -> tuple[str, str, str]:
-    frame = package.contract.conversion.native_frame
-    labels = (frame.positive_x, frame.positive_y, frame.positive_z)
-    if all(label is not None for label in labels):
-        return labels  # type: ignore[return-value]
-    declaration = frame.declared_probe_semantics
-    if declaration is None:
-        raise ValueError("native frame must declare positive axis meanings")
-    match = re.search(r"\+X\s+([^,]+),\s*\+Y\s+([^,]+),\s*\+Z\s+(.+)", declaration)
-    if match is None:
-        raise ValueError("native probe frame declaration is not parseable")
-    return (
-        match.group(1).strip(),
-        match.group(2).strip(),
-        re.split(r"\s+for\s+", match.group(3).strip(), maxsplit=1)[0],
+def _native_coefficients(
+    canonical_wxyz: list[float],
+    package: EngineSemanticPackage,
+) -> list[float]:
+    """Apply the declared frame basis and native coefficient order."""
+    mapped_wxyz = map_hamilton_quaternion_wxyz(
+        canonical_wxyz,
+        package.contract.conversion.destination_axes_from_source,
     )
+    if package.contract.engine.native_quaternion_order == "wxyz":
+        return mapped_wxyz
+    return mapped_wxyz[1:] + mapped_wxyz[:1]
 
 
-def _validate_frame_map(package: EngineSemanticPackage) -> tuple[str, str, str]:
+def _native_wxyz(coefficients: list[float], order: str) -> list[float]:
+    if order == "wxyz":
+        return coefficients
+    return [coefficients[3], *coefficients[:3]]
+
+
+def _require_coefficients_close(
+    actual: list[float],
+    expected: list[float],
+    *,
+    tolerance: float,
+    context: str,
+) -> None:
+    """Check captured target coefficients against the declared conversion."""
+    if len(actual) != len(expected) or any(
+        not math.isclose(value, wanted, rel_tol=0.0, abs_tol=tolerance)
+        for value, wanted in zip(actual, expected)
+    ):
+        raise ValueError(f"{context} differs from its declared frame conversion")
+
+
+def _validate_frame_map(
+    package: EngineSemanticPackage,
+) -> tuple[AxisMeaning, AxisMeaning, AxisMeaning]:
     conversion = package.contract.conversion
     axis_map = conversion.destination_axes_from_source
     derived_handedness = mapped_handedness(
         "right-handed", axis_map, context="native frame map"
     )
     canonical = conversion.canonical_frame
-    declared_labels = _native_axis_labels(package)
-    canonical_labels = (
-        canonical.positive_x,
-        canonical.positive_y,
-        canonical.positive_z,
+    declared_labels = (
+        conversion.native_frame.positive_x,
+        conversion.native_frame.positive_y,
+        conversion.native_frame.positive_z,
     )
-    for destination_index, axis in enumerate(axis_map):
-        source_index = "xyz".index(axis.lstrip("-"))
-        expected = canonical_labels[source_index]
-        if axis.startswith("-"):
-            expected = _opposite_axis_meaning(expected)
-        if declared_labels[destination_index] != expected:
-            raise ValueError(
-                f"declared native axis {destination_index} disagrees with signed map"
-            )
+    derived_map = derive_signed_axis_map(
+        (canonical.positive_x, canonical.positive_y, canonical.positive_z),
+        declared_labels,
+    )
+    if axis_map != derived_map:
+        raise ValueError("declared native axis meanings disagree with signed map")
     declared_handedness = package.contract.conversion.native_frame.handedness
     if declared_handedness is not None:
         expected_hand = (
@@ -114,11 +122,54 @@ def _validate_frame_map(package: EngineSemanticPackage) -> tuple[str, str, str]:
     return declared_labels
 
 
+def _validate_capture_contract(package: EngineSemanticPackage) -> None:
+    """Require native identity and interoperability labels to match the contract."""
+    engine = package.contract.engine
+    capture_target = package.capture.target
+    for field in (
+        "engine",
+        "api",
+        "version",
+        "native_scalar_profiles",
+        "native_quaternion_order",
+        "native_algebra",
+        "native_vector_action",
+    ):
+        if getattr(capture_target, field) != getattr(engine, field):
+            raise ValueError(f"engine capture {field} differs from its contract")
+    interop = package.capture.canonical_interop
+    conversion = package.contract.conversion
+    if (
+        interop.contract_id != conversion.contract_id
+        or interop.native_quaternion_order != engine.native_quaternion_order
+        or interop.frame_map_destination_axes_from_source
+        != conversion.destination_axes_from_source
+    ):
+        raise ValueError("engine interoperability labels differ from its contract")
+
+
 def _profile_cases(
     package: EngineSemanticPackage,
-) -> list[tuple[str, list[EngineOrientation], EngineComposition, EngineComposition]]:
+) -> list[
+    tuple[
+        NativeScalarProfile,
+        list[EngineOrientation],
+        EngineComposition,
+        EngineComposition,
+    ]
+]:
     interop = package.capture.canonical_interop
+    declared_profiles = package.contract.engine.native_scalar_profiles
+    tolerances = package.contract.conversion.native_precision_tolerance
+    if len(set(declared_profiles)) != len(declared_profiles):
+        raise ValueError("engine contract contains duplicate scalar profiles")
+    if set(tolerances) != set(declared_profiles):
+        raise ValueError("engine tolerances differ from the declared scalar profiles")
     if interop.precision_captures is not None:
+        if set(interop.precision_captures) != set(declared_profiles):
+            raise ValueError(
+                "engine native captures differ from the declared scalar profiles"
+            )
         return [
             (
                 profile,
@@ -134,11 +185,11 @@ def _profile_cases(
         or interop.reverse_composition is None
     ):
         raise ValueError("engine capture lacks either profiles or flat witnesses")
-    if len(package.contract.engine.native_scalar_profiles) != 1:
+    if len(declared_profiles) != 1:
         raise ValueError("flat engine capture must declare one precision profile")
     return [
         (
-            package.contract.engine.native_scalar_profiles[0],
+            declared_profiles[0],
             interop.orientation_cases,
             interop.composition,
             interop.reverse_composition,
@@ -156,8 +207,7 @@ def _orientation_witnesses(
     retained_case_ids = ENGINE_RETAINED_CASE_IDS
     output: list[QuaternionBoundaryWitness] = []
     for precision, cases, composition, reverse in _profile_cases(package):
-        if precision not in package.contract.conversion.native_precision_tolerance:
-            raise ValueError(f"engine contract lacks tolerance for {precision}")
+        tolerance = package.contract.conversion.native_precision_tolerance[precision]
         retained_rows = select_retained_rows(
             cases, retained_case_ids, context=f"{identity.engine} {precision}"
         )
@@ -166,9 +216,30 @@ def _orientation_witnesses(
                 raise ValueError(
                     f"{identity.engine} {row.case_id} is absent from shared inputs"
                 )
+            _require_coefficients_close(
+                row.native_quaternion,
+                _native_coefficients(shared[row.case_id], package),
+                tolerance=tolerance,
+                context=f"{identity.engine} {precision} {row.case_id}",
+            )
             probe_image = row.native_rotated_probe_vector_xyz
             if row.case_id == "mixed_a" and probe_image is None:
                 raise ValueError(f"{identity.engine} mixed_a lacks its probe action")
+            validate_quaternion_actions(
+                _native_wxyz(row.native_quaternion, identity.native_quaternion_order),
+                row.native_rotated_positive_basis_vectors_xyz,
+                tolerance=tolerance,
+                context=f"{identity.engine} {precision} {row.case_id}",
+                probe_vector_xyz=(
+                    map_vector_components(
+                        canonical_inputs.probe_vector_xyz,
+                        package.contract.conversion.destination_axes_from_source,
+                    )
+                    if probe_image is not None
+                    else None
+                ),
+                probe_image_xyz=probe_image,
+            )
             output.append(
                 OrientationWitness(
                     kind="orientation",
@@ -205,6 +276,29 @@ def _orientation_witnesses(
                 raise ValueError(
                     "native composition references an unknown canonical case"
                 )
+            expected_product = multiply_wxyz(
+                shared[row.left_case_id], shared[row.right_case_id]
+            )
+            _require_coefficients_close(
+                row.native_product_quaternion,
+                _native_coefficients(expected_product, package),
+                tolerance=tolerance,
+                context=(
+                    f"{identity.engine} {precision} composition "
+                    f"{row.left_case_id} * {row.right_case_id}"
+                ),
+            )
+            validate_quaternion_actions(
+                _native_wxyz(
+                    row.native_product_quaternion, identity.native_quaternion_order
+                ),
+                row.native_rotated_positive_basis_vectors_xyz,
+                tolerance=tolerance,
+                context=(
+                    f"{identity.engine} {precision} composition "
+                    f"{row.left_case_id} * {row.right_case_id}"
+                ),
+            )
             output.append(
                 CompositionWitness(
                     kind="composition",
@@ -229,6 +323,7 @@ def serialize_engine_semantics(
     contract = package.contract
     engine = contract.engine
     conversion = contract.conversion
+    _validate_capture_contract(package)
     declared_labels = _validate_frame_map(package)
     handedness = mapped_handedness(
         "right-handed",

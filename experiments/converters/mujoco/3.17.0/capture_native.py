@@ -6,6 +6,7 @@ import sys
 from importlib import resources
 from importlib.metadata import version
 from pathlib import Path
+from typing import Literal
 
 import mujoco  # pyright: ignore[reportMissingModuleSource]
 import numpy as np
@@ -35,7 +36,7 @@ def capture_quaternion(
     q: np.ndarray,
     probe: np.ndarray,
     *,
-    native_constructor: str | None = None,
+    native_constructor: Literal["mju_axisAngle2Quat(axis, angle)"] | None = None,
     lhs: np.ndarray | None = None,
     rhs: np.ndarray | None = None,
 ) -> MuJoCoOrientation:

@@ -37,7 +37,24 @@ reference-space type, session, opaque identities for the actual `XrSpace` and
 base-space handles, runtime, and signed `XrTime`;
 it also requires the orientation-valid location flag and retains the tracked
 flag separately. STAGE and generic action spaces need their own explicit
-frame declaration. A binding's source says where the alignment came from,
+frame declaration.
+
+The gateway is a general conversion between explicitly supplied frame
+snapshots. It retains independently supplied parent/child runtime contexts,
+including different sessions or sample times, when the caller supplies their
+physical relationship. It does not represent or perform a single native
+`xrLocateSpace` call. That operation requires both handles from the same
+session and one requested time; an application combining other observations
+must establish its own bridge. See the
+[OpenXR 1.1.65 locate contract](https://registry.khronos.org/OpenXR/specs/1.1/man/html/xrLocateSpace.html).
+
+Reuse a converter while its frame mapping and binding context remain
+applicable. Supplying new quaternion coefficients does not refresh a stored
+runtime relation. Rebind from a new runtime observation when its applicability
+changes, even if the numeric coefficients happen to be unchanged. The runtime
+can revise a relation for the same space/base/time as its understanding improves.
+
+A binding's source says where the alignment came from,
 but QuatOps cannot determine whether an application declaration matches a
 real sensor mount or survey.
 Cesium ENU uses
@@ -97,10 +114,21 @@ the represented orientation, not a failed round trip.
 ### Input and precision policy
 
 The `PhysicalOrientation` gateway accepts only finite, unit Hamilton
-quaternions whose norm differs from one by at most `1e-6`. It rejects other
-values; call `.normalized()` explicitly if normalization is intended. Reverse
-scalar and batch conversion applies the same physical-unit check to the
-recovered value. The lower-level `ConverterProfile` methods accept
+quaternions whose norm differs from one by at most `1e-6`. Normalize raw values
+before construction when that is intended:
+
+```python
+from quatops.python import hamilton
+from quatops.experimental.semantics import PhysicalOrientation
+
+orientation = PhysicalOrientation.from_wxyz(
+    hamilton.normalize(raw_quaternion), parent_frame, child_frame
+)
+```
+
+The `.normalized()` instance method is useful for an already accepted near-unit
+orientation. Reverse scalar and batch conversion applies the same physical-unit
+check to the recovered value. The lower-level `ConverterProfile` methods accept
 `FramedOrientation` values and leave unit-domain responsibility to their
 caller.
 
@@ -113,6 +141,14 @@ created through `OrientationConverter` also retain semantic role bindings and
 their alignment provenance/context. The reverse gateway requires that complete
 binding to match, even when a replacement binding happens to use the same
 numeric basis.
+
+`OrientationConverter.target_parent` and `.target_child` retain the supplied
+frame-or-binding objects. Use `.target_parent_frame` and `.target_child_frame`
+for their resolved coordinate frames. `dataclasses.replace(converter)` preserves
+both complete bindings. Equality and hashing include their alignment evidence
+and runtime context, so different calibration revisions remain distinct cache
+keys even when they share a numeric map. Replacing a binding with a plain frame
+explicitly removes that endpoint's binding.
 
 Scalar target values contain Python `float` coefficients and do not simulate
 rounding to a target's float32 storage type. Assign or cast them through the
@@ -201,6 +237,9 @@ each input uses the configured source frames and reuses its compiled frame map
 for scalar and batch values. The one-shot
 `convert_orientation_to_target` and `convert_orientation_from_target`
 functions remain available for occasional conversions.
+
+Identity and composition under different parent/child maps are illustrated in
+the [two-sided coordinate mapping rules](engines/coordinate-mapping.md#different-parent-and-child-maps).
 
 The lower-level `ConverterProfile.to_target` and `from_target` methods remain
 available when an application already owns a `FramedOrientation` and a

@@ -29,6 +29,22 @@ def serialize_direct_quaternion_contract(
     contract: EigenContract | MuJoCoContract | SpiceyPyContract,
 ) -> QuaternionBoundaryContract:
     """Serialize the shared direct-quaternion boundary declared by one library."""
+    if isinstance(contract, MuJoCoContract):
+        expected_entry_points = {
+            "mju_rotVecQuat",
+            "mju_mulQuat",
+            "mju_axisAngle2Quat",
+        }
+    elif isinstance(contract, SpiceyPyContract):
+        expected_entry_points = {"q2m", "mxv", "m2q", "qxq", "axisar"}
+    else:
+        expected_entry_points = None
+    if expected_entry_points is not None and (
+        len(contract.target.entry_points) != len(set(contract.target.entry_points))
+        or set(contract.target.entry_points) != expected_entry_points
+    ):
+        raise ValueError("direct quaternion target API list differs from its scope")
+
     boundary = contract.target_boundary
     canonical_coefficient_order = canonical_order(contract)
     native_coefficient_order = native_order(boundary)
@@ -37,11 +53,7 @@ def serialize_direct_quaternion_contract(
     if not conversion or not inverse:
         raise ValueError("direct quaternion contract must declare both directions")
     if isinstance(boundary, EigenBoundaryContract):
-        native_storage = (
-            coefficient_order(boundary.coeffs_access_order)
-            if boundary.coeffs_access_order
-            else None
-        )
+        native_storage = coefficient_order(boundary.coeffs_access_order)
         native_action = boundary.vector_action
     elif isinstance(boundary, MuJoCoBoundaryContract):
         native_storage = None
@@ -66,10 +78,7 @@ def serialize_direct_quaternion_contract(
         native_algebra="Hamilton",
         native_order=native_coefficient_order,
         native_storage_order=native_storage,
-        native_vector_action=(
-            native_action
-            or "native quaternion action captured on the declared coordinate basis"
-        ),
+        native_vector_action=native_action,
         conversion_rule=conversion,
         inverse_rule=inverse,
         input_domain=contract.canonical.normalization,

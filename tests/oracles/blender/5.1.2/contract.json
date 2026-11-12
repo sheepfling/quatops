@@ -19,7 +19,7 @@
     "canonical_input_file": "experiments/interoperability/v1/canonical_inputs.json",
     "canonical_input_sha256": "a6f0630806b69d3b3b29a036aa10f63bfe214668329c661598951f84f8f41eec",
     "semantic_contract_file": "experiments/blender/5.1.2/semantic_contract.json",
-    "semantic_contract_sha256": "7379d87b1aceca5e9be8b75bf556a592dfa3a79c1e59631ac5795cd43af9b0c0",
+    "semantic_contract_sha256": "f5d892b74874d8dbd89001ca3c325bf7baf6f0e23a6342691026d2e4d9fa1320",
     "direct_capture": {
       "capture_source": "experiments/blender/5.1.2/capture.py",
       "capture_source_sha256": "e9d4ba7f7fbb3f20d15d66aeffd054d2fa7d6c6832d5cda386a4851e55a64173",

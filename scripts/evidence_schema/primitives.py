@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import math
-from collections.abc import Iterable
+from collections.abc import Iterable, Sequence
 from typing import Annotated, Literal, Union
 
 from pydantic import (
@@ -16,6 +16,58 @@ from pydantic import (
 )
 
 Scalar = float
+
+SignedAxis = Literal["x", "-x", "y", "-y", "z", "-z"]
+AxisMeaning = Literal[
+    "right",
+    "left",
+    "east",
+    "west",
+    "forward",
+    "back",
+    "backward",
+    "north",
+    "south",
+    "up",
+    "down",
+    "ellipsoid normal",
+    "ellipsoid inward normal",
+]
+AxisLetter = Literal["X", "Y", "Z"]
+SignedAxisDirection = Literal["+X", "-X", "+Y", "-Y", "+Z", "-Z"]
+AxisDirectionName = Literal[
+    "positive_x",
+    "negative_x",
+    "positive_y",
+    "negative_y",
+    "positive_z",
+    "negative_z",
+]
+NativeScalarProfile = Literal["float32", "float64"]
+PrecisionProfile = Literal["float32", "float64", "orientation", "ecef-position"]
+FrameHandednessLabel = Literal["right", "left", "right-handed", "left-handed"]
+QuaternionCoefficientOrder = Literal["WXYZ", "XYZW", "wxyz", "xyzw"]
+QuaternionProductOrder = Literal[
+    "lhs * rhs; rhs acts first",
+    "rhs * lhs; lhs acts first",
+]
+MatrixProductOrder = Literal["lhs matrix * rhs matrix; rhs acts first"]
+ObservedProductOrder = Literal[
+    "lhs * rhs; rhs acts first",
+    "rhs * lhs; lhs acts first",
+    "lhs matrix * rhs matrix; rhs acts first",
+]
+NativeQuaternionVectorAction = Literal[
+    "active quaternion sandwich / engine vector rotation API",
+    "Eigen quaternion multiplication rotates column vectors",
+    "active; mujoco.mju_rotVecQuat(output, vector, q)",
+    "active; q2m(q) * column_vector",
+]
+SceneTransformSemantics = Literal[
+    "node local to parent; world = parent world * child local; column-vector action",
+    "OpenUSD Gf row vectors; child world row matrix = child local row matrix "
+    "* parent world row matrix",
+]
 
 NATIVE_RETAINED_CASE_IDS = (
     "identity",
@@ -46,6 +98,8 @@ def _ensure_binary64_convertible(value: object) -> object:
 FiniteInputNumber = Annotated[
     Union[StrictInt, FiniteFloat], AfterValidator(_ensure_binary64_convertible)
 ]
+PositiveFiniteFloat = Annotated[FiniteFloat, Field(gt=0)]
+NonNegativeFiniteFloat = Annotated[FiniteFloat, Field(ge=0)]
 SHA256 = Annotated[str, Field(pattern=r"^[0-9a-f]{64}$")]
 Vector3 = Annotated[list[Scalar], Field(min_length=3, max_length=3)]
 Quaternion4 = Annotated[list[Scalar], Field(min_length=4, max_length=4)]
@@ -57,7 +111,7 @@ Matrix4 = Annotated[
 BasisImages = Annotated[list[Vector3], Field(min_length=3, max_length=3)]
 
 
-def validate_signed_axis_map(values: list[str], *, context: str) -> None:
+def validate_signed_axis_map(values: Sequence[str], *, context: str) -> None:
     """Validate a declared signed permutation of three coordinate axes."""
     if len(values) != 3 or any(
         value not in {"x", "-x", "y", "-y", "z", "-z"} for value in values
@@ -68,7 +122,7 @@ def validate_signed_axis_map(values: list[str], *, context: str) -> None:
 
 
 def mapped_handedness(
-    source: str, values: list[str], *, context: str
+    source: str, values: Sequence[str], *, context: str
 ) -> Literal["right-handed", "left-handed"]:
     """Compute the handedness induced by a declared signed-axis map."""
     validate_signed_axis_map(values, context=context)

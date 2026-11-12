@@ -24,7 +24,7 @@
     "native_loader_script_sha256": "6ee56db73b1765ebe477c921b7108b2ee76605f446b900aed9e09db6d99d89a1",
     "native_package_lock_sha256": "cede45573d60150ede075f768f955da9890935dfb78764b3cd0b0029cd48365d",
     "native_numeric_helper_sha256": "aed1da7b180e76ff0e101a477dd6a941ed0ad076509d9716bf2bf9b6896f5fa4",
-    "contract_sha256": "91cc30cafafdc798f6d88ac56a3c3f02da1398009b0d7de24e9267239a590c11",
+    "contract_sha256": "7e93e0ca67cfb010ee33193e50fd0277d92a10e956decfee2ceefe087b6efefb",
     "input_serialization_note": "JSON formatting changed only; parsed native input values are unchanged."
   },
   "reproduction": {
@@ -54,7 +54,7 @@
   },
   "semantic_contract": {
     "file": "experiments/converters/gltf/2.0.0/semantic_contract.json",
-    "sha256": "91cc30cafafdc798f6d88ac56a3c3f02da1398009b0d7de24e9267239a590c11"
+    "sha256": "7e93e0ca67cfb010ee33193e50fd0277d92a10e956decfee2ceefe087b6efefb"
   },
   "direct_reproduction": {
     "utc": "2026-11-10T15:08:15.388Z",
@@ -64,6 +64,7 @@
     "comparison": "All selected native values match bit-for-bit, including signed zero; the point-operation label was corrected and JSON formatting differs.",
     "runner_sha256": "0ec2d652fc870fcc0da1dcf82c61f7336a3facfb409ff253c922b93b433b3fb5",
     "reproduction_runner_sha256": "48890a5e938a38f654f5b4083c38408e6376b23ddb84b75a0e5969ecedf3c49a",
-    "pre_unified_runner_sha256": "9e5c8220cef64cabd5bf6617395170f8a941a33e25040b35633de762b262de78"
+    "pre_unified_runner_sha256": "9e5c8220cef64cabd5bf6617395170f8a941a33e25040b35633de762b262de78",
+    "reproduction_runner_source": "experiments/provenance/reproduction-v1.zip#run-converter-capture-48890a5e.py"
   }
 }
