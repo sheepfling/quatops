@@ -12,6 +12,12 @@ native evidence) and semantic authority (for example, representation-only or
 standard-defined). Neither field upgrades the other. A verified coefficient
 layout does not establish world/body axes. See the generated
 [converter and semantic-role registry](converter-registry.md).
+The [target-contract audit](contributing/SEMANTIC_TARGET_CONTRACT_AUDIT.md)
+records the evidence boundaries and follow-up native qualifications. The
+[contract refinement goal](contributing/TARGET_CONTRACT_REFINEMENT_GOAL.md)
+tracks the typed-contract work, and the
+[authored glTF mesh witness](../experiments/transports/gltf/2.0.0/oriented_mesh/README.md)
+documents the bounded asset-front capture and its reproduction.
 
 The `OrientationConverter` is the semantic path: callers provide source and
 target parent/child frame definitions, and the gateway applies those maps.

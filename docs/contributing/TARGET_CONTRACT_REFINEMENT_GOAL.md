@@ -60,7 +60,6 @@ behavior, Godot Camera3D node action, or mesh-specific glTF asset-front
 behavior. Those require new matching fixtures and native captures only if those
 stronger claims become part of the requested scope.
 
-
 ## Follow-up native qualification
 
 Rick subsequently requested the excluded native gaps be addressed. Supplemental

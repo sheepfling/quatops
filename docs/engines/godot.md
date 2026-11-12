@@ -39,7 +39,6 @@ camera forward from the oriented-asset convention, whose front points along
 +Z. QuatOps keeps those as different roles; neither is inferred for an
 arbitrary imported object.
 
-
 ## Camera3D native node evidence
 
 Separate native Camera3D captures now cover Godot 4.7 stable and 4.8-dev1:

@@ -71,7 +71,12 @@ min_prefix_characters = 4
 
 [checks.pydantic_practices]
 extensions = [".py"]
-exclude = []
+# Reviewed external-process boundary: ProbeRequest is serialized into Node stdin;
+# NativeObservation validates newly produced stdout, not the dumped request.
+# The current advisory follows the subprocess assignment as dump-derived data.
+# Preserve response validation; revisit this exception when the rule can
+# distinguish process output from the request payload.
+exclude = ["examples/converters/threejs_consumer.py"]
 report_dump_revalidation = true
 report_deprecated_v1_apis = true
 report_unvalidated_construct = true

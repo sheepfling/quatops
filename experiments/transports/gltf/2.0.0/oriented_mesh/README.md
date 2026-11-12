@@ -39,8 +39,9 @@ The initial native capture ran on Windows with Node 24.21.0 and Three.js
 ## Qualification boundary
 
 This is additional, narrowly scoped loader-observation evidence for this
-specified mesh, static hierarchy and authored alignment. The shared semantic-claim registry links `gltf.asset-front` to this exact
-witness as `asset_front_observation [oriented_mesh]`. Typed capture validation
+specified mesh, static hierarchy and authored alignment. The shared
+semantic-claim registry links `gltf.asset-front` to this exact witness as
+`asset_front_observation [oriented_mesh]`. Typed capture validation
 checks geometry, author assignment, provenance and numeric actions before
 crediting that limited claim. Converter acceptance is unchanged. It establishes neither
 calibration of a physical installation nor inference of an unknown mesh's
