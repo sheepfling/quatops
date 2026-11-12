@@ -49,8 +49,16 @@ packages. Raw target-specific observations remain intact in their fixtures.
 CI runs the declared Python compatibility matrix. Check the workflow results
 for the current branch when confirming a change; this page intentionally does
 not preserve old pass counts or environment snapshots.
-The pinned Alphus quality review runs on pushes and pull requests as a separate
-workflow.
+The pinned Alphus quality review is local-only, not a hosted CI workflow.
+Install its optional tools in a separate Python 3.15 environment, then run from
+the repository root:
+
+```shell
+python -m pip install "alphus @ https://github.com/sheepfling/alphus/archive/77b191b8bdf1fc4cfb50c6f3e4518be297f3d3ee.zip" -r requirements-dev-experimental.txt
+python -m alphus --root . --config quality-gates.toml --run --profile review --output plain
+```
+
+The normal CI, type-check, package, and evidence-replay jobs remain unchanged.
 
 Before pushing, run the checks in a Linux Docker container as well:
 

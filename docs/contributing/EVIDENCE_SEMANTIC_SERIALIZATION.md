@@ -5,16 +5,13 @@ target-specific; a target adapter gives it explicit mathematical and frame
 meaning; the common normalizer accepts only a compatible contract and witness
 set. Native capture package schemas remain versioned independently.
 
-```text
-native capture + experiment-owned semantic contract
-                 ->
-one target semantic serializer
-                 ->
-one concrete serialization model
-                 ->
-shared normalizer
-                 ->
-validated frame contract and native witnesses
+```mermaid
+flowchart TD
+    capture["Native capture"] --> serializer["Target semantic serializer"]
+    contract["Experiment-owned semantic contract"] --> serializer
+    serializer --> model["Concrete serialization model"]
+    model --> normalizer["Shared normalizer"]
+    normalizer --> validated["Validated frame contract and native witnesses"]
 ```
 
 ## Responsibilities

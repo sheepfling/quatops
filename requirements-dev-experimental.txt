@@ -1,2 +1,2 @@
-# Bridge for the reusable workflow's requirements-file input.
+# Optional tools for the local Alphus quality review.
 -e .[dev-experimental]
