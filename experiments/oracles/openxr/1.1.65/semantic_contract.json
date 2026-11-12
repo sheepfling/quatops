@@ -1,0 +1,27 @@
+{
+  "schema_version": "1.0",
+  "evidence_status": "declared_not_native_accepted",
+  "product": "Khronos OpenXR SDK and SDK-Source test_runtime",
+  "version": "1.1.65",
+  "api_version": [1, 1, 65],
+  "quaternion_order": "xyzw",
+  "quaternion_precision": "binary32",
+  "position_units": "metres",
+  "validation_tolerance": 0.000002,
+  "orientation_applied_before_translation": true,
+  "locate_returns_target_pose_in_base": true,
+  "reference_space": {
+    "reference_space_type": "LOCAL",
+    "handedness": "right-handed",
+    "positive_x": "right",
+    "positive_y": "up",
+    "positive_z": "back",
+    "origin": "runtime-defined"
+  },
+  "input_spaces": ["A", "B", "C"],
+  "relation_cases": [
+    {"observation": "A_from_B", "target": "B", "base": "A"},
+    {"observation": "B_from_C", "target": "C", "base": "B"},
+    {"observation": "A_from_C", "target": "C", "base": "A"}
+  ]
+}

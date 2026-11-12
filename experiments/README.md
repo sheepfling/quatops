@@ -5,17 +5,29 @@ runtime package. For the user-facing documentation, start with the
 [project README](../README.md); for development checks, see
 [contributor verification](../docs/contributing/VERIFICATION.md).
 
-Run from the repository root with the local `.venv`. List the experiment
-commands with:
+## Evidence capture indexes
 
-```sh
-.venv/bin/python experiments/run.py --list
+- [Engine captures](blender/README.md): Blender authoring and native rotation capture.
+- [Converter-boundary captures](converters/README.md): auxiliary canonical-to-target proofs.
+- [Shared Python capture environment](converters/python/README.md): locked target extras.
+- [Godot captures](godot/README.md): versioned native runtime evidence.
+- [Shared orientation inputs](interoperability/README.md): stable discovery and witness inputs.
+- [Math-library captures](oracles/README.md): independently implemented rotation APIs.
+- [Transport captures](transports/README.md): glTF assets and loader runs.
+- [Unity captures](unity/README.md): versioned native runtime evidence.
+- [Unreal captures](unreal/README.md): versioned native runtime evidence.
+
+Run from the repository root with an activated virtual environment. List the
+experiment commands with:
+
+```shell
+python experiments/run.py --list
 ```
 
 Install optional experiment dependencies when needed:
 
-```sh
-.venv/bin/python -m pip install -e '.[experiments]'
+```shell
+python -m pip install -e ".[experiments]"
 ```
 
 ## Script commands
@@ -41,18 +53,17 @@ in [issue #6](https://github.com/sheepfling/quatops/issues/6).
 The one-off runner checks outputs, labels each run's winner, and can save that
 run's metadata and results to a local JSON file:
 
-```sh
-.venv/bin/python experiments/one_off_benchmark.py --json /tmp/quatops-one-off.json
-.venv/bin/python experiments/one_off_benchmark.py --include-vectorized \
-    --json /tmp/quatops-performance.json
+```shell
+python experiments/one_off_benchmark.py --repository-root .
+python experiments/one_off_benchmark.py --repository-root . --include-vectorized
 ```
+
+Pass `--json` with a destination path to save the run's results.
 
 For grouped NumPy and engine comparisons:
 
-```sh
-.venv/bin/python -m pytest tests/benchmarks -m benchmark --benchmark-only \
-    --benchmark-group-by=group --benchmark-columns=median \
-    --benchmark-json=/tmp/quatops-benchmarks.json
+```shell
+python -m scripts.verify benchmarks
 ```
 
 Benchmark groups verify outputs before timing. Optional Numba kernels are
@@ -70,8 +81,8 @@ not part of the benchmark tests.
 
 Install the performance extra to enable Numba acceleration:
 
-```sh
-.venv/bin/python -m pip install -e '.[performance]'
+```shell
+python -m pip install -e ".[performance]"
 ```
 
 Large NumPy batches use optional kernels for multiplication, vector rotation,

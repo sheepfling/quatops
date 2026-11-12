@@ -4,4 +4,4 @@ graft src
 graft tests
 prune docs
 prune experiments
-global-exclude *.py[cod]
+global-exclude *.py[cod] *.nbc *.nbi

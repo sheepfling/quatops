@@ -1,0 +1,15 @@
+{
+  "schema_version": 1,
+  "target": "Godot Camera3D",
+  "version": "4.8-dev1 (official)",
+  "build_hash": "ebbf577a041d1ab8d7824b6f90e7d0575461ca45",
+  "platform": "Windows",
+  "capture_source": "experiments/godot/camera3d/capture.gd",
+  "capture_sha256": "c9aa4184ccc57940cc2024dbb76dd17b5f4a9a9f15f4480952aefcea39b60635",
+  "semantic_contract": "experiments/godot/camera3d/semantic_contract.json",
+  "semantic_contract_sha256": "161f1f93d0282025621d2198d4270c9eca97fba0ac66654edeffa76b0013056e",
+  "witnesses_sha256": "7b9351ce8fcfb06fde1a0238de0ff8b5d946ff590600ac337dccaa85f6972975",
+  "executable_sha256": "061370a63e2033f3139d2c55f2250ddc69a5e2ba151ac16139f68e8bdd4cc18d",
+  "native_run_date": "2026-11-12",
+  "execution": "Godot --headless --path experiments/godot/<version> --script experiments/godot/camera3d/capture.gd -- <output>"
+}

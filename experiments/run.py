@@ -32,16 +32,21 @@ COMMANDS = {
 
 def main(argv: Optional[Sequence[str]] = None) -> int:  # noqa: UP045
     parser = argparse.ArgumentParser(description="Run a QuatOps experiment.")
-    parser.add_argument("--list", action="store_true", help="list available experiments")
+    parser.add_argument(
+        "--list", action="store_true", help="list available experiments"
+    )
     parser.add_argument("experiment", nargs="?", choices=tuple(COMMANDS))
     parser.add_argument(
-        "modules", nargs="*",
+        "modules",
+        nargs="*",
         help="optional module names for check-homogeneous (default: both prototypes)",
     )
     args = parser.parse_args(argv)
     if args.list:
         for name, (script, requirements) in COMMANDS.items():
-            extra = " (requires " + ", ".join(requirements) + ")" if requirements else ""
+            extra = (
+                " (requires " + ", ".join(requirements) + ")" if requirements else ""
+            )
             print(f"{name}: {script}{extra}")
         return 0
     if not args.experiment:
@@ -52,7 +57,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:  # noqa: UP045
     missing = [name for name in requirements if importlib.util.find_spec(name) is None]
     if missing:
         print(
-            "Missing optional dependencies: " + ", ".join(missing)
+            "Missing optional dependencies: "
+            + ", ".join(missing)
             + ". Install them with: python3 -m pip install -e '.[experiments]'",
             file=sys.stderr,
         )

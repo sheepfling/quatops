@@ -1,0 +1,57 @@
+{
+  "schema_version": "1.0",
+  "review_state": "Pinned native capture only; replay acceptance is recorded by repository tests",
+  "execution": {
+    "was_run": true,
+    "utc": "2026-11-04T08:41:22.974605+00:00",
+    "python": "3.10.11 (tags/v3.10.11:7d4cc5a, Apr  5 2023, 00:38:17) [MSC v.1929 64 bit (AMD64)]",
+    "platform": "Windows-10-10.0.26300-SP0",
+    "architecture": "AMD64"
+  },
+  "target": {
+    "name": "SpiceyPy / CSPICE",
+    "wrapper_version": "8.3.0",
+    "toolkit_version": "CSPICE_N0067",
+    "native_scalar_dtype": "float64"
+  },
+  "selection": {
+    "retained_orientation_cases": 5,
+    "native_created_orientations": 1,
+    "noncommuting_product_orders": 2,
+    "native_basis_images_per_orientation": 3,
+    "native_mixed_probe_case_id": "mixed_a"
+  },
+  "provenance": {
+    "capture_script_sha256": "9f086a289cc3a3ffa4e7c1503575b74e4291b53a0bcd72b687bf93d680b0f4b6",
+    "contract_sha256": "75b58bb87dca0d97767d2ff638115c9d4537f769b44576dd2a2de5b4b8b1e45d",
+    "converter_input_spec_sha256": "aa7756f7c655246f53fbd4e34b1a48d72942c2bcb41fc181f8021fd666bfa058",
+    "selected_inputs_sha256": "a6f0630806b69d3b3b29a036aa10f63bfe214668329c661598951f84f8f41eec",
+    "witnesses_sha256": "ea498c1a3b326bb76531aa94004ecaf66bc15098111ff2b6669a479f0d9dbe60",
+    "witness_selection_note": "Quarter-turn rows were removed from the retained subset; original native capture identity and selected values are unchanged.",
+    "pinned_lockfile_sha256": "cb4c7d5ec7d098acc31b61dec5362335b1c2f41423532598a823ced5e2a2845e",
+    "loaded_cspice_binary_path": "C:\\Users\\peanu\\GIT\\sheepfling\\quatops\\experiments\\converters\\spiceypy\\8.3.0\\.venv\\lib\\site-packages\\spiceypy\\utils\\cspice.dll",
+    "loaded_cspice_binary_sha256": "7fd2dcc58d73ed5293847e67109897caba34240b8f9c38ad739c0b2ec6ce7715",
+    "exact_invocation": "uv run --locked --project experiments/converters/spiceypy/8.3.0 --python 3.10.11 python experiments/converters/spiceypy/8.3.0/capture_native.py --repository-root <repository>",
+    "capture_script_archive": "experiments/provenance/reproduction-v1.zip#spiceypy-8.3.0-capture_native.py",
+    "historical_contract_sha256": "3897449f31edcb43c0f81234a95e539d84f702b0ce9c0f61adac410679c05bc9",
+    "historical_contract_revision": "e523c687de06bb600a2cc3e404c193a650ec0319",
+    "contract_scope_note": "Current contract removes unsupported matrix-roundtrip claims; original capture, witnesses and recorded execution are unchanged."
+  },
+  "semantic_contract": {
+    "file": "experiments/converters/spiceypy/8.3.0/semantic_contract.json",
+    "sha256": "75b58bb87dca0d97767d2ff638115c9d4537f769b44576dd2a2de5b4b8b1e45d"
+  },
+  "reproduction": {
+    "capture_script_sha256": "27fa644897c7c1d07f6e1feb4429e647d4c97c9aa0db2d3fd2b7a979d2329928"
+  },
+  "unified_lock_replay": {
+    "utc": "2026-11-11T02:08:23.958462+00:00",
+    "python": "3.13.14 (main, Jun 23 2026, 15:19:27) [MSC v.1944 64 bit (AMD64)]",
+    "lockfile_sha256": "4377022efa364fac013b8adf6a232bfbd6dc860847418061ef7f6c66e0f2d142",
+    "native_binary_sha256": "7fd2dcc58d73ed5293847e67109897caba34240b8f9c38ad739c0b2ec6ce7715",
+    "capture_script_sha256": "7a7b5c154cf72ef4713aefed5862c8b8159f78a7e160d311603048f433e4bb35",
+    "shared_capture_script_sha256": "0b7f0374acedf0ba38a17701a9a2aba2e0b79033ff89d5f49878ea20e166917b",
+    "witnesses_sha256": "ea498c1a3b326bb76531aa94004ecaf66bc15098111ff2b6669a479f0d9dbe60",
+    "invocation": "uv run --locked --project experiments/converters/python --all-extras --python 3.13.14 python experiments/converters/spiceypy/8.3.0/capture_native.py --repository-root . --output-dir <temporary>"
+  }
+}

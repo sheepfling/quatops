@@ -1,0 +1,149 @@
+{
+  "schema_version": "1.0",
+  "capture_id": "proj-geographic",
+  "oracle_id": "proj_geographic",
+  "oracle_family": "proj",
+  "evidence_kind": "native_runtime",
+  "product": {
+    "name": "PROJ via pyproj",
+    "version": "9.5.1",
+    "source_revision": null,
+    "binary_sha256": "49dd659f375b93cf4916d7612ca47dca960d6d5d7347bfc53b4ab673d78e29c3",
+    "binary_identity_note": "/opt/pyvenv/lib/python3.13/site-packages/pyproj/_transformer.cpython-313-x86_64-linux-gnu.so",
+    "dependencies": [
+      {
+        "name": "pyproj",
+        "version": "3.7.2"
+      }
+    ]
+  },
+  "execution": {
+    "was_run": true,
+    "utc": "2026-11-03T02:53:07.613026+00:00",
+    "argv": [
+      "python",
+      "<historical PROJ capture exporter; workspace-specific path removed>",
+      "--output",
+      "<temporary capture directory>"
+    ],
+    "exit_code": 0,
+    "platform": "Linux-6.18.57-x86_64-with-glibc2.41",
+    "architecture": "x86_64",
+    "runtime": "3.13.5 (main, Jul 15 2026, 20:25:40) [GCC 14.2.0]",
+    "compiler_flags": [],
+    "compiler_flags_note": "Vendor native flags not inferred from host Python",
+    "argv_note": "The historical exporter SHA-256 is preserved; the versioned package now contains a portable reproduction exporter."
+  },
+  "precision": {
+    "input": "binary64 geographic degrees/metres",
+    "arithmetic": "native PROJ double",
+    "output": "binary64",
+    "serialized": "Round-trip binary64 JSON values; duplicate per-value IEEE-754 sidecars are omitted."
+  },
+  "exporter": {
+    "path": "historical native exporter source not retained; see SHA-256",
+    "sha256": "8211253a2d97a9453890b8a695af02f0c79069419deca9ce7e7dc0b4211a48b1",
+    "commit": null,
+    "role": "historical native-run exporter; original source path was removed during evidence curation"
+  },
+  "corpus": {
+    "path": "experiments/oracles/shared/geographic_inputs_v1.json",
+    "sha256": "ca5c70314444c14cead0cc196f319e5d189657bb818eb59751c07e55ec23ff85"
+  },
+  "artifacts": [
+    {
+      "path": "../shared/observations-ab631993f29c2307725d8720e19a3aa0d42fdcb4536b32d3734ca0bc2c75fe33.jsonl",
+      "sha256": "ab631993f29c2307725d8720e19a3aa0d42fdcb4536b32d3734ca0bc2c75fe33",
+      "role": "selected_native_observations",
+      "source_capture_sha256": "67adb8fcedc1cd9b6aca1b203a6109b8b57f2d8fe3f381951cbcb0dcd56e5f5a"
+    },
+    {
+      "path": "experiments/oracles/shared/geographic_inputs_v1.json",
+      "sha256": "ca5c70314444c14cead0cc196f319e5d189657bb818eb59751c07e55ec23ff85",
+      "role": "geographic_input_corpus"
+    }
+  ],
+  "coverage": {
+    "profiles": ["FRAME"],
+    "independent_input_count": 11,
+    "native_observation_count": 11,
+    "quatops_replay_count": 0,
+    "status_counts": {
+      "ok": 11
+    },
+    "record_count": 11
+  },
+  "review": {
+    "state": "captured_not_reviewed",
+    "reviewer": null,
+    "limitations": [
+      "This is PROJ execution, NOT Cesium execution.",
+      "Local Cartesian point transforms only; no quaternion/HPR function is inferred from these outputs.",
+      "At geographic poles longitude fixes a convention; Cesium may choose a different exact-pole fallback.",
+      "Network disabled; WGS84 ellipsoid only, no external datum grids."
+    ]
+  },
+  "reproduction": {
+    "exporter_path": "experiments/oracles/proj/9.5.1/capture_proj.py",
+    "exporter_sha256": "d7040722a7e90baca55aa2bbceabc1c99d62d00b58c157fbe124d52778c0624e",
+    "previous_checkout_exporter_sha256": "b1924e77c6a449b3c86af70f8fb870cb06fa2eecd160f8a1d6937b3bbe4254a6",
+    "input_path": "experiments/oracles/shared/geographic_inputs_v1.json",
+    "input_sha256": "619099b732593c6c45f4f7eb64714e4c7d79b2c96dcd070777522e3736e4f085",
+    "previous_checkout_capture_helper_sha256": "ecdf0245b9d0318d67189c471f26b3ec58e2ef871611b6a2c5c79cbbc16963da",
+    "capture_helper_archive": "experiments/provenance/reproduction-v1.zip#capture_io.py",
+    "lockfile_sha256": "4377022efa364fac013b8adf6a232bfbd6dc860847418061ef7f6c66e0f2d142",
+    "digest_helper_sha256": "0ef54f8fed931269ac8f104d376ac889a6be4dff449a23e4a5005bbf063ff7bb",
+    "previous_envelope_exporter_sha256": "98329f54b4195f242aee7d86486c4e312b8bd9d46494680843d9239baf2a5679"
+  },
+  "retention": {
+    "source_observations_sha256": "67adb8fcedc1cd9b6aca1b203a6109b8b57f2d8fe3f381951cbcb0dcd56e5f5a",
+    "original_full_capture_sha256": "d908e22625445f11e0167b136587cfe511161885f22f35fddea53b5e6069e20d",
+    "selection": "Eleven locations retain exact native ECEF origin, three ENU unit-axis endpoints, one mixed-point ECEF endpoint, and its local inverse readback; case inputs resolve from the shared corpus. Shared contract and binary64 dtype appear once.",
+    "verified_inverse_readbacks": "All five prior local readbacks at each location were checked against their source points within 1e-8 m before retaining the mixed-point readback.",
+    "verified_hex_values_removed": 583,
+    "previous_selected_observations_sha256": "44d6c6ed0c27339ad0f718436dbacc89ac22778209790428919883f6e74c1ab8",
+    "previous_selected_observations_revision": "60802309fe3d933c6d4c7e07ed5110048620b83d"
+  },
+  "direct_reproduction": {
+    "utc": "2026-11-10T14:50:54.626997+00:00",
+    "pyproj_version": "3.7.2",
+    "proj_version": "9.5.1",
+    "python": "3.13.14 (main, Jun 23 2026, 15:19:27) [MSC v.1944 64 bit (AMD64)]",
+    "platform": "Windows-11-10.0.26300-SP0",
+    "native_binary_sha256": "bc220c1e28b5a5aa694eabe713c8c7b35f39aa38d6d6412046f9d1dfc96f138c",
+    "input_sha256": "619099b732593c6c45f4f7eb64714e4c7d79b2c96dcd070777522e3736e4f085",
+    "exporter_sha256": "7567785060d92eea201c2861d87a75a576666ca0bd31a683c7452c2bf8913b77",
+    "observations_sha256": "d30b93e91e68d562f3a4d6187a648191e748e400cf45876135ed6a8958aa35ba",
+    "observation_count": 11,
+    "comparison": "All 11 native records reproduced on Windows; maximum absolute difference from historical Linux values was 9.313225746154785e-10 m, with no signed-zero differences.",
+    "reproduction_exporter_sha256": "98329f54b4195f242aee7d86486c4e312b8bd9d46494680843d9239baf2a5679"
+  },
+  "unified_lock_replay": {
+    "utc": "2026-11-11T16:53:49.987735+00:00",
+    "python": "3.13.14 (main, Jun 23 2026, 15:19:27) [MSC v.1944 64 bit (AMD64)]",
+    "lockfile_sha256": "4377022efa364fac013b8adf6a232bfbd6dc860847418061ef7f6c66e0f2d142",
+    "native_binary_sha256": "bc220c1e28b5a5aa694eabe713c8c7b35f39aa38d6d6412046f9d1dfc96f138c",
+    "observations_sha256": "d30b93e91e68d562f3a4d6187a648191e748e400cf45876135ed6a8958aa35ba",
+    "observation_count": 11,
+    "exporter_sha256": "98329f54b4195f242aee7d86486c4e312b8bd9d46494680843d9239baf2a5679",
+    "digest_helper_sha256": "0ef54f8fed931269ac8f104d376ac889a6be4dff449a23e4a5005bbf063ff7bb"
+  },
+  "compact_reproduction": {
+    "utc": "2026-11-11T23:10:57.052976+00:00",
+    "was_run": true,
+    "capture_operations_completed": true,
+    "pyproj_version": "3.7.2",
+    "proj_version": "9.5.1",
+    "python": "3.13.14 (main, Aug  5 2026, 01:09:38) [GCC 14.2.0]",
+    "platform": "Linux-6.18.33.2-microsoft-standard-WSL2-x86_64-with-glibc2.41",
+    "native_binary_sha256": "49dd659f375b93cf4916d7612ca47dca960d6d5d7347bfc53b4ab673d78e29c3",
+    "native_binary_note": "SHA-256 of the pyproj _transformer extension, not a hash of every dynamically linked PROJ library.",
+    "input_sha256": "619099b732593c6c45f4f7eb64714e4c7d79b2c96dcd070777522e3736e4f085",
+    "exporter_sha256": "d7040722a7e90baca55aa2bbceabc1c99d62d00b58c157fbe124d52778c0624e",
+    "observations_sha256": "ab631993f29c2307725d8720e19a3aa0d42fdcb4536b32d3734ca0bc2c75fe33",
+    "observation_count": 11,
+    "compared_witness_exact": true,
+    "exit_code": 0,
+    "comparison": "All 198 native values, including zero signs, exactly match the retained historical Linux observations."
+  }
+}

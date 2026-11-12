@@ -87,30 +87,30 @@ branch-policy exception next to the tests. Run the full suite with the local
 ## Coverage map and branch policies
 
 - Generic algebra and rotation-vector/matrix Monte Carlo:
-  [`test_numpy_quaternion_oracle.py`](../../tests/test_numpy_quaternion_oracle.py).
+  [`test_numpy_quaternion_oracle.py`](../../tests/quatops/numpy/oracles/test_numpy_quaternion_oracle.py).
 - Analytic functions and scalar/vector extraction:
-  [`test_analytic_oracle.py`](../../tests/test_analytic_oracle.py).
+  [`test_analytic_oracle.py`](../../tests/experiments/oracles/shared/test_analytic_oracle.py).
 - Coefficient/convention conversion, axis-angle, Euler, MRP, vector alignment,
   and rotation-vector aliases:
-  [`test_rotation_conversion_oracle.py`](../../tests/test_rotation_conversion_oracle.py).
+  [`test_rotation_conversion_oracle.py`](../../tests/experiments/oracles/shared/test_rotation_conversion_oracle.py).
 - Engine signed-axis maps and basis-converted SLERP trajectories:
-  [`test_engine_basis_oracle.py`](../../tests/test_engine_basis_oracle.py).
+  [`test_engine_basis_oracle.py`](../../tests/quatops/experimental/engines/test_engine_basis_oracle.py).
 - Frozen upstream Unity.Mathematics/Godot Euler-to-quaternion and matrix values:
-  [`test_engine_euler_golden.py`](../../tests/test_engine_euler_golden.py) with
+  [`test_engine_euler_golden.py`](../../tests/experiments/engines/shared/test_engine_euler_golden.py) with
   source-attributed values in [`engine_euler_fixtures.json`](../../tests/golden/engine_euler_fixtures.json).
 - SLERP, NLERP, SQUAD, boxplus/boxminus, quaternion derivatives, and angular
   velocity integration:
-  [`test_manifold_kinematics_oracle.py`](../../tests/test_manifold_kinematics_oracle.py).
+  [`test_manifold_kinematics_oracle.py`](../../tests/experiments/oracles/shared/test_manifold_kinematics_oracle.py).
 - Multiplication matrices, skew, Jacobians, adjoint, and homogeneous matrices:
-  [`test_matrix_oracle.py`](../../tests/test_matrix_oracle.py).
+  [`test_matrix_oracle.py`](../../tests/experiments/oracles/shared/test_matrix_oracle.py).
 - Weighted alignment, means, covariance, and swing/twist:
-  [`test_estimation_oracle.py`](../../tests/test_estimation_oracle.py).
+  [`test_estimation_oracle.py`](../../tests/experiments/oracles/shared/test_estimation_oracle.py).
 - Seeded random attitudes and stream parity:
-  [`test_random_oracle.py`](../../tests/test_random_oracle.py).
+  [`test_random_oracle.py`](../../tests/experiments/oracles/shared/test_random_oracle.py).
 - Singular inputs, branch edges, invalid shapes, and empty NumPy layouts:
-  [`test_oracle_edge_contracts.py`](../../tests/test_oracle_edge_contracts.py),
-  [`test_numpy_layouts.py`](../../tests/test_numpy_layouts.py), and
-  [`test_numpy_component_axes.py`](../../tests/test_numpy_component_axes.py).
+  [`test_oracle_edge_contracts.py`](../../tests/experiments/oracles/shared/test_oracle_edge_contracts.py),
+  [`test_numpy_layouts.py`](../../tests/quatops/numpy/test_numpy_layouts.py), and
+  [`test_numpy_component_axes.py`](../../tests/quatops/numpy/test_numpy_component_axes.py).
 
 The logarithm of a negative real uses the positive first coefficient axis in
 both Hamilton and JPL algebraic representations. At this singular input, a

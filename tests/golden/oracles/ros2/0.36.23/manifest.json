@@ -1,0 +1,152 @@
+{
+  "schema_version": "1.0",
+  "evidence_kind": "native_runtime_selected_witnesses",
+  "review_state": "native tf2 capture retained; QuatOps frame-chain replay passed",
+  "product": {
+    "name": "ROS 2 tf2",
+    "version": "0.36.23",
+    "source_revision": null,
+    "binary_sha256": "020dfc03b71b41af8ab70101801202a06a4456491bda47c993a93003d2bc004f",
+    "binary_identity_note": "/tmp/ros-install/quatops_ros_capture/lib/quatops_ros_capture/capture_ros",
+    "dependencies": [
+      {
+        "name": "ROS_DISTRO",
+        "version": "jazzy"
+      },
+      {
+        "name": "container image",
+        "version": "ros:jazzy-ros-base@sha256:8eed0a4669bbf43ee331878a4c39bd8ebddea8e3312a58b4fae8edb14526b617"
+      },
+      {
+        "name": "tf2",
+        "version": "0.36.23",
+        "package_xml_sha256": "a4aa5ea795e6375f07e1322c191c30e11ce1f85525a1be16643ebe97c8c26eae"
+      },
+      {
+        "name": "tf2_geometry_msgs",
+        "version": "0.36.23",
+        "package_xml_sha256": "e3231888f8ac6bcdaf74ce800497a95b59955201c8107fe311d470b21f7a36db"
+      },
+      {
+        "name": "geometry_msgs",
+        "version": "5.3.8",
+        "package_xml_sha256": "879da7003d6d2952701aa23146f0d78096143d5107dd6e775a23e591c2c376a0"
+      },
+      {
+        "name": "nlohmann-json3-dev",
+        "version": "3.11.3-1"
+      },
+      {
+        "name": "ros-jazzy-tf2-geometry-msgs",
+        "version": "0.36.23-1noble.20260915.174516"
+      }
+    ]
+  },
+  "execution": {
+    "was_run": true,
+    "utc": "2026-11-04T08:43:00.586915+00:00",
+    "argv": [
+      "/usr/bin/python3",
+      "experiments/converters/ros2/0.36.23/capture_native.py",
+      "--repository-root",
+      "/workspace",
+      "--corpus",
+      "experiments/oracles/shared/orientation_inputs_v1.json",
+      "--output",
+      "/captures/full",
+      "--executable",
+      "/tmp/ros-install/quatops_ros_capture/lib/quatops_ros_capture/capture_ros",
+      "--runtime-image",
+      "ros:jazzy-ros-base@sha256:8eed0a4669bbf43ee331878a4c39bd8ebddea8e3312a58b4fae8edb14526b617"
+    ],
+    "exit_code": 0,
+    "platform": "Linux-6.18.33.2-microsoft-standard-WSL2-x86_64-with-glibc2.39",
+    "architecture": "x86_64",
+    "runtime": "3.12.3 (main, Aug 31 2026, 10:18:26) [GCC 13.3.0]",
+    "compiler_flags": [],
+    "compiler_flags_note": "Vendor native flags not inferred from host Python"
+  },
+  "precision": {
+    "input": "native tf2Scalar; geometry_msgs double fields",
+    "arithmetic": "tf2Scalar as measured by compiled executable",
+    "output": "native scalar and message doubles; inspect native_scalar_bytes",
+    "serialized": "JSON plus native scalar IEEE bits"
+  },
+  "native_build": {
+    "native_scalar_bytes": 8,
+    "compiler": "13.3.0",
+    "cpp_standard": 202002,
+    "flags": "CMake: -Wall -Wextra -Wpedantic -fno-fast-math; C++20"
+  },
+  "capture_provenance": {
+    "full_observation_sha256": "81e826627d153b2cd0583991656f0a3df4ced74963df46c80df0f854cbc04aae",
+    "native_stdout_sha256": "61be3a4b3463e17257f50aa5c657ff0ba4581d0a14d34deda9e85f074a351b75",
+    "capture_manifest_sha256": "bf44939672eca6ad7c12678c3a06c766132f4aee57a8e3fa67d36337ae2cd0eb",
+    "corpus_sha256": "4af272e762f402cb4b3a60ff063bcc2ef1b79aa82e6890207abfa1bf16890db7",
+    "exporter_source_sha256": "3d8374d3e3dede9d14e06ae5fb5667504cc41787ca7451eb989c914a68e2f41d",
+    "capture_runner_sha256": "be4047a273917756c9f0f9154a0990b8318797048744be360457a391e80c8d7b",
+    "capture_helper_sha256": "ecdf0245b9d0318d67189c471f26b3ec58e2ef871611b6a2c5c79cbbc16963da",
+    "dockerfile_sha256": "e2214f02b11168ad25ab6e88a86b428d67e940a0555574dae328391aed91ee52",
+    "build_recipe_sha256": "65e75f02b743ef65eab8f0041ba8f286c767a60e3e02a64921e1a822af00e835",
+    "selected_witnesses_sha256": "a6e2569b79295b44c3598decc70efba233f1ddd20e420c22c0673ee3aee64920",
+    "historical_sources": {
+      "exporter": "experiments/provenance/reproduction-v1.zip#ros2-0.36.23/capture_ros.cpp",
+      "runner": "experiments/provenance/reproduction-v1.zip#ros2-0.36.23/capture_native.py",
+      "helper": "experiments/provenance/reproduction-v1.zip#capture_io.py"
+    }
+  },
+  "selection": {
+    "retained_observations": 2,
+    "full_capture_observations": 9,
+    "policy": "retain both lookup directions; store shared edge inputs once and keep one forward message, point action, and round trip",
+    "numeric_values": "round-trippable decimals and dtype; exact bits only for signed-zero or nonfinite values"
+  },
+  "semantic_contract": {
+    "file": "experiments/converters/ros2/0.36.23/semantic_contract.json",
+    "sha256": "4fef1703f0d2a982c2087d058b0703272f3e1cc5608673ea9890f0655c42ce48"
+  },
+  "direct_capture": {
+    "kind": "direct_native_ros2_tf2_capture",
+    "utc": "2026-11-11T16:50:09.825280+00:00",
+    "runtime_image": "ros:jazzy-ros-base@sha256:8eed0a4669bbf43ee331878a4c39bd8ebddea8e3312a58b4fae8edb14526b617",
+    "ros_distro": "jazzy",
+    "packages": {
+      "tf2": {
+        "version": "0.36.23",
+        "package_xml_sha256": "a4aa5ea795e6375f07e1322c191c30e11ce1f85525a1be16643ebe97c8c26eae"
+      },
+      "tf2_geometry_msgs": {
+        "version": "0.36.23",
+        "package_xml_sha256": "e3231888f8ac6bcdaf74ce800497a95b59955201c8107fe311d470b21f7a36db"
+      },
+      "geometry_msgs": {
+        "version": "5.3.8",
+        "package_xml_sha256": "879da7003d6d2952701aa23146f0d78096143d5107dd6e775a23e591c2c376a0"
+      }
+    },
+    "platform": "Linux-6.18.33.2-microsoft-standard-WSL2-x86_64-with-glibc2.39",
+    "python": "3.12.3",
+    "native_build": {
+      "native_scalar_bytes": 8,
+      "compiler": "13.3.0",
+      "cpp_standard": 202002,
+      "flags": "CMake: -Wall -Wextra -Wpedantic -fno-fast-math; C++20"
+    },
+    "sha256": {
+      "input": "e5dd788cdbed73ca0dbd5d4a619b5526282c0656737abdfdf9593bd732a01746",
+      "contract": "4fef1703f0d2a982c2087d058b0703272f3e1cc5608673ea9890f0655c42ce48",
+      "native_source": "3f792807563b75bff742ad8b1aaeb15a83743325f8d4e8eb5f82c70be9b78fd6",
+      "runner": "9238f1592ecd5f23b6e434f9a8442f1cd04f15c766e6952c5a3a5647f5d8af31",
+      "schema": "718141efc5546a7625c24dda6e9d2fd867c04e8e43d4de76d8844aa3441ecc4a",
+      "digest_helper": "0ef54f8fed931269ac8f104d376ac889a6be4dff449a23e4a5005bbf063ff7bb",
+      "dockerfile": "70cd2720db531d2debdb37ea6d41ac12095b2f3912baa0e3b22bc522dd941e25",
+      "build_recipe": "65e75f02b743ef65eab8f0041ba8f286c767a60e3e02a64921e1a822af00e835",
+      "native_binary": "2ee2a64e333771b008e67d0b1ca9a3217c0cd7030e058c0c882d84776b7c1a18",
+      "native_stdout": "6330a794b4ab780d0183c43c39cf09f02b8c9c559fed672c4f6a890f28817de4",
+      "witnesses": "f72e13ff5d45a1ee25a50ca43598c01247b6b427bad1005f56e3f9080fd08645"
+    },
+    "scope": "static same-time BufferCore chain; no DDS, interpolation or hardware transport",
+    "comparison_witness_sha256": "a6e2569b79295b44c3598decc70efba233f1ddd20e420c22c0673ee3aee64920",
+    "comparison": "All retained native values match the historical witnesses bit-for-bit; the historical selection count is 9 and the direct capture contains 2 observations."
+  }
+}

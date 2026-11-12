@@ -27,8 +27,9 @@ classifiers = [
 [project.optional-dependencies]
 numpy = ["numpy>=1.20"]
 experiments = ["numpy>=1.20", "scipy>=1.7"]
-alphus-trial = [
-    "yamllint==1.38.0",
+dev-experimental = [
+    "yamllint==1.37.1; python_version < '3.10'",
+    "yamllint==1.38.0; python_version >= '3.10'",
     "rumdl==0.2.79",
     "mdrepo==0.0.1.post0; python_version >= '3.11'",
 ]
@@ -63,10 +64,13 @@ typecheck = ["pyright[nodejs]==1.1.414"]
 
 [tool.setuptools]
 package-dir = { "" = "src" }
-include-package-data = true
+# Keep local runtime caches and other discovered files out of wheels; the
+# package-data table below explicitly retains only typing metadata and stubs.
+include-package-data = false
 
 [tool.setuptools.packages.find]
 where = ["src"]
+exclude = ["quatops.__pycache__", "quatops.*.__pycache__"]
 
 [tool.setuptools.package-data]
 quatops = ["py.typed", "**/*.pyi"]
@@ -87,12 +91,36 @@ markers = [
 ]
 
 [tool.pyright]
+venvPath = "."
+venv = ".venv"
+stubPath = "experiments/converters/stubs"
 include = [
     "src",
+    "examples/**/*.py",
     "tests/typing_tests/foundational_consumer.py",
     "tests/typing_tests/consumer.py",
     "tests/typing_tests/float32_consumer.py",
     "tests/typing_tests/numpy_consumer.py",
+    "scripts/evidence_json.py",
+    "scripts/evidence_format.py",
+    "scripts/repository.py",
+    "scripts/converter_evidence.py",
+    "scripts/render_converter_registry.py",
+    "scripts/validate_converter_evidence.py",
+    "scripts/validate_evidence_json.py",
+    "scripts/verify.py",
+    "scripts/package_smoke.py",
+    "scripts/wheel_consumer.py",
+    "scripts/semantic_claims.py",
+    "scripts/retain_engine_witnesses.py",
+    "experiments/oracles/sophus/1.24.6/verify_scipy.py",
+    "experiments/oracles/openxr/1.1.65/verify_test_runtime.py",
+    "experiments/converters/cesium/1.124.0/create_inputs.py",
+    "experiments/converters/eigen/5.0.1/capture_native.py",
+    "experiments/converters/gltf/2.0.0/create_asset.py",
+    "experiments/converters/mujoco/3.17.0/capture_native.py",
+    "experiments/converters/ros2/0.36.23/run_capture.py",
+    "experiments/converters/spiceypy/8.3.0/capture_native.py",
 ]
 # Package exports are assembled from runtime adapter tables and compatibility
 # modules. The namespace and component-axis tests assert the resulting exports.

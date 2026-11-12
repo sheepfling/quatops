@@ -1,0 +1,37 @@
+{
+  "schema_version": 1,
+  "evidence_kind": "native_capture_source_reproduction_record",
+  "target": {
+    "name": "Blender glTF importer",
+    "version": "5.1.2"
+  },
+  "historical_capture": {
+    "artifact": "tests/golden/transports/gltf/2.0.0/blender/5.1.2/native_rotation.json",
+    "exporter_sha256": "81fec5fb7fff574714086bf7958aabae62dc4d9c88758cfe374b9b613f3b0cac",
+    "exporter_archive": "experiments/provenance/reproduction-v1.zip#gltf-blender-5.1.2-capture_gltf.py"
+  },
+  "reproduction": {
+    "capture_source": "experiments/transports/gltf/2.0.0/blender/5.1.2/capture_gltf.py",
+    "capture_source_sha256": "cee2112867c9b484dbc4213e9b6c2d161ae56b3cb21e25e94f596437f7ec17e3",
+    "asset_builder_source": "experiments/transports/gltf/2.0.0/assets/build_asset.py",
+    "asset_builder_source_sha256": "67df2b51c62ad3f9d9bc99a21e23effaf53703e99d482fe6c5a2d0f7fa2f2dc0",
+    "identity_note": "Blender 5.1.2 re-captured the selected static and minimal animation witnesses; the historical exporter remains archived.",
+    "schema": "scripts/evidence_schema/blender_gltf.py",
+    "schema_sha256": "8c97cd8af80bf71312d8889a7b898a13e33c170ba8328745fd60a6a70d62403f",
+    "schema_primitives": "experiments/provenance/reproduction-v1.zip#blender-5.1.2-primitives-71469be6.py",
+    "schema_primitives_sha256": "71469be6ed0591edc9f742c0310a48ef5b7a05ba1819b8b053714cef918c1d5d",
+    "requirements": "experiments/transports/gltf/2.0.0/blender/5.1.2/requirements-capture.txt",
+    "requirements_sha256": "44612bb88640ae1ae1c0e10867bcb3019c9c4c77b3d2cd7dd51bf05e30e39de7",
+    "digest_helper": "scripts/evidence_schema/utilities.py",
+    "digest_helper_sha256": "0ef54f8fed931269ac8f104d376ac889a6be4dff449a23e4a5005bbf063ff7bb",
+    "formatter": "scripts/evidence_format.py",
+    "formatter_sha256": "56961d6be101a2bdfb1b21372c823ec86dfd636547d851901b7284f2ae20e0b3"
+  },
+  "pydantic_native_rerun": {
+    "blender_version": "5.1.2",
+    "build_hash": "ec6e62d40fa9",
+    "observations_sha256": "9f7a245af7a059af5416f3156642f438f1aac81e3ad66dd1024e596a8b834e11",
+    "comparison": "Static transforms, axis images, curve metadata, and all four retained animation values match the previous native capture exactly, including signed zero.",
+    "utc": "2026-11-12T00:05:21.087320+00:00"
+  }
+}

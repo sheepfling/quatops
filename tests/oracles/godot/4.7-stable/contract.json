@@ -1,0 +1,46 @@
+{
+  "engine": {
+    "engine": "Godot Engine",
+    "api": "Quaternion(x,y,z,w); Quaternion * Vector3",
+    "version": "4.7-stable",
+    "build": "official",
+    "platform": "Windows",
+    "native_scalar_profiles": ["float32"],
+    "native_quaternion_order": "xyzw",
+    "native_algebra": "Hamilton",
+    "native_vector_action": "active quaternion sandwich / engine vector rotation API"
+  },
+  "provenance": {
+    "witness_file": "../shared/witnesses.json",
+    "witness_sha256": "96c0dbc6fb0c3a650bba748b7bf536c25534bdbc553b12f55a151ad38f143747",
+    "capture_source": "experiments/godot/capture.gd",
+    "capture_source_sha256": "e9ffcd08ef64471a2016894576059f1be3ed2e1d12a549562c4f0b6351013c61",
+    "original_capture_sha256": "9f7a786b3383f8e20f50b5eff6e516f688424bec86116ca78e1c86c41d88d28d",
+    "canonical_input_file": "experiments/interoperability/v1/canonical_inputs.json",
+    "canonical_input_sha256": "a6f0630806b69d3b3b29a036aa10f63bfe214668329c661598951f84f8f41eec",
+    "native_build_record": {
+      "build": "official",
+      "hash": "5b4e0cb0fd279832bbdd69fed5354d4e5ad26f88",
+      "major": 4,
+      "minor": 7,
+      "name": "Godot Engine",
+      "patch": 0,
+      "platform": "Windows",
+      "precision": "float32",
+      "status": "stable",
+      "version": "4.7-stable (official)"
+    },
+    "capture_method": "Godot headless GDScript SceneTree script",
+    "retention_method": "selected native outputs retained losslessly; inputs linked by case ID; redundant inputs and probe actions omitted",
+    "semantic_contract_file": "experiments/godot/semantic_contract.json",
+    "semantic_contract_sha256": "81c3c5f2e435af6607bb460736368e32fb89813e50ccbb2e0ac367647744ce99",
+    "direct_capture": {
+      "capture_source": "experiments/godot/capture.gd",
+      "capture_source_sha256": "4f413c590cfbfd6d75a3e442851b34435f58e59a62c7296cd75700e9157eac23",
+      "capture_output_sha256": "d1a5a105705a147bdd5c797a741e015b9f3b9021ba18c12dd6181903f7473c03",
+      "executable_sha256": "d8055fb8c7e7f5010d7439ec69be051554055dae55a265f8647bd7301c34161c",
+      "utc": "2026-11-10T15:34:43.062378+00:00"
+    },
+    "capture_source_revision": "ccf242b6f775aa39c9ae4f7ccb5a3a999c59d672"
+  }
+}

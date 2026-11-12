@@ -1,0 +1,31 @@
+# SpiceyPy / CSPICE 8.3.0 converter capture
+
+This auxiliary capture exercises only the direct WXYZ quaternion boundary in
+SpiceyPy 8.3.0 / CSPICE_N0067: `q2m`, `mxv`, `m2q`, `qxq`, and the native
+`axisar` matrix followed by `m2q`. It does not assert an `eul2m` convention or
+named SPICE frame mapping, and it imports no QuatOps code.
+
+From the repository root, install the pinned environment and capture the
+selected witnesses:
+
+```powershell
+uv sync --locked --project experiments/converters/python --extra spiceypy --python 3.13.14
+uv run --locked --project experiments/converters/python --extra spiceypy --python 3.13.14 `
+  python experiments/converters/spiceypy/8.3.0/capture_native.py --repository-root .
+```
+
+The shared Python 3.13 capture project provides a separate SpiceyPy extra.
+It installs `spiceypy==8.3.0`; the root QuatOps environment
+does not need this native capture dependency. The lock covers Python 3.13,
+the interpreter used for this capture; other Python versions require a
+separately resolved environment.
+
+The script writes selected witnesses and provenance to a new temporary
+directory, or to `--output-dir` when specified. It shares input selection and
+provenance recording with the MuJoCo capture; the rotation operations remain
+CSPICE calls. The reviewed witnesses and original capture provenance are in
+[`tests/golden/oracles/spiceypy/8.3.0/converter`](../../../../tests/golden/oracles/spiceypy/8.3.0/converter/manifest.json).
+Replay those frozen native values with
+[`test_spiceypy_converter.py`](../../../../tests/experiments/converters/spiceypy/test_spiceypy_converter.py).
+Euler, derivative, named-frame, and mission-kernel behavior is outside this
+evidence package.

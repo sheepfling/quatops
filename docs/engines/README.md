@@ -1,49 +1,38 @@
-# Game-engine references
+# Engine quaternion adapters
 
-This directory keeps engine-specific Euler and coordinate-system notes close
-to the library documentation without making the core API engine-dependent.
-The [API contract](../API.md) defines QuatOps behavior. These pages describe
-external APIs and conversion guidance.
+The QuatOps core stays independent of engine packages. Named adapters in
+`quatops.engines` convert Hamilton quaternion storage and caller-declared
+frames for Unreal, Unity, Godot, and Blender. Every conversion requires an
+explicit `QuaternionFrameMap`; engine names do not imply world axes, model
+forward, or active/passive transform meaning.
 
-Use `quatops.engines.SignedAxisMap` for caller-declared signed-axis conversion
-to engine XYZW values. The [trajectory guide](trajectory.md) shows how to
-preconvert a key sequence and sample it natively.
+## Adapter references
 
-For implementation workflow, start with the [developer guide](../contributing/ENGINE_INTEGRATIONS.md).
-Coding agents working in this area should follow the
-[agent guide](../contributing/ENGINE_AGENT_GUIDE.md); the repository's `AGENTS.md` points here too.
-
-## Choose a reference
-
-| Library/API | Reference | Euler behavior at a glance |
+| Target API | Native representation | Contract page |
 | --- | --- | --- |
-| Unreal Engine `FRotator` / `FQuat` | [Unreal](unreal.md) | `FRotator` fields are Pitch, Yaw, Roll in degrees; Unreal's native basis is left-handed, Z-up. |
-| Unity `UnityEngine.Quaternion` | [Unity](unity.md) | `Quaternion.Euler(x, y, z)` takes degrees and applies Z, then X, then Y. |
-| Unity `Unity.Mathematics.quaternion` | [Unity](unity.md) | Sequence-named constructors take radians and make the order explicit. |
-| Godot `Quaternion` / `Basis` / `Node3D` | [Godot](godot.md) | `Quaternion.from_euler` takes radians and uses YXZ; `Basis` exposes order-specific constructors. |
+| Unreal `TQuat<T>` | Hamilton XYZW; float32 and float64 | [Unreal](unreal.md) |
+| Unity `UnityEngine.Quaternion` | Hamilton XYZW; float32 | [Unity](unity.md) |
+| Godot `Quaternion` | Hamilton XYZW; float32 | [Godot](godot.md) |
+| Blender `mathutils.Quaternion` | Hamilton WXYZ | [Blender](blender.md) |
 
-The [coordinate-mapping page](coordinate-mapping.md) keeps the basis-change
-formulas in one place. The SciPy conversion oracle lives in
-[`tests/test_engine_basis_oracle.py`](../../tests/test_engine_basis_oracle.py).
-Native Unreal runtime checks are tracked in
-[issue #4](https://github.com/sheepfling/quatops/issues/4); Unity and Godot
-checks are tracked in [issue #7](https://github.com/sheepfling/quatops/issues/7).
-For the main use case, start with the [trajectory conversion guide](trajectory.md).
+The [coordinate-mapping page](coordinate-mapping.md) gives the shared basis
+math. The [proof matrix](proof-matrix.md) links each selected versioned native
+witness set and summarizes the shared validation method. Capture exporters
+and rerun instructions are indexed in
+[`experiments/README.md`](../../experiments/README.md). The common
+frame-labelled scalar and NumPy converter front, including other target
+boundaries, is documented in the [converter guide](../converters.md).
 
-## Reading these pages safely
+Auxiliary converter-boundary evidence for Cesium, ROS 2/tf2, glTF loaders, and
+OpenUSD is indexed in the
+[interoperability evidence atlas](../INTEROPERABILITY_EVIDENCE.md). The common
+profiles convert declared orientation fields; their fixtures, native SDK
+capture, file generation, and runtime-specific operations remain separate.
 
-An Euler triple is incomplete without its API, axis order, units, frame
-(intrinsic or extrinsic), and rotation direction. “Yaw-pitch-roll” by itself
-does not uniquely specify a rotation. See the core [Euler contract](../API.md#attitude-conversions-alignment-statistics-and-random-sampling) for
-QuatOps' active/passive definitions and intrinsic/extrinsic sequence rules.
+## Scope
 
-Engine coordinate handedness is a separate issue from Hamilton versus JPL
-quaternion algebra. A coordinate-basis change can alter quaternion vector
-components without changing the algebra used by the library.
-
-These pages are references, not claims of engine-runtime compatibility. The
-linked engine manuals are versioned independently. Before shipping an adapter,
-pin its engine/API version and validate it against that runtime. If runtime
-helpers are added later, keep them under engine-specific namespaces such as
-`quatops.engines.unreal`, `quatops.engines.unity`, and
-`quatops.engines.godot`; the generic conversion API can remain unchanged.
+These contracts cover quaternion-to-quaternion coefficient conversion and
+native physical-vector action. Euler sequences, interpolation, scene
+transforms, geographic placement, and serialized animation need separate
+contracts when QuatOps exposes those operations. Asset model-forward axes
+remain caller-supplied facts.

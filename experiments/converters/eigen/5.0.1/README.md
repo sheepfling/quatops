@@ -1,0 +1,43 @@
+# Eigen 5.0.1 quaternion-boundary capture
+
+This auxiliary proof compiles a small C++ capture program against the official
+Eigen 5.0.1 source archive. The program uses `Eigen::Quaternionf` and
+`Eigen::Quaterniond` constructors, `coeffs()`, quaternion/vector products,
+and `AngleAxis`.
+It imports and calls no QuatOps code.
+
+The release archive URL and SHA-256 are pinned in
+[`experiments/oracles/eigen/5.0.1/source.json`](../../../oracles/eigen/5.0.1/source.json).
+Download and unpack it outside the repository, then run from the repository
+root:
+
+```powershell
+$archive = Join-Path $env:TEMP 'eigen-5.0.1.tar.gz'
+$extract = Join-Path $env:TEMP 'quatops-eigen-5.0.1'
+Invoke-WebRequest -Uri 'https://gitlab.com/libeigen/eigen/-/archive/5.0.1/eigen-5.0.1.tar.gz' -OutFile $archive
+tar -xzf $archive -C $extract
+uv sync --locked --project experiments/converters/python --extra eigen --python 3.13.14
+uv run --locked --project experiments/converters/python --extra eigen --python 3.13.14 `
+  python `
+  experiments\converters\eigen\5.0.1\capture_native.py `
+  --repository-root . `
+  --eigen-root (Join-Path $extract 'eigen-5.0.1') `
+  --eigen-archive $archive
+```
+
+The capture verifies the archive digest before compiling with `g++` in C++17
+mode. Its Python 3.13 lock is shared across captures through separate extras;
+other Python versions require a separately resolved environment. The script
+writes a new temporary capture directory by default; pass `--output-dir` to
+choose another location. The reviewed witnesses and original build provenance
+are under
+[`tests/golden/oracles/eigen/5.0.1/converter`](../../../../tests/golden/oracles/eigen/5.0.1/converter/manifest.json).
+The compiler path/version and native executable digest are recorded in the
+manifest. The harness retains one native `coeffs()` storage-order observation
+per precision, alongside WXYZ coefficients and native actions for each selected
+orientation. It emits the selected typed rows directly; the
+historical producer source remains available by digest in the provenance
+archive. The native input stream is built directly from typed shared inputs
+and its digest is recorded without a duplicate prepared JSON document. Replay the frozen
+native outputs with
+[`test_eigen_converter.py`](../../../../tests/experiments/converters/eigen/test_eigen_converter.py).

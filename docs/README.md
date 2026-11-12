@@ -2,12 +2,21 @@
 
 ## For users
 
+- [Experimental API policy](experimental.md): opt-in runtime surface,
+  compatibility, evidence scope, and removal.
 - [Project README](../README.md): installation, short examples, and backend
   selection.
 - [API contract](API.md): conventions, representations, layouts, operations,
   validation, and numerical limits.
-- [Game-engine guides](engines/README.md): Unreal, Unity, and Godot API notes,
-  coordinate maps, and quaternion trajectory conversion.
+- [Converter registry](converter-registry.md): generated index of registered
+  converter profiles and supporting evidence targets.
+- [Game-engine guides](engines/README.md): Unreal, Unity, Godot, and Blender
+  API notes, coordinate maps, and quaternion trajectory conversion.
+- [Interoperability evidence atlas](INTEROPERABILITY_EVIDENCE.md): consolidated
+  engine, math-oracle, transport, and capture-layer findings with open gaps.
+- [Converter setup and capture runbooks](../experiments/converters/README.md):
+  install pinned target environments, run portable captures, and find replay
+  checks.
 - [Changelog](../CHANGELOG.md): release and compatibility notes.
 
 ## For contributors
@@ -22,12 +31,20 @@
   implementation and validation guidance.
 - [Engine agent guidance](contributing/ENGINE_AGENT_GUIDE.md): required
   convention reasoning and evidence boundaries for code changes.
+- [Math-library oracles](oracles/README.md): native quaternion and coordinate APIs.
+- [Rotation transports](transports/README.md): format and named-loader evidence.
 
-## Open investigation
+## Open evidence work
 
-Work that needs new discovery or native runtime evidence is tracked as GitHub
-issues rather than recorded benchmark reports:
+Unreal, Unity, Godot, and Blender have versioned native convention and
+converter witnesses. Remaining evidence gaps are narrower:
 
 - [Extreme float64 rotation accuracy](https://github.com/sheepfling/quatops/issues/6)
-- [Unreal native fixtures](https://github.com/sheepfling/quatops/issues/4)
-- [Unity and Godot runtime verification](https://github.com/sheepfling/quatops/issues/7)
+- OpenXR vendor and hardware runtime behavior. A pinned Khronos test-runtime
+  capture covers one static `xrLocateSpace` frame chain; tracking and runtime-
+  specific reference-space relations remain unmeasured.
+- Sophus Jacobian and tangent-derivative behavior is outside the selected
+  `SO3f`/`SO3d` discovery scope and is not a converter release gate.
+
+See the [interoperability evidence atlas](INTEROPERABILITY_EVIDENCE.md) for
+the accepted scope and explicit limits of each converter.

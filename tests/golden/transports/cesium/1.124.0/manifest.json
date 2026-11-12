@@ -1,0 +1,90 @@
+{
+  "schema_version": "1.0",
+  "review_state": "native capture retained; QuatOps replay covered by tests/experiments/converters/cesium/test_cesium_converter.py",
+  "target": {
+    "name": "CesiumJS",
+    "package_version": "1.124.0",
+    "api_version": "1.124",
+    "package_entry_sha256": "7520b29545f5803c1f690650545d84d1bf5c25ce3c47ca65a43059604cdf1f58"
+  },
+  "execution": {
+    "was_run": true,
+    "utc": "2026-11-06T23:48:41.853Z",
+    "node": "v24.21.0",
+    "v8": "13.6.233.17-node.53",
+    "platform": "win32",
+    "architecture": "x64"
+  },
+  "provenance": {
+    "run_manifest_sha256": "a6fd084da848ace05719d396114219443b29267a931412d6e58a98daaf15cbc1",
+    "full_observation_sha256": "25deabd662a8fca8e2ff710ab3f4017a043fe63a123ef5ab75fd4b75cc4f740a",
+    "converter_input_sha256": "1750c433c0344684015dba2bdadcd3695cd40880a2e4bdd8781f2d56b4e3d489",
+    "captured_converter_input_sha256": "1750c433c0344684015dba2bdadcd3695cd40880a2e4bdd8781f2d56b4e3d489",
+    "canonical_inputs_sha256": "a6f0630806b69d3b3b29a036aa10f63bfe214668329c661598951f84f8f41eec",
+    "geographic_inputs_sha256": "619099b732593c6c45f4f7eb64714e4c7d79b2c96dcd070777522e3736e4f085",
+    "native_capture_script_sha256": "cc596d22e143b7dac96bbca8eebca8629cf4eb8dec3fe52c75a9fdd691d23b41",
+    "native_numeric_helper_sha256": "aed1da7b180e76ff0e101a477dd6a941ed0ad076509d9716bf2bf9b6896f5fa4",
+    "native_package_lock_sha256": "5e331bee862cbdff2a96dec2d325e86aa996b780821833899f4053e9476002e0",
+    "witnesses_sha256": "cf56f2ed41685d79fb08f3d04ef7e36818e5fb920286758aa813d85746613ed2",
+    "contract_sha256": "b99e29264dea4f59f8dc958e16b09fa32773cc38cc1e4c466f6f821dc28be644",
+    "input_serialization_note": "JSON formatting changed only; parsed native input values are unchanged.",
+    "captured_input_generator_sha256": "53fc7b1ebaa120677a08ba1d578983de7b2694ea8b17a5321dcb2e6797d9b6a0",
+    "captured_input_generator_archive": "experiments/provenance/reproduction-v1.zip#cesium-1.124.0-create_inputs-v2.py",
+    "native_package_lock_archive": "experiments/provenance/reproduction-v1.zip#cesium-1.124.0/package-lock.json",
+    "native_package_manifest_archive": "experiments/provenance/reproduction-v1.zip#cesium-1.124.0/package.json",
+    "native_package_manifest_sha256": "a105fc79fa42983f6dea02b28d7651b30cb4263e14253a15e957485f5ecd0cd5"
+  },
+  "reproduction": {
+    "input_generator_sha256": "cee4047253dab1237b2c5a52d2275984ea2f5d1de8f82a183d67fec06296f961",
+    "input_builder_sha256": "0ff76107de79307db85deda097f63891e9c2464102482f14613769cf0c0c03a9",
+    "capture_script_sha256": "724dee726d19f66940dc4f2001f94d209a56b9c5954e086c442ea828820e5838",
+    "numeric_helper_sha256": "c0eaaa45990c0de90b8fc183fc820faccdce4c39c064111acaa7501a1e82a944",
+    "retention_script_identity_note": "The current native exporter emits selected witnesses directly. Previous selection and capture hashes remain recorded.",
+    "finite_json_replay": {
+      "utc": "2026-11-10T08:20:52.098Z",
+      "node": "v24.21.0",
+      "native_observations_sha256": "05f077747d5d64d787ef21d7222ac1629fd2985670f0bbb3b9ca7e2076b60ff2",
+      "selected_witnesses_sha256": "cf56f2ed41685d79fb08f3d04ef7e36818e5fb920286758aa813d85746613ed2"
+    },
+    "retention_formatter_sha256": "56961d6be101a2bdfb1b21372c823ec86dfd636547d851901b7284f2ae20e0b3",
+    "geographic_inputs_sha256": "619099b732593c6c45f4f7eb64714e4c7d79b2c96dcd070777522e3736e4f085",
+    "input_generator_archive": "experiments/provenance/reproduction-v1.zip#cesium-1.124.0-create_inputs-v2.py",
+    "previous_capture_script_sha256": "e856856b36948c08215e21a8eb9b1e38b56ec5d856dcc45dd46c1ca375ee2da7",
+    "previous_retention_script_sha256": "4cc2ca111fa99ffd4f80431b5a77b810e62b08c94005c18c388499080fa2a1d6",
+    "previous_retention_digest_helper_sha256": "293ac5c75393f99f783ba412be80983ec21dce39d89bc570623fb428194ea785",
+    "previous_retention_helper_sha256": "3eea651a4485c4dd3e5a85bf0085edeff14d775badeaf7c07288de74d6519ed3",
+    "distribution_sha256": "4b4700f008b190b700f4d461ba419c2477033d64017ca37a685d1caab7cbff3f",
+    "distribution_installer_sha256": "ade731b36425424053e4fa3909bd7d8c6b249675171bcea4603690c6c51d5e4b"
+  },
+  "selection": {
+    "retained_observations": 5,
+    "native_observations": 5,
+    "policy": "retain local basis action once; retain ECEF orientation, world basis action, one probe point round trip, and origin for identity, mixed, antipodal, and composed cases",
+    "numeric_values": "round-trippable decimals and dtype; exact bits only for signed-zero or nonfinite values"
+  },
+  "semantic_contract": {
+    "file": "experiments/converters/cesium/1.124.0/semantic_contract.json",
+    "sha256": "b99e29264dea4f59f8dc958e16b09fa32773cc38cc1e4c466f6f821dc28be644"
+  },
+  "direct_reproduction": {
+    "utc": "2026-11-10T15:06:54.214Z",
+    "node": "v24.21.0",
+    "native_script_sha256": "d68537527643354369eadc9b28423ba6e38fdd25fe8c05ccc849a604a687fe2b",
+    "native_witnesses_sha256": "7aeceed46f87013b05255d90e06f2821b0ac9b1ee45a589a9b27de8b90d4e3be",
+    "comparison": "Every selected native value matches the historical witness bit-for-bit, including signed zero; JSON formatting differs.",
+    "runner_sha256": "0ec2d652fc870fcc0da1dcf82c61f7336a3facfb409ff253c922b93b433b3fb5",
+    "reproduction_runner_sha256": "662e62f891451b7f0ddc817f22ce896a897faf590dbb7d3e646d15c04025b70f",
+    "pre_unified_runner_sha256": "9e5c8220cef64cabd5bf6617395170f8a941a33e25040b35633de762b262de78"
+  },
+  "bundled_reproduction": {
+    "utc": "2026-11-11T17:12:56.232Z",
+    "node": "v24.21.0",
+    "distribution_integrity": "sha512-FDfjr7sWLeYkrblW50KXXbe2vsLuKmY6BY/gFDCjntQBdmQs0uWuOhtM0rW+V4510IgqQj4MYLK8CHOOChvA8w==",
+    "package_entry_sha256": "a69e0de2d5e62aa1ee4669d5bc65d6affe1075d9be66b5b4298f856239bf2770",
+    "native_script_sha256": "724dee726d19f66940dc4f2001f94d209a56b9c5954e086c442ea828820e5838",
+    "native_witnesses_sha256": "7aeceed46f87013b05255d90e06f2821b0ac9b1ee45a589a9b27de8b90d4e3be",
+    "reproduction_runner_sha256": "48890a5e938a38f654f5b4083c38408e6376b23ddb84b75a0e5969ecedf3c49a",
+    "comparison": "All selected native values match the historical witnesses exactly, including signed zero; JSON formatting differs.",
+    "reproduction_runner_source": "experiments/provenance/reproduction-v1.zip#run-converter-capture-48890a5e.py"
+  }
+}

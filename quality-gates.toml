@@ -10,17 +10,22 @@ orchestration_files = [
 
 [files]
 include = [
-  "src/**/*.py", "tests/**/*.py", "experiments/**/*.py", "scripts/**/*.py",
+  "src/**/*.py", "tests/**/*.py", "examples/**/*.py", "experiments/**/*.py", "scripts/**/*.py",
   "*.md", "**/*.md", "*.json", "**/*.json", "*.yaml", "**/*.yaml",
   "*.yml", "**/*.yml", "*.toml", "**/*.toml",
 ]
-exclude = []
-
 [checks.json_structure]
 extensions = [".py"]
 # Test decoders consume controlled fixtures; the benchmark reads its own
 # pytest-benchmark report, whose schema belongs to that local tool.
-exclude = ["tests/**", "experiments/one_off_benchmark.py"]
+exclude = [
+  "tests/**",
+  # This reader rejects duplicate keys and non-finite/non-standard values,
+  # then validates the decoded tree through Pydantic RootModels. Alphus's
+  # source rule cannot follow that validated data flow.
+  "scripts/evidence_json.py",
+  "experiments/one_off_benchmark.py",
+]
 
 [checks.output_escaping]
 extensions = [".py"]
@@ -28,9 +33,11 @@ exclude = []
 
 [checks.path_discovery]
 extensions = [".py"]
-# These checkout-local tools intentionally discover the source tree.
-exclude = ["experiments/one_off_benchmark.py", "experiments/run.py"]
-inspection_exclude = ["tests/**"]
+# The experiment launcher intentionally installs its configured source paths.
+exclude = [
+  "experiments/run.py",
+]
+inspection_exclude = []
 
 [checks.line_length]
 exclude = []
@@ -64,7 +71,12 @@ min_prefix_characters = 4
 
 [checks.pydantic_practices]
 extensions = [".py"]
-exclude = []
+# Reviewed external-process boundary: ProbeRequest is serialized into Node stdin;
+# NativeObservation validates newly produced stdout, not the dumped request.
+# The current advisory follows the subprocess assignment as dump-derived data.
+# Preserve response validation; revisit this exception when the rule can
+# distinguish process output from the request payload.
+exclude = ["examples/converters/threejs_consumer.py"]
 report_dump_revalidation = true
 report_deprecated_v1_apis = true
 report_unvalidated_construct = true
@@ -73,7 +85,11 @@ report_validator_fallthrough = true
 report_field_positional_default = true
 report_custom_init = true
 report_unconstrained_any = true
-public_model_paths = ["src/**/*.py"]
+public_model_paths = [
+  "src/**/*.py",
+  "scripts/converter_evidence.py",
+  "scripts/evidence_json.py",
+]
 
 [orchestration]
 default_profile = "review"

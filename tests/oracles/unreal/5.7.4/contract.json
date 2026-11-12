@@ -1,0 +1,33 @@
+{
+  "engine": {
+    "engine": "Unreal Engine",
+    "api": "UE::Math::TQuat<T>(X,Y,Z,W); TQuat::RotateVector",
+    "version": "5.7.4",
+    "build": 51494982,
+    "platform": "WindowsEditor",
+    "native_scalar_profiles": ["float32", "float64"],
+    "native_quaternion_order": "xyzw",
+    "native_algebra": "Hamilton",
+    "native_vector_action": "active quaternion sandwich / engine vector rotation API"
+  },
+  "provenance": {
+    "witness_file": "witnesses.json",
+    "witness_sha256": "9579b62fbee2956c13e52d71544a139e77c9aae5b42feabe60602dffc35112c2",
+    "capture_source": "experiments/unreal/5.7.4/Source/QuatOpsUnrealCapture/Private/QuatOpsUnrealCaptureTests.cpp",
+    "capture_source_sha256": "7ed0a481c8af4a08c8eedf34609fc48339a3560e725c1b10f8c4881d45833a10",
+    "original_capture_sha256": "c763289dab91ea523bc2695fc270f063b777819a5bd9dc630b095dfb0412fe00",
+    "canonical_input_sha256": "a6f0630806b69d3b3b29a036aa10f63bfe214668329c661598951f84f8f41eec",
+    "retention_method": "selected native outputs retained losslessly; inputs linked by case ID; redundant inputs and probe actions omitted",
+    "canonical_input_file": "experiments/interoperability/v1/canonical_inputs.json",
+    "semantic_contract_file": "experiments/unreal/5.7.4/semantic_contract.json",
+    "semantic_contract_sha256": "b0979fe872e9374ed607b541b6535ee492cd13c0999dc00f07928ad42a2f9af5",
+    "direct_capture": {
+      "capture_source": "experiments/unreal/5.7.4/Source/QuatOpsUnrealCapture/Private/QuatOpsUnrealCaptureTests.cpp",
+      "capture_source_sha256": "7516f6bb5637f4c24cccb62f4c72cbf7ed43ebe4c43565666967e5f9636f75a6",
+      "capture_output_sha256": "0ede8a5345d9080420b6990b8bf09e823a390baebc2294d6a92540947afc792e",
+      "executable_sha256": "ecce9996191f7f7e69b3d104eecdd0e678ae69176fdccd79828c3e75a0654d6d",
+      "utc": "2026-11-10T15:35:17.833853+00:00"
+    },
+    "capture_source_revision": "ccf242b6f775aa39c9ae4f7ccb5a3a999c59d672"
+  }
+}

@@ -1,0 +1,57 @@
+{
+  "schema_version": "1.0",
+  "evidence_kind": "native_openxr_test_runtime_frame_chain",
+  "runtime": {
+    "product": "Khronos OpenXR-SDK-Source test_runtime",
+    "headless_extension": "XR_MND_headless",
+    "headless_extension_advertised": true,
+    "hardware_runtime": false
+  },
+  "api_version": [1, 1, 65],
+  "locate_time_xr_time": 1,
+  "reference_space_type": "LOCAL",
+  "inputs_pose_in_reference_space": {
+    "A": {
+      "orientation_xyzw": [0.5, 0.5, 0, 0.707106769],
+      "position_xyz_m": [1.25, -2, 0.5]
+    },
+    "B": {
+      "orientation_xyzw": [0, 0.353553385, 0.353553385, 0.866025388],
+      "position_xyz_m": [-0.75, 1.5, 2.25]
+    },
+    "C": {
+      "orientation_xyzw": [-0.270598054, 0, -0.270598054, 0.923879504],
+      "position_xyz_m": [3, 0.25, -1]
+    }
+  },
+  "observations": {
+    "A_from_B": {
+      "target": "B",
+      "base": "A",
+      "location_flags": 15,
+      "pose": {
+        "orientation_xyzw": [-0.609789371, -0.00623601675, 0.0732232928, 0.789149106],
+        "position_xyz_m": [-0.487436652, 1.98743677, -3.8890872]
+      }
+    },
+    "B_from_C": {
+      "target": "C",
+      "base": "B",
+      "location_flags": 15,
+      "pose": {
+        "orientation_xyzw": [-0.138673931, -0.230969876, -0.656656384, 0.704432249],
+        "position_xyz_m": [3.0997448, -4.04639626, -0.453603387]
+      }
+    },
+    "A_from_C": {
+      "target": "C",
+      "base": "A",
+      "location_flags": 15,
+      "pose": {
+        "orientation_xyzw": [-0.517982423, -0.597238779, -0.326640725, 0.517982423],
+        "position_xyz_m": [3.06065989, 0.939339817, -0.353553534]
+      }
+    }
+  },
+  "quatops_executed": false
+}

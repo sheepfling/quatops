@@ -1,0 +1,33 @@
+{
+  "engine": {
+    "engine": "Unity Editor",
+    "api": "UnityEngine.Quaternion(x,y,z,w); Quaternion * Vector3",
+    "version": "6000.5.2f1",
+    "build": null,
+    "platform": "WindowsEditor",
+    "native_scalar_profiles": ["float32"],
+    "native_quaternion_order": "xyzw",
+    "native_algebra": "Hamilton",
+    "native_vector_action": "active quaternion sandwich / engine vector rotation API"
+  },
+  "provenance": {
+    "witness_file": "witnesses.json",
+    "witness_sha256": "cd7a440865636e1a6e9705cb63958c2575d6a39621e0f1270e007fca38f9fe9e",
+    "capture_source": "experiments/unity/6000.5.2f1/Assets/Editor/QuatOpsEngineCapture.cs",
+    "capture_source_sha256": "1b04a9b7bbd7897c8b0ca0da816af711ccfd4e89b4f11c2981f59351dc29f98f",
+    "original_capture_sha256": "d94da828fc5d905bad9797475f14a44bcd771c0024f4154186cb3ef5fbb57267",
+    "canonical_input_sha256": "a6f0630806b69d3b3b29a036aa10f63bfe214668329c661598951f84f8f41eec",
+    "retention_method": "selected native outputs retained losslessly; inputs linked by case ID; redundant inputs and probe actions omitted",
+    "canonical_input_file": "experiments/interoperability/v1/canonical_inputs.json",
+    "semantic_contract_file": "experiments/unity/6000.5.2f1/semantic_contract.json",
+    "semantic_contract_sha256": "c1a2d84eb3e91a63f19ce776ad59b0f3b810ca31ce82ec59df2be4ec2e096b9e",
+    "direct_capture": {
+      "capture_source": "experiments/unity/6000.5.2f1/Assets/Editor/QuatOpsEngineCapture.cs",
+      "capture_source_sha256": "02ddc657ee15f056022cefb8037e62a85fcb6b73a7e92eb10c02bd97c0507b46",
+      "capture_output_sha256": "db4fee58e6604860f2a3b01e78ba75bb2e4d90830e2d640bf6a90f2033a25614",
+      "executable_sha256": "2a37263b47b55c1a45ea62745480d26e8f3a1e69617abe70950f72c3f54ce11f",
+      "utc": "2026-11-10T15:36:08.405082+00:00"
+    },
+    "capture_source_revision": "ccf242b6f775aa39c9ae4f7ccb5a3a999c59d672"
+  }
+}

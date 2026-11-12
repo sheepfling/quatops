@@ -1,0 +1,67 @@
+{
+  "schema_version": "1.0",
+  "evidence_kind": "derived_reference",
+  "target": {
+    "name": "PROJ via pyproj",
+    "proj_version": "9.5.1",
+    "pyproj_version": "3.7.2"
+  },
+  "native_baseline": {
+    "manifest": "manifest.json",
+    "audit_time_manifest_sha256": "281ea752613bf2238a3e15008033124067f8fa390c0ee47a8edfe102ef0adc51",
+    "observations": "../shared/observations-ab631993f29c2307725d8720e19a3aa0d42fdcb4536b32d3734ca0bc2c75fe33.jsonl",
+    "observations_sha256": "ab631993f29c2307725d8720e19a3aa0d42fdcb4536b32d3734ca0bc2c75fe33",
+    "input_corpus": "experiments/oracles/shared/geographic_inputs_v1.json",
+    "audit_time_input_corpus_sha256": "ca5c70314444c14cead0cc196f319e5d189657bb818eb59751c07e55ec23ff85",
+    "observation_count": 11,
+    "original_manifest_sha256": "0ab8b041eac0d7dd9290bb64e3428842c3f18d76798fcbb7a02c6890a62a039c",
+    "audit_time_reproduction_exporter_sha256": "9295111b0a0d2ddf36c207ee50c7078a28202b60911a5589301299622a665a9a",
+    "historical_native_exporter_sha256": "8211253a2d97a9453890b8a695af02f0c79069419deca9ce7e7dc0b4211a48b1",
+    "reproduction_exporter_path": "experiments/oracles/proj/9.5.1/capture_proj.py",
+    "source_observations_sha256": "67adb8fcedc1cd9b6aca1b203a6109b8b57f2d8fe3f381951cbcb0dcd56e5f5a",
+    "retention": "All eleven location outputs retained with shared contract and binary64 dtype declared once; per-value hex sidecars remain omitted.",
+    "original_full_capture_sha256": "d908e22625445f11e0167b136587cfe511161885f22f35fddea53b5e6069e20d",
+    "previous_selected_observations_sha256": "44d6c6ed0c27339ad0f718436dbacc89ac22778209790428919883f6e74c1ab8",
+    "previous_selected_observations_revision": "60802309fe3d933c6d4c7e07ed5110048620b83d"
+  },
+  "independent_native_reexecution": {
+    "was_run": true,
+    "platform": "Windows-11-10.0.26300-SP0",
+    "python_runtime": "3.13.14 (main, Jun 23 2026, 15:19:27) [MSC v.1944 64 bit (AMD64)]",
+    "pyproj_version": "3.7.2",
+    "proj_version": "9.5.1",
+    "native_module": {
+      "path": "pyproj/_transformer.cp313-win_amd64.pyd",
+      "sha256": "bc220c1e28b5a5aa694eabe713c8c7b35f39aa38d6d6412046f9d1dfc96f138c"
+    },
+    "capture_manifest_binary_sha256": "not recorded by the archived Linux-only .so glob",
+    "case_count": 11,
+    "matched_case_ids": true,
+    "max_abs_native_output_difference_m": 9.313225746154785e-10,
+    "replay_output_sha256": "6451bfc5421710bf1fcf61394c56fef39e483dfb0e93a223b2bb6f6a72d6dc77",
+    "replay_manifest_sha256": "679fc248e43ec713d057dc019be45a842548846f0578941bd90da70a9bb9f31c",
+    "replay_raw_output_retained": false
+  },
+  "formula_review": {
+    "formula": "analytic local ENU basis columns expressed in ECEF; +East, +North, +Up",
+    "quatops_executed": false,
+    "reference_library": "SciPy Rotation",
+    "scipy_version": "1.18.1",
+    "cases": 11,
+    "max_abs_native_basis_formula_error": 3.964464312389282e-10,
+    "max_abs_native_basis_orthogonality_error": 5.079652254380562e-10,
+    "max_abs_native_basis_det_minus_one": 3.962175032512505e-10,
+    "max_abs_analytic_basis_orthogonality_error": 2.220446049250313e-16,
+    "max_abs_analytic_basis_det_minus_one": 4.440892098500626e-16,
+    "max_abs_scipy_analytic_matrix_roundtrip_error": 2.220446049250313e-16
+  },
+  "scope": "Geodetic/ECEF and topocentric frame support only; no PROJ quaternion or Cesium runtime claim.",
+  "limitations": [
+    "WGS84 only; external datum grids disabled.",
+    "Exact-pole longitude selects a convention.",
+    "Numerical consistency is not a geodetic accuracy statement.",
+    "The Windows replay output was summarized and not retained; selected native origin, basis, and probe values from the original 11 locations remain frozen.",
+    "The versioned reproduction exporter is not the historical Linux exporter; both source identities are recorded."
+  ],
+  "generated_utc": "2026-11-03T08:12:22.362244+00:00"
+}

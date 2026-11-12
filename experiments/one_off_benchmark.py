@@ -1,7 +1,7 @@
 """Run the pytest benchmarks and print an explicit winner per group.
 
-Run from the repository root with ``.venv/bin/python
-experiments/one_off_benchmark.py`` for scalar cases, or add
+Run from the repository root with ``python experiments/one_off_benchmark.py
+--repository-root .`` for scalar cases, or add
 ``--include-vectorized`` to include 10k NumPy workloads. Benchmark cases live in
 ``tests/benchmarks/`` so correctness checks and timings exercise the same
 callables. Use ``--json results.json`` to save a machine-readable report.
@@ -26,12 +26,11 @@ import pytest_benchmark
 import quaternion
 import scipy
 
-ROOT = Path(__file__).resolve().parents[1]
 TEST_FILES = (
-    ROOT / "tests" / "benchmarks" / "test_one_off.py",
-    ROOT / "tests" / "benchmarks" / "test_one_off_jpl.py",
+    Path("tests/benchmarks/hamilton/test_one_off.py"),
+    Path("tests/benchmarks/jpl/test_one_off_jpl.py"),
 )
-VECTOR_TEST_FILE = ROOT / "tests" / "benchmarks" / "test_public_operations.py"
+VECTOR_TEST_FILE = Path("tests/benchmarks/quatops/test_public_operations.py")
 WINNER_TOLERANCE = 0.01
 
 
@@ -61,7 +60,10 @@ def _case_label(test_name: str, group: str) -> str:
 
 
 def _run_pytest(
-    min_rounds: int, max_time: float, test_files: tuple[Path, ...] = TEST_FILES
+    min_rounds: int,
+    max_time: float,
+    repository_root: Path,
+    test_files: tuple[Path, ...],
 ) -> dict[str, Any]:
     """Run selected performance benchmarks and return pytest-benchmark JSON."""
     with tempfile.TemporaryDirectory(prefix="quatops-benchmark-") as temp_dir:
@@ -78,10 +80,10 @@ def _run_pytest(
             f"--benchmark-max-time={max_time}",
             "--benchmark-warmup=on",
             f"--benchmark-json={json_path}",
-            *(str(test_file) for test_file in test_files),
+            *(str(repository_root / test_file) for test_file in test_files),
         ]
         result = subprocess.run(
-            command, check=False, cwd=ROOT, capture_output=True, text=True
+            command, check=False, cwd=repository_root, capture_output=True, text=True
         )
         if result.returncode:
             print(result.stdout, end="", file=sys.stderr)
@@ -96,36 +98,44 @@ def _winner_report(data: dict[str, Any]) -> dict[str, Any]:
     for benchmark in data["benchmarks"]:
         grouped[benchmark["group"]].append(benchmark)
 
-    results: dict[str, Any] = {}
-    for group, benchmarks in sorted(grouped.items()):
-        rows = []
-        for benchmark in benchmarks:
-            case = _case_label(benchmark["name"], group)
-            rows.append(
+    def report_group(group: str, benchmarks: list[dict[str, Any]]) -> dict[str, Any]:
+        measured_rows = sorted(
+            [
                 {
-                    "backend": case,
+                    "backend": _case_label(benchmark["name"], group),
                     "min_us": benchmark["stats"]["min"] * 1e6,
                     "median_us": benchmark["stats"]["median"] * 1e6,
                     "mean_us": benchmark["stats"]["mean"] * 1e6,
                     "stddev_us": benchmark["stats"]["stddev"] * 1e6,
                     "rounds": benchmark["stats"]["rounds"],
                 }
-            )
-        rows.sort(key=lambda row: row["median_us"])
-        fastest = rows[0]["median_us"]
-        for row in rows:
-            row["relative_to_winner"] = row["median_us"] / fastest
-            row["within_one_percent_of_winner"] = (
-                row["relative_to_winner"] <= 1.0 + WINNER_TOLERANCE
-            )
-        results[group] = {
+                for benchmark in benchmarks
+            ],
+            key=lambda row: row["median_us"],
+        )
+        fastest = measured_rows[0]["median_us"]
+        rows = [
+            {
+                **row,
+                "relative_to_winner": row["median_us"] / fastest,
+                "within_one_percent_of_winner": (
+                    row["median_us"] / fastest <= 1.0 + WINNER_TOLERANCE
+                ),
+            }
+            for row in measured_rows
+        ]
+        return {
             "winner": rows[0]["backend"],
             "co_winners": [
                 row["backend"] for row in rows if row["within_one_percent_of_winner"]
             ],
             "results": rows,
         }
-    return results
+
+    return {
+        group: report_group(group, benchmarks)
+        for group, benchmarks in sorted(grouped.items())
+    }
 
 
 def _print_report(report: dict[str, Any]) -> None:
@@ -173,6 +183,7 @@ def _print_report(report: dict[str, Any]) -> None:
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--repository-root", type=Path, required=True)
     parser.add_argument("--min-rounds", type=int, default=9)
     parser.add_argument("--max-time", type=float, default=0.2)
     parser.add_argument(
@@ -182,15 +193,18 @@ def main(argv: list[str] | None = None) -> int:
     )
     parser.add_argument("--json", type=Path, help="write the report to this path")
     args = parser.parse_args(argv)
+    repository_root = args.repository_root.resolve(strict=True)
     if args.min_rounds < 1 or args.max_time <= 0:
         parser.error(
             "--min-rounds must be positive and --max-time must be greater than zero"
         )
 
-    test_files = TEST_FILES
+    test_files = tuple(TEST_FILES)
     if args.include_vectorized:
         test_files += (VECTOR_TEST_FILE,)
-    plugin_data = _run_pytest(args.min_rounds, args.max_time, test_files)
+    plugin_data = _run_pytest(
+        args.min_rounds, args.max_time, repository_root, test_files
+    )
     report = {
         "created_utc": datetime.now(timezone.utc).isoformat(),
         "command": " ".join(sys.argv),

@@ -25,8 +25,9 @@ CASES: Mapping[str, tuple[tuple[float, ...], tuple[float, ...]]] = {
 }
 
 
-def report(label: str, function: Callable[[], object], count: int, scale: float,
-           unit: str) -> None:
+def report(
+    label: str, function: Callable[[], object], count: int, scale: float, unit: str
+) -> None:
     """Print best and median time per requested work unit."""
     timings = sorted(timeit.repeat(function, number=count, repeat=5))
     print(

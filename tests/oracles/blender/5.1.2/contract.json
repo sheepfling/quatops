@@ -1,0 +1,31 @@
+{
+  "engine": {
+    "engine": "Blender",
+    "api": "mathutils.Quaternion((w,x,y,z)); Quaternion @ Vector",
+    "version": "5.1.2",
+    "build": "ec6e62d40fa9",
+    "platform": "win32",
+    "native_scalar_profiles": ["float32"],
+    "native_quaternion_order": "wxyz",
+    "native_algebra": "Hamilton",
+    "native_vector_action": "active quaternion sandwich / engine vector rotation API"
+  },
+  "provenance": {
+    "witness_file": "witnesses.json",
+    "witness_sha256": "e8f9a4080c98f9484d4f6895361457bd2070ffb99415b4c1afe17643a812f763",
+    "capture_source": "experiments/provenance/reproduction-v1.zip#blender-5.1.2-capture.py",
+    "capture_source_sha256": "f61b09cbed8fe6ce3f0615745bd438d168a552d184558f8d6fc78b849e093cc4",
+    "original_capture_sha256": "e1a46351cf32f5a3937defb8e669458e34cb50c4a4131e03bf34c8ecb8009b76",
+    "canonical_input_file": "experiments/interoperability/v1/canonical_inputs.json",
+    "canonical_input_sha256": "a6f0630806b69d3b3b29a036aa10f63bfe214668329c661598951f84f8f41eec",
+    "semantic_contract_file": "experiments/blender/5.1.2/semantic_contract.json",
+    "semantic_contract_sha256": "f5d892b74874d8dbd89001ca3c325bf7baf6f0e23a6342691026d2e4d9fa1320",
+    "direct_capture": {
+      "capture_source": "experiments/blender/5.1.2/capture.py",
+      "capture_source_sha256": "e9d4ba7f7fbb3f20d15d66aeffd054d2fa7d6c6832d5cda386a4851e55a64173",
+      "capture_output_sha256": "f8eaa558cdf2567673d36b814b9ce24deeae7a8fba68fab630f92c194add791e",
+      "executable_sha256": "1e6624af112b3c936f4b038b025ebd2bf00ae72c4b62881a6787166d71c58fa5",
+      "utc": "2026-11-10T15:35:14.136384+00:00"
+    }
+  }
+}

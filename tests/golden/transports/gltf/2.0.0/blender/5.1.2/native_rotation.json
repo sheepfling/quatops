@@ -1,0 +1,175 @@
+{
+  "schema_version": "1.0",
+  "evidence_kind": "native_blender_gltf_importer_capture",
+  "transport": {
+    "name": "glTF",
+    "version": "2.0",
+    "source_coordinates": "glTF specification right-handed Y-up; target axis conversion measured by explicit translation probes"
+  },
+  "loader": {
+    "name": "Blender glTF importer",
+    "version": "5.1.2",
+    "version_tuple": [5, 1, 2],
+    "build_hash": "ec6e62d40fa9",
+    "build_date": "2026-05-19",
+    "build_platform": "Windows",
+    "python_version": "3.13.9 (main, Jan 16 2026, 12:29:45) [MSC v.1944 64 bit (AMD64)]",
+    "executable": "C:\\Program Files\\Blender Foundation\\Blender 5.1\\blender.exe",
+    "executable_sha256": "1e6624af112b3c936f4b038b025ebd2bf00ae72c4b62881a6787166d71c58fa5",
+    "importer_source_root": "C:\\Program Files\\Blender Foundation\\Blender 5.1\\5.1\\scripts\\addons_core\\io_scene_gltf2",
+    "importer_source_sha256": {
+      "blender/imp/animation_node.py": "5fcda6905c3c60912366973153518b1e10a9fb30f221f7d3a51876b306ae3845",
+      "blender/imp/animation_utils.py": "7dc9201b1ce8d90e1827f1523ef86367af466d402671f00c695abacac2d8d74e",
+      "blender/imp/node.py": "a39d7111a9fdda34508f7a4adbdee90a3a8478a7464a4f647b89489e6de4752a"
+    },
+    "rotation_component_order": "WXYZ in mathutils Quaternion; outputs labelled explicitly"
+  },
+  "provenance": {
+    "gltf_sha256": "fdfb41df6dba25b0af3452b85310887e7e4f0060b017fad025c930a9de7c0bb3",
+    "binary_sha256": "335c8c8ca1d09faae363ddab206ec1abd04c94c044889f92c501edbf772f2ed7",
+    "exporter_sha256": "cee2112867c9b484dbc4213e9b6c2d161ae56b3cb21e25e94f596437f7ec17e3",
+    "digest_helper_sha256": "0ef54f8fed931269ac8f104d376ac889a6be4dff449a23e4a5005bbf063ff7bb",
+    "formatter_sha256": "56961d6be101a2bdfb1b21372c823ec86dfd636547d851901b7284f2ae20e0b3",
+    "exact_invocation": "blender --background --factory-startup --python-use-system-env --python-exit-code 1 --python capture_gltf.py -- --asset <rotation_transport.gltf> --output <native_blender_gltf.json>",
+    "operator_arguments": {
+      "filepath": "rotation_transport.gltf"
+    },
+    "other_operator_properties": "Blender 5.1.2 importer defaults",
+    "captured_at_utc": "2026-11-12T00:05:21.087320+00:00"
+  },
+  "scene": {
+    "fps": 30,
+    "fps_base": 1.0,
+    "frame_start": 1,
+    "frame_end": 250,
+    "unit_settings": {
+      "system": "METRIC",
+      "scale_length": 1.0,
+      "system_rotation": "DEGREES"
+    }
+  },
+  "observations": {
+    "static_transforms": {
+      "parent_frame": {
+        "matrix_basis_rows": [
+          [0.9210609793663025, 0.0, -0.3894183337688446, 1.25],
+          [0.0, 1.0, 0.0, -0.75],
+          [0.3894183337688446, 0.0, 0.9210609793663025, -2.5],
+          [0.0, 0.0, 0.0, 1.0]
+        ],
+        "matrix_world_rows": [
+          [0.9210609793663025, 0.0, -0.3894183337688446, 1.25],
+          [0.0, 1.0, 0.0, -0.75],
+          [0.3894183337688446, 0.0, 0.9210609793663025, -2.5],
+          [0.0, 0.0, 0.0, 1.0]
+        ]
+      },
+      "static_trs": {
+        "matrix_basis_rows": [[2.0, 0.0, 0.0, 2.0], [0.0, 0.25, -0.8660253882408142, 1.0], [0.0, 0.4330126941204071, 0.5, 1.0], [0.0, 0.0, 0.0, 1.0]],
+        "matrix_world_rows": [
+          [1.842121958732605, -0.16862307488918304, -0.1947091668844223, 2.7027034759521484],
+          [0.0, 0.25, -0.8660253882408142, 0.25],
+          [0.7788366675376892, 0.3988310992717743, 0.46053048968315125, -0.8001022934913635],
+          [0.0, 0.0, 0.0, 1.0]
+        ]
+      },
+      "static_matrix": {
+        "matrix_basis_rows": [
+          [2.0, 0.0, 0.0, 2.0],
+          [0.0, 0.2500000298023224, -0.8660253286361694, 1.0],
+          [0.0, 0.4330126643180847, 0.5000000596046448, 1.0],
+          [0.0, 0.0, 0.0, 1.0]
+        ],
+        "matrix_world_rows": [
+          [1.842121958732605, -0.16862307488918304, -0.1947091966867447, 2.7027034759521484],
+          [0.0, 0.2500000298023224, -0.8660253286361694, 0.25],
+          [0.7788366675376892, 0.3988310694694519, 0.460530549287796, -0.8001022934913635],
+          [0.0, 0.0, 0.0, 1.0]
+        ]
+      }
+    },
+    "source_translation_axis_images_in_blender_xyz": {
+      "x": [1.0, 0.0, 0.0],
+      "y": [0.0, 0.0, 1.0],
+      "z": [0.0, -1.0, 0.0]
+    },
+    "animations": [
+      {
+        "action_name": "rotation_step",
+        "target_object": "animated_step",
+        "key_times_seconds_from_imported_fcurves": [0.0, 0.7, 1.9],
+        "fcurves": {
+          "data_path": "rotation_quaternion",
+          "array_indices": [0, 1, 2, 3],
+          "interpolations_by_component": [
+            ["CONSTANT", "CONSTANT", "CONSTANT"],
+            ["CONSTANT", "CONSTANT", "CONSTANT"],
+            ["CONSTANT", "CONSTANT", "CONSTANT"],
+            ["CONSTANT", "CONSTANT", "CONSTANT"]
+          ]
+        },
+        "samples": [
+          {
+            "sample": "before-key-1-1e-05",
+            "time_seconds": 0.69999,
+            "quaternion_wxyz": [0.9847265481948853, 0.1741081327199936, 0.0, 0.0]
+          },
+          {
+            "sample": "before-key-1-1e-06",
+            "time_seconds": 0.6999989999999999,
+            "quaternion_wxyz": [0.8253356218338013, 0.0, 0.0, 0.5646424889564514]
+          }
+        ],
+        "interpolation": "STEP"
+      },
+      {
+        "action_name": "rotation_linear",
+        "target_object": "animated_linear",
+        "key_times_seconds_from_imported_fcurves": [0.0, 0.7, 1.9],
+        "fcurves": {
+          "data_path": "rotation_quaternion",
+          "array_indices": [0, 1, 2, 3],
+          "interpolations_by_component": [
+            ["LINEAR", "LINEAR", "LINEAR"],
+            ["LINEAR", "LINEAR", "LINEAR"],
+            ["LINEAR", "LINEAR", "LINEAR"],
+            ["LINEAR", "LINEAR", "LINEAR"]
+          ]
+        },
+        "samples": [
+          {
+            "sample": "midpoint-0-1",
+            "time_seconds": 0.35,
+            "quaternion_wxyz": [0.9050310850143433, 0.0870540663599968, 0.0, 0.2823212444782257]
+          }
+        ],
+        "interpolation": "LINEAR"
+      },
+      {
+        "action_name": "rotation_cubic",
+        "target_object": "animated_cubic",
+        "key_times_seconds_from_imported_fcurves": [0.0, 0.7, 1.9],
+        "fcurves": {
+          "data_path": "rotation_quaternion",
+          "array_indices": [0, 1, 2, 3],
+          "interpolations_by_component": [
+            ["BEZIER", "BEZIER", "BEZIER"],
+            ["BEZIER", "BEZIER", "BEZIER"],
+            ["BEZIER", "BEZIER", "BEZIER"],
+            ["BEZIER", "BEZIER", "BEZIER"]
+          ],
+          "left_handle_types_by_component": [["AUTO", "AUTO", "AUTO"], ["AUTO", "AUTO", "AUTO"], ["AUTO", "AUTO", "AUTO"], ["AUTO", "AUTO", "AUTO"]],
+          "right_handle_types_by_component": [["AUTO", "AUTO", "AUTO"], ["AUTO", "AUTO", "AUTO"], ["AUTO", "AUTO", "AUTO"], ["AUTO", "AUTO", "AUTO"]]
+        },
+        "samples": [
+          {
+            "sample": "midpoint-0-1",
+            "time_seconds": 0.35,
+            "quaternion_wxyz": [0.9388859868049622, 0.10767213255167007, 0.03591213375329971, 0.2382085621356964]
+          }
+        ],
+        "interpolation": "CUBICSPLINE"
+      }
+    ]
+  }
+}

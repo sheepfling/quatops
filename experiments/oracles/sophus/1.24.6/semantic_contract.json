@@ -1,0 +1,38 @@
+{
+  "schema_version": "1.0",
+  "evidence_status": "supporting_oracle_only",
+  "target": "Sophus",
+  "version": "1.24.6",
+  "dependency": "Eigen 5.0.1",
+  "representation": {
+    "algebra": "Hamilton",
+    "vector_action": "active",
+    "matrix_action": "column vectors",
+    "constructor_order": "WXYZ",
+    "params_order": "XYZW",
+    "composition_order": "lhs * rhs; rhs acts first"
+  },
+  "probe_frame": {
+    "description": "+X right, +Y forward, +Z up; right-handed",
+    "handedness": "right-handed",
+    "positive_x": "right",
+    "positive_y": "forward",
+    "positive_z": "up",
+    "assignment": "fixture_numeric_assignment"
+  },
+  "probe_xyz": [2.0, -3.0, 5.0],
+  "scalar_profiles": [
+    {
+      "capture_target": "Sophus SO3f",
+      "precision": "float32",
+      "witness_target": "Sophus 1.24.6 SO3f / Eigen 5.0.1",
+      "scipy_tolerance": 0.000002
+    },
+    {
+      "capture_target": "Sophus SO3d",
+      "precision": "float64",
+      "witness_target": "Sophus 1.24.6 SO3d / Eigen 5.0.1",
+      "scipy_tolerance": 2e-14
+    }
+  ]
+}

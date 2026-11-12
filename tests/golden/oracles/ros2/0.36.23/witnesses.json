@@ -1,0 +1,94 @@
+{
+  "schema_version": "1.0",
+  "evidence_kind": "native_ros2_tf2_buffer_core_capture",
+  "selected_from_full_observation_count": 9,
+  "native_inputs": {
+    "world_from_base": {
+      "quaternion_xyzw": {
+        "values": [0.13243054739079688, -0.11964726626912243, 0.25785889528426975, 0.9495554075012557],
+        "dtype": "binary64"
+      },
+      "translation_xyz": {
+        "values": [3.0, 5.0, -7.0],
+        "dtype": "binary64"
+      }
+    },
+    "base_from_sensor": {
+      "quaternion_xyzw": {
+        "values": [-0.34497002974625945, 0.1695951825349676, 0.11405135381457045, 0.9160924851404795],
+        "dtype": "binary64"
+      },
+      "translation_xyz": {
+        "values": [1.25, -2.5, 3.75],
+        "dtype": "binary64"
+      }
+    },
+    "probe_in_source_xyz": {
+      "values": [2.0, -3.0, 5.0],
+      "dtype": "binary64"
+    },
+    "source_frame": "sensor",
+    "stamp_sec": 42,
+    "target_frame": "world"
+  },
+  "observations": [
+    {
+      "operation_id": "lookup-world-from-sensor",
+      "native_outputs": {
+        "lookup": {
+          "quaternion_xyzw": {
+            "values": [-0.26362708701588705, -0.05262541282738117, 0.32570553779803985, 0.9064475867715437],
+            "dtype": "binary64"
+          },
+          "translation_xyz": {
+            "values": [4.755489756070515, 2.3181442801272065, -3.593989780679297],
+            "dtype": "binary64"
+          }
+        },
+        "lookup_message": {
+          "child_frame": "sensor",
+          "parent_frame": "world",
+          "rotation_xyzw": {
+            "values": [-0.2636270870158871, -0.052625412827381174, 0.32570553779803985, 0.9064475867715437],
+            "dtype": "binary64"
+          },
+          "stamp_nanosec": 0,
+          "stamp_sec": 42,
+          "translation_xyz": {
+            "values": [4.755489756070515, 2.3181442801272065, -3.593989780679297],
+            "dtype": "binary64"
+          }
+        },
+        "message_roundtrip": {
+          "quaternion_xyzw": {
+            "values": [-0.26362708701588705, -0.05262541282738117, 0.32570553779803985, 0.9064475867715437],
+            "dtype": "binary64"
+          },
+          "translation_xyz": {
+            "values": [4.755489756070515, 2.3181442801272065, -3.593989780679297],
+            "dtype": "binary64"
+          }
+        },
+        "probe_in_target_xyz": {
+          "values": [6.672574910902324, 3.826315726843135, 2.067300125025434],
+          "dtype": "binary64"
+        }
+      }
+    },
+    {
+      "operation_id": "lookup-sensor-from-world",
+      "native_outputs": {
+        "lookup": {
+          "quaternion_xyzw": {
+            "values": [0.26362708701588705, 0.05262541282738117, -0.32570553779803985, 0.9064475867715437],
+            "dtype": "binary64"
+          },
+          "translation_xyz": {
+            "values": [-5.427614331673773, -0.6689397505418517, 3.3164379300628855],
+            "dtype": "binary64"
+          }
+        }
+      }
+    }
+  ]
+}

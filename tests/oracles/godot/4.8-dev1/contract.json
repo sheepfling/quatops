@@ -1,0 +1,46 @@
+{
+  "engine": {
+    "engine": "Godot Engine",
+    "api": "Quaternion(x,y,z,w); Quaternion * Vector3",
+    "version": "4.8-dev1",
+    "build": "official",
+    "platform": "Windows",
+    "native_scalar_profiles": ["float32"],
+    "native_quaternion_order": "xyzw",
+    "native_algebra": "Hamilton",
+    "native_vector_action": "active quaternion sandwich / engine vector rotation API"
+  },
+  "provenance": {
+    "witness_file": "../shared/witnesses.json",
+    "witness_sha256": "96c0dbc6fb0c3a650bba748b7bf536c25534bdbc553b12f55a151ad38f143747",
+    "capture_source": "experiments/godot/capture.gd",
+    "capture_source_sha256": "e9ffcd08ef64471a2016894576059f1be3ed2e1d12a549562c4f0b6351013c61",
+    "original_capture_sha256": "87b2ae2ab1fa4d15a9c5eead13828c6afcae76f4fca84e8e5b1acc421ae69f8f",
+    "canonical_input_file": "experiments/interoperability/v1/canonical_inputs.json",
+    "canonical_input_sha256": "a6f0630806b69d3b3b29a036aa10f63bfe214668329c661598951f84f8f41eec",
+    "native_build_record": {
+      "build": "official",
+      "hash": "ebbf577a041d1ab8d7824b6f90e7d0575461ca45",
+      "major": 4,
+      "minor": 8,
+      "name": "Godot Engine",
+      "patch": 0,
+      "platform": "Windows",
+      "precision": "float32",
+      "status": "dev1",
+      "version": "4.8-dev1 (official)"
+    },
+    "capture_method": "Godot headless GDScript SceneTree script",
+    "retention_method": "selected native outputs retained losslessly; inputs linked by case ID; redundant inputs and probe actions omitted",
+    "semantic_contract_file": "experiments/godot/semantic_contract.json",
+    "semantic_contract_sha256": "81c3c5f2e435af6607bb460736368e32fb89813e50ccbb2e0ac367647744ce99",
+    "direct_capture": {
+      "capture_source": "experiments/godot/capture.gd",
+      "capture_source_sha256": "4f413c590cfbfd6d75a3e442851b34435f58e59a62c7296cd75700e9157eac23",
+      "capture_output_sha256": "9f1a35b3524c31669556fa9080cb50f1d2ce33f53e9f87bdd5354fcbca050e86",
+      "executable_sha256": "061370a63e2033f3139d2c55f2250ddc69a5e2ba151ac16139f68e8bdd4cc18d",
+      "utc": "2026-11-10T15:35:13.244878+00:00"
+    },
+    "capture_source_revision": "ccf242b6f775aa39c9ae4f7ccb5a3a999c59d672"
+  }
+}

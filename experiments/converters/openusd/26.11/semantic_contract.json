@@ -1,0 +1,49 @@
+{
+  "contract_id": "quatops-openusd-y-up-hierarchy-v1",
+  "target": {
+    "name": "OpenUSD",
+    "version": "26.11",
+    "distribution": "usd-core"
+  },
+  "serialization_format": "USDA",
+  "reopen_api": "Usd.Stage.Open",
+  "source": {
+    "algebra": "Hamilton",
+    "rotation_action": "active",
+    "storage": "WXYZ",
+    "frame": {
+      "handedness": "right",
+      "positive_x": "right",
+      "positive_y": "forward",
+      "positive_z": "up"
+    }
+  },
+  "stage": {
+    "handedness": "right",
+    "upAxis": "Y",
+    "positive_x": "right",
+    "positive_y": "up",
+    "positive_z": "backward",
+    "forward": "-Z",
+    "metersPerUnit": 1.0
+  },
+  "destination_axes_from_source": ["x", "z", "-y"],
+  "orientation_op": "xformOp:orient",
+  "matrix_action": "OpenUSD Gf row vectors; child world row matrix = child local row matrix * parent world row matrix",
+  "native_numeric_type": "binary64 Gf.Quatd and Gf.Matrix4d",
+  "scope": [
+    "file serialization and reopen",
+    "quatd orient op readback",
+    "translate+orient stacks",
+    "parent/child composition",
+    "resetXformStack",
+    "native world basis directions and mixed-point actions",
+    "one inverse point round trip"
+  ],
+  "excludes": [
+    "other stage up-axis choices",
+    "time samples",
+    "shear/nonuniform scale decomposition",
+    "renderer or file import pipeline"
+  ]
+}

@@ -1,0 +1,9 @@
+# Ignore generated editor state and captures for every pinned Unreal version.
+Binaries/
+**/Config/DefaultEngine.ini
+**/Config/DefaultInput.ini
+DerivedDataCache/
+Intermediate/
+Saved/
+*.sln
+*.log

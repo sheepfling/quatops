@@ -1,0 +1,13 @@
+# Ignore generated editor state and captures for every pinned Unity version.
+Library/
+Logs/
+Temp/
+UserSettings/
+Build/
+obj/
+MemoryCaptures/
+Recordings/
+capture.log
+native_capture.json
+**/ProjectSettings/*.asset
+**/Packages/packages-lock.json

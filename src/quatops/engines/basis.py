@@ -1,4 +1,4 @@
-"""Precomputed signed-axis maps for Hamilton and JPL quaternion values."""
+"""Core signed-axis quaternion maps, independent of experimental APIs."""
 
 from __future__ import annotations
 
@@ -12,8 +12,10 @@ class SignedAxisMap:
 
     ``destination_axes`` gives each destination component as a signed source
     axis. For example, ``("x", "y", "-z")`` means
-    ``v_destination = (v_source.x, v_source.y, -v_source.z)``. The source frame
-    must be right-handed. Destination frames may be right- or left-handed.
+    ``v_destination = (v_source.x, v_source.y, -v_source.z)``. Source and
+    destination frames may be right- or left-handed; their relative
+    parity is recorded by ``determinant``. Frame meanings must be supplied by
+    the caller and are never inferred from an engine name.
 
     The constructor validates and precomputes the component selectors once.
     Quaternion methods return Hamilton XYZW coefficients ready for game APIs;
@@ -57,9 +59,7 @@ class SignedAxisMap:
             sign = -1 if token.startswith("-") else 1
             name = token[1:] if token.startswith(("+", "-")) else token
             if name not in _AXIS_INDEX or token not in (name, "+" + name, "-" + name):
-                raise ValueError(
-                    "axes must be x, y, z, -x, -y, or -z"
-                )
+                raise ValueError("axes must be x, y, z, -x, -y, or -z")
             indices.append(_AXIS_INDEX[name])
             signs.append(sign)
             normalized.append(("-" if sign < 0 else "") + name)
@@ -79,9 +79,7 @@ class SignedAxisMap:
         self._indices = tuple(indices)  # type: ignore[assignment]
         self._vector_signs = tuple(signs)  # type: ignore[assignment]
         self._hamilton_signs = hamilton_signs  # type: ignore[assignment]
-        self._jpl_signs = tuple(
-            -sign for sign in hamilton_signs
-        )  # type: ignore[assignment]
+        self._jpl_signs = tuple(-sign for sign in hamilton_signs)  # type: ignore[assignment]
         self.determinant = determinant
 
     @staticmethod
@@ -102,6 +100,26 @@ class SignedAxisMap:
             source[indices[1]] if signs[1] > 0 else -source[indices[1]],
             source[indices[2]] if signs[2] > 0 else -source[indices[2]],
         )
+
+    @property
+    def matrix(self) -> tuple[tuple[int, int, int], ...]:
+        """Return the row-major matrix ``B`` such that ``v_destination = B v_source``."""
+        rows = [[0, 0, 0] for _ in range(3)]
+        for destination_index, (source_index, sign) in enumerate(
+            zip(self._indices, self._vector_signs)
+        ):
+            rows[destination_index][source_index] = sign
+        return tuple(tuple(row) for row in rows)  # type: ignore[return-value]
+
+    def inverse(self) -> SignedAxisMap:
+        """Return the destination-to-source signed-axis map ``B.T``."""
+        inverse_axes = [""] * 3
+        for destination_index, (source_index, sign) in enumerate(
+            zip(self._indices, self._vector_signs)
+        ):
+            axis = "xyz"[destination_index]
+            inverse_axes[source_index] = ("-" if sign < 0 else "") + axis
+        return SignedAxisMap(inverse_axes)
 
     def map_hamilton_xyzw(
         self, q: Iterable[float]
@@ -133,9 +151,7 @@ class SignedAxisMap:
             w,
         )
 
-    def map_jpl_xyzw(
-        self, q: Iterable[float]
-    ) -> tuple[float, float, float, float]:
+    def map_jpl_xyzw(self, q: Iterable[float]) -> tuple[float, float, float, float]:
         """Map active JPL ``xyzw`` values directly to engine Hamilton ``xyzw``."""
         x, y, z, w = self._four(q)
         source = (x, y, z)
@@ -148,9 +164,7 @@ class SignedAxisMap:
             w,
         )
 
-    def map_jpl_wxyz(
-        self, q: Iterable[float]
-    ) -> tuple[float, float, float, float]:
+    def map_jpl_wxyz(self, q: Iterable[float]) -> tuple[float, float, float, float]:
         """Map active JPL ``wxyz`` values directly to engine Hamilton ``xyzw``."""
         w, x, y, z = self._four(q)
         source = (x, y, z)
@@ -165,3 +179,35 @@ class SignedAxisMap:
 
     def __repr__(self) -> str:
         return f"SignedAxisMap({self.destination_axes!r})"
+
+
+def __getattr__(name: str):
+    if name not in (
+        "BasisMap",
+        "OrthogonalBasisMap",
+        "QuaternionFrameMap",
+        "change_rotation_basis",
+    ):
+        raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
+    import warnings
+    from importlib import import_module
+
+    warnings.warn(
+        f"{__name__}.{name} is experimental; use quatops.experimental.engines.{name}. "
+        "This compatibility path is deprecated and may be removed before 0.1.0.",
+        DeprecationWarning,
+        stacklevel=2,
+    )
+    return getattr(import_module("quatops.experimental.engines.basis"), name)
+
+
+def __dir__() -> list[str]:
+    return sorted(
+        set(globals())
+        | {
+            "OrthogonalBasisMap",
+            "QuaternionFrameMap",
+            "change_rotation_basis",
+            "BasisMap",
+        }
+    )

@@ -1,0 +1,88 @@
+{
+  "schema_version": "1.0",
+  "review_state": "QuatOps-generated USDA reopened by pinned OpenUSD; native capture retained",
+  "target": {
+    "name": "OpenUSD",
+    "distribution": "usd-core",
+    "distribution_version": "26.11",
+    "openusd_version_tuple": [0, 26, 11]
+  },
+  "stage_metadata": {
+    "upAxis": "Y",
+    "metersPerUnit": 1.0,
+    "defaultPrim": "/Scene"
+  },
+  "execution": {
+    "was_run": true,
+    "utc": "2026-11-04T08:41:23.345477+00:00",
+    "python": "3.14.6 (tags/v3.14.6:c63aec6, Jun 10 2026, 10:26:10) [MSC v.1944 64 bit (AMD64)]",
+    "platform": "Windows-11-10.0.26300-SP0",
+    "architecture": "AMD64"
+  },
+  "native_binaries_sha256": {
+    "usd_ms.dll": "583e033d5364ea962805d7dff88f3b1ecbe4b31196d57d82686930ec413466c3",
+    "Gf/_gf.pyd": "ccb332e1bf61ca6bbe88cca155cad98ce2dbba655c552bf387036b7393a4ba11",
+    "Usd/_usd.pyd": "121a4fd1edd29708f685ac5f2ec1a6ff06f81447aa1187da9e4fb31e458d51ba",
+    "UsdGeom/_usdGeom.pyd": "4246b9b322cfead62a7fd0f8d4e6373b9f0cbb8d0c5ecbb4ffe9f1ddb3e992c5"
+  },
+  "provenance": {
+    "stage_sha256": "8cfafffffd499fe64f8107ca2efc6ce3ffae1aea69800ff6fed08790ed9c7c74",
+    "converter_input_sha256": "8b79b57491921a8db2cf353f67afa473e732b5a38e815b0744e0569eb5630281",
+    "captured_converter_input_sha256": "8b79b57491921a8db2cf353f67afa473e732b5a38e815b0744e0569eb5630281",
+    "native_observations_sha256": "1ccf08a682e1283c7f86894accadd1eba0a46e12a63bf280282305407c80125e",
+    "native_run_manifest_sha256": "e8afcc582be671238fd380dd7f03994564fb5402e4c95a11eabf350c6684d2f3",
+    "full_observation_sha256": "e2caabd89ad7d75c1d68f2a5f9c66fed86579db3f9f040e1d5abdf4fd1ed9b39",
+    "generator_sha256": "13ac39b7846ebfddde2326f8eed11eb859cc24354dee916cf1478305b46abd76",
+    "native_capture_script_sha256": "1e9e0c258837a66dba56d9eb3ecbabb0cbd04353763778758329ef3b2c50e0c4",
+    "lockfile_sha256": "5bef7ea8cec65c6054abc37722b1a2a11021719902408230281cb4f4e926e44a",
+    "contract_sha256": "1386b60889ddc2480e1f9c43a61c036f47b04121a3bc8fd7f203b4614af6077d"
+  },
+  "reproduction": {
+    "input_builder_sha256": "967540c58422b8b863022bac55e96b5c961f4063cf890b8e77c409c2dad9bee2",
+    "retention_formatter_sha256": "56961d6be101a2bdfb1b21372c823ec86dfd636547d851901b7284f2ae20e0b3",
+    "generator_sha256": "82685da1114506b7a693cea04bfd46d34b23019ded118c3d30306f6f9b24bc5e",
+    "generator_archive": "experiments/provenance/reproduction-v1.zip#openusd-26.11-create_stage.py",
+    "capture_script_sha256": "d5234a4922a8b65f0a52a6b2b8563d2f7bbf6acfb405ce7b1a204dfaa4d52cc4",
+    "capture_script_identity_note": "The current direct capture reproduces the retained native values; provenance.native_capture_script_sha256 identifies the historical producer.",
+    "lockfile_sha256": "4377022efa364fac013b8adf6a232bfbd6dc860847418061ef7f6c66e0f2d142",
+    "previous_reproduction_capture_script_sha256": "bd3cda3a7eff771dcc98f891c854b223dd004c363de9608272799f8c8370de7a",
+    "previous_retention_script_sha256": "6eeb17029d14995f5afe0e52e178ff38596928ba593dcd573723df887551a990",
+    "previous_retention_digest_helper_sha256": "293ac5c75393f99f783ba412be80983ec21dce39d89bc570623fb428194ea785",
+    "previous_retention_helper_sha256": "3eea651a4485c4dd3e5a85bf0085edeff14d775badeaf7c07288de74d6519ed3",
+    "pre_unified_lockfile_sha256": "3ab41b046da6374e42286dc7710b708ba3968aba1fefebae1ec8db42bc120665",
+    "pre_unified_lockfile_revision": "abf2a2f27ceb601398da126423901484eb6ae46b",
+    "pre_unified_capture_source_sha256": "f4412b38627acc111f676b94fa503ae542c172e516fbcf229fb00370659eb997",
+    "digest_helper_sha256": "0ef54f8fed931269ac8f104d376ac889a6be4dff449a23e4a5005bbf063ff7bb"
+  },
+  "selection": {
+    "retained_observations": 3,
+    "native_observations": 3,
+    "policy": "orient op and reset flag per role; native world basis and mixed point actions; one inverse point round trip"
+  },
+  "semantic_contract": {
+    "file": "experiments/converters/openusd/26.11/semantic_contract.json",
+    "sha256": "1386b60889ddc2480e1f9c43a61c036f47b04121a3bc8fd7f203b4614af6077d"
+  },
+  "direct_reproduction": {
+    "utc": "2026-11-10T14:57:45.021408+00:00",
+    "python": "3.14.6 (tags/v3.14.6:c63aec6, Jun 10 2026, 10:26:10) [MSC v.1944 64 bit (AMD64)]",
+    "capture_script_sha256": "f4412b38627acc111f676b94fa503ae542c172e516fbcf229fb00370659eb997",
+    "witnesses_sha256": "1ccf08a682e1283c7f86894accadd1eba0a46e12a63bf280282305407c80125e",
+    "note": "Pinned OpenUSD rerun reproduced every selected witness byte-for-byte using the same native binary hashes.",
+    "reproduction_capture_script_sha256": "d5234a4922a8b65f0a52a6b2b8563d2f7bbf6acfb405ce7b1a204dfaa4d52cc4"
+  },
+  "unified_lock_replay": {
+    "utc": "2026-11-11T16:50:02.828087+00:00",
+    "python": "3.13.14 (main, Jun 23 2026, 15:19:27) [MSC v.1944 64 bit (AMD64)]",
+    "lockfile_sha256": "4377022efa364fac013b8adf6a232bfbd6dc860847418061ef7f6c66e0f2d142",
+    "witnesses_sha256": "1ccf08a682e1283c7f86894accadd1eba0a46e12a63bf280282305407c80125e",
+    "native_binaries_sha256": {
+      "usd_ms.dll": "d98be7adfdca097596d82d8b65fbdfaca84a62bedec141295d0a7ae0e4cdeb7e",
+      "Gf/_gf.pyd": "b32894f21ad51c0e0345d3937e88e391122a6bbefe9b647ee5e2829d826ac3bf",
+      "Usd/_usd.pyd": "dc622117c31ae71adb7fd4519919810299d4933860167dc052173bc5a0f0ac93",
+      "UsdGeom/_usdGeom.pyd": "06a99e8763cc19e59f8b71f2249f55f48fad39907c03e9dc1fc65cfa5a6e0781"
+    },
+    "capture_script_sha256": "d5234a4922a8b65f0a52a6b2b8563d2f7bbf6acfb405ce7b1a204dfaa4d52cc4",
+    "digest_helper_sha256": "0ef54f8fed931269ac8f104d376ac889a6be4dff449a23e4a5005bbf063ff7bb"
+  }
+}

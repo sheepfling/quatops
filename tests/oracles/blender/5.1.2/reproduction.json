@@ -1,0 +1,19 @@
+{
+  "schema_version": 1,
+  "evidence_kind": "capture_source_reproduction_record",
+  "target": {
+    "name": "Blender",
+    "version": "5.1.2"
+  },
+  "historical_capture": {
+    "capture_source": "experiments/blender/5.1.2/capture.py",
+    "capture_source_sha256": "f61b09cbed8fe6ce3f0615745bd438d168a552d184558f8d6fc78b849e093cc4",
+    "capture_source_archive": "experiments/provenance/reproduction-v1.zip#blender-5.1.2-capture.py"
+  },
+  "reproduction": {
+    "capture_source": "experiments/blender/5.1.2/capture.py",
+    "capture_source_sha256": "e9d4ba7f7fbb3f20d15d66aeffd054d2fa7d6c6832d5cda386a4851e55a64173",
+    "identity_note": "The current direct source was run in pinned Blender 5.1.2; the historical source and capture remain separate.",
+    "previous_capture_source_sha256": "c5b6ef2a9514cb6ac571d9d81f530394c33c338ca093eb02756e2d627952ff4f"
+  }
+}

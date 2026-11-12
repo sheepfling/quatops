@@ -1,0 +1,48 @@
+{
+  "schema_version": 1,
+  "contract_id": "godot-camera3d-node-action-v1",
+  "versions": [
+    "4.7-stable",
+    "4.8-dev1"
+  ],
+  "frame_authority": "application_declared",
+  "world_axes": [
+    "right",
+    "up",
+    "backward"
+  ],
+  "camera_local_axes": [
+    "right",
+    "up",
+    "backward"
+  ],
+  "forward": "negative_z",
+  "coefficient_order": "xyzw",
+  "action": "active",
+  "composition": "parent * camera; camera acts first",
+  "parent_translation": [
+    1.25,
+    -2.5,
+    4.0
+  ],
+  "camera_translation": [
+    -0.5,
+    1.75,
+    2.25
+  ],
+  "scope": [
+    "Camera3D local/global basis action",
+    "get_camera_transform default offsets",
+    "perspective viewport-center project_ray_normal",
+    "asymmetric parent-child orientation and translation"
+  ],
+  "excludes": [
+    "physical sensor calibration",
+    "arbitrary imported assets",
+    "rendered images",
+    "XR camera overrides",
+    "nonzero camera offsets",
+    "nonuniform scale",
+    "animation"
+  ]
+}

@@ -1,0 +1,39 @@
+{
+  "contract_id": "quatops-gltf-static-hierarchy-v1",
+  "target": {
+    "name": "Three.js GLTFLoader",
+    "version": "0.187.0",
+    "revision": "187"
+  },
+  "format_name": "glTF",
+  "format_version": "2.0",
+  "algebra": "Hamilton",
+  "rotation_action": "active",
+  "source_storage_order": "WXYZ",
+  "serialized_storage_order": "XYZW",
+  "meters_per_unit": 1.0,
+  "canonical_frame": {
+    "handedness": "right",
+    "positive_x": "right",
+    "positive_y": "forward",
+    "positive_z": "up"
+  },
+  "probe_frame": {
+    "handedness": "right",
+    "positive_x": "right",
+    "positive_y": "up",
+    "positive_z": "backward",
+    "forward": "-Z"
+  },
+  "frame_role_note": "Caller-assigned camera-like probe basis; not a glTF asset-front or camera-role conversion.",
+  "destination_axes_from_source": ["x", "z", "-y"],
+  "transform_semantics": "node local to parent; world = parent world * child local; column-vector action",
+  "scope": [
+    "static node TRS serialization",
+    "hierarchy composition",
+    "native local quaternion and basis actions",
+    "native child world basis action and mixed-point action",
+    "inverse point round trip"
+  ],
+  "excludes": ["animation", "mesh model-forward convention", "compression extensions", "other GLTFLoader versions"]
+}

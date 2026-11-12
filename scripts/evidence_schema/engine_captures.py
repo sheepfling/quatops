@@ -1,0 +1,230 @@
+"""Strict serialization models for native Unreal, Unity, Godot, and Blender captures."""
+
+# Pydantic annotations must remain importable on the supported Python 3.9 floor.
+# ruff: noqa: UP007, UP045
+
+from __future__ import annotations
+
+from pathlib import Path
+from typing import Annotated, Literal, Optional, Union
+
+from pydantic import Field
+
+from scripts.evidence_schema.primitives import (
+    AxisDirectionName,
+    AxisMeaning,
+    FrameHandednessLabel,
+    NATIVE_RETAINED_CASE_IDS,
+    NonNegativeFiniteFloat,
+    NativeScalarProfile,
+    QuaternionProductOrder,
+    SHA256,
+    NativeCaptureModel,
+    Quaternion4,
+    SignedAxis,
+    Vector3,
+)
+
+ENGINE_RETAINED_CASE_IDS = NATIVE_RETAINED_CASE_IDS
+EngineName = Literal["Unreal Engine", "Unity Editor", "Godot Engine", "Blender"]
+EngineApi = Literal[
+    "UE::Math::TQuat<T>(X,Y,Z,W); TQuat::RotateVector",
+    "UnityEngine.Quaternion(x,y,z,w); Quaternion * Vector3",
+    "Quaternion(x,y,z,w); Quaternion * Vector3",
+    "mathutils.Quaternion((w,x,y,z)); Quaternion @ Vector",
+]
+EngineVersion = Literal["5.7.4", "6000.5.2f1", "4.7-stable", "4.8-dev1", "5.1.2"]
+
+
+class EngineIdentity(NativeCaptureModel):
+    engine: EngineName
+    api: EngineApi
+    version: Optional[EngineVersion] = None
+    build: Optional[Union[int, str]] = None
+    platform: str
+    native_scalar_profiles: list[NativeScalarProfile]
+    native_quaternion_order: Literal["wxyz", "xyzw"]
+    native_algebra: Literal["Hamilton", "JPL"]
+    native_vector_action: Literal[
+        "active quaternion sandwich / engine vector rotation API"
+    ]
+
+
+class EngineFrame(NativeCaptureModel):
+    declaration: Optional[str] = None
+    declared_probe_semantics: Optional[str] = None
+    handedness: Optional[FrameHandednessLabel] = None
+    positive_x: AxisMeaning
+    positive_y: AxisMeaning
+    positive_z: AxisMeaning
+    forward_direction: Optional[AxisDirectionName] = None
+    positive_x_image: Optional[Vector3] = None
+    positive_y_image: Optional[Vector3] = None
+    positive_z_image: Optional[Vector3] = None
+    semantic_imported_object_forward_axis: Optional[Literal["not assumed"]] = None
+
+
+class EngineCanonicalFrame(NativeCaptureModel):
+    declaration: Optional[str] = None
+    handedness: Literal["right-handed"]
+    positive_x: AxisMeaning
+    positive_y: AxisMeaning
+    positive_z: AxisMeaning
+
+
+class EngineConversionContract(NativeCaptureModel):
+    contract_id: str
+    canonical_algebra: Literal["Hamilton", "JPL"]
+    canonical_order: Literal["wxyz", "xyzw"]
+    canonical_action: Literal["active", "passive"]
+    canonical_frame: EngineCanonicalFrame
+    native_frame: EngineFrame
+    destination_axes_from_source: Annotated[
+        list[SignedAxis], Field(min_length=3, max_length=3)
+    ]
+    conversion_rule: str
+    inverse_rule: str
+    world_and_body_map: Optional[str] = None
+    input_domain: str
+    native_precision_tolerance: dict[NativeScalarProfile, NonNegativeFiniteFloat]
+    scope: str
+    excludes: list[str]
+
+
+class EngineNativeBuildRecord(NativeCaptureModel):
+    build_branch: Optional[str] = None
+    build: Optional[str] = None
+    build_hash: Optional[str] = None
+    hash: Optional[str] = None
+    major: Optional[int] = None
+    minor: Optional[int] = None
+    patch: Optional[int] = None
+    changelist: Optional[int] = None
+    branch: Optional[str] = None
+    name: Optional[str] = None
+    platform: Optional[str] = None
+    platform_architecture: Optional[str] = None
+    build_target: Optional[str] = None
+    precision_types: Optional[str] = None
+    precision: Optional[str] = None
+    status: Optional[str] = None
+    version: Optional[str] = None
+    python_version: Optional[str] = None
+    capture_method: Optional[str] = None
+
+
+class EngineDirectCapture(NativeCaptureModel):
+    capture_source: str
+    capture_source_sha256: SHA256
+    capture_output_sha256: SHA256
+    executable_sha256: SHA256
+    utc: str
+
+
+class EngineProvenance(NativeCaptureModel):
+    semantic_contract_file: str
+    semantic_contract_sha256: SHA256
+    original_capture_sha256: Optional[SHA256] = None
+    capture_source: Optional[str] = None
+    capture_source_revision: Optional[
+        Annotated[str, Field(pattern=r"^[0-9a-f]{40}$")]
+    ] = None
+    capture_source_sha256: Optional[SHA256] = None
+    canonical_input_file: Optional[str] = None
+    canonical_input_sha256: Optional[SHA256] = None
+    native_build_record: Optional[EngineNativeBuildRecord] = None
+    capture_method: Optional[str] = None
+    retention_method: Optional[str] = None
+    witness_file: Optional[str] = None
+    witness_sha256: Optional[SHA256] = None
+    direct_capture: Optional[EngineDirectCapture] = None
+
+
+class EngineContractDocument(NativeCaptureModel):
+    engine: EngineIdentity
+    conversion: EngineConversionContract
+    provenance: EngineProvenance
+
+
+class EngineSemanticIdentity(NativeCaptureModel):
+    """Stable target identity and representation facts owned by an experiment."""
+
+    engine: EngineName
+    api: EngineApi
+    version: Union[EngineVersion, list[EngineVersion]]
+    native_scalar_profiles: list[NativeScalarProfile]
+    native_quaternion_order: Literal["wxyz", "xyzw"]
+    native_algebra: Literal["Hamilton", "JPL"]
+    native_vector_action: Literal[
+        "active quaternion sandwich / engine vector rotation API"
+    ]
+
+    def supports_version(self, version: str) -> bool:
+        """Allow only versions explicitly named by the experiment contract."""
+        return (
+            version in self.version
+            if isinstance(self.version, list)
+            else version == self.version
+        )
+
+
+def engine_semantic_contract_path(root: Path, engine: str, version: str) -> Path:
+    """Select a version-specific contract or an explicitly shared engine contract."""
+    directory = root / "experiments" / engine
+    versioned = directory / version / "semantic_contract.json"
+    return versioned if versioned.is_file() else directory / "semantic_contract.json"
+
+
+class EngineSemanticConfig(NativeCaptureModel):
+    """Experiment-owned semantic contract, separate from run provenance."""
+
+    schema_version: Literal[1]
+    engine: EngineSemanticIdentity
+    conversion: EngineConversionContract
+
+
+class EngineOrientation(NativeCaptureModel):
+    case_id: str
+    native_quaternion: Quaternion4
+    native_rotated_positive_basis_vectors_xyz: Annotated[
+        list[Vector3], Field(min_length=3, max_length=3)
+    ]
+    native_rotated_probe_vector_xyz: Optional[Vector3] = None
+
+
+class EngineComposition(NativeCaptureModel):
+    left_case_id: str
+    right_case_id: str
+    product_order: QuaternionProductOrder
+    native_product_quaternion: Quaternion4
+    native_rotated_positive_basis_vectors_xyz: Annotated[
+        list[Vector3], Field(min_length=3, max_length=3)
+    ]
+
+
+class EnginePrecisionCapture(NativeCaptureModel):
+    orientation_cases: list[EngineOrientation]
+    composition: EngineComposition
+    reverse_composition: EngineComposition
+
+
+class EngineCanonicalInterop(NativeCaptureModel):
+    contract_id: str
+    native_quaternion_order: Literal["wxyz", "xyzw"]
+    frame_map_destination_axes_from_source: Annotated[
+        list[SignedAxis], Field(min_length=3, max_length=3)
+    ]
+    orientation_cases: Optional[list[EngineOrientation]] = None
+    composition: Optional[EngineComposition] = None
+    reverse_composition: Optional[EngineComposition] = None
+    precision_captures: Optional[dict[NativeScalarProfile, EnginePrecisionCapture]] = (
+        None
+    )
+
+
+class EngineCaptureDocument(NativeCaptureModel):
+    schema_version: Literal[1]
+    target: EngineIdentity
+    contract: EngineConversionContract
+    provenance: Optional[EngineProvenance] = None
+    canonical_interop: EngineCanonicalInterop

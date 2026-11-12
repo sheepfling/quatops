@@ -12,3 +12,7 @@ Never infer its forward/up directions, the target asset's model-forward axis,
 or whether a stored transform is active or passive from an engine name alone.
 Report SciPy formula checks separately from tests run inside a pinned engine
 runtime.
+
+Before pushing, run the relevant checks locally under Linux using Docker; see
+[`docs/contributing/VERIFICATION.md`](docs/contributing/VERIFICATION.md). Report
+any checks that could not be run.

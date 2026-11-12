@@ -1,0 +1,30 @@
+{
+  "schema_version": "1.0",
+  "evidence_kind": "native_threejs_authored_mesh_capture",
+  "target": {
+    "name": "Three.js GLTFLoader",
+    "version": "0.187.0",
+    "revision": "187"
+  },
+  "execution": {
+    "was_run": true,
+    "utc": "2026-11-12T17:34:07.639Z",
+    "node": "v24.21.0",
+    "platform": "win32",
+    "architecture": "x64"
+  },
+  "scope": "Authored asymmetric mesh vertices transformed through static parent-child hierarchy",
+  "authority": "application_declared",
+  "excludes": [
+    "Arbitrary mesh-front inference",
+    "Physical asset calibration",
+    "Animation",
+    "Other loader versions"
+  ],
+  "provenance": {
+    "asset_sha256": "075744c58478d21e094151036ad2663a70b9479aa2a39c5cb8564b19d9aee309",
+    "capture_sha256": "fe86f1c29fa4111e4cc1157601c9308aea57a8aeb052536a4da19a060f5fcaf8",
+    "package_lock_sha256": "cede45573d60150ede075f768f955da9890935dfb78764b3cd0b0029cd48365d",
+    "witnesses_sha256": "1e8d6d973891ee3f3980f2c97cfe7dc4237534397a09b006eff0c9e1b7b4ec21"
+  }
+}
